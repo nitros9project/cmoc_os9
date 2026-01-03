@@ -2,7 +2,7 @@
 #include <string.h>
 
 __norts__ asm void *
-memcpy(void *dst, void *src, size_t len)
+memcpy(void *dst, const void *src, size_t len)
 {
 	asm
 	{
@@ -13,21 +13,21 @@ memcpy(void *dst, void *src, size_t len)
 *	6,s = count of bytes to copy
 memcpy export
 memcpy
-        pshs    y,u 
+        pshs    y,u
         ldu     2+4,s           get destination pointer in U
         ldy     4+4,s           get source pointer in Y
         ldd     6+4,s           get count
-        lsra                    multiply count by 2   
-        rorb   
+        lsra                    multiply count by 2
+        rorb
         tfr     d,x             move count into X
-        bcc     savecount       branch if even 
+        bcc     savecount       branch if even
         lda     ,y+             else get first byte
         sta     ,u+             and store it
 savecount
         stx     -2,s            store in Y on stack
-        beq     copydone 
+        beq     copydone
 copyloop
-        ldd     ,y++            get two bytes   
+        ldd     ,y++            get two bytes
         std     ,u++            store two bytes into destination
         leax    -1,x            decrement count
         bne     copyloop        keep going until finished

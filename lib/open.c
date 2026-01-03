@@ -2,7 +2,7 @@
 #include <fcntl.h>
 
 asm int
-open(char *path, int mode)
+open(const char *path, int mode)
 {
     asm
     {

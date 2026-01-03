@@ -1,4 +1,4 @@
-asm int strlen(char *str)
+asm int strlen(const char *str)
 {
 	asm
 	{

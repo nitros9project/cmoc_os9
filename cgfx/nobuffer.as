@@ -10,8 +10,8 @@
 
 _errno EXTERN
 
-_write EXPORT
-_write:
+_cwrite EXPORT
+_cwrite:
  pshs y save y
  tfr u,y byte count to y
  os9 $8A I$WRITE write it

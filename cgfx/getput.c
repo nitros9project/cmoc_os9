@@ -5,7 +5,7 @@ _cgfx_dfngpbuf(path_id path, int grp, int buf, int bl)
 {
     asm
     {
-_write	EXTERNAL
+_cwrite	EXTERNAL
 		pshs u
 		leas -6,s
 		ldu #6
@@ -18,7 +18,7 @@ _write	EXTERNAL
 		std 4,s
 		lda 8+2+1,s			get path
 		leax ,s
-		lbsr _write
+		lbsr _cwrite
 		leas 6,s
 		bra os9err0
 	}
@@ -38,7 +38,7 @@ _cgfx_kilbuf(path_id path, int grp, int buf)
 		lda 6+2+1,s		get path
 		ldu #4
 		leax ,s
-		lbsr _write
+		lbsr _cwrite
 		leas 4,s
 		bra os9err0
 	}
@@ -68,7 +68,7 @@ _sysret	EXTERNAL
 		leax ,s
 		ldu #11
 		lda 16,s
-		lbsr _write
+		lbsr _cwrite
 		leas 11,s
 os9err0 puls u
 		lbra	_sysret
@@ -98,7 +98,7 @@ _cgfx_getblk(path_id path, int grp, int buf, int bx, int by, int sx, int sy)
 		leax ,s
 		ldu #12
 		lda 17,s
-		lbsr _write
+		lbsr _cwrite
 		leas 12,s
 		bra os9err0
 	}
@@ -123,7 +123,7 @@ _cgfx_putblk(path_id path, int grp, int buf, int bx, int by)
 		leax ,s
 		ldu #8
 		lda 13,s
-		lbsr _write
+		lbsr _cwrite
 		leas 8,s
 		bra os9err0
 	}

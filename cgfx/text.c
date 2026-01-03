@@ -10,7 +10,7 @@ _cgfx_curhom(path_id path)
 {
     asm
     {
-_write EXTERNAL
+_cwrite EXTERNAL
         lda #1
         bra send1
     }
@@ -223,7 +223,7 @@ send1   pshs d,u
 
 sendit  leax ,s
         lda 7,s
-        lbsr _write
+        lbsr _cwrite
         puls x,u
 
 os9err0
@@ -247,7 +247,7 @@ _cgfx_curxy(path_id path, int x, int y)
         lda 8,s
         ldu #3
         leax ,s
-        lbsr _write
+        lbsr _cwrite
         leas 3,s
         puls u
         bra os9err0

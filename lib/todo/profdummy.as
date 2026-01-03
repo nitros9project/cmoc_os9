@@ -2,7 +2,7 @@
 
  section code
 
-_dumprof: rts    
+_dumprof: rts
 
- endsect  
+ endsect
 

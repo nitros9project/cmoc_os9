@@ -3,7 +3,7 @@
 #include <os.h>
 
 __norts__ asm int
-access(char *pathname, int mode)
+access(const char *pathname, int mode)
 {
 	asm
 	{
@@ -25,7 +25,7 @@ _sysret EXTERNAL
 }
 
 __norts__ asm int
-mknod(char *pathname, int mode)
+mknod(const char *pathname, int mode)
 {
 	asm
 	{
@@ -41,7 +41,7 @@ mknod(char *pathname, int mode)
 }
 
 __norts__ asm int
-unlinkx(char *pathname, int mode)
+unlinkx(const char *pathname, int mode)
 {
 	asm
 	{
@@ -56,7 +56,7 @@ unlinkx(char *pathname, int mode)
 }
 
 __norts__ asm int
-unlink(char *pathname)
+unlink(const char *pathname)
 {
 	asm
 	{

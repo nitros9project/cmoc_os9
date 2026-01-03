@@ -5,7 +5,7 @@ _os_getime(_os_time *time)
 {
     asm
     {
-_osret  EXTERN  
+_osret  EXTERN
 * stack:
 *	0,s = return address
 *	2,s = time packet pointer

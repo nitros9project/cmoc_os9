@@ -16,37 +16,37 @@ _osret  EXTERN
 *	8,s = permissions
 		ldx 	    2,s 		get pointer to pathname
 		lda   	    8+1,s 	    get permissions byte
-		tfr   	    a,b 
-		andb	    #$24 
-		orb 	    #$0b 
-		os9		    I$Create 
-		bcc 	    createok 
-		cmpb	    #$da 
-		bne		    createerr 
+		tfr   	    a,b
+		andb	    #$24
+		orb 	    #$0b
+		os9		    I$Create
+		bcc 	    createok
+		cmpb	    #$da
+		bne		    createerr
 		lda		    4+1,s 		get mode
-		bita	    #$80 
-		bne		    createerr 
-		anda	    #7 
+		bita	    #$80
+		bne		    createerr
+		anda	    #7
 		ldx 	    2,s 		get pointer to pathname
-		os9		    I$Open 
-		bcs 	    createerr 
+		os9		    I$Open
+		bcs 	    createerr
 		pshs	    d		    save off path number
 		tfr		    a,b
 		clra
 		std		    [6+2,s]
 		puls	    d
-		pshs	    a,u 
-		ldx		    #0 
-		leau	    ,x 
-		ldb 	    #2 
-		os9		    I$SetStt 
-		puls	    a,u 
-		bcc		    createok 
-		pshs	    b 
-		os9		    I$Close 
-		puls	    b 
+		pshs	    a,u
+		ldx		    #0
+		leau	    ,x
+		ldb 	    #2
+		os9		    I$SetStt
+		puls	    a,u
+		bcc		    createok
+		pshs	    b
+		os9		    I$Close
+		puls	    b
 createerr
-		lbra	    _oserr 
+		lbra	    _oserr
 createok
 		tfr		    a,b
 		clra
@@ -67,8 +67,8 @@ _os_open(char *pathname, int mode, path_id *path)
 *	4,s = mode
 *	6,s = path pointer [out]
 		ldx  	    2,s 			; get pathname pointer
-		lda		    5,s				; get mode 
-		os9		    I$Open 
+		lda		    5,s				; get mode
+		os9		    I$Open
 		lblo	    _oserr
 		pshs	    d
 		tfr		    a,b
@@ -139,22 +139,22 @@ _os_read(path_id path, void *data, int *count)
 *	2,s = path
 *	4,s = data pointer
 *	6,s = count pointer [in/out]
-		pshs		y 
+		pshs		y
 		lda			3+2,s	 		path
-		ldx			4+2,s			pointer to data 
+		ldx			4+2,s			pointer to data
 		ldy			[6+2,s] 		count
-		pshs		y 
-		os9			I$Read 
+		pshs		y
+		os9			I$Read
 afterread
 		bcc			savecount
 		cmpb		#$d3 E$EOF?
 		bne			readerr
-		ldy			#0000   
-		bra			savecount   
-readerr	puls		x,y 
-		lbra		_oserr 
+		ldy			#0000
+		bra			savecount
+readerr	puls		x,y
+		lbra		_oserr
 savecount sty		[6+4,s]
-		puls		x,y 
+		puls		x,y
 		lbra		_osret
     }
 }
@@ -169,13 +169,13 @@ _os_readln(path_id path, void *data, int *count)
 *	2,s = path
 *	4,s = data pointer
 *	6,s = count pointer [in/out]
-		pshs		y 
-		lda			3+2,s 
-		ldx			4+2,s 
+		pshs		y
+		lda			3+2,s
+		ldx			4+2,s
 		ldy			[6+2,s]
-		pshs		y 
-		os9			I$ReadLn 
-		bra			afterread 
+		pshs		y
+		os9			I$ReadLn
+		bra			afterread
 	}
 }
 
@@ -189,15 +189,15 @@ _os_write(path_id path, void *data, int *count)
 *	2,s = path
 *	4,s = data pointer
 *	6,s = count pointer [in/out]
-		pshs		y 
+		pshs		y
 		ldy			[6+2,s]		get length
 		beq			writeex		if zero, nothing to do
 		lda			3+2,s		get path
 		ldx			4+2,s		get data pointer
 		os9			I$Write
-L00xe	bcc			store_writeex 
-		puls		y 
-		lbra		_oserr 
+L00xe	bcc			store_writeex
+		puls		y
+		lbra		_oserr
 store_writeex
 		sty			[6+2,s]
 writeex
@@ -218,11 +218,11 @@ _os_writeln(path_id path, void *data, int *count)
 *	6,s = count pointer [in/out]
 		pshs		y
 		ldy			[6+2,s]			get length
-		beq			writeex			if zero, nothing to do 
+		beq			writeex			if zero, nothing to do
 		lda 		3+2,s 			get path
 		ldx 		4+2,s 			get data pointer
-		os9			I$WritLn 
-		bra			L00xe 
+		os9			I$WritLn
+		bra			L00xe
 	}
 }
 
@@ -263,15 +263,15 @@ lseek(int path, long position, int whence)
 		ldu         #0
 		ldx         #0
 		bra         doseek
-		
-lseek10 
+
+lseek10
         cmpd        #1                  from current location?
         beq         here
         cmpd        #2                  from the end?
         beq         end
 * bad type
         ldb         #E$Seek
-        
+
 lserr   clra
         std         _errno,y
         ldd         #-1
@@ -282,18 +282,18 @@ _flacc  EXTERNAL
         puls        d,u,pc
 
 * from the end
-end     lda         4+2+1,s             get path number        
+end     lda         4+2+1,s             get path number
         ldb         #SS_Size            get file size code
         os9         I$GetStt
         bcs         lserr
-        
+
         bra         doseek
-        
+
 here    lda         4+2+1,s             get path number
         ldb         #SS_Pos
         os9         I$GetStt
         bcs         lserr
-        
+
 doseek  tfr         u,d                 work on the LSW first
         addd        4+6+1,s             get low byte of LSW
         std         _flacc+2,y          store in LSW of _flacc
@@ -304,11 +304,11 @@ doseek  tfr         u,d                 work on the LSW first
         bmi         lserr               if negiative, seek is before beginning of file
         tfr         d,x                 move D to X
         std         _flacc,y            store in MSW of _flacc
-        
+
         lda         4+2+1,s             get path number
         os9         I$Seek
         bcs         lserr
-        
+
         leax        _flacc,y
         puls        d,u,pc
 	}

@@ -8,18 +8,18 @@
 *           ret
 *            u
 */
-__norts__ asm 
-char  *strcat(char *s1, char *s2)
+__norts__ asm
+char  *strcat(char *s1, const char *s2)
 {
 	asm {
 strcat EXPORT
 strcat:
- pshs  u 
+ pshs  u
  ldu   6,s s2
  ldx   4,s s1
- bsr   strend1 
- tfr   d,x 
- bra   strcpy1 
+ bsr   strend1
+ tfr   d,x
+ bra   strcpy1
 	 }
 }
 
@@ -32,19 +32,19 @@ strcat:
 *            u
 */
 __norts__ asm
-char  *strcpy(char *dst, char *src)
+char  *strcpy(char *dst, const char *src)
 {
 	asm {
 strcpy EXPORT
 strcpy:
- pshs  u 
+ pshs  u
  ldu   6,s src
  ldx   4,s dst
-strcpy1 ldb   ,u+ 
- stb   ,x+ 
- bne   strcpy1 
- ldd   4,s 
- puls  u,pc 
+strcpy1 ldb   ,u+
+ stb   ,x+
+ bne   strcpy1
+ ldd   4,s
+ puls  u,pc
  	}
 }
 
@@ -52,16 +52,16 @@ strcpy1 ldb   ,u+
 *    returns pointer to null on s
 */
 __norts__ asm
-char *strend(char *str)
+const char *strend(const char *str)
 {
 	asm {
 strend EXPORT
 strend:
  ldx   2,s str
-strend1 ldb   ,x+ 
- bne   strend1 
- leax  -1,x 
- tfr   x,d 
- rts    
+strend1 ldb   ,x+
+ bne   strend1
+ leax  -1,x
+ tfr   x,d
+ rts
  	}
 }

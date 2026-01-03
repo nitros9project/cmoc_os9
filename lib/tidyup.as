@@ -2,7 +2,7 @@
 
 _tidyup EXPORT
 
-_tidyup: rts    
+_tidyup: rts
 
- endsect  
+ endsect
 

@@ -2,7 +2,7 @@
 
  section code
 
-fflush: rts    
+fflush: rts
 
- endsect  
+ endsect
 

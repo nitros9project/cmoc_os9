@@ -10,8 +10,8 @@ exit(int code)
 __dumprof EXTERNAL
 _tidyup EXTERNAL
 
-        lbsr        __dumprof 
-        lbsr        _tidyup 
+        lbsr        __dumprof
+        lbsr        _tidyup
         bra         _exit
     }
 }
@@ -21,8 +21,8 @@ _exit(int code)
 {
     asm
     {
-        ldd         2,s 
-        os9         F$Exit 
+        ldd         2,s
+        os9         F$Exit
     }
 }
 #endif

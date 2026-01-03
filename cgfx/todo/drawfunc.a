@@ -81,7 +81,7 @@ p20 cmpa #$43
  leax ,s
  ldu #3
  lda path,y
- lbsr _write
+ lbsr _cwrite
  leas 3,s
  puls x
  bra parse
@@ -379,7 +379,7 @@ moveto tst blank,y
  leax 2,s
  ldu #6
  lda path,y
- lbsr _write
+ lbsr _cwrite
  ldd #$1b44
  std 2,s
  ldd x2,y
@@ -397,7 +397,7 @@ moveto tst blank,y
  leax 2,s
  ldu #6
  lda path,y
- lbsr _write
+ lbsr _cwrite
  puls x
  leas 6,s
 

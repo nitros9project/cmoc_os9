@@ -60,8 +60,8 @@ int hputs(char *str)
 	putchar((*s)&0x7f);
 	return 0;
 }
-	
-	
+
+
 int Xmain()
 {
 	char s[]="test";

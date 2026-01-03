@@ -50,9 +50,9 @@ int fputs(int c, FILE *stream);
 #define clearerr(p)	((p)->_flag&=~_ERR)
 #define fileno(p)   ((p)->_fd)
 
-int printf(char *fmt, ...);
-int fprintf(FILE *fp, char *fmt, ...);
-int sprintf(char *str, char *fmt, ...);
+int printf(const char *fmt, ...);
+int fprintf(FILE *fp, const char *fmt, ...);
+int sprintf(char *str, const char *fmt, ...);
 char *fgets(char *str, int size, FILE *stream);
 
 FILE *fopen(char *path, char *mode);

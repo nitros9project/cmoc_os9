@@ -5,7 +5,7 @@ _cgfx_setdptr(path_id path, int x, int y)
 {
     asm
     {
-_write EXTERNAL
+_cwrite EXTERNAL
         ldd #$1b40
         bra send6
     }
@@ -132,7 +132,7 @@ send2   pshs u,d
         lda 7,s
         leax ,s
         ldu #2
-        lbsr _write
+        lbsr _cwrite
         leas 2,s
         bra os9err0
     }
@@ -151,7 +151,7 @@ _cgfx_circle(path_id path, int radius)
         lda 9,s
         leax ,s
         ldu #4
-        lbsr _write
+        lbsr _cwrite
         leas 4,s
         bra os9err0
     }
@@ -185,7 +185,7 @@ send6   pshs u
         lda 11,s
         leax ,s
         ldu #6
-        lbsr _write
+        lbsr _cwrite
         leas 6,s
 
 os9err0 puls u
@@ -204,7 +204,7 @@ _cgfx_arc(path_id path, int xrad, int yrad, int xo1, int yo1, int xo2, int yo2)
         lda 5,s
         stu ,x
         ldu #14
-        lbsr _write
+        lbsr _cwrite
         bra os9err0
     }
 }

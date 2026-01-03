@@ -6,7 +6,7 @@
  * Copy no more than n bytes.
  * Return a pointer to the byte after character c in the copy,
  * or NULL if c is not found in the first n bytes.
- * 
+ *
  *
  * char *
  * memccpy(s1, s2, c, n)
@@ -30,7 +30,7 @@ memccpy(char *s1, char *s2, int c, int n)
 *	4,s = source address
 *	6,s = character to stop at
 *	8,s = maximum bytes to copy
-        pshs        y,u 
+        pshs        y,u
         ldu         4+4,s               get source address in U
         ldx         4+2,s               get destination address in X
         ldy         4+8,s               get maximum bytes to copy in Y
@@ -41,8 +41,8 @@ copylp  lda         ,u+                 get byte from source
         bne         noteq               branch if not
         tfr         u,d                 else copy updated source to D
         bra         ex                  exit
-noteq   leay        -1,y                back up one 
-        bne         copylp 
+noteq   leay        -1,y                back up one
+        bne         copylp
 anull   tfr         y,d                 return NULL
 ex      puls        y,u,pc              restore and exit
     }

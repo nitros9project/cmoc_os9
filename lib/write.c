@@ -2,7 +2,7 @@
 #include <os.h>
 
 __norts__ asm int
-write(int fd, char *buf, int count)
+write(int fd, const char *buf, int count)
 {
 	asm
 	{
@@ -11,11 +11,11 @@ write(int fd, char *buf, int count)
 *	2,s = fd
 *	4,s = buffer pointer
 *	6,s = write count
-        pshs    y               save data pointer
-        ldy     2+6,s           get count
-        beq     write10         branch if nothing to do
-        lda     2+2+1,s         get fd
-        lda     2+2+2,s         get buffer address
+        pshs    y             save data pointer
+        ldy     2+6,s         get count
+        beq     write10       branch if nothing to do
+        lda     2+2+1,s       get fd
+        ldx     2+2+2,s       get buffer address
 
         os9     I$Write
 
@@ -30,7 +30,7 @@ write10 tfr     y,d
 }
 
 __norts__ asm int
-writeln(int fd, char *buf, int count)
+writeln(int fd, const char *buf, int count)
 {
 	asm
 	{

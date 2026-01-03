@@ -2,7 +2,7 @@
 #include <string.h>
 
 __norts__ asm int
-memcmp(char *dst, char *src)
+memcmp(const char *dst, const char *src)
 {
 	asm
 	{
@@ -17,17 +17,17 @@ memcmp(char *dst, char *src)
         beq     same          pointers are same... equal
         ldu     4+4,s         get second parameter
         ldy     4+6,s         get third parameter (count)
-        beq     same 
+        beq     same
 compare ldb     ,u+           get byte in second ptr
         subb    ,x+           subtract from first
         beq     equal         branch if equal to zero (meaning bytes at U and X are equal)
-        negb   
-        sex    
-        bra     ret 
+        negb
+        sex
+        bra     ret
 equal   leay    -1,y          decrement count
         bne     compare       branch if more
-same    clra   
-        clrb   
-ret     puls    y,u,pc 
+same    clra
+        clrb
+ret     puls    y,u,pc
     }
 }

@@ -2,7 +2,7 @@
 #include <fcntl.h>
 
 __norts__ asm int
-creat(char *path, int mode)
+creat(const char *path, int mode)
 {
     asm
     {
@@ -51,7 +51,7 @@ _os9err EXTERNAL
 
 
 __norts__ asm int
-create(char *path, int mode, int perm)
+create(const char *path, int mode, int perm)
 {
     asm
     {
@@ -66,7 +66,7 @@ create(char *path, int mode, int perm)
         ldb         2+6+1,s         get permissions
         os9         I$Create
         bcs         errout
-        bra         crret   
+        bra         crret
 
 creat10 cmpb        #E$CEF          already there?
         bne         errout          no - cannot cope
@@ -77,9 +77,9 @@ creat10 cmpb        #E$CEF          already there?
         bra         _ocreat
     }
 }
- 
+
 asm int
-ocreat(char *path, int mode, int perm)
+ocreat(const char *path, int mode, int perm)
 {
     asm
     {

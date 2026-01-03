@@ -1,3 +1,6 @@
+#ifndef _FCNTL_H
+#define _FCNTL_H
+
 #include "os.h"
 
 typedef int path_id;
@@ -53,8 +56,10 @@ int setstat(int code, int param);
 void pflinit(void);
 
 /* traditional low-level UNIX I/O calls */
-int creat(char *path, int mode);
-int create(char *path, int mode, int perm);
-int ocreat(char *path, int mode, int perm);
-int open(char *path, int mode);
+int creat(const char *path, int mode);
+int create(const char *path, int mode, int perm);
+int ocreat(const char *path, int mode, int perm);
+int open(const char *path, int mode);
 int close(int mode);
+
+#endif /* _FCNTL_H */

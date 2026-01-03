@@ -6,7 +6,9 @@
 int rand(void);
 void srand(unsigned seed);
 
+#ifndef _CMOC_VERSION_
 float    atof(char *str);
+#endif
 int      atoi(char *str);
 long     atol(char *str);
 char     *itoa();
@@ -14,7 +16,7 @@ char     *ltoa();
 char     *utoa();
 int      htoi();
 long     htol();
-int      max();
+int      max(int v1, int v2);
 int      min();
 unsigned umin();
 unsigned umax();

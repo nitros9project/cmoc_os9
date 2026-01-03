@@ -9,7 +9,7 @@
 *    static   char  *save;
 */
 __norts__ asm
-char *strtok(char *str, char *sep)
+char *strtok(char *str, const char *sep)
 {
 	asm {
 _strspn EXTERN

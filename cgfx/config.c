@@ -5,7 +5,7 @@ _cgfx_pset(path_id path, int grpnum, int bufnum)
 {
     asm
     {
-_write EXTERNAL
+_cwrite EXTERNAL
         ldd #$1b2e
         bra send4
     }
@@ -31,7 +31,7 @@ _cgfx_defcolr(path_id path)
         leax ,s
         lda 7,s
         ldu #2
-        lbsr _write
+        lbsr _cwrite
         leas 2,s
         bra os9err0
     }
@@ -92,7 +92,7 @@ send3   pshs u
         ldu #3
         leax ,s
         lda 8,s
-        lbsr _write
+        lbsr _cwrite
         leas 3,s
         bra os9err0
     }
@@ -115,7 +115,7 @@ send4   pshs u
         ldu #4
         leax ,s
         lda 9,s
-        lbsr _write
+        lbsr _cwrite
         leas 4,s
 
 os9err0 puls u

@@ -87,12 +87,12 @@ _CGFXBuf:
 * U=byte count
 *
 
-_write EXPORT
-_write:
+_cwrite EXPORT
+_cwrite:
  cmpa _CPath,y writing to a different path?
  beq noflush1 no, don't flush yet...
 
-* fix for version 7! 
+* fix for version 7!
  pshs a save old path (_Flush will overwrite...)
 
  bsr _Flush ok, flush everything

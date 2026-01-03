@@ -28,18 +28,18 @@ void exit(int status);
 void _exit(int status);
 
 // file I/O
-int creat(char *pathname, int mode);
-int create(char *pathname, int mode, int perm);
-int open(char *pathname, int mode);
+int creat(const char *pathname, int mode);
+int create(const char *pathname, int mode, int perm);
+int open(const char *pathname, int mode);
 int read(int filedes, char *data, int count);
 int readln(int filedes, char *data, int count);
-int write(int filedes, char *data, int count);
-int writeln(int filedes, char *data, int count);
+int write(int filedes, const char *data, int count);
+int writeln(int filedes, const char *data, int count);
 int close(int fd);
-int access(char *pathname, int mode);
-int mknod(char *pathname, int mode);
-int unlink(char *pathname);
-int unlinkx(char *pathname, int mode);
+int access(const char *pathname, int mode);
+int mknod(const char *pathname, int mode);
+int unlink(const char *pathname);
+int unlinkx(const char *pathname, int mode);
 int lseek(int fildes, off_t offset, int origin);
 
 /* special OS-9 C runtime globals */

@@ -45,7 +45,7 @@ Shadow:
  stu 9,s
  ldu #9
  lda 14,s
- lbsr _write
+ lbsr _cwrite
  bcc noerror
  clra
  std errno,y

@@ -20,10 +20,10 @@ __memend EXTERNAL
         cmpd    _spare,y        any spare left? (initially set to zero)
         blo     sbrk20          branch if less than
 
-* we have to get some memory from the system        
+* we have to get some memory from the system
         pshs    y               save off data ptr
-        clra   
-        clrb   
+        clra
+        clrb
         os9     F$Mem           D = 0, get current size and upper boundaries
         addd    2+2+2,s         add requested increase to current size
         os9     F$Mem           ask for new size in D
@@ -33,13 +33,13 @@ __memend EXTERNAL
         ldd     #-1             else error
         leas    2,s             recover stack
         rts                     return
-        
+
 sbrk10  std     __memend,y      save new memory area upper bound in memend
         addd    _spare,y        add to spare
         subd    ,s              subtract saved memend at start of call
         std     _spare,y        and update spare to that
-        
-* now _spare is big enough        
+
+* now _spare is big enough
 sbrk20  leas    2,s             eat D saved on stack earlier
         ldd     _spare,y        get spare count into D
         pshs    d               save on stack
@@ -55,7 +55,7 @@ clr@    sta     ,x+             write 0 to location and increment
         cmpx    __memend,y      end of memory?
         bcs     clr@            branch if not
         stx     ,s              save X to stack to pull for return
-sbrkex  puls    d,pc 
+sbrkex  puls    d,pc
      }
 }
 
@@ -76,17 +76,17 @@ __stbot EXTERNAL
         bhs     ibrkerr         yes, it is an error
         pshs    d               otherwise save off D
         ldx     __mtop,y        get mtop in X
-        clra   
+        clra
 clr@    cmpx    ,s              have we reached the end?
         bcc     ibrk10          branch if so
         sta     ,x+             else clear byte
         bra     clr@            and go to next
-        
+
 ibrk10  ldd     __mtop,y        get current _mtop
-        puls    x               get earlier saved value 
+        puls    x               get earlier saved value
         stx     __mtop,y        and save as new _mtop
-        rts    
-        
+        rts
+
 ibrkerr ldd     #-1             error
     }
 }
@@ -102,15 +102,15 @@ unbrk(int decrease)
         ldd     2,s           get parameter in D (memory to return from sbrk)
         pshs    y             save off data ptr
         os9     F$Mem         change data area size
-        bcc     L0093 
-        ldd     #-1 
-        puls    y,pc 
-        
+        bcc     L0093
+        ldd     #-1
+        puls    y,pc
+
 L0093   tfr     y,d           transfer address of new area upper bound into D
         puls    y             recover data pointer
         std     __memend,y    store D in memend
-        clra   
-        clrb   
+        clra
+        clrb
         std     _spare,y      kill any leftover
     }
-}   
+}

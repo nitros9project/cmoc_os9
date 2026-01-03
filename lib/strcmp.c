@@ -10,22 +10,22 @@
 *         ->  u
 */
 __norts__ asm
-int   strcmp(char *s1, char *s2)
+int   strcmp(const char *s1, const char *s2)
 {
 	asm {
- pshs  u 
+ pshs  u
  ldx   4,s *s1
  ldu   6,s *s2
- bra   strcmp2 
+ bra   strcmp2
 
 strcmp1 ldb   ,u+ check null & bump *s2
  beq   strcmp3 if EOS
 strcmp2 ldb   ,u s2 char
  subb  ,x+ check same & bump pnt
  beq   strcmp1 if same
- negb reverse sign of result 
-strcmp3 sex    
- puls  u,pc 
+ negb reverse sign of result
+strcmp3 sex
+ puls  u,pc
 
 	}
 }

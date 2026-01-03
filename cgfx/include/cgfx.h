@@ -1,3 +1,7 @@
+
+#ifndef _CGFX_H
+#define _CGFX_H
+
 #include <fcntl.h>
 
 /**** TEXT FUNCTIONS ****/
@@ -244,6 +248,13 @@ error_code _cgfx_curxy(path_id path, int x, int y);
 #define CHR_HRG 	0xCB /* hourglass (Tandy menu) */
 #define CHR_TRR 	0xCC /* triple bar with open right side */
 #define CHR_TRL 	0xCD /* triple bar with open left side */
+
+
+/**
+ * @brief Flush queued up drawing commands.
+ */
+void Flush(void);
+
 
 /**
  * @brief Set the drawing pattern to be used.
@@ -692,7 +703,7 @@ typedef struct mousin {
       pt_ttsa,   	/* time this state button A */
       pt_ttsb,   	/* time this state button B */
       pt_tlsa,   	/* time last state button A */
-      pt_tlsb,   	/* time last state button B */ 
+      pt_tlsb,   	/* time last state button B */
       pt_rsrv1[6],	/* reserved */
       pt_stat,   	/* window pointer location type */
       pt_res;    	/* resolution */
@@ -706,7 +717,7 @@ typedef struct mousin {
 #define WR_CNTNT	0 /* content region */
 #define WR_CNTRL	1 /* control region */
 #define WR_OFWIN	2 /* off window */
-      
+
 /**
  * @brief Set the mouse parameters.
  *
@@ -892,6 +903,14 @@ typedef struct {
 #define MN_FUNC 	1 /* call a function */
 #define MN_SUBMN 	2 /* sub-menu */
 
+/* window type defs */
+#define WT_NBOX		0		/* No box- default window type */
+#define WT_FWIN		1		/* Framed window with menus */
+#define WT_FSWIN	2		/* Framed window with menus and scroll bars */
+#define WT_SBOX		3		/* Shadowed window- form menus */
+#define WT_DBOX		4		/* Double border- for dialog boxes */
+#define WT_PBOX		5		/* Plain border- anything */
+
 /**
  * @brief Sets the current window type.
  *
@@ -950,7 +969,7 @@ error_code _cgfx_ss_sbar(path_id path, int horbar, int verbar);
  * @return 0 if successful, otherwise the error code.
  */
 error_code _cgfx_gs_crsr(path_id path, int *x, int *y);
- 
+
 /**
  * @brief Get the screen size.
  *
@@ -1091,4 +1110,70 @@ typedef struct {
 	int p_xcor;
 	int p_ycor;
 } VERTEX;
- 
+
+/**
+ * @brief Send signal upon key press.
+ *
+ * The window manager will send the requested signal when any mouse button is clicked.
+ *
+ * @param path_id The path to the window device.
+ * @param signo The desired signal to receive.
+ * @return 0 if successful, otherwise the error code.
+ */
+error_code _cgfx_ss_ssig(path_id path, int signo);
+
+
+typedef struct sgbuf { /* structure for 'getstat()' and 'setstat()' */
+   char sg_class,       /* device class */
+
+/* The following are for an SCF type device. See below for
+ * structure member definitions for an RBF device.
+ */
+        sg_case,        /* 0 = upper and lower cases, 1 = upper case only */
+        sg_backsp,      /* 0 = BSE, 1 = BSE-SP-BSE */
+        sg_delete,      /* delete sequence */
+        sg_echo,        /* 0 = no echo */
+        sg_alf,         /* 0 = no auto line feed */
+        sg_nulls,       /* end of line null count */
+        sg_pause,       /* 0 = no end of page pause */
+        sg_page,        /* lines per page */
+        sg_bspch,       /* backspace character */
+        sg_dlnch,       /* delete line character */
+        sg_eorch,       /* end of record character */
+        sg_eofch,       /* end of file character */
+        sg_rlnch,       /* reprint line character */
+        sg_dulnch,      /* duplicate last line character */
+        sg_psch,        /* pause character */
+        sg_kbich,       /* keyboard interrupt character */
+        sg_kbach,       /* keyboard abort character */
+        sg_bsech,       /* backspace echo character */
+        sg_bellch,      /* line overflow character (bell) */
+        sg_parity,      /* device initialisation (parity) */
+        sg_baud;        /* baud rate */
+   int  sg_d2p,         /* offset to second device name string */
+        sg_stn;         /* offset to status routine name */
+   char sg_err;         /* most recent error status */
+   char sg_spare[5];    /* spare bytes - necessary for correct sizing */
+} SCF_OPT;
+
+
+/**
+ * @brief Gets options for the given path.
+ *
+ * @param path_id The path to the window device.
+ * @param buffer Updated to contain the options set for path.
+ * @return 0 if successful, otherwise the error code.
+ */
+error_code _cgfx_gs_opt(path_id path, SCF_OPT *opt);
+
+
+/**
+ * @brief Sets options for the given path.
+ *
+ * @param path_id The path to the window device.
+ * @param buffer Updated to contain the options set for path.
+ * @return 0 if successful, otherwise the error code.
+ */
+error_code _cgfx_ss_opt(path_id path, const SCF_OPT *opt);
+
+#endif /* _CGFX_H */

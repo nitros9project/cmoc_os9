@@ -53,6 +53,7 @@ static char *_ftoa(double *np0, int prec, int format, int c)    /* double to asc
 
        np = (char *)&n;        /* so we can get at the exponent */
 
+#if FLOATING_POINT_SUPPORTED
        /* remove bias and test for neg */
        if(np[7]==0) {
                dppos=sign=esign=0;
@@ -155,6 +156,7 @@ choose: p = buf;
         conptr = ftoatbl;
 
         _abnorm(&n); /* de-normalize number */
+#endif
 #ifdef DEBUG
         printf("after de-normalizing\n");
         dumpf(&n);
@@ -268,6 +270,7 @@ static int _outdig(double *np, double **conptr)
 }
 
 double ftoatbl[] = {
+#if FLOATING_POINT_SUPPORTED
      1.0e-0,
      1.0e-1,
      1.0e-2,
@@ -285,7 +288,9 @@ double ftoatbl[] = {
      1.0e-14,
      1.0e-15,
      1.0e-16,
-     1.0e-17 };
+     1.0e-17
+#endif
+};
 double *ftblend = ftoatbl + (sizeof ftoatbl)/(sizeof(double));
 
 #ifdef DEBUG

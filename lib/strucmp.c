@@ -1,7 +1,7 @@
 #include <string.h>
 
 __norts__ asm
-int strucmp(char *s1, char *s2)
+int strucmp(const char *s1, const char *s2)
 {
 	asm {
 toupper EXTERN

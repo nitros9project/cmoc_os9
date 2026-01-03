@@ -12,7 +12,7 @@ static struct sgbuf oldopts,newopts;
 
 /*
 int MouseKey(path)
-int path;
+path_id path;
 
   Returns a keypress from path if one is available, or returns -1 or -2 if
 one of the mouse buttons has been pressed (-1=left button, -2=right button.)
@@ -20,7 +20,7 @@ If neither a keypress is ready nor a button is pressed, then it returns a 0.
 */
 
 int MouseKey(path)
-register int path;
+register path_id path;
 {
  char ch; /* character variable used to read a character from the window */
 
@@ -58,6 +58,6 @@ register int path;
     };
   };
 }
- 
+
 
 

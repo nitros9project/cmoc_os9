@@ -7,33 +7,33 @@
 toupper EXPORT
 _chcodes EXTERNAL
 
-toupper: clra   
- ldb   3,s 
+toupper: clra
+ ldb   3,s
  leax  _chcodes,pcr
- lda   d,x 
- anda  #4 
- beq returnit * beq   L0022 
- andb  #$df 
+ lda   d,x
+ anda  #4
+ beq returnit * beq   L0022
+ andb  #$df
  bra returnit
- * clra   
- * rts    
+ * clra
+ * rts
 
 * char tolower(char c)
 
 tolower EXPORT
 _chcodes EXTERNAL
 
-tolower: clra   
- ldb   3,s 
+tolower: clra
+ ldb   3,s
  leax  _chcodes,pcr
- lda   d,x 
- anda  #2 
- beq returnit * beq   L0022 
- orb   #$20 
+ lda   d,x
+ anda  #2
+ beq returnit * beq   L0022
+ orb   #$20
 returnit
- clra   
- rts    
-* L0022 ldd   2,s 
+ clra
+ rts
+* L0022 ldd   2,s
 *  rts
 
- endsect    
+ endsect

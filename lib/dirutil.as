@@ -19,8 +19,6 @@ _B0004              rmb       30        ; reserve 30 bytes
 _closedir           EXPORT              ; export this symbol
 _opendir            EXPORT              ; export this symbol
 _readdir            EXPORT              ; export this symbol
-_seekdir            EXPORT              ; export this symbol
-_telldir            EXPORT              ; export this symbol
 
 _close              EXTERNAL            ; import external symbol
 _free               EXTERNAL            ; import external symbol
@@ -28,7 +26,6 @@ _malloc             EXTERNAL            ; import external symbol
 _open               EXTERNAL            ; import external symbol
 _read               EXTERNAL            ; import external symbol
 _strhcpy            EXTERNAL            ; import external symbol
-_lseek              EXTERNAL            ; import external symbol
 
 * DIR layout used by this file:
 *   0..1  dd_fd   (path number)
@@ -74,15 +71,11 @@ _readdir:           pshs      u         ; save U on the hardware stack
                     ldu       4,s       ; load U from stack-relative value 4,s
                     leau      2,u       ; compute effective address into U from 2,u
 Loop_01             ldd       #$0020    ; load D from immediate value $0020
-* _read(fd, buf, count) wants:
-*   2,s = fd
-*   4,s = buffer
-*   6,s = count
-* The path number lives at -2,u because U was advanced to dd_buf above.
+* Keep the original KLib call shape for _read(fd, buf, count):
+*   push count, then push fd+buf together.
                     pshs      d         ; save D on the hardware stack
-                    pshs      u         ; save U on the hardware stack
                     ldd       -2,u      ; load D from indexed value -2,u
-                    pshs      d         ; save D on the hardware stack
+                    pshs      d,u       ; save D,U on the hardware stack
                     lbsr      _read     ; long branch to subroutine to _read
                     leas      6,s       ; adjust S using 6,s
                     std       -2,s      ; store D to stack-relative value -2,s
@@ -104,38 +97,4 @@ BranchTarget_02     ldb       ,u        ; load B from memory pointed to by U
                     std       2,x       ; store D to indexed value 2,x
                     tfr       x,d       ; transfer X,D
                     puls      u,pc      ; restore registers and return
-_seekdir:           clra                ; clear A
-                    clrb                ; clear B
-* Build the CMOC long-return call frame for _lseek(fd, loc, SEEK_SET):
-*   2,s = hidden return buffer
-*   4,s = fd
-*   6,s = loc MSW
-*   8,s = loc LSW
-*   10,s = whence
-                    pshs      d         ; save D on the hardware stack
-                    ldd       8,s       ; load D from stack-relative value 8,s
-                    pshs      d         ; save D on the hardware stack
-                    ldd       8,s       ; load D from stack-relative value 8,s
-                    pshs      d         ; save D on the hardware stack
-                    ldd       [8,s]     ; load D from indirect address [8,s]
-                    pshs      d         ; save D on the hardware stack
-                    leax      _B0000,y  ; compute effective address into X from _B0000,y
-                    pshs      x         ; save X on the hardware stack
-                    lbsr      _lseek    ; long branch to subroutine to _lseek
-                    leas      10,s      ; adjust S using 10,s
-                    rts                 ; return to caller
-_telldir:           ldd       #1        ; load D from immediate value 1
-                    pshs      d         ; save D on the hardware stack
-                    clra                ; clear A
-                    clrb                ; clear B
-                    pshs      d         ; save D on the hardware stack
-                    pshs      d         ; save D on the hardware stack
-                    ldd       [10,s]    ; load D from indirect address [10,s]
-                    pshs      d         ; save D on the hardware stack
-                    ldx       10,s      ; load X from stack-relative value 10,s
-                    pshs      x         ; save X on the hardware stack
-                    lbsr      _lseek    ; long branch to subroutine to _lseek
-                    leas      10,s      ; adjust S using 10,s
-                    rts                 ; return to caller
-
                     endsect             ; end current section

@@ -21,8 +21,8 @@ _os_getstat
 
 do_getstat
                     pshs      y,u       ; preserve Y and U across the system call
-                    lda       9,s       ; load path number argument
-                    ldb       7,s       ; load requested GetStat code
+                    lda       11,s      ; load path number argument
+                    ldb       9,s       ; load requested GetStat code
                     beq       L003c     ; SS_Opt uses only X as parameter
                     cmpb      #SS_Ready ; check for simple status query using registers only
                     beq       L003e     ; issue call directly for single-register forms
@@ -40,14 +40,14 @@ do_getstat
                     bra       gsbye     ; return error through shared exit
 L0024               os9       I_GetStt  ; perform size/position GetStat call
                     bcs       gsbye     ; return immediately if OS-9 signaled an error
-L002e               stx       [10,s]    ; store high word of 32-bit result through p1
-                    ldx       10,s      ; reload destination pointer
+L002e               stx       [12,s]    ; store high word of 32-bit result through p1
+                    ldx       12,s      ; reload destination pointer
                     stu       2,x       ; store low word of 32-bit result through p1
                     clrb                ; clear low byte of success return value
                     clra                ; clear high byte of success return value
                     bra       gsbye     ; finish through shared return path
-L0039               ldy       12,s      ; load byte-count/aux pointer argument for SS_FD
-L003c               ldx       10,s      ; load primary buffer pointer argument
+L0039               ldy       14,s      ; load byte-count/aux pointer argument for SS_FD
+L003c               ldx       12,s      ; load primary buffer pointer argument
 L003e               os9       I_GetStt  ; issue the requested GetStat call
 gsbye               puls      y,u,pc    ; restore preserved registers and return
 
@@ -61,8 +61,8 @@ _os_setstat
 
 do_setstat
                     pshs      y,u       ; preserve Y and U across the system call
-                    lda       9,s       ; load path number argument
-                    ldb       7,s       ; load requested SetStat code
+                    lda       11,s      ; load path number argument
+                    ldb       9,s       ; load requested SetStat code
                     beq       L0096     ; SS_Opt uses X only
                     cmpb      #SS_Size  ; file size update uses X and U
                     beq       L0094     ; prepare both registers before calling
@@ -97,15 +97,15 @@ do_setstat
                     ldb       #E_UnkSvc ; reject unsupported traditional codes
                     puls      y,u       ; restore preserved registers before error path
                     lbra      _os9err   ; return unknown-service error
-L0091               ldy       14,s      ; load secondary pointer/count argument
-L0094               ldu       12,s      ; load auxiliary pointer/value argument
-L0096               ldx       10,s      ; load primary pointer/value argument
+L0091               ldy       16,s      ; load secondary pointer/count argument
+L0094               ldu       14,s      ; load auxiliary pointer/value argument
+L0096               ldx       12,s      ; load primary pointer/value argument
                     bra       L00a6     ; issue SetStat with prepared registers
 L009a               tfr       a,b       ; move path number into B for SS_DCmd convention
-                    lda       11,s      ; load command byte into A
-                    ldx       12,s      ; load primary pointer/value into X
-                    ldy       14,s      ; load secondary pointer/value into Y
-                    ldu       16,s      ; load tertiary pointer/value into U
+                    lda       13,s      ; load command byte into A
+                    ldx       14,s      ; load primary pointer/value into X
+                    ldy       16,s      ; load secondary pointer/value into Y
+                    ldu       18,s      ; load tertiary pointer/value into U
 L00a6               os9       I_SetStt  ; issue the requested SetStat call
                     puls      y,u,pc    ; restore preserved registers and return
 

@@ -18,6 +18,14 @@
 #ifndef _CTYPE_H
 #define _CTYPE_H
 
+/**
+ * @file ctype.h
+ * @brief Character classification and ASCII case-conversion helpers.
+ */
+
+/**
+ * @brief Character classification table used by the ctype macros.
+ */
 extern const unsigned char     _chcodes[];	/* in chcodes.r */
 
 #define _CONTROL       0x01

@@ -1,24 +1,24 @@
- section code
+                    section   code      ; begin code section
 
-_linc EXPORT
-_ldec EXPORT
+_linc               EXPORT              ; export this symbol
+_ldec               EXPORT              ; export this symbol
 
-_linc: ldd   #1 
- addd  2,x 
- std   2,x 
- ldd   ,x 
- adcb  #0 
- adca  #0 
- std   ,x 
- rts    
-_ldec: ldd   2,x 
- subd  #1 
- std   2,x 
- ldd   ,x 
- sbcb  #0 
- sbca  #0 
- std   ,x 
- rts    
+_linc:              ldd       #1        ; load D from immediate value 1
+                    addd      2,x       ; add indexed value 2,x into D
+                    std       2,x       ; store D to indexed value 2,x
+                    ldd       ,x        ; load D from memory pointed to by X
+                    adcb      #0        ; add immediate value 0 into B
+                    adca      #0        ; add immediate value 0 into A
+                    std       ,x        ; store D to memory pointed to by X
+                    rts                 ; return to caller
+_ldec:              ldd       2,x       ; load D from indexed value 2,x
+                    subd      #1        ; subtract immediate value 1 from D
+                    std       2,x       ; store D to indexed value 2,x
+                    ldd       ,x        ; load D from memory pointed to by X
+                    sbcb      #0        ; subtract immediate value 0 from B
+                    sbca      #0        ; subtract immediate value 0 from A
+                    std       ,x        ; store D to memory pointed to by X
+                    rts                 ; return to caller
 
- endsect  
+                    endsect             ; end current section
 

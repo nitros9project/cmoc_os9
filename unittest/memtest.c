@@ -67,7 +67,39 @@ void test_memchr()
     else
     {
 		printf("%s [FAIL] memchr(%X, %X, %d) = %X\n", __func__, src, locate, count, result);
-    }
+	}
+}
+
+void test_memcmp()
+{
+    int result = memcmp("abcd", "abcd", 4);
+    if (result == 0)
+        printf("%s [PASS] memcmp(equal)\n", __func__);
+    else
+        printf("%s [FAIL] memcmp(equal)=%d\n", __func__, result);
+
+    result = memcmp("abce", "abcd", 4);
+    if (result > 0)
+        printf("%s [PASS] memcmp(greater)\n", __func__);
+    else
+        printf("%s [FAIL] memcmp(greater)=%d\n", __func__, result);
+}
+
+void test_memccpy()
+{
+    char dst[8];
+    void *result = memccpy(dst, "abcd", 'c', 4);
+
+    if (result != 0 && dst[0] == 'a' && dst[1] == 'b' && dst[2] == 'c')
+        printf("%s [PASS] memccpy(stop)\n", __func__);
+    else
+        printf("%s [FAIL] memccpy(stop)=%X\n", __func__, result);
+
+    result = memccpy(dst, "abcd", 'z', 4);
+    if (result == 0)
+        printf("%s [PASS] memccpy(nomatch)\n", __func__);
+    else
+        printf("%s [FAIL] memccpy(nomatch)=%X\n", __func__, result);
 }
 
 void test_sbrk()
@@ -151,6 +183,37 @@ void test_malloc()
 	free(p);
 }
 
+void test_calloc()
+{
+	char *p = (char *) calloc(8, 1);
+
+	if (p != 0 && p[0] == 0 && p[1] == 0 && p[7] == 0)
+		printf("%s [PASS] calloc(8, 1) = $%X\n", __func__, p);
+	else
+		printf("%s [FAIL] calloc(8, 1) = $%X\n", __func__, p);
+
+	free(p);
+}
+
+void test_realloc()
+{
+	char *p = (char *) malloc(4);
+	char *q;
+
+	p[0] = 'A';
+	p[1] = 'B';
+	p[2] = 'C';
+	p[3] = 'D';
+
+	q = (char *) realloc(p, 8);
+	if (q != 0 && q[0] == 'A' && q[1] == 'B' && q[2] == 'C' && q[3] == 'D')
+		printf("%s [PASS] realloc($%X, 8) = $%X\n", __func__, p, q);
+	else
+		printf("%s [FAIL] realloc($%X, 8) = $%X\n", __func__, p, q);
+
+	free(q);
+}
+
 int main(int argc, char **argv)
 {
 	test_memglobs();
@@ -160,7 +223,11 @@ int main(int argc, char **argv)
 	test_memcpy();
 	test_memset();
 	test_memchr();
+	test_memcmp();
+	test_memccpy();
 	test_malloc();
+	test_calloc();
+	test_realloc();
 
 	return 0;
 }

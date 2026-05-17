@@ -3,7 +3,7 @@
 /* This is from the C3 Project
    https://github.com/boisy/toolshed/blob/master/c3/lib/lib.a/patmatch.c */
 
-int patmatch(char *pattern, char *str, char forceCase)
+int patmatch(const char *pattern, const char *str, char forceCase)
 {
 	char   pc;                    /* a single character from pattern */
 

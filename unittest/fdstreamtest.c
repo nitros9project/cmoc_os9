@@ -7,6 +7,7 @@ static const char fdopen_read_tmp[] = "fdopen_read.tmp";
 static const char fdopen_write_tmp[] = "fdopen_write.tmp";
 static const char freopen_old_tmp[] = "freopen_old.tmp";
 static const char freopen_new_tmp[] = "freopen_new.tmp";
+static const char freopen_fail_tmp[] = "freopen_fail.tmp";
 static int failed;
 
 static void check_true(const char *name, int condition)
@@ -94,6 +95,22 @@ static void test_fdopen_write(void)
     unlink(fdopen_write_tmp);
 }
 
+static void test_fdopen_badmode(void)
+{
+    int fd;
+    FILE *fp;
+
+    unlink(fdopen_read_tmp);
+    fd = open(".", FAM_READ);
+    check_true("test_fdopen_badmode open(dir)", fd >= 0);
+    if (fd < 0)
+        return;
+
+    fp = fdopen(fd, "q");
+    check_true("test_fdopen_badmode fdopen(q)", fp == 0);
+    close(fd);
+}
+
 static void test_freopen(void)
 {
     FILE *fp;
@@ -135,10 +152,74 @@ static void test_freopen(void)
     unlink(freopen_new_tmp);
 }
 
+static void test_freopen_flushes_pending_write(void)
+{
+    FILE *fp;
+    char buf[16];
+
+    unlink(freopen_old_tmp);
+    unlink(freopen_new_tmp);
+
+    fp = fopen(freopen_old_tmp, "w");
+    check_true("test_freopen_flushes fopen(old)", fp != 0);
+    if (fp == 0)
+        return;
+
+    check_true("test_freopen_flushes buffered write", fputs("stay\r", fp) >= 0);
+    check_true("test_freopen_flushes freopen()",
+               freopen(freopen_new_tmp, "w", fp) == fp);
+    if (fp != 0)
+        fclose(fp);
+
+    fp = fopen(freopen_old_tmp, "r");
+    check_true("test_freopen_flushes old read", fp != 0);
+    if (fp != 0) {
+        memset(buf, 0, sizeof(buf));
+        check_true("test_freopen_flushes old content",
+                   fgets(buf, sizeof(buf), fp) != 0 && strcmp(buf, "stay\r") == 0);
+        fclose(fp);
+    }
+
+    unlink(freopen_old_tmp);
+    unlink(freopen_new_tmp);
+}
+
+static void test_freopen_failure_keeps_stream_usable(void)
+{
+    FILE *fp;
+    FILE *reopened;
+    char buf[16];
+
+    unlink(freopen_fail_tmp);
+    fp = fopen(freopen_fail_tmp, "w+");
+    check_true("test_freopen_failure fopen()", fp != 0);
+    if (fp == 0)
+        return;
+
+    check_true("test_freopen_failure initial write", fputs("orig\r", fp) >= 0);
+    check_true("test_freopen_failure rewind", (rewind(fp), ftell(fp) == 0L));
+    reopened = freopen("/D0/NO/SUCH/PATH", "r", fp);
+    check_true("test_freopen_failure result", reopened == 0);
+
+    fp = fopen(freopen_fail_tmp, "r");
+    check_true("test_freopen_failure reopen old path", fp != 0);
+    if (fp != 0) {
+        memset(buf, 0, sizeof(buf));
+        check_true("test_freopen_failure old content",
+                   fgets(buf, sizeof(buf), fp) != 0 && strcmp(buf, "orig\r") == 0);
+        fclose(fp);
+    }
+
+    unlink(freopen_fail_tmp);
+}
+
 int main(void)
 {
     test_fdopen_read();
     test_fdopen_write();
+    test_fdopen_badmode();
     test_freopen();
+    test_freopen_flushes_pending_write();
+    test_freopen_failure_keeps_stream_usable();
     return failed;
 }

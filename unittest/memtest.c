@@ -1,204 +1,184 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
-#include <sys/types.h>
 #include <string.h>
 #include <unistd.h>
-//#include <os.h>
 
-void test_memcpy()
+static int failed;
+
+static void fail_ptr(const char *name, const char *detail, void *actual, void *expected)
 {
-    char *src = "test";
-    char dst[5];
-    int count = 4;
-    void *result = memcpy(dst, src, count);
-    
-    if (dst[0] == 't' && dst[1] == 'e' && dst[2] == 's' && dst[3] == 't')
-    {
-		printf("%s [PASS] memcpy(%X, %X, %d) = %X\n", __func__, dst, src, count, result);
-    }
-    else
-    {
-		printf("%s [FAIL] memcpy(%X, %X, %d) = %X\n", __func__, dst, src, count, result);
-    }
+	printf("%s [FAIL] %s actual=%X expected=%X\n", name, detail, actual, expected);
+	failed = 1;
 }
 
-void test_memset()
+static void fail_int(const char *name, const char *detail, int actual, int expected)
 {
-    char src = 'X';
-    char dst[5];
-    int count = 5;
-    void *result = memset(dst, src, count);
-    
-    if (dst[0] == 'X' && dst[1] == 'X' && dst[2] == 'X' && dst[3] == 'X' && dst[4] == 'X')
-    {
-		printf("%s [PASS] memset(%X, %X, %d) = %X\n", __func__, dst, src, count, result);
-    }
-    else
-    {
-		printf("%s [FAIL] memset(%X, %X, %d) = %X\n", __func__, dst, src, count, result);
-    }
+	printf("%s [FAIL] %s actual=%d expected=%d\n", name, detail, actual, expected);
+	failed = 1;
 }
 
-void test_memchr()
+static void test_memcpy(void)
 {
-    char *src = "ABCDEFGHIJKLMNOP";
-    char locate = 'H';
-    int count = strlen(src);
-    void *result = memchr(src, locate, count);
-    
-    if (result == src + 7)
-    {
-		printf("%s [PASS] memchr(%X, %X, %d) = %X\n", __func__, src, locate, count, result);
-    }
-    else
-    {
-		printf("%s [FAIL] memchr(%X, %X, %d) = %X\n", __func__, src, locate, count, result);
-    }
+	char src[] = "test";
+	char dst[8];
+	void *result;
 
-    // locate a character that is NOT in the source string
-    locate = 'Z';
-    result = memchr(src, locate, count);
-    
-    if (result == 0x0000)
-    {
-		printf("%s [PASS] memchr(%X, %X, %d) = %X\n", __func__, src, locate, count, result);
-    }
-    else
-    {
-		printf("%s [FAIL] memchr(%X, %X, %d) = %X\n", __func__, src, locate, count, result);
+	memset(dst, 0x5A, sizeof(dst));
+	result = memcpy(dst, src, 4);
+	if (result != dst)
+		fail_ptr(__func__, "return", result, dst);
+	else if (memcmp(dst, "test", 4) != 0)
+		fail_int(__func__, "bytes", memcmp(dst, "test", 4), 0);
+	else if ((unsigned char) dst[4] != 0x5A)
+		fail_int(__func__, "sentinel", (unsigned char) dst[4], 0x5A);
+	else
+		printf("%s [PASS]\n", __func__);
+}
+
+static void test_memset(void)
+{
+	char dst[5];
+	void *result = memset(dst, 'X', sizeof(dst));
+
+	if (result != dst)
+		fail_ptr(__func__, "return", result, dst);
+	else if (dst[0] != 'X' || dst[1] != 'X' || dst[2] != 'X' || dst[3] != 'X' || dst[4] != 'X')
+		fail_int(__func__, "fill", 0, 1);
+	else
+		printf("%s [PASS]\n", __func__);
+}
+
+static void test_memchr(void)
+{
+	char src[] = "ABCDEFGHIJKLMNOP";
+	void *result = memchr(src, 'H', strlen(src));
+
+	if (result != src + 7)
+		fail_ptr(__func__, "hit", result, src + 7);
+	else if (memchr(src, 'Z', strlen(src)) != NULL)
+		fail_ptr(__func__, "miss", memchr(src, 'Z', strlen(src)), NULL);
+	else
+		printf("%s [PASS]\n", __func__);
+}
+
+static void test_memcmp(void)
+{
+	int result = memcmp("abcd", "abcd", 4);
+	if (result != 0)
+		fail_int(__func__, "equal", result, 0);
+	else if (memcmp("abce", "abcd", 4) <= 0)
+		fail_int(__func__, "greater", memcmp("abce", "abcd", 4), 1);
+	else if (memcmp("abcd", "abce", 4) >= 0)
+		fail_int(__func__, "less", memcmp("abcd", "abce", 4), -1);
+	else
+		printf("%s [PASS]\n", __func__);
+}
+
+static void test_memccpy(void)
+{
+	char dst[8];
+	void *result;
+
+	memset(dst, 0, sizeof(dst));
+	result = memccpy(dst, "abcd", 'c', 4);
+	if (result != dst + 3)
+		fail_ptr(__func__, "stop return", result, dst + 3);
+	else if (memcmp(dst, "abc", 3) != 0)
+		fail_int(__func__, "stop bytes", memcmp(dst, "abc", 3), 0);
+	else if (dst[3] != 0)
+		fail_int(__func__, "stop sentinel", (unsigned char) dst[3], 0);
+	else {
+		memset(dst, 0, sizeof(dst));
+		result = memccpy(dst, "abcd", 'z', 4);
+		if (result != NULL)
+			fail_ptr(__func__, "nomatch return", result, NULL);
+		else if (memcmp(dst, "abcd", 4) != 0)
+			fail_int(__func__, "nomatch bytes", memcmp(dst, "abcd", 4), 0);
+		else
+			printf("%s [PASS]\n", __func__);
 	}
 }
 
-void test_memcmp()
+static void test_sbrk(void)
 {
-    int result = memcmp("abcd", "abcd", 4);
-    if (result == 0)
-        printf("%s [PASS] memcmp(equal)\n", __func__);
-    else
-        printf("%s [FAIL] memcmp(equal)=%d\n", __func__, result);
+	void *before = sbrk(0);
+	void *after = sbrk(16);
 
-    result = memcmp("abce", "abcd", 4);
-    if (result > 0)
-        printf("%s [PASS] memcmp(greater)\n", __func__);
-    else
-        printf("%s [FAIL] memcmp(greater)=%d\n", __func__, result);
+	if (before == (void *) -1 || after == (void *) -1)
+		fail_ptr(__func__, "error", after, before);
+	else if (after != before)
+		fail_ptr(__func__, "increment return", after, before);
+	else if (sbrk(0) != (char *) before + 16)
+		fail_ptr(__func__, "new break", sbrk(0), (char *) before + 16);
+	else
+		printf("%s [PASS]\n", __func__);
 }
 
-void test_memccpy()
+static void test_ibrk(void)
 {
-    char dst[8];
-    void *result = memccpy(dst, "abcd", 'c', 4);
+	void *before = ibrk(0);
+	void *old = ibrk(16);
+	void *after = ibrk(0);
 
-    if (result != 0 && dst[0] == 'a' && dst[1] == 'b' && dst[2] == 'c')
-        printf("%s [PASS] memccpy(stop)\n", __func__);
-    else
-        printf("%s [FAIL] memccpy(stop)=%X\n", __func__, result);
-
-    result = memccpy(dst, "abcd", 'z', 4);
-    if (result == 0)
-        printf("%s [PASS] memccpy(nomatch)\n", __func__);
-    else
-        printf("%s [FAIL] memccpy(nomatch)=%X\n", __func__, result);
+	if (before == (void *) -1 || old == (void *) -1 || after == (void *) -1)
+		fail_ptr(__func__, "error", after, before);
+	else if (old != before)
+		fail_ptr(__func__, "increment return", old, before);
+	else if (after != (char *) before + 16)
+		fail_ptr(__func__, "new break", after, (char *) before + 16);
+	else
+		printf("%s [PASS]\n", __func__);
 }
 
-void test_sbrk()
+static void test_memglobs(void)
 {
-	int request = 0;
-	void *result = sbrk(request);
-	printf("sbrk(%d) = $%X\n", request, result);
-	request = 128;
-	result = sbrk(request);
-	printf("sbrk(%d) = $%X\n", request, result);
+	if (_memend == NULL || _sttop == NULL || _stbot == NULL || _mtop == NULL)
+		fail_ptr(__func__, "globals", _memend, _mtop);
+	else if (!(_memend >= _sttop && _sttop >= _stbot && _stbot >= _mtop))
+		fail_int(__func__, "ordering", 0, 1);
+	else
+		printf("%s [PASS]\n", __func__);
 }
 
-void test_ibrk()
+static void test_malloc(void)
 {
-	// ibrk() affects _mtop
-	int request = 0;
-	void *result = ibrk(request);
-	printf("ibrk(%d) = $%X\n", request, result);
-	request = 128;
-	result = ibrk(request); // the old _mtop is returned
-	printf("ibrk(%d) = $%X\n", request, result);
-	request = 0;
-	result = ibrk(request);
-	printf("ibrk(%d) = $%X\n", request, result);
-}
-
-void test_memglobs()
-{
-	char *lines[] = {
-		"OS-9 Process Structure:",
-		"",
-		"                       high address",
-		"                 |                      | <- sbrk() adds more",
-		"                 |                      |    memory here",
-		"                 |                      |",
-		"                 |----------------------| <- _memend",
-		"                 |      parameters      |",
-		"                 |----------------------| <- _sttop",
-		"                 |                      |",
-		"                 |        stack         | <- SP register",
-		"Current stack    |                      |",
-		"  reservation -> |......................| <- _stbot",
-		"                 |          v           |",
-		"                 |                      | <- standard I/O buffers",
-		"                 |      free memory     |    allocated here",
-		"Current top      |                      |",
-		"    of data ->   |..........^...........| <- ibrk() changes this",
-		"                 |                      |    memory bound upward",
-		"                 |   requested memory   |",
-		"                 |----------------------| <- _mtop",
-		"                 |    uninitialized     |",
-		"                 |        data          |",
-		"                 |----------------------| <- edata",
-		"                 |     initialized      |",
-		"                 |        data          |",
-		"                 |----------------------|",
-		"                 |     direct page      |",
-		"    dpsiz        |      variables       |",
-		"      v          +----------------------+ <- Y, DP registers",
-		"                       low address",
-		"",
-		NULL
-	};
-
-	char **lineptr = lines;
-	while (*lineptr != NULL)
-	{
-		printf("%s\n", *lineptr);
-		lineptr++;
+	char *p = (char *) malloc(16);
+	if (p == NULL)
+		fail_ptr(__func__, "malloc(16)", p, (void *) 1);
+	else {
+		p[0] = 'A';
+		p[15] = 'Z';
+		if (p[0] != 'A' || p[15] != 'Z')
+			fail_int(__func__, "readback", 0, 1);
+		else
+			printf("%s [PASS]\n", __func__);
+		free(p);
 	}
-	printf("_memend = $%X\n", _memend);
-	printf("_sttop  = $%X\n", _sttop);
-	printf("_stbot  = $%X\n", _stbot);
-	printf("_mtop   = $%X\n", _mtop);
 }
 
-void test_malloc()
-{
-	char *p = (char *)malloc(16);
-	printf("p = $%X\n", p);
-	free(p);
-}
-
-void test_calloc()
+static void test_calloc(void)
 {
 	char *p = (char *) calloc(8, 1);
 
-	if (p != 0 && p[0] == 0 && p[1] == 0 && p[7] == 0)
-		printf("%s [PASS] calloc(8, 1) = $%X\n", __func__, p);
-	else
-		printf("%s [FAIL] calloc(8, 1) = $%X\n", __func__, p);
-
-	free(p);
+	if (p == NULL)
+		fail_ptr(__func__, "calloc(8,1)", p, (void *) 1);
+	else if (p[0] != 0 || p[1] != 0 || p[7] != 0)
+		fail_int(__func__, "zero fill", 0, 1);
+	else {
+		printf("%s [PASS]\n", __func__);
+		free(p);
+	}
 }
 
-void test_realloc()
+static void test_realloc(void)
 {
 	char *p = (char *) malloc(4);
 	char *q;
+
+	if (p == NULL) {
+		fail_ptr(__func__, "malloc(4)", p, (void *) 1);
+		return;
+	}
 
 	p[0] = 'A';
 	p[1] = 'B';
@@ -206,20 +186,26 @@ void test_realloc()
 	p[3] = 'D';
 
 	q = (char *) realloc(p, 8);
-	if (q != 0 && q[0] == 'A' && q[1] == 'B' && q[2] == 'C' && q[3] == 'D')
-		printf("%s [PASS] realloc($%X, 8) = $%X\n", __func__, p, q);
-	else
-		printf("%s [FAIL] realloc($%X, 8) = $%X\n", __func__, p, q);
-
-	free(q);
+	if (q == NULL)
+		fail_ptr(__func__, "realloc grow", q, (void *) 1);
+	else if (q[0] != 'A' || q[1] != 'B' || q[2] != 'C' || q[3] != 'D')
+		fail_int(__func__, "preserve grow", 0, 1);
+	else {
+		q[4] = 'E';
+		q[5] = 'F';
+		if (q[4] != 'E' || q[5] != 'F')
+			fail_int(__func__, "grow write", 0, 1);
+		else
+			printf("%s [PASS]\n", __func__);
+		free(q);
+	}
 }
 
-int main(int argc, char **argv)
+int main(void)
 {
 	test_memglobs();
 	test_sbrk();
 	test_ibrk();
-
 	test_memcpy();
 	test_memset();
 	test_memchr();
@@ -228,6 +214,5 @@ int main(int argc, char **argv)
 	test_malloc();
 	test_calloc();
 	test_realloc();
-
-	return 0;
+	return failed;
 }

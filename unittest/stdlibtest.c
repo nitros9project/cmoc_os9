@@ -51,10 +51,14 @@ void test_setbuf(void)
 	char buf[BUFSIZ];
 
 	setbuf(stdout, buf);
-	if (stdout->_base == buf && stdout->_ptr == buf)
+	if (stdout->_base == buf &&
+	    stdout->_end == buf + BUFSIZ &&
+	    stdout->_ptr == stdout->_end &&
+	    (stdout->_flag & _BIGBUF) != 0 &&
+	    (stdout->_flag & _UNBUF) == 0)
 		printf("%s [PASS] setbuf(buffered)\n", __func__);
 	else
-		printf("%s [FAIL] setbuf(buffered)\n", __func__);
+		printf("%s [FAIL] setbuf(buffered) flag=%04x\n", __func__, stdout->_flag);
 
 	setbuf(stdout, 0);
 	if ((stdout->_flag & _UNBUF) != 0)

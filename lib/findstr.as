@@ -23,15 +23,15 @@ BranchTarget_01     ldd       #1        ; load D from immediate value 1
 
 _findstr
                     pshs      y,u       ; save Y,U on the hardware stack
-                    ldu       6,s       ; load U from stack-relative value 6,s
+                    ldu       8,s       ; load U from stack-relative value 8,s
                     ldb       ,u        ; load B from memory pointed to by U
                     bne       BranchTarget_02 ; branch if not equal to BranchTarget_02
-                    ldd       4,s       ; load D from stack-relative value 4,s
+                    ldd       6,s       ; load D from stack-relative value 6,s
                     puls      y,u,pc    ; restore registers and return
-BranchTarget_02     ldx       4,s       ; load X from stack-relative value 4,s
+BranchTarget_02     ldx       6,s       ; load X from stack-relative value 6,s
 Loop_02             ldb       ,x        ; load B from memory pointed to by X
                     beq       ReturnZero_01 ; branch if equal/zero to ReturnZero_01
-                    ldy       6,s       ; load Y from stack-relative value 6,s
+                    ldy       8,s       ; load Y from stack-relative value 8,s
                     bsr       match_at  ; branch to subroutine to match_at
                     bne       BranchTarget_03 ; branch if not equal to BranchTarget_03
                     leax      1,x       ; compute effective address into X from 1,x
@@ -47,9 +47,9 @@ _findnstr
                     ldu       8,s       ; load U from stack-relative value 8,s
                     ldb       ,u        ; load B from memory pointed to by U
                     bne       BranchTarget_04 ; branch if not equal to BranchTarget_04
-                    ldd       4,s       ; load D from stack-relative value 4,s
+                    ldd       6,s       ; load D from stack-relative value 6,s
                     puls      y,u,pc    ; restore registers and return
-BranchTarget_04     ldx       4,s       ; load X from stack-relative value 4,s
+BranchTarget_04     ldx       6,s       ; load X from stack-relative value 6,s
                     ldy       10,s      ; load Y from stack-relative value 10,s
                     beq       ReturnZero_02 ; branch if equal/zero to ReturnZero_02
 Loop_03             ldb       ,x        ; load B from memory pointed to by X
@@ -62,6 +62,7 @@ Loop_03             ldb       ,x        ; load B from memory pointed to by X
                     leax      1,x       ; compute effective address into X from 1,x
                     leay      -1,y      ; compute effective address into Y from -1,y
                     bne       Loop_03   ; branch if not equal to Loop_03
+                    bra       ReturnZero_02 ; limit exhausted without a match
 BranchTarget_05     tfr       x,d       ; transfer X,D
                     puls      y,u,pc    ; restore registers and return
 ReturnZero_02       clra                ; clear A

@@ -6,22 +6,24 @@ _memcpy             EXPORT              ; export this symbol
 
 _memcpy
                     pshs      y,u       ; save Y,U on the hardware stack
-                    ldu       6,s       ; load U from stack-relative value 6,s
-                    ldy       8,s       ; load Y from stack-relative value 8,s
-                    ldd       10,s      ; load D from stack-relative value 10,s
-                    lsra                ; logical shift A right by one bit
-                    rorb                ; rotate B right through carry
-                    tfr       d,x       ; transfer D,X
-                    bcc       BranchTarget_01 ; branch if carry is clear to BranchTarget_01
-                    lda       ,y+       ; load A from memory pointed to by Y, then advance Y
-                    sta       ,u+       ; store A to memory pointed to by U, then advance U
-BranchTarget_01     stx       -2,s      ; store X to stack-relative value -2,s
-                    beq       BranchTarget_02 ; branch if equal/zero to BranchTarget_02
-Loop_01             ldd       ,y++      ; load D from memory pointed to by Y+, then advance Y+
-                    std       ,u++      ; store D to memory pointed to by U+, then advance U+
-                    leax      -1,x      ; compute effective address into X from -1,x
-                    bne       Loop_01   ; branch if not equal to Loop_01
-BranchTarget_02     ldd       6,s       ; load D from stack-relative value 6,s
+                    ldu       6,s       ; destination pointer
+                    ldy       8,s       ; source pointer
+                    ldd       10,s      ; byte count
+                    pshs      u         ; save original destination pointer for return
+                    lsra                ; divide count by 2, preserving odd-byte carry
+                    rorb
+                    tfr       d,x       ; word count into X
+                    bcc       BranchTarget_01 ; skip odd-byte prologue when count is even
+                    lda       ,y+       ; copy the leading odd byte
+                    sta       ,u+
+BranchTarget_01     leax      0,x       ; set Z for the word-copy count
+                    beq       BranchTarget_02 ; no word copies left
+Loop_01             ldd       ,y++      ; copy two bytes per iteration
+                    std       ,u++
+                    leax      -1,x
+                    bne       Loop_01
+BranchTarget_02     ldd       ,s        ; return original destination pointer
+                    leas      2,s       ; drop saved destination pointer
                     puls      y,u,pc    ; restore registers and return
 
                     endsect             ; end current section

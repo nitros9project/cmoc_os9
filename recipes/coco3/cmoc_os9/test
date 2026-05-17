@@ -16,6 +16,8 @@ echo dirtest
 dirtest >>>-dirtest.out
 echo errmsgtest
 errmsgtest >>>-errmsgtest.out
+echo fdstreamtest
+fdstreamtest >>>-fdstreamtest.out
 echo filelayout
 filelayout >>>-filelayout.out
 echo fiotest

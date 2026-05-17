@@ -14,11 +14,12 @@ Loop_01             lda       ,u+       ; load A from memory pointed to by U, th
                     sta       ,x+       ; store A to memory pointed to by X, then advance X
                     cmpa      11,s      ; compare A against stack-relative value 11,s
                     bne       BranchTarget_01 ; branch if not equal to BranchTarget_01
-                    tfr       u,d       ; transfer U,D
+                    tfr       x,d       ; return pointer to the byte after the copied stop character
                     bra       Continue_01 ; branch unconditionally to Continue_01
 BranchTarget_01     leay      -1,y      ; compute effective address into Y from -1,y
                     bne       Loop_01   ; branch if not equal to Loop_01
-BranchTarget_02     tfr       y,d       ; transfer Y,D
+BranchTarget_02     clra                ; return NULL when the stop character was not copied
+                    clrb
 Continue_01         puls      y,u,pc    ; restore registers and return
 
                     endsect             ; end current section

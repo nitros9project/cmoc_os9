@@ -7,7 +7,7 @@ _osret              EXTERNAL            ; common successful return helper
 
 __os_syscall
                     pshs      y,u       ; preserve Y and U while staging the call
-                    lda       5,s       ; load requested OS-9 call code byte
+                    lda       7,s       ; load low byte of requested OS-9 call code
                     ldb       #$39      ; build trailing RTS opcode for stub frame
                     pshs      d         ; push call code and RTS byte onto the stack
                     ldd       #$103F    ; load SWI2 prefix used by OS-9 system calls

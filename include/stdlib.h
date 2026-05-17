@@ -48,6 +48,26 @@ int      atoi(const char *str);
 long     atol(const char *str);
 
 /**
+ * @brief Convert a string to `long` with base control.
+ *
+ * @param str Input string.
+ * @param endptr Optional pointer updated to the first unparsed character.
+ * @param base Numeric base from 2 to 36, or 0 for auto-detection.
+ * @return Parsed signed long value.
+ */
+long     strtol(const char *str, char **endptr, int base);
+
+/**
+ * @brief Convert a string to `unsigned long` with base control.
+ *
+ * @param str Input string.
+ * @param endptr Optional pointer updated to the first unparsed character.
+ * @param base Numeric base from 2 to 36, or 0 for auto-detection.
+ * @return Parsed unsigned long value.
+ */
+unsigned long strtoul(const char *str, char **endptr, int base);
+
+/**
  * @brief Convert an `int` to a decimal string.
  *
  * @param value Value to convert.

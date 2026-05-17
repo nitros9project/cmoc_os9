@@ -49,6 +49,8 @@ extern const unsigned char     _chcodes[];	/* in chcodes.r */
 #define iscntrl(c)      (_chcodes[c]&_CONTROL)
 #define _toupper(c)     ((c)&0xdf)
 #define _tolower(c)     ((c)|0x20)
+#define toupper(c)      _toupper(c)
+#define tolower(c)      _tolower(c)
 #define toascii(c)      ((c)&0x7f)
 
 #endif				/* _CTYPE_H */

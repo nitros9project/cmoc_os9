@@ -14,6 +14,7 @@ char *pStr = "Tue Mar  4 11:33:22 2014\n";
 struct _os_time epoch = {1970 - 1900, 1, 1, 0, 0, 0};
 char *epochStr = "Thu Jan  1 00:00:00 1970\n";
 #define EPOCH_START 0L
+static int failed;
 
 
 void test_o2utime()
@@ -26,6 +27,7 @@ void test_o2utime()
 	{
 		printf("%s [FAIL] o2utime(): epoch: expected %ld but got %ld\n", __func__, EPOCH_START, t);
 		LPX(t);
+		failed = 1;
 	}	
 
 	t = o2utime(&p);
@@ -36,6 +38,7 @@ void test_o2utime()
 	{
 		printf("%s [FAIL] o2utime(): date: expected %ld but got %ld\n", __func__, P_SECS_EPOCH, t);
 		LPX(t);
+		failed = 1;
 	}
 }
 
@@ -51,6 +54,7 @@ void test_time()
 	{
 		printf("%s [FAIL] time() by value: expected %ld but got %ld\n", __func__, P_SECS_EPOCH, t);
 		LPX(t);
+		failed = 1;
 	}
 	_os_setime(&p);
 	time(&t);
@@ -61,6 +65,7 @@ void test_time()
 	{
 		printf("%s [FAIL] time() by ptr: expected %ld but got %ld\n", __func__, P_SECS_EPOCH, t);
 		LPX(t);
+		failed = 1;
 	}
 }
 
@@ -77,6 +82,16 @@ void test_ctime()
 		printf("%s [FAIL] ctime() date\n", __func__);
 		printf("%s pStr (%s)\n", __func__, pStr);
 		printf("%s   ds (%s)\n", __func__, ds);
+		failed = 1;
+	}
+
+	t = EPOCH_START;
+	ds = ctime(&t);
+	if (strcmp(epochStr, ds) == 0)
+		printf("%s [PASS] ctime() epoch\n", __func__);
+	else {
+		printf("%s [FAIL] ctime() epoch\n", __func__);
+		failed = 1;
 	}
 
 }
@@ -96,6 +111,7 @@ void test_mktime()
 		printf("%s [FAIL] mktime() roundtrip: expected %ld but got %ld\n",
 		       __func__, P_SECS_EPOCH, roundtrip);
 		LPX(roundtrip);
+		failed = 1;
 	}
 }
 
@@ -111,7 +127,7 @@ void test_gmtime_localtime()
 		printf("%s [PASS] gmtime() UTC decode\n", __func__);
 	else
 		printf("%s [FAIL] gmtime() UTC decode: got day=%d hour=%d\n",
-		       __func__, utc->tm_mday, utc->tm_hour);
+		       __func__, utc->tm_mday, utc->tm_hour), failed = 1;
 
 	timezone = -(6L * 60L * 60L);
 	local = localtime(&t);
@@ -119,7 +135,7 @@ void test_gmtime_localtime()
 		printf("%s [PASS] localtime() timezone adjust\n", __func__);
 	else
 		printf("%s [FAIL] localtime() timezone adjust: got day=%d hour=%d\n",
-		       __func__, local->tm_mday, local->tm_hour);
+		       __func__, local->tm_mday, local->tm_hour), failed = 1;
 
 	timezone = 0;
 }
@@ -132,5 +148,5 @@ int main()
 	test_mktime();
 	test_gmtime_localtime();
 
-	return 0;
+	return failed;
 }

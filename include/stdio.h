@@ -120,7 +120,7 @@ int fputs(const char *s, FILE *stream);
 #define getchar()  	getc(stdin)
 #define ferror(p)  	((p)->_flag&_ERR)
 #define feof(p)    	((p)->_flag&_EOF)
-#define clearerr(p)	((p)->_flag&=~_ERR)
+#define clearerr(p)	((p)->_flag&=~(_ERR|_EOF))
 #define fileno(p)   ((p)->_fd)
 
 /**

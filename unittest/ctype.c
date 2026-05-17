@@ -3,89 +3,34 @@
 #include <unistd.h>
 #include <ctype.h>
 
+static int failed;
+
+static void check_true(const char *name, int condition)
+{
+	if (condition)
+		printf("%s [PASS]\n", name);
+	else {
+		printf("%s [FAIL]\n", name);
+		failed = 1;
+	}
+}
+
 void simple(void)
 {
-	if( isascii('a') )
-	{
-		printf("%s isascii [PASS]\n",__func__);
-	}
-	else
-	{
-		printf("%s isascii [FAIL]\n",__func__);
-	}
-
-	if( isalpha('a') )
-	{
-		printf("%s isalpha [PASS]\n",__func__);
-	}
-	else
-	{
-		printf("%s isalpha [FAIL]\n",__func__);
-	}
-
-	if( islower('a') )
-	{
-		printf("%s islower [PASS]\n",__func__);
-	}
-	else
-	{
-		printf("%s islower [FAIL]\n",__func__);
-	}
-
-	if( isupper('A') )
-	{
-		printf("%s isupper [PASS]\n",__func__);
-	}
-	else
-	{
-		printf("%s isupper [FAIL]\n",__func__);
-	}
-
-	if( isdigit('5') )
-	{
-		printf("%s isdigit [PASS]\n",__func__);
-	}
-	else
-	{
-		printf("%s isdigit [FAIL]\n",__func__);
-	}
-
-	if( isxdigit('A') )
-	{
-		printf("%s isxdigit [PASS]\n",__func__);
-	}
-	else
-	{
-		printf("%s isxdigit [FAIL]\n",__func__);
-	}
-
-	if( isspace(' ') )
-	{
-		printf("%s isspace [PASS]\n",__func__);
-	}
-	else
-	{
-		printf("%s isspace [FAIL]\n",__func__);
-	}
-
-	if( ispunct('!') )
-	{
-		printf("%s ispunct [PASS]\n",__func__);
-	}
-	else
-	{
-		printf("%s ispunct [FAIL]\n",__func__);
-	}
-
-	if( iscntrl(0) )
-	{
-		printf("%s iscntrl [PASS]\n",__func__);
-	}
-	else
-	{
-		printf("%s iscntrl [FAIL]\n",__func__);
-	}
-
+	check_true("simple isascii", isascii('a'));
+	check_true("simple isalpha", isalpha('a'));
+	check_true("simple islower", islower('a'));
+	check_true("simple isupper", isupper('A'));
+	check_true("simple isdigit", isdigit('5'));
+	check_true("simple isxdigit", isxdigit('A'));
+	check_true("simple isspace", isspace(' '));
+	check_true("simple ispunct", ispunct('!'));
+	check_true("simple iscntrl", iscntrl(0));
+	check_true("simple !isalpha", !isalpha('5'));
+	check_true("simple !isdigit", !isdigit('a'));
+	check_true("simple !isspace", !isspace('A'));
+	check_true("simple tolower", tolower('A') == 'a');
+	check_true("simple toupper", toupper('a') == 'A');
 }
 
 void exhaustive( void )
@@ -97,6 +42,7 @@ void exhaustive( void )
 		if( !isascii(a) )
 		{
 			printf("%s isascii+ [FAIL: %d]\n",__func__, a );
+			failed = 1;
 			break;
 		}
 	}
@@ -106,6 +52,7 @@ void exhaustive( void )
 		if( isascii(a) )
 		{
 			printf("%s isascii- [FAIL]: %d\n",__func__, a );
+			failed = 1;
 			break;
 		}
 	}
@@ -115,6 +62,5 @@ int main()
 {
 	simple();
 	exhaustive();
-	return 0;
+	return failed;
 }
-

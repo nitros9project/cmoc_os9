@@ -1,65 +1,90 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <fcntl.h>
-#include <assert.h>
+#include <string.h>
+#include <unistd.h>
 
-void test_putc()
+static const char text_file[] = "fiotest.out.tmp";
+static int failed;
+
+static void check_true(const char *name, int condition)
 {
-	assert(putc('1', stdout) == '1');
-	assert(putc('2', stdout) == '2');
-	assert(putc('3', stdout) == '3');
-	assert(putc('\n', stdout) == '\n');
+    if (condition)
+        printf("%s [PASS]\n", name);
+    else {
+        printf("%s [FAIL]\n", name);
+        failed = 1;
+    }
 }
 
-void test_putw()
+static void test_text_output(void)
 {
-	assert(putw(0x4344, stdout) == 0);
-	assert(putw(0x4142, stdout) == 0);
-	assert(putc('\n', stdout) == '\n');
-	fflush(stdout);
+    FILE *fp;
+    char buf[128];
+    size_t n;
+    const char expected[] =
+        "123\n"
+        "fputs test\n"
+        "printf Hello world!\n"
+        "printf Hello small world!\n"
+        "printf Hello CoCo community!\n"
+        "printf Long value is 32\n"
+        "fprintf Hello world!\n"
+        "fprintf Hello small world!\n"
+        "fprintf Hello CoCo community!\n";
+
+    unlink(text_file);
+    fp = fopen(text_file, "w+");
+    if (fp == 0) {
+        printf("%s [FAIL] fopen(w+)\n", __func__);
+        failed = 1;
+        return;
+    }
+
+    check_true("test_text_output putc(1)", putc('1', fp) == '1');
+    check_true("test_text_output putc(2)", putc('2', fp) == '2');
+    check_true("test_text_output putc(3)", putc('3', fp) == '3');
+    check_true("test_text_output putc(\\n)", putc('\n', fp) == '\n');
+    check_true("test_text_output fputs()", fputs("fputs test\n", fp) >= 0);
+    check_true("test_text_output printf()", fprintf(fp, "printf Hello world!\n") > 0);
+    check_true("test_text_output printf(%s)",
+               fprintf(fp, "printf Hello %s world!\n", "small") > 0);
+    check_true("test_text_output printf(%s,%s)",
+               fprintf(fp, "printf Hello %s %s!\n", "CoCo", "community") > 0);
+    check_true("test_text_output printf(%ld)",
+               fprintf(fp, "printf Long value is %ld\n", 32L) > 0);
+    check_true("test_text_output fprintf(world)",
+               fprintf(fp, "fprintf Hello world!\n") > 0);
+    check_true("test_text_output fprintf(%s)",
+               fprintf(fp, "fprintf Hello %s world!\n", "small") > 0);
+    check_true("test_text_output fprintf(%s,%s)",
+               fprintf(fp, "fprintf Hello %s %s!\n", "CoCo", "community") > 0);
+    check_true("test_text_output fflush()", fflush(fp) == 0);
+    fclose(fp);
+
+    fp = fopen(text_file, "r");
+    if (fp == 0) {
+        printf("%s [FAIL] fopen(readback)\n", __func__);
+        unlink(text_file);
+        failed = 1;
+        return;
+    }
+    memset(buf, 0, sizeof(buf));
+    n = fread(buf, 1, sizeof(buf) - 1, fp);
+    check_true("test_text_output fread()", n > 0 && ferror(fp) == 0);
+    check_true("test_text_output content", strcmp(buf, expected) == 0);
+
+    fclose(fp);
+    unlink(text_file);
 }
 
-void test_puts()
+static void test_stdout_puts(void)
 {
-    puts( "puts test" );
+    check_true("test_stdout_puts puts()", puts("fiotest stdout smoke") >= 0);
 }
 
-void test_fputs(FILE *fp)
+int main(void)
 {
-    fputs("fputs test", fp );
-    fputs("\n", fp );
-}
-
-void test_printf()
-{
-	printf("printf Hello world!\n");
-	printf("printf Hello %s world!\n", "small");
-	printf("printf Hello %s %s!\n", "CoCo", "community");
-	printf("printf Long value is %ld\n", 32L);
-}
-
-void test_fprintf(FILE *fp)
-{
-	fprintf(fp, "fprintf Hello world!\n");
-	fprintf(fp, "fprintf Hello %s world!\n", "small");
-	fprintf(fp, "fprintf Hello %s %s!\n", "CoCo", "community");
-}
-
-void test_fopen()
-{
-//	FILE *fp = fopen("x", "r");
-//	fclose(fp);
-}
-
-int main()
-{
-	test_putc();
-	test_putw();
-	test_puts();
-	test_fputs(stdout);
-	test_printf();
-	test_fprintf(stdout);
-	test_fprintf(stderr);
-
-	return 0;
+    test_text_output();
+    test_stdout_puts();
+    return failed;
 }

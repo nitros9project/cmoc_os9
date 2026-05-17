@@ -51,22 +51,18 @@ static void test_os_gs_ss_wrappers(void)
     static const char payload[] = "abcdef\n";
     path_id path = -1;
     int count;
+    int read_count;
     error_code result;
     long size_value = -1;
     long pos_value = -1;
     long legacy_long;
     int ready_value = -1;
     int eof_value = -1;
-    int legacy_int;
     char opts[32];
     char legacy_opts[32];
     char devnm[64];
     char legacy_devnm[64];
-
-    union {
-        long l;
-        int i;
-    } generic_value;
+    char readbuf[16];
 
     _os_delete(file, FAM_READ);
 
@@ -146,6 +142,29 @@ static void test_os_gs_ss_wrappers(void)
     result = _os_gs_eof(path, &eof_value);
     check_status("_os_gs_eof after seek", result);
     check_int_equal("_os_gs_eof after seek value", eof_value, 0);
+
+    memset(readbuf, 0, sizeof(readbuf));
+    read_count = sizeof(payload) - 1;
+    result = _os_read(path, readbuf, &read_count);
+    check_status("_os_read", result);
+    check_int_equal("_os_read count", read_count, sizeof(payload) - 1);
+    check_string_equal("_os_read payload", readbuf, payload);
+
+    result = _os_gs_pos(path, &pos_value);
+    check_status("_os_gs_pos after read", result);
+    check_long_equal("_os_gs_pos after read value", pos_value, sizeof(payload) - 1);
+
+    result = _os_gs_eof(path, &eof_value);
+    check_status("_os_gs_eof after read", result);
+    check_int_equal("_os_gs_eof after read value", eof_value, -1);
+
+    result = _os_getstat(SS_Pos, path, &legacy_long, 0);
+    check_status("_os_getstat SS_Pos", result);
+    check_long_equal("_os_getstat SS_Pos value", legacy_long, sizeof(payload) - 1);
+
+    result = _os_getstat(SS_EOF, path, &ready_value, 0);
+    check_status("_os_getstat SS_EOF", result);
+    check_int_equal("_os_getstat SS_EOF value", ready_value, -1);
 
     result = _os_close(path);
     check_status("_os_close", result);

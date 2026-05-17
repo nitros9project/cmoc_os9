@@ -5,6 +5,7 @@ LFLAGS = -I../include -I../cgfx/include $(OS9FLAGS)
 CMOC_BIN ?= $(shell command -v cmoc)
 CMOC_FLOAT_LIB_DIR ?= $(abspath $(dir $(CMOC_BIN))../share/cmoc/lib)
 GRAPHICS_TEST_DIR = ../graphictest
+.DEFAULT_GOAL := all
 
 %: %.c
 	$(CC) $(LFLAGS) $^ $(OBJS) -L../lib -lc -L../cgfx -lcgfx
@@ -32,7 +33,7 @@ floatfmttest: floatfmttest.c
 
 
 GRAPHICS_TESTS = wintest maze
-TESTS	= hello noop timetest fiotest iotest osiotest osopenerrtest syscalltest memtest forktest forkhellotest forknowaittest forknooptest printtest osgstattest utimetest ctype string floattest floatfmttest getopttest popentest pwenttest defdrivetest pwcryptest errmsgtest stdlibtest streamiotest searchtest stringexttest filelayout setjmptest systemtest setstest dirtest compat3test signaltest intercepttest dirapitest misctest datmodstest attrwraptest abortchild aborttest
+TESTS	= hello noop timetest fiotest iotest osiotest osopenerrtest syscalltest memtest forktest forkhellotest forknowaittest forknooptest printtest osgstattest utimetest ctype string floattest floatfmttest getopttest popentest pwenttest defdrivetest pwcryptest errmsgtest stdlibtest streamiotest searchtest stringexttest randtest filelayout setjmptest systemtest setstest dirtest compat3test signaltest intercepttest dirapitest misctest datmodstest attrwraptest abortchild aborttest
 ALL_TESTS = $(TESTS) $(GRAPHICS_TESTS)
 
 all:	$(ALL_TESTS)
@@ -51,4 +52,5 @@ run:	dsk
 	mame64 -inipath ~/Documents/mame -video opengl -window coco3 -flop1 nos9.dsk -flop2 test.dsk -speed 4 &
 
 clean:
-	-rm $(ALL_TESTS) test.dsk go
+	-rm -f $(ALL_TESTS) test.dsk go
+	-rm -f *.s.list *.s.map

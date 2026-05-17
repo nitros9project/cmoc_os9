@@ -12,7 +12,9 @@ _errno              EXTERN              ; import external symbol
 _fclose             EXTERN              ; import external symbol
 _open               EXTERN              ; import external symbol
 _creat              EXTERN              ; import external symbol
+_create             EXTERN              ; import external symbol
 _lseek              EXTERN              ; import external symbol
+_flacc              EXTERN              ; import shared long return slot
 
 * stack:
 *   0,s = return address
@@ -184,8 +186,10 @@ openit5
                     pshs      d         ; save D on the hardware stack
                     ldd       8,s       ; load D from stack-relative value 8,s
                     pshs      d         ; save D on the hardware stack
+                    leax      _flacc,y  ; provide hidden long return slot for _lseek
+                    pshs      x         ; stage hidden return pointer
                     lbsr      _lseek    ; seek to end-of-file so subsequent writes append
-                    leas      8,s       ; adjust S using 8,s
+                    leas      10,s      ; adjust S using 10,s
                     ldd       2,s       ; recover the path number after the seek
                     bra       openit13  ; branch unconditionally to openit13
 
@@ -195,6 +199,18 @@ openit6
 openit7
                     ldd       ,s        ; load D from memory pointed to by S
                     orb       #$02      ; add OS-9 write permission for create/truncate modes
+                    cmpb      #$03      ; detect update-mode create such as "w+"
+                    bne       openit7a  ; plain write mode can continue to use creat()
+                    tfr       d,x       ; preserve the read/write mode word for create()
+                    ldd       #$000B    ; use stdio's default PMODE (owner rw, public r)
+                    pshs      d         ; stage creation permissions
+                    tfr       x,d       ; restore access mode after staging permissions
+                    pshs      d         ; stage access mode for create(path, mode, perm)
+                    pshs      u         ; stage pathname
+                    lbsr      _create   ; create/truncate with an actual read/write path
+                    leas      6,s       ; discard staged _create arguments
+                    bra       openit13  ; return created path directly
+openit7a
                     pshs      d         ; save D on the hardware stack
                     pshs      u         ; save U on the hardware stack
                     lbsr      _creat    ; create or truncate the target file

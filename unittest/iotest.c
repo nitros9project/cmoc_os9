@@ -82,6 +82,7 @@ void test_delete_nonexistent_file()
 void test_create_and_seek()
 {
 	char *file = "text.txt";
+	char buf[32];
 
 	// delete the file if it exists, we don't care if we error here
 	unlink(file);
@@ -96,36 +97,80 @@ void test_create_and_seek()
 		char *message = "this is a line of text\n";
 		int length = strlen(message);
 		int result = writeln(path, message, length);
-		if (length == strlen(message))
+		if (result == length)
 		{
 			printf("%s [PASS] writeln(%d, \"%s\", %d) = %d\n", __func__, path, message, length, result);
 			long offset = 5;
 			int whence = 0;
-			long result = lseek(path, offset, whence);
-#if 0
-			if (result == offset)
+			long seek_result = lseek(path, offset, whence);
+			if (seek_result == offset)
 			{
-				// file position is now at 5
-				char buf[32];
 				int readsize = 2;
-				
-				printf("%s [PASS] lseek(%d, %l, %d) = %ld\n", __func__, path, offset, whence, result);
-				int result = read(path, buf, readsize);
-				if (2 == result && buf[0] == 'i' && buf[1] == 's')
+				memset(buf, 0, sizeof(buf));
+				printf("%s [PASS] lseek(%d, %ld, %d) = %ld\n", __func__, path, offset, whence, seek_result);
+				result = read(path, buf, readsize);
+				if (readsize == result && buf[0] == 'i' && buf[1] == 's')
 				{
-					// file position is now at 5 + 2 = 7
 					printf("%s [PASS] read(%d, \"is\", %d) = %d\n", __func__, path, readsize, result);
 				}
 				else
 				{
-					printf("%s [FAIL] read(%d, \"is\", %d) = %d\n", __func__, path, readsize, result);
+					printf("%s [FAIL] read(%d, expected \"is\", %d) = %d got=\"%c%c\"\n",
+					       __func__, path, readsize, result, buf[0], buf[1]);
 				}
 			}
 			else
 			{
-				printf("%s [FAIL] lseek(%d, %l, %d) = %ld\n", __func__, path, offset, whence, result);
+				printf("%s [FAIL] lseek(%d, %ld, %d) = %ld\n", __func__, path, offset, whence, seek_result);
 			}
-#endif
+
+			offset = -5;
+			whence = 2;
+			seek_result = lseek(path, offset, whence);
+			if (seek_result == (long) length - 5)
+			{
+				int readsize = 4;
+				memset(buf, 0, sizeof(buf));
+				printf("%s [PASS] lseek(%d, %ld, %d) = %ld\n", __func__, path, offset, whence, seek_result);
+				result = read(path, buf, readsize);
+				if (readsize == result && strncmp(buf, "text", 4) == 0)
+				{
+					printf("%s [PASS] read(%d, \"text\", %d) = %d\n", __func__, path, readsize, result);
+				}
+				else
+				{
+					printf("%s [FAIL] read(%d, expected \"text\", %d) = %d got=\"%s\"\n",
+					       __func__, path, readsize, result, buf);
+				}
+			}
+			else
+			{
+				printf("%s [FAIL] lseek(%d, %ld, %d) = %ld\n", __func__, path, offset, whence, seek_result);
+			}
+
+			offset = -2;
+			whence = 1;
+			seek_result = lseek(path, offset, whence);
+			if (seek_result == (long) length - 3)
+			{
+				int readsize = 2;
+				memset(buf, 0, sizeof(buf));
+				printf("%s [PASS] lseek(%d, %ld, %d) = %ld\n", __func__, path, offset, whence, seek_result);
+				result = read(path, buf, readsize);
+				if (readsize == result && strncmp(buf, "xt", 2) == 0)
+				{
+					printf("%s [PASS] read(%d, \"xt\", %d) = %d\n", __func__, path, readsize, result);
+				}
+				else
+				{
+					printf("%s [FAIL] read(%d, expected \"xt\", %d) = %d got=\"%c%c\"\n",
+					       __func__, path, readsize, result, buf[0], buf[1]);
+				}
+			}
+			else
+			{
+				printf("%s [FAIL] lseek(%d, %ld, %d) = %ld\n", __func__, path, offset, whence, seek_result);
+			}
 			close(path);
 			unlink(file);
 		}
@@ -144,7 +189,7 @@ void test_make_directory()
 {
 	char *file = "newdirectory";
 
-	int perm = FAP_READ | FAP_WRITE | FAP_PREAD;
+	int perm = FAP_DIR | FAP_READ | FAP_WRITE | FAP_PREAD;
 	int result = mknod(file, perm);
 	if (result == 0)
 	{

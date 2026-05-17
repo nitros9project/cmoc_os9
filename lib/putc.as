@@ -9,6 +9,7 @@ __os_close          EXTERNAL            ; low-level close wrapper
 _setbase            EXTERNAL            ; stdio buffer initializer
 _ftell              EXTERNAL            ; buffered current-position helper
 _lseek              EXTERNAL            ; long seek helper
+_flacc              EXTERNAL            ; shared long accumulator used as lseek return slot
 __iob               EXTERNAL            ; stdio FILE table base
 
 _WRITE              equ       $02       ; FILE open-for-write flag
@@ -161,18 +162,22 @@ _flush              pshs      u         ; preserve caller's U register
                     beq       L012c     ; no correction needed when buffer is already full
                     clra                ; build zero offset for ftell/seek correction
                     clrb                ; build zero offset for ftell/seek correction
-                    pshs      d         ; stage zero long low word
-                    pshs      u         ; stage FILE pointer for ftell
+                    pshs      d         ; keep SEEK_SET-style whence 0 for the later _lseek call
+                    leax      _flacc,y  ; provide hidden long return slot for ftell
+                    pshs      x,u       ; stage hidden return slot and FILE pointer for ftell
                     lbsr      _ftell    ; compute current buffered file position
-                    leas      2,s       ; discard staged FILE pointer
+                    leas      4,s       ; discard staged hidden return slot and FILE pointer
+                    leax      _flacc,y  ; point X at the returned long value
                     ldd       2,x       ; fetch low word of current file position
                     pshs      d         ; stage low word for lseek
                     ldd       ,x        ; fetch high word of current file position
                     pshs      d         ; stage high word for lseek
                     ldd       8,u       ; load underlying path number
                     pshs      d         ; stage path number for lseek
+                    leax      _flacc,y  ; provide hidden long return slot for lseek
+                    pshs      x         ; stage hidden return pointer
                     lbsr      _lseek    ; synchronize OS-9 file position with buffer state
-                    leas      8,s       ; discard staged lseek arguments
+                    leas      10,s      ; discard staged lseek arguments
 L012c               ldd       ,u        ; load current buffer pointer
                     subd      2,u       ; compute buffered byte count as ptr-base
                     std       2,s       ; save pending-byte count in local scratch

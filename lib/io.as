@@ -236,12 +236,12 @@ doseek
                     std       _flacc+2,y ; save tentative low word in long accumulator
                     tfr       d,u       ; keep combined low word in U for direct seek
                     tfr       x,d       ; copy base high word into D
-                    adcb      7,s       ; add carry and requested low byte of high word
-                    adca      6,s       ; add requested high byte of high word
+                    adcb      9,s       ; add carry and requested low byte of high word
+                    adca      8,s       ; add requested high byte of high word
                     bmi       lserr     ; reject negative resulting file positions
                     tfr       d,x       ; keep combined high word in X for direct seek
                     std       _flacc,y  ; save tentative high word in long accumulator
-                    lda       5,s       ; load path number
+                    lda       7,s       ; load path number
                     os9       I_Seek    ; apply the new absolute file position
                     bcs       lserr     ; fail if the direct seek was rejected
                     ldx       4,s       ; load hidden pointer to 32-bit return slot

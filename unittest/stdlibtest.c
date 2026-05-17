@@ -54,17 +54,32 @@ void test_setbuf(void)
 	if (stdout->_base == buf &&
 	    stdout->_end == buf + BUFSIZ &&
 	    stdout->_ptr == stdout->_end &&
+	    stdout->_bufsiz == BUFSIZ &&
 	    (stdout->_flag & _BIGBUF) != 0 &&
 	    (stdout->_flag & _UNBUF) == 0)
 		printf("%s [PASS] setbuf(buffered)\n", __func__);
 	else
-		printf("%s [FAIL] setbuf(buffered) flag=%04x\n", __func__, stdout->_flag);
+		printf("%s [FAIL] setbuf(buffered) flag=%04x bufsiz=%d\n",
+		       __func__, stdout->_flag, stdout->_bufsiz);
 
 	setbuf(stdout, 0);
-	if ((stdout->_flag & _UNBUF) != 0)
+	if ((stdout->_flag & _UNBUF) != 0 &&
+	    (stdout->_flag & _BIGBUF) == 0 &&
+	    stdout->_ptr == stdout->_end &&
+	    stdout->_bufsiz == BUFSIZ)
 		printf("%s [PASS] setbuf(unbuffered)\n", __func__);
 	else
 		printf("%s [FAIL] setbuf(unbuffered)\n", __func__);
+
+	setbuf(stdout, buf);
+	if (stdout->_base == buf &&
+	    stdout->_end == buf + BUFSIZ &&
+	    stdout->_ptr == stdout->_end &&
+	    (stdout->_flag & _BIGBUF) != 0 &&
+	    (stdout->_flag & _UNBUF) == 0)
+		printf("%s [PASS] setbuf(rebuffered)\n", __func__);
+	else
+		printf("%s [FAIL] setbuf(rebuffered)\n", __func__);
 }
 
 void test_rand(void)

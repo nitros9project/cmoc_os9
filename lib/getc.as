@@ -11,8 +11,14 @@ _getc               pshs      u         ; save U on the hardware stack
                     beq       Loop_05   ; branch if equal/zero to Loop_05
                     lda       6,u       ; load A from indexed value 6,u
                     anda      #1        ; AND A with immediate value 1
-                    bne       Loop_05   ; branch if not equal to Loop_05
-                    ldx       ,u        ; load X from memory pointed to by U
+                    beq       Loop_00   ; branch if stream is not marked written in update mode
+                    ldx       ,u        ; load current buffer pointer
+                    cmpx      4,u       ; allow reads only after a reposition parked ptr at end
+                    bne       Loop_05   ; branch if buffered write state is still active
+                    lda       6,u       ; reload high byte of FILE flags
+                    anda      #^1       ; clear _WRITTEN after fseek-style reposition
+                    sta       6,u       ; save cleaned update-state flag
+Loop_00             ldx       ,u        ; load X from memory pointed to by U
                     cmpx      4,u       ; compare X against indexed value 4,u
                     bcc       BranchTarget_02 ; branch if carry is clear to BranchTarget_02
 Loop_01             ldb       ,x+       ; load B from memory pointed to by X, then advance X
@@ -60,8 +66,10 @@ Loop_05             ldd       #-1       ; load D from immediate value -1
 BranchTarget_02     ldd       6,u       ; load D from indexed value 6,u
                     anda      #$80      ; AND A with immediate value $80
                     andb      #$31      ; AND B with immediate value $31
-                    cmpb      #1        ; compare B against immediate value 1
-                    bne       Loop_05   ; branch if not equal to Loop_05
+                    bitb      #$30      ; reject streams already marked EOF or ERR
+                    bne       Loop_05   ; branch if EOF or ERR is already set
+                    bitb      #$01      ; require read permission, but allow update streams too
+                    beq       Loop_05   ; branch if stream is not readable
                     cmpa      #$80      ; compare A against immediate value $80
                     beq       BranchTarget_03 ; branch if equal/zero to BranchTarget_03
                     pshs      u         ; save U on the hardware stack

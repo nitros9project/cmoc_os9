@@ -8,6 +8,11 @@
  * @brief Low-level OS-9 file-mode bits and path-descriptor wrapper calls.
  */
 
+/**
+ * @brief OS-9 path descriptor type used by low-level file wrappers.
+ */
+typedef int path_id;
+
 /* low-level I/O file modes */
 #define S_IFMT     0xff         /* mask for type of file */
 #define S_IFDIR    0x80         /* directory */
@@ -39,6 +44,112 @@
 #define	FAP_SHARE	0x40
 #define	FAP_DIR		0x80
 
+/* _os style OS-9 I/O calls */
+/**
+ * @brief Create a file and return its path descriptor.
+ *
+ * @param pathname Path to create.
+ * @param mode Access mode bits.
+ * @param path Receives the opened path descriptor.
+ * @param perm Permission bits.
+ * @return `0` on success, otherwise an OS-9 error code.
+ */
+error_code _os_create(const char *pathname, int mode, path_id *path, int perm);
+
+/**
+ * @brief Open an existing path and return its descriptor.
+ *
+ * @param pathname Path to open.
+ * @param mode Access mode bits.
+ * @param path Receives the opened path descriptor.
+ * @return `0` on success, otherwise an OS-9 error code.
+ */
+error_code _os_open(const char *pathname, int mode, path_id *path);
+
+/**
+ * @brief Close a low-level OS-9 path descriptor.
+ *
+ * @param mode Path descriptor to close.
+ * @return `0` on success, otherwise an OS-9 error code.
+ */
+error_code _os_close(int mode);
+
+/**
+ * @brief Read bytes from a low-level OS-9 path descriptor.
+ *
+ * @param path Source path descriptor.
+ * @param data Destination buffer.
+ * @param count On entry, requested byte count; on return, bytes actually read.
+ * @return `0` on success, otherwise an OS-9 error code.
+ */
+error_code _os_read(path_id path, void *data, int *count);
+
+/**
+ * @brief Read a line-oriented record from a low-level path descriptor.
+ *
+ * @param path Source path descriptor.
+ * @param data Destination buffer.
+ * @param count On entry, requested byte count; on return, bytes actually read.
+ * @return `0` on success, otherwise an OS-9 error code.
+ */
+error_code _os_readln(path_id path, void *data, int *count);
+
+/**
+ * @brief Write bytes to a low-level OS-9 path descriptor.
+ *
+ * @param path Destination path descriptor.
+ * @param data Source buffer.
+ * @param count On entry, requested byte count; on return, bytes actually written.
+ * @return `0` on success, otherwise an OS-9 error code.
+ */
+error_code _os_write(path_id path, void *data, int *count);
+
+/**
+ * @brief Write a line-oriented record to a low-level path descriptor.
+ *
+ * @param path Destination path descriptor.
+ * @param data Source buffer.
+ * @param count On entry, requested byte count; on return, bytes actually written.
+ * @return `0` on success, otherwise an OS-9 error code.
+ */
+error_code _os_writeln(path_id path, void *data, int *count);
+
+/**
+ * @brief Delete a file or entry using explicit mode bits.
+ *
+ * @param pathname Path to delete.
+ * @param mode Deletion mode/type bits.
+ * @return `0` on success, otherwise an OS-9 error code.
+ */
+error_code _os_delete(const char *pathname, int mode);
+
+/**
+ * @brief Create a directory using OS-9 semantics.
+ *
+ * @param pathname Directory path to create.
+ * @param perm Permission bits.
+ * @return `0` on success, otherwise an OS-9 error code.
+ */
+error_code _os_makdir(const char *pathname, int perm);
+
+/**
+ * @brief Reposition an OS-9 path descriptor to a byte offset.
+ *
+ * @param path Path descriptor to reposition.
+ * @param position Absolute byte position.
+ * @return `0` on success, otherwise an OS-9 error code.
+ */
+error_code _os_seek(path_id path, long position);
+
+/**
+ * @brief Set path attributes on an existing file system object.
+ *
+ * @param pathname Path to modify.
+ * @param perm New attribute bits.
+ * @return `0` on success, otherwise an OS-9 error code.
+ */
+error_code _os_ss_attr(const char *pathname, int perm);
+
 /* traditional OS-9 stat calls */
 /**
  * @brief Issue an OS-9 GetStat call on an open path.
@@ -52,139 +163,13 @@
 int getstat(int code, int path, void *p1, void *p2);
 
 /**
- * @brief Issue an OS-9 SetStat call using the traditional return convention.
+ * @brief Issue an OS-9 SetStat call using the active path.
  *
  * @param code SetStat selector code.
- * @param path Path descriptor.
- * @param p1 First argument block or value pointer.
- * @param p2 Second argument block or auxiliary pointer.
- * @param p3 Third argument block or auxiliary pointer.
+ * @param param Parameter value or block pointer.
  * @return `0` on success, or `-1` on failure.
  */
-int setstat(int code, int path, void *p1, void *p2, void *p3);
-
-/* Legacy convenience GetStat/SetStat helpers used by the older CGfx code. */
-/**
- * @brief Return the object size reported by `SS_Size`.
- *
- * @param path Open path descriptor.
- * @return Size value, or a negative result on failure.
- */
-long _gs_size(int path);
-
-/**
- * @brief Return the current file position reported by `SS_Pos`.
- *
- * @param path Open path descriptor.
- * @return Current position, or a negative result on failure.
- */
-long _gs_pos(int path);
-
-/**
- * @brief Query readiness using `SS_Ready`.
- *
- * @param path Open path descriptor.
- * @return Ready status, or a negative result on failure.
- */
-int _gs_rdy(int path);
-
-/**
- * @brief Query end-of-file state using `SS_EOF`.
- *
- * @param path Open path descriptor.
- * @return EOF status, or a negative result on failure.
- */
-int _gs_eof(int path);
-
-/**
- * @brief Read an OS-9 options packet using `SS_Opt`.
- *
- * @param path Open path descriptor.
- * @param opts Destination options buffer.
- * @return `0` on success, otherwise an OS-9 error code.
- */
-error_code _gs_opt(int path, void *opts);
-
-/**
- * @brief Read the device name associated with a path.
- *
- * @param path Open path descriptor.
- * @param name Destination buffer.
- * @return `0` on success, otherwise an OS-9 error code.
- */
-error_code _gs_devn(int path, char *name);
-
-/**
- * @brief Write an options packet using `SS_Opt`.
- *
- * @param path Open path descriptor.
- * @param opts Source options buffer.
- * @return `0` on success, otherwise an OS-9 error code.
- */
-error_code _ss_opt(int path, void *opts);
-
-/**
- * @brief Set attributes using `SS_Attr`.
- *
- * @param path Open path descriptor.
- * @param value Attribute block or value pointer.
- * @return `0` on success, otherwise an OS-9 error code.
- */
-error_code _ss_attr(int path, void *value);
-
-/**
- * @brief Set size-related information using `SS_Size`.
- *
- * @param path Open path descriptor.
- * @param value Size block or value pointer.
- * @return `0` on success, otherwise an OS-9 error code.
- */
-error_code _ss_size(int path, void *value);
-
-/**
- * @brief Lock a path or resource using `SS_Lock`.
- *
- * @param path Open path descriptor.
- * @param value Lock parameter block.
- * @return `0` on success, otherwise an OS-9 error code.
- */
-error_code _ss_lock(int path, void *value);
-
-/**
- * @brief Release a path or resource using the matching SetStat call.
- *
- * @param path Open path descriptor.
- * @param value Release parameter block.
- * @return `0` on success, otherwise an OS-9 error code.
- */
-error_code _ss_rel(int path, void *value);
-
-/**
- * @brief Reset a device or stream using `SS_Reset`.
- *
- * @param path Open path descriptor.
- * @param value Reset parameter block.
- * @return `0` on success, otherwise an OS-9 error code.
- */
-error_code _ss_rest(int path, void *value);
-
-/**
- * @brief Configure signal-on-status behavior for a path.
- *
- * @param path Open path descriptor.
- * @param value Signal parameter block.
- * @return `0` on success, otherwise an OS-9 error code.
- */
-error_code _ss_ssig(int path, void *value);
-
-/**
- * @brief Set or read tick-related status information.
- *
- * @param path Open path descriptor.
- * @param value Tick parameter block.
- * @return `0` on success, otherwise an OS-9 error code.
- */
-error_code _ss_tiks(int path, void *value);
+int setstat(int code, int param);
 
 /**
  * @brief Initialize the internal formatted-printing long support.

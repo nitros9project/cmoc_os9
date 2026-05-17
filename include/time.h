@@ -24,7 +24,7 @@ typedef long time_t;
 /**
  * @brief OS-9 date/time packet used by low-level clock calls.
  */
-struct os_time
+typedef struct os_time
 {
     /** Year offset stored by OS-9. */
     byte year;
@@ -38,7 +38,7 @@ struct os_time
     byte minutes;
     /** Second of minute. */
     byte seconds;
-};
+} _os_time;
 
 /**
  * @brief Broken-down calendar time structure.
@@ -68,6 +68,22 @@ struct tm {
 extern int daylight;
 /** @brief Seconds west of UTC for the current local time zone. */
 extern long timezone;
+
+/**
+ * @brief Read the current OS-9 time packet.
+ *
+ * @param time Destination time packet.
+ * @return `0` on success, otherwise an OS-9 error code.
+ */
+error_code _os_getime(_os_time *time);
+
+/**
+ * @brief Set the current OS-9 time packet.
+ *
+ * @param time Source time packet.
+ * @return `0` on success, otherwise an OS-9 error code.
+ */
+error_code _os_setime(_os_time *time);
 
 /**
  * @brief Return the current Unix-style time value.

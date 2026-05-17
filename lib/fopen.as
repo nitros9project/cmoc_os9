@@ -2,6 +2,7 @@
 
 _READ               equ       1         ; define constant as 1
 _WRITE              equ       2         ; define constant as 2
+_APPEND             equ       2         ; high-byte FILE append-mode flag
 
 _fdopen             EXPORT              ; export this symbol
 _fopen              EXPORT              ; export this symbol
@@ -121,6 +122,13 @@ setiob7
 setiob8
                     orb       7,u       ; merge the new mode bits into the FILE entry flags
                     stb       7,u       ; store the updated mode flags back into the FILE entry
+                    ldb       ,x        ; inspect first mode character for append semantics
+                    cmpb      #'a
+                    bne       setiob8a  ; only append modes need the sticky append flag
+                    lda       6,u       ; load high byte of FILE flags
+                    ora       #_APPEND  ; remember that writes must always target EOF
+                    sta       6,u       ; store updated high-byte flags
+setiob8a
                     ldd       2,u       ; load the buffer base address from the FILE entry
                     addd      11,u      ; advance to the logical end of the FILE buffer
                     std       ,u        ; initialize the current pointer to the buffer end

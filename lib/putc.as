@@ -13,6 +13,7 @@ _flacc              EXTERNAL            ; shared long accumulator used as lseek 
 __iob               EXTERNAL            ; stdio FILE table base
 
 _WRITE              equ       $02       ; FILE open-for-write flag
+_APPEND             equ       $02       ; high-byte FILE append-mode flag
 _UNBUF              equ       $04       ; FILE unbuffered flag
 _ERR                equ       $20       ; FILE error flag
 _SCF                equ       $40       ; sequential character file-manager flag
@@ -154,6 +155,23 @@ finited             pshs      u         ; pass FILE pointer to internal flush he
 _flush              pshs      u         ; preserve caller's U register
                     ldu       4,s       ; load FILE pointer
                     leas      -4,s      ; reserve local word/count scratch space
+                    lda       6,u       ; load high byte of FILE flags
+                    anda      #_APPEND  ; test append-mode behavior before any sync correction
+                    beq       L0110     ; non-append streams keep the existing synchronization path
+                    ldd       #2        ; build SEEK_END selector for append streams
+                    pshs      d         ; stage whence for _lseek
+                    clra                ; zero offset high byte for append seek
+                    clrb                ; zero offset low byte for append seek
+                    pshs      d         ; stage zero offset low word
+                    pshs      d         ; stage zero offset high word
+                    ldd       8,u       ; load underlying path number
+                    pshs      d         ; stage path number for _lseek
+                    leax      _flacc,y  ; provide hidden long return slot for _lseek
+                    pshs      x         ; stage hidden return pointer
+                    lbsr      _lseek    ; force descriptor position back to EOF before writing
+                    leas      10,s      ; discard staged _lseek arguments
+                    bra       L012c     ; continue into normal pending-byte flush logic
+L0110
                     lda       6,u       ; load high byte of FILE flags
                     anda      #1        ; test _WRITTEN bit
                     bne       L012c     ; skip seek correction once stream is in write mode

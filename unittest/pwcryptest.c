@@ -7,6 +7,10 @@ int main(void)
 
 	strcpy(buf, "secret");
 	pwcryp(buf);
-	printf("PASS %s\n", buf);
-	return 0;
+	if (strcmp(buf, "secret") != 0 && buf[0] != '\0') {
+		printf("PASS %s\n", buf);
+		return 0;
+	}
+	printf("FAIL %s\n", buf);
+	return 1;
 }

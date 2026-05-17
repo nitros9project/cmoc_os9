@@ -3,6 +3,7 @@
 
 struct _os_time p = {2014 - 1900, 3, 4, 11, 33, 22};
 extern int errno;
+static int failed;
 
 void test_getime()
 {
@@ -20,6 +21,7 @@ void test_getime()
 	else
 	{
 		printf("%s [FAIL] _os_getime(), errno=%d\n", __func__, errno);
+		failed = 1;
 	}
 }
 
@@ -33,6 +35,7 @@ void test_setime()
 	else
 	{
 		printf("%s [FAIL] _os_setime(), errno=%d\n", __func__, errno);
+		failed = 1;
 	}
 }
 
@@ -41,5 +44,5 @@ int main()
 	test_setime();
 	test_getime();
 
-	return 0;
+	return failed;
 }

@@ -9,6 +9,7 @@ char *p1 = "catbatdog";
 char *pu = "CAT BAT DOG";
 char *pr = "god tab tac";
 char *sep = " ";
+static int failed;
 
 #ifndef NULL
 #define NULL 0
@@ -25,6 +26,7 @@ void test_strcat(void)
 	{
 		printf("%s [PASS]\n",__func__);
 	} else {
+		failed = 1;
 		printf("%s [FAIL], expected '%s' got '%s'\n",__func__,p,buf);
 	}
 }
@@ -40,6 +42,7 @@ void test_strncat(void)
 	{
 		printf("%s [PASS] with spc\n",__func__);
 	} else {
+		failed = 1;
 		printf("%s [FAIL] with spc, expected '%s' got '%s'\n",__func__,p,buf);
 	}
 
@@ -51,6 +54,7 @@ void test_strncat(void)
 	{
 		printf("%s [PASS] without spc\n",__func__);
 	} else {
+		failed = 1;
 		printf("%s [FAIL] without spc, expected '%s' got '%s'\n",__func__,p1,buf);
 	}
 }
@@ -65,6 +69,7 @@ void test_strhcpy(void)
 	{
 		printf("%s [PASS]\n",__func__);
 	} else {
+		failed = 1;
 		printf("%s [FAIL], expected '%s' got '%s'\n",__func__,p,buf);
 	}
 }
@@ -79,6 +84,7 @@ void test_strcpy(void)
 	{
 		printf("%s [PASS]\n",__func__);
 	} else {
+		failed = 1;
 		printf("%s [FAIL], expected '%s' got '%s'\n",__func__,p,buf);
 	}
 }
@@ -91,6 +97,7 @@ void test_strncpy(void)
 	{
 		printf("%s [PASS]\n",__func__);
 	} else {
+		failed = 1;
 		printf("%s [FAIL], expected '%s' got '%s'\n",__func__,p,buf);
 	}
 }
@@ -106,6 +113,7 @@ void test_strclr(void)
 	{
 		printf("%s [PASS]\n",__func__);
 	} else {
+		failed = 1;
 		printf("%s [FAIL], expected all 0 got 0x",__func__);
 		int i, *ptr;
 		for (i=0, ptr=(int *)buf; i<3; i++, ptr++)
@@ -125,6 +133,7 @@ void test_strucpy(void)
 	{
 		printf("%s [PASS]\n",__func__);
 	} else {
+		failed = 1;
 		printf("%s [FAIL], expected '%s' got '%s'\n",__func__,pu,buf);
 	}
 }
@@ -138,6 +147,7 @@ void test_index(void)
 	{
 		printf("%s [PASS]\n",__func__);
 	} else {
+		failed = 1;
 		printf("%s [FAIL], expected %04x got %04x\n",__func__,p+1,ptr);
 	}
 	ptr = index(p, 'd');
@@ -145,6 +155,7 @@ void test_index(void)
 	{
 		printf("%s [PASS]\n",__func__);
 	} else {
+		failed = 1;
 		printf("%s [FAIL], expected %04x got %04x\n",__func__,p+8,ptr);
 	}
 }
@@ -157,6 +168,7 @@ void test_rindex(void)
 	{
 		printf("%s [PASS]\n",__func__);
 	} else {
+		failed = 1;
 		printf("%s [FAIL], expected %04x got %04x\n",__func__,p+5,ptr);
 	}
 	ptr = rindex(p, 'g');
@@ -164,6 +176,7 @@ void test_rindex(void)
 	{
 		printf("%s [PASS]\n",__func__);
 	} else {
+		failed = 1;
 		printf("%s [FAIL], expected %04x got %04x\n",__func__,p+10,ptr);
 	}
 }
@@ -180,6 +193,7 @@ void test_reverse(void)
 	{
 		printf("%s [PASS]\n",__func__);
 	} else {
+		failed = 1;
 		printf("%s [FAIL], expected 0 got %d, (%s) (%s)\n",__func__,r,p,buf);
 	}
 }
@@ -195,6 +209,7 @@ void test_strend(void)
 	{
 		printf("%s [PASS]\n",__func__);
 	} else {
+		failed = 1;
 		printf("%s [FAIL], expected %04x got %04x\n",__func__,myend,end);
 	}
 }
@@ -208,6 +223,7 @@ void test_strcmp(void)
 	{
 		printf("%s [PASS]\n",__func__);
 	} else {
+		failed = 1;
 		printf("%s [FAIL], expected 0 got %d\n",__func__,r);
 	}
 }
@@ -220,6 +236,7 @@ void test_strncmp(void)
 	{
 		printf("%s [PASS]\n",__func__);
 	} else {
+		failed = 1;
 		printf("%s [FAIL], expected 0 got %d\n",__func__,r);
 	}
 }
@@ -232,6 +249,7 @@ void test_strlen(void)
 	{
 		printf("%s [PASS]\n",__func__);
 	} else {
+		failed = 1;
 		printf("%s [FAIL], expected %d got %d\n",__func__,PLEN,r);
 	}
 }
@@ -245,6 +263,7 @@ void test_strucmp(void)
 	{
 		printf("%s [PASS]\n",__func__);
 	} else {
+		failed = 1;
 		printf("%s [FAIL], expected 0 got %d\n",__func__,r);
 	}
 }
@@ -259,6 +278,7 @@ void test_strnucmp(void)
 	{
 		printf("%s [PASS]\n",__func__);
 	} else {
+		failed = 1;
 		printf("%s [FAIL], expected 0 got %d\n",__func__,r);
 	}
 }
@@ -274,6 +294,7 @@ void test_patmatch_questionmark(void)
 	{
 		printf("%s [PASS]\n",__func__);
 	} else {
+		failed = 1;
 		printf("%s [FAIL], expected 1 got %d, %s, %s\n",__func__,r,tst,p);
 	}
 	char *tstu = "CAT BAT D?G";
@@ -282,6 +303,7 @@ void test_patmatch_questionmark(void)
 	{
 		printf("%s [PASS]\n",__func__);
 	} else {
+		failed = 1;
 		printf("%s [FAIL], expected 1 got %d, %s, %s\n",__func__,r,tstu,pu);
 	}
 }
@@ -296,6 +318,7 @@ void test_patmatch_asterix(void)
 	{
 		printf("%s [PASS]\n",__func__);
 	} else {
+		failed = 1;
 		printf("%s [FAIL], expected 1 got %d\n",__func__,r);
 	}
 	r = patmatch("*DOG", pu, 1);
@@ -303,6 +326,7 @@ void test_patmatch_asterix(void)
 	{
 		printf("%s [PASS]\n",__func__);
 	} else {
+		failed = 1;
 		printf("%s [FAIL], expected 1 got %d\n",__func__,r);
 	}
 }
@@ -316,6 +340,7 @@ void test_strchr(void)
 	{
 		printf("%s [PASS]\n",__func__);
 	} else {
+		failed = 1;
 		printf("%s [FAIL], expected 'd' got %c\n",__func__,*ptr);
 	}
 }
@@ -328,6 +353,7 @@ void test_strrchr(void)
 	{
 		printf("%s [PASS]\n",__func__);
 	} else {
+		failed = 1;
 		printf("%s [FAIL], expected 'd' got %d\n",__func__,*ptr);
 	}
 }
@@ -340,6 +366,7 @@ void test_strspn(void)
 	{
 		printf("%s [PASS]\n",__func__);
 	} else {
+		failed = 1;
 		printf("%s [FAIL], expected 'd' got p[%d]\n",__func__,idx);
 	}
 }
@@ -351,6 +378,7 @@ void test_strcspn(void)
 	{
 		printf("%s [PASS]\n",__func__);
 	} else {
+		failed = 1;
 		printf("%s [FAIL], expected 'd' got p[%d]\n",__func__,idx);
 	}
 }
@@ -368,6 +396,7 @@ void test_strtok(void)
 	r = strcmp(token, "cat");
 	if ( r != 0 )
 	{
+		failed = 1;
 		printf("%s [FAIL], expected 'cat' got %s\n",__func__,token);
 		rr = r;
 	}
@@ -376,6 +405,7 @@ void test_strtok(void)
 	r = strcmp(token, "bat");
 	if ( r != 0 )
 	{
+		failed = 1;
 		printf("%s [FAIL], expected 'bat' got %s\n",__func__,token);
 		rr = r;
 	}
@@ -384,6 +414,7 @@ void test_strtok(void)
 	r = strcmp(token, "dog");
 	if ( r != 0 )
 	{
+		failed = 1;
 		printf("%s [FAIL], expected 'dog' got %s\n",__func__,token);
 		rr = r;
 	}
@@ -391,6 +422,7 @@ void test_strtok(void)
 	if ( rr == 0 ) {
 		printf("%s [PASS]\n",__func__);
 	} else {
+		failed = 1;
 		printf("%s [FAIL]\n",__func__);
 	}
 }
@@ -403,6 +435,7 @@ void test_strpbrk(void)
 	{
 		printf("%s [PASS]\n",__func__);
 	} else {
+		failed = 1;
 		printf("%s [FAIL], expected 'd' got %c\n",__func__,*ptr);
 	}
 }
@@ -428,6 +461,7 @@ void test_strass(void)
 	{
 		printf("%s [PASS]\n",__func__);
 	} else {
+		failed = 1;
 		printf("%s [FAIL]\n",__func__);
 		printf("  f.a=%d p->a=%d\n",f.a, p->a);
 		printf("  f.b=%d p->b=%d\n",f.a, p->b);
@@ -435,6 +469,28 @@ void test_strass(void)
 	}
 }
 #endif
+
+void test_strcmp_ordering(void)
+{
+	int r = strcmp("cat", "dog");
+	if (r < 0)
+		printf("%s [PASS]\n", __func__);
+	else {
+		failed = 1;
+		printf("%s [FAIL], expected negative got %d\n", __func__, r);
+	}
+}
+
+void test_strchr_miss(void)
+{
+	char *ptr = strchr(p, 'z');
+	if (ptr == NULL)
+		printf("%s [PASS]\n", __func__);
+	else {
+		failed = 1;
+		printf("%s [FAIL], expected NULL got %04x\n", __func__, ptr);
+	}
+}
 
 
 int main()
@@ -447,8 +503,10 @@ int main()
 	test_rindex();
 	test_strcmp();
 	test_strncmp();
+	test_strcmp_ordering();
 	test_strlen();
 	test_strchr();
+	test_strchr_miss();
 	test_strrchr();
 	test_strspn();
 	test_strcspn();
@@ -466,5 +524,5 @@ int main()
 	test_patmatch_asterix();
 	test_strass();
 #endif
-	return 0;
+	return failed;
 }

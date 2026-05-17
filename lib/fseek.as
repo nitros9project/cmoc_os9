@@ -15,6 +15,7 @@ _lseek              EXTERNAL            ; absolute long seek helper
 
 _READ               equ       $01       ; FILE open-for-read flag
 _WRITE              equ       $02       ; FILE open-for-write flag
+_APPEND             equ       $02       ; FILE append-mode flag in high byte
 _EOF                equ       $10       ; FILE end-of-file flag
 _ERR                equ       $20       ; FILE error flag
 
@@ -34,7 +35,7 @@ _fseek              pshs      u         ; preserve caller's U register
                     leas      2,s       ; discard staged FILE pointer
                     lbra      L00db     ; seed seek scratch before real reposition path
 L0020               lda       6,u       ; reload high byte so the _WRITTEN test sees the full flag byte
-                    anda      #$01      ; isolate _WRITTEN from all other high-byte flags
+                    bita      #$01      ; test _WRITTEN without destroying other high-byte flags
                     beq       L003a     ; branch if stream is currently in read mode
                     pshs      u         ; pass FILE pointer to fflush
                     lbsr      _fflush   ; flush pending output before moving the file position
@@ -43,7 +44,7 @@ L0020               lda       6,u       ; reload high byte so the _WRITTEN test 
                     andb      #_ERR     ; preserve only a possible flush error marker
                     lbne      L0114     ; treat flush failure as a failed seek
                     lda       6,u       ; reload high byte of FILE flags
-                    anda      #^$01     ; clear _WRITTEN bit after flush
+                    anda      #^$01     ; clear _WRITTEN bit after flush, preserve append/init
                     sta       6,u       ; save cleaned update-state flag
                     ldd       2,u       ; load buffer base pointer
                     addd      11,u      ; recompute buffer end as base + size

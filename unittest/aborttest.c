@@ -8,6 +8,7 @@ main(void)
     int waited_pid = -1;
     int status = -1;
     error_code err;
+    int failed = 0;
     static char params[] = "\n";
 
     err = _os_fork("abortchild", 1, params, Objct, Prgrm, 0, &pid);
@@ -19,8 +20,10 @@ main(void)
     waited_pid = _os_wait(&status);
     if (waited_pid > 0 && status != 0)
         printf("%s [PASS] abort() pid=%d status=%d\n", __func__, waited_pid, status);
-    else
+    else {
         printf("%s [FAIL] abort() pid=%d status=%d\n", __func__, waited_pid, status);
+        failed = 1;
+    }
 
-    return 0;
+    return failed;
 }

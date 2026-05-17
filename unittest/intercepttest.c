@@ -3,6 +3,7 @@
 #include <stdio.h>
 
 static int got_signal;
+static int failed;
 
 static void
 handler(int signo)
@@ -35,8 +36,10 @@ main(void)
     err = _os_send(pid, SIGQUIT);
     if (err == 0 && got_signal == SIGQUIT)
         printf("%s [PASS] intercept(delivery)\n", __func__);
-    else
+    else {
         printf("%s [FAIL] intercept(delivery) err=%d got=%d\n", __func__, err, got_signal);
+        failed = 1;
+    }
 
-    return 0;
+    return failed;
 }

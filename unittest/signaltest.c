@@ -3,6 +3,18 @@
 #include <stdio.h>
 
 static int got_signal;
+static int failed;
+
+static void
+check_true(const char *name, int condition)
+{
+    if (condition)
+        printf("%s [PASS]\n", name);
+    else {
+        printf("%s [FAIL]\n", name);
+        failed = 1;
+    }
+}
 
 static void
 handler(int signo)
@@ -19,10 +31,7 @@ main(void)
 
     got_signal = 0;
     prev = signal(SIGQUIT, handler);
-    if (prev == SIG_DFL)
-        printf("%s [PASS] signal(set handler)\n", __func__);
-    else
-        printf("%s [FAIL] signal(set handler)\n", __func__);
+    check_true("signaltest signal(set handler)", prev == SIG_DFL);
 
     err = _os_getpid(&pid);
     if (err != 0) {
@@ -33,24 +42,25 @@ main(void)
 
     err = _os_send(pid, SIGQUIT);
     if (err == 0 && got_signal == SIGQUIT)
-        printf("%s [PASS] signal(delivery)\n", __func__);
-    else
-        printf("%s [FAIL] signal(delivery) err=%d got=%d\n", __func__, err, got_signal);
+        printf("%s [PASS]\n", "signaltest signal(delivery)");
+    else {
+        printf("%s [FAIL] err=%d got=%d\n", "signaltest signal(delivery)", err, got_signal);
+        failed = 1;
+    }
 
     got_signal = 0;
     prev = signal(SIGINT, SIG_IGN);
-    if (prev == SIG_DFL)
-        printf("%s [PASS] signal(ignore install)\n", __func__);
-    else
-        printf("%s [FAIL] signal(ignore install)\n", __func__);
+    check_true("signaltest signal(ignore install)", prev == SIG_DFL);
 
     err = _os_send(pid, SIGINT);
     if (err == 0 && got_signal == 0)
-        printf("%s [PASS] signal(ignore delivery)\n", __func__);
-    else
-        printf("%s [FAIL] signal(ignore delivery) err=%d got=%d\n", __func__, err, got_signal);
+        printf("%s [PASS]\n", "signaltest signal(ignore delivery)");
+    else {
+        printf("%s [FAIL] err=%d got=%d\n", "signaltest signal(ignore delivery)", err, got_signal);
+        failed = 1;
+    }
 
     signal(SIGQUIT, SIG_DFL);
     signal(SIGINT, SIG_DFL);
-    return 0;
+    return failed;
 }

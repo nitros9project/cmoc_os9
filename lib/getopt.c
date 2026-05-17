@@ -18,13 +18,20 @@ int getopt(int argc, char **argv, const char *options)
 	static const char *place = EMSG;
 	const char *option_ptr;
 
+	if (optind <= 1)
+		place = EMSG;
+
 	if (!*place)
 	{
 		if (optind >= argc || *(place = argv[optind]) != '-' || !*++place)
+		{
+			place = EMSG;
 			return EOF;
+		}
 		if (*place == '-')
 		{
 			++optind;
+			place = EMSG;
 			return EOF;
 		}
 	}

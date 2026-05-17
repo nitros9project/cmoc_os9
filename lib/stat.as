@@ -2,8 +2,8 @@
 
 _getstat            EXPORT              ; export generic GetStat wrapper
 _setstat            EXPORT              ; export generic SetStat wrapper
-_os_getstat         EXPORT              ; export modern generic GetStat wrapper
-_os_setstat         EXPORT              ; export modern generic SetStat wrapper
+__os_getstat        EXPORT              ; export modern generic GetStat wrapper
+__os_setstat        EXPORT              ; export modern generic SetStat wrapper
 
 _os9err             EXTERNAL            ; common OS-9 error return helper
 _osret              EXTERNAL            ; modern _os_* status return helper
@@ -15,7 +15,7 @@ _getstat
                     lbsr      do_getstat ; perform GetStat and preserve carry result
                     lbra      _sysret   ; return using shared status-to-C helper
 
-_os_getstat
+__os_getstat
                     lbsr      do_getstat ; perform GetStat and preserve carry result
                     lbra      _osret    ; return using modern _os_* status helper
 
@@ -55,7 +55,7 @@ _setstat
                     lbsr      do_setstat ; perform SetStat and preserve carry result
                     lbra      _sysret   ; return using shared status-to-C helper
 
-_os_setstat
+__os_setstat
                     lbsr      do_setstat ; perform SetStat and preserve carry result
                     lbra      _osret    ; return using modern _os_* status helper
 

@@ -32,7 +32,7 @@ floatfmttest: floatfmttest.c
 
 
 GRAPHICS_TESTS = wintest maze
-TESTS	= hello noop timetest fiotest iotest osiotest osopenerrtest syscalltest memtest forktest forkhellotest forknowaittest forknooptest printtest utimetest ctype string floattest floatfmttest getopttest popentest pwenttest defdrivetest pwcryptest errmsgtest stdlibtest streamiotest searchtest stringexttest filelayout setjmptest systemtest setstest dirtest compat3test signaltest intercepttest dirapitest misctest datmodstest attrwraptest abortchild aborttest
+TESTS	= hello noop timetest fiotest iotest osiotest osopenerrtest syscalltest memtest forktest forkhellotest forknowaittest forknooptest printtest osgstattest utimetest ctype string floattest floatfmttest getopttest popentest pwenttest defdrivetest pwcryptest errmsgtest stdlibtest streamiotest searchtest stringexttest filelayout setjmptest systemtest setstest dirtest compat3test signaltest intercepttest dirapitest misctest datmodstest attrwraptest abortchild aborttest
 ALL_TESTS = $(TESTS) $(GRAPHICS_TESTS)
 
 all:	$(ALL_TESTS)

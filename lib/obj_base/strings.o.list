@@ -1,0 +1,35 @@
+                      (    ../strings.as):00001         * Adapted from Deek's KLibc strings_a for the live cmoc_os9 ABI.
+                      (    ../strings.as):00002         
+                      (    ../strings.as):00003                             section   code      ; begin code section
+                      (    ../strings.as):00004         
+                      (    ../strings.as):00005         _strcat             EXPORT              ; export this symbol
+                      (    ../strings.as):00006         _strcpy             EXPORT              ; export this symbol
+                      (    ../strings.as):00007         _strend             EXPORT              ; export this symbol
+                      (    ../strings.as):00008         
+0000                  (    ../strings.as):00009         _strcat
+0000 3440             (    ../strings.as):00010                             pshs      u         ; save U on the hardware stack
+0002 EE66             (    ../strings.as):00011                             ldu       6,s       ; load U from stack-relative value 6,s
+0004 AE64             (    ../strings.as):00012                             ldx       4,s       ; load X from stack-relative value 4,s
+0006 8D16             (    ../strings.as):00013                             bsr       Subroutine_01 ; branch to subroutine to Subroutine_01
+0008 1F01             (    ../strings.as):00014                             tfr       d,x       ; transfer D,X
+000A 2006             (    ../strings.as):00015                             bra       Loop_01   ; branch unconditionally to Loop_01
+                      (    ../strings.as):00016         
+000C                  (    ../strings.as):00017         _strcpy
+000C 3440             (    ../strings.as):00018                             pshs      u         ; save U on the hardware stack
+000E EE66             (    ../strings.as):00019                             ldu       6,s       ; load U from stack-relative value 6,s
+0010 AE64             (    ../strings.as):00020                             ldx       4,s       ; load X from stack-relative value 4,s
+0012 E6C0             (    ../strings.as):00021         Loop_01             ldb       ,u+       ; load B from memory pointed to by U, then advance U
+0014 E780             (    ../strings.as):00022                             stb       ,x+       ; store B to memory pointed to by X, then advance X
+0016 26FA             (    ../strings.as):00023                             bne       Loop_01   ; branch if not equal to Loop_01
+0018 EC64             (    ../strings.as):00024                             ldd       4,s       ; load D from stack-relative value 4,s
+001A 35C0             (    ../strings.as):00025                             puls      u,pc      ; restore registers and return
+                      (    ../strings.as):00026         
+001C                  (    ../strings.as):00027         _strend
+001C AE62             (    ../strings.as):00028                             ldx       2,s       ; load X from stack-relative value 2,s
+001E E680             (    ../strings.as):00029         Subroutine_01       ldb       ,x+       ; load B from memory pointed to by X, then advance X
+0020 26FC             (    ../strings.as):00030                             bne       Subroutine_01 ; branch if not equal to Subroutine_01
+0022 301F             (    ../strings.as):00031                             leax      -1,x      ; compute effective address into X from -1,x
+0024 1F10             (    ../strings.as):00032                             tfr       x,d       ; transfer X,D
+0026 39               (    ../strings.as):00033                             rts                 ; return to caller
+                      (    ../strings.as):00034         
+                      (    ../strings.as):00035                             endsect             ; end current section

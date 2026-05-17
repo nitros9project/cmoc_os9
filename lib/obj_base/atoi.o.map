@@ -1,0 +1,8 @@
+Symbol: _atoi (atoi.o) = 0000
+Symbol: L_atoi_accum (atoi.o) = 0022
+Symbol: L_atoi_check (atoi.o) = 0039
+Symbol: L_atoi_done (atoi.o) = 0041
+Symbol: L_atoi_exit (atoi.o) = 004B
+Symbol: L_atoi_next (atoi.o) = 0037
+Symbol: L_atoi_plus (atoi.o) = 001C
+Symbol: L_atoi_skip (atoi.o) = 000A

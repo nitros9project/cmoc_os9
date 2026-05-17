@@ -1,0 +1,66 @@
+                      (      ../chown.as):00001         *
+                      (      ../chown.as):00002         * Adapted from cmoc_os9/lib/todo/chown.as for the live CMOC ABI.
+                      (      ../chown.as):00003         *
+                      (      ../chown.as):00004         
+                      (      ../chown.as):00005                             use       ../include/fcntl.d ; shared file-mode constants
+                      (./include/fcntl.d):00001         * Shared assembler-side file mode and access constants.
+                      (./include/fcntl.d):00002         
+     0001             (./include/fcntl.d):00003         S_IREAD             equ       $01       ; owner-read permission bit
+     0002             (./include/fcntl.d):00004         S_IWRITE            equ       $02       ; owner-write permission bit
+     0004             (./include/fcntl.d):00005         S_IEXEC             equ       $04       ; owner-execute permission bit
+     0008             (./include/fcntl.d):00006         S_IOREAD            equ       $08       ; public-read permission bit
+     0010             (./include/fcntl.d):00007         S_IOWRITE           equ       $10       ; public-write permission bit
+     0020             (./include/fcntl.d):00008         S_IOEXEC            equ       $20       ; public-execute permission bit
+     0040             (./include/fcntl.d):00009         S_SHARED            equ       $40       ; sharable file bit
+     0080             (./include/fcntl.d):00010         S_DIR               equ       $80       ; directory attribute bit
+                      (./include/fcntl.d):00011         
+     0001             (./include/fcntl.d):00012         FAM_READ            equ       S_IREAD   ; open for reading
+     0002             (./include/fcntl.d):00013         FAM_WRITE           equ       S_IWRITE  ; open for writing
+     0003             (./include/fcntl.d):00014         FAM_UPDATE          equ       S_IREAD|S_IWRITE ; open for read/write
+     0080             (./include/fcntl.d):00015         FAM_DIR             equ       S_DIR     ; operate on a directory path
+                      (      ../chown.as):00006         
+                      (      ../chown.as):00007                             section   code      ; begin code section
+                      (      ../chown.as):00008         
+                      (      ../chown.as):00009         _chown              EXPORT              ; export this symbol
+                      (      ../chown.as):00010         
+                      (      ../chown.as):00011         _sysret             EXTERNAL            ; import external symbol
+                      (      ../chown.as):00012         
+     0010             (      ../chown.as):00013         Bufsize             equ       16        ; define constant as 16
+     000F             (      ../chown.as):00014         SS_FD               equ       $0f       ; define constant as $0f
+                      (      ../chown.as):00015         
+0000 3460             (      ../chown.as):00016         _chown              pshs      y,u       ; save Y,U on the hardware stack
+0002 3270             (      ../chown.as):00017                             leas      -Bufsize,s ; adjust S using -Bufsize,s
+0004 103F0C           (      ../chown.as):00018                             os9       $0c       ; invoke OS-9 system call $0c
+0007 2521             (      ../chown.as):00019                             bcs       chxit     ; branch if carry is set to chxit
+0009 C6D6             (      ../chown.as):00020                             ldb       #$d6      ; load B from immediate value $d6
+000B 108C0000         (      ../chown.as):00021                             cmpy      #0        ; compare Y against immediate value 0
+000F 1A01             (      ../chown.as):00022                             orcc      #1        ; set condition-code bits with mask #1
+0011 2617             (      ../chown.as):00023                             bne       chxit     ; branch if not equal to chxit
+0013 8D1D             (      ../chown.as):00024                             bsr       openfile  ; branch to subroutine to openfile
+0015 2513             (      ../chown.as):00025                             bcs       chxit     ; branch if carry is set to chxit
+0017 3402             (      ../chown.as):00026                             pshs      a         ; save A on the hardware stack
+0019 ECE819           (      ../chown.as):00027                             ldd       25,s      ; load D from stack-relative value 25,s
+001C ED01             (      ../chown.as):00028                             std       1,x       ; store D to indexed value 1,x
+001E 3502             (      ../chown.as):00029                             puls      a         ; restore A from the hardware stack
+0020 C60F             (      ../chown.as):00030                             ldb       #SS_FD    ; load B from immediate value SS_FD
+0022 103F8E           (      ../chown.as):00031                             os9       $8e       ; invoke OS-9 system call $8e
+0025 2503             (      ../chown.as):00032                             bcs       chxit     ; branch if carry is set to chxit
+0027 103F8F           (      ../chown.as):00033                             os9       $8f       ; invoke OS-9 system call $8f
+002A 32E810           (      ../chown.as):00034         chxit               leas      Bufsize,s ; adjust S using Bufsize,s
+002D 3560             (      ../chown.as):00035                             puls      y,u       ; restore Y,U from the hardware stack
+002F 160000           (      ../chown.as):00036                             lbra      _sysret   ; long branch unconditionally to _sysret
+                      (      ../chown.as):00037         
+0032                  (      ../chown.as):00038         openfile
+0032 8602             (      ../chown.as):00039                             lda       #FAM_WRITE ; load A from immediate value FAM_WRITE
+0034 AEE818           (      ../chown.as):00040                             ldx       24,s      ; load X from stack-relative value 24,s
+0037 103F84           (      ../chown.as):00041                             os9       $84       ; invoke OS-9 system call $84
+003A 2401             (      ../chown.as):00042                             bcc       openf10   ; branch if carry is clear to openf10
+003C 39               (      ../chown.as):00043                             rts                 ; return to caller
+                      (      ../chown.as):00044         
+003D 3062             (      ../chown.as):00045         openf10             leax      2,s       ; compute effective address into X from 2,s
+003F 108E0010         (      ../chown.as):00046                             ldy       #Bufsize  ; load Y from immediate value Bufsize
+0043 C60F             (      ../chown.as):00047                             ldb       #SS_FD    ; load B from immediate value SS_FD
+0045 103F8D           (      ../chown.as):00048                             os9       $8d       ; invoke OS-9 system call $8d
+0048 39               (      ../chown.as):00049                             rts                 ; return to caller
+                      (      ../chown.as):00050         
+                      (      ../chown.as):00051                             endsect             ; end current section

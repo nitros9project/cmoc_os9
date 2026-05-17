@@ -1,0 +1,26 @@
+                      (     ../strass.as):00001         * Adapted from Deek's KLibc strass_a for the live cmoc_os9 ABI.
+                      (     ../strass.as):00002         
+                      (     ../strass.as):00003                             section   code      ; begin code section
+                      (     ../strass.as):00004         
+                      (     ../strass.as):00005         __strass            EXPORT              ; export this symbol
+                      (     ../strass.as):00006         
+0000                  (     ../strass.as):00007         __strass
+0000 3460             (     ../strass.as):00008                             pshs      y,u       ; save Y,U on the hardware stack
+0002 EE66             (     ../strass.as):00009                             ldu       6,s       ; load U from stack-relative value 6,s
+0004 10AE68           (     ../strass.as):00010                             ldy       8,s       ; load Y from stack-relative value 8,s
+0007 EC6A             (     ../strass.as):00011                             ldd       10,s      ; load D from stack-relative value 10,s
+0009 44               (     ../strass.as):00012                             lsra                ; logical shift A right by one bit
+000A 56               (     ../strass.as):00013                             rorb                ; rotate B right through carry
+000B 1F01             (     ../strass.as):00014                             tfr       d,x       ; transfer D,X
+000D 2404             (     ../strass.as):00015                             bcc       BranchTarget_01 ; branch if carry is clear to BranchTarget_01
+000F A6A0             (     ../strass.as):00016                             lda       ,y+       ; load A from memory pointed to by Y, then advance Y
+0011 A7C0             (     ../strass.as):00017                             sta       ,u+       ; store A to memory pointed to by U, then advance U
+0013 AF7E             (     ../strass.as):00018         BranchTarget_01     stx       -2,s      ; store X to stack-relative value -2,s
+0015 2708             (     ../strass.as):00019                             beq       BranchTarget_02 ; branch if equal/zero to BranchTarget_02
+0017 ECA1             (     ../strass.as):00020         Loop_01             ldd       ,y++      ; load D from memory pointed to by Y+, then advance Y+
+0019 EDC1             (     ../strass.as):00021                             std       ,u++      ; store D to memory pointed to by U+, then advance U+
+001B 301F             (     ../strass.as):00022                             leax      -1,x      ; compute effective address into X from -1,x
+001D 26F8             (     ../strass.as):00023                             bne       Loop_01   ; branch if not equal to Loop_01
+001F 35E0             (     ../strass.as):00024         BranchTarget_02     puls      y,u,pc    ; restore registers and return
+                      (     ../strass.as):00025         
+                      (     ../strass.as):00026                             endsect             ; end current section

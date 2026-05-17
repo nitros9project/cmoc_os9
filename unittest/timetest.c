@@ -2,6 +2,7 @@
 #include <time.h>
 
 struct _os_time p = {2014 - 1900, 3, 4, 11, 33, 22};
+extern int errno;
 
 void test_getime()
 {

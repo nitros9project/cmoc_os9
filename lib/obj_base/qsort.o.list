@@ -1,0 +1,187 @@
+                      (      ../qsort.as):00001         * Adapted from cmoc_os9/lib/todo/qsort.a for the live cmoc_os9 ABI.
+                      (      ../qsort.as):00002         
+                      (      ../qsort.as):00003                             section   bss       ; begin bss section
+                      (      ../qsort.as):00004         
+0000                  (      ../qsort.as):00005         _B0000              rmb       2         ; reserve 2 bytes
+0002                  (      ../qsort.as):00006         _B0002              rmb       2         ; reserve 2 bytes
+                      (      ../qsort.as):00007         
+                      (      ../qsort.as):00008                             endsect             ; end current section
+                      (      ../qsort.as):00009         
+                      (      ../qsort.as):00010                             section   code      ; begin code section
+                      (      ../qsort.as):00011         
+                      (      ../qsort.as):00012         _qsort              EXPORT              ; export this symbol
+                      (      ../qsort.as):00013         
+                      (      ../qsort.as):00014         _stkcheck           EXTERNAL            ; import external symbol
+                      (      ../qsort.as):00015         ccdiv               EXTERNAL            ; import external symbol
+                      (      ../qsort.as):00016         ccmult              EXTERNAL            ; import external symbol
+                      (      ../qsort.as):00017         
+0000                  (      ../qsort.as):00018         _qsort
+0000 3440             (      ../qsort.as):00019                             pshs      u         ; save U on the hardware stack
+0002 CCFFB8           (      ../qsort.as):00020                             ldd       #$ffb8    ; load D from immediate value $ffb8
+0005 170000           (      ../qsort.as):00021                             lbsr      _stkcheck ; long branch to subroutine to _stkcheck
+0008 EC68             (      ../qsort.as):00022                             ldd       8,s       ; load D from stack-relative value 8,s
+000A EDA90000         (      ../qsort.as):00023                             std       _B0000,y  ; store D to indexed value _B0000,y
+000E EC6A             (      ../qsort.as):00024                             ldd       10,s      ; load D from stack-relative value 10,s
+0010 EDA90000         (      ../qsort.as):00025                             std       _B0002,y  ; store D to indexed value _B0002,y
+0014 EC66             (      ../qsort.as):00026                             ldd       6,s       ; load D from stack-relative value 6,s
+0016 C3FFFF           (      ../qsort.as):00027                             addd      #-1       ; add immediate value -1 into D
+0019 3406             (      ../qsort.as):00028                             pshs      d         ; save D on the hardware stack
+001B ECA90000         (      ../qsort.as):00029                             ldd       _B0000,y  ; load D from indexed value _B0000,y
+001F 170000           (      ../qsort.as):00030                             lbsr      ccmult    ; long branch to subroutine to ccmult
+0022 E364             (      ../qsort.as):00031                             addd      4,s       ; add stack-relative value 4,s into D
+0024 3406             (      ../qsort.as):00032                             pshs      d         ; save D on the hardware stack
+0026 EC66             (      ../qsort.as):00033                             ldd       6,s       ; load D from stack-relative value 6,s
+0028 3406             (      ../qsort.as):00034                             pshs      d         ; save D on the hardware stack
+002A 8D03             (      ../qsort.as):00035                             bsr       Subroutine_01 ; branch to subroutine to Subroutine_01
+002C 1600DB           (      ../qsort.as):00036                             lbra      Continue_03 ; long branch unconditionally to Continue_03
+                      (      ../qsort.as):00037         
+002F                  (      ../qsort.as):00038         Subroutine_01
+002F 3440             (      ../qsort.as):00039                             pshs      u         ; save U on the hardware stack
+0031 CCFFB4           (      ../qsort.as):00040                             ldd       #$ffb4    ; load D from immediate value $ffb4
+0034 170000           (      ../qsort.as):00041                             lbsr      _stkcheck ; long branch to subroutine to _stkcheck
+0037 327C             (      ../qsort.as):00042                             leas      -4,s      ; adjust S using -4,s
+0039 1600C5           (      ../qsort.as):00043                             lbra      Continue_02 ; long branch unconditionally to Continue_02
+                      (      ../qsort.as):00044         
+003C                  (      ../qsort.as):00045         Loop_01
+003C EE68             (      ../qsort.as):00046                             ldu       8,s       ; load U from stack-relative value 8,s
+003E EC6A             (      ../qsort.as):00047                             ldd       10,s      ; load D from stack-relative value 10,s
+0040 ED62             (      ../qsort.as):00048                             std       2,s       ; store D to stack-relative value 2,s
+0042 EC6A             (      ../qsort.as):00049                             ldd       10,s      ; load D from stack-relative value 10,s
+0044 A368             (      ../qsort.as):00050                             subd      8,s       ; subtract stack-relative value 8,s from D
+0046 3406             (      ../qsort.as):00051                             pshs      d         ; save D on the hardware stack
+0048 ECA90000         (      ../qsort.as):00052                             ldd       _B0000,y  ; load D from indexed value _B0000,y
+004C 58               (      ../qsort.as):00053                             lslb                ; shift B left by one bit
+004D 49               (      ../qsort.as):00054                             rola                ; rotate A left through carry
+004E 170000           (      ../qsort.as):00055                             lbsr      ccdiv     ; long branch to subroutine to ccdiv
+0051 3406             (      ../qsort.as):00056                             pshs      d         ; save D on the hardware stack
+0053 ECA90000         (      ../qsort.as):00057                             ldd       _B0000,y  ; load D from indexed value _B0000,y
+0057 170000           (      ../qsort.as):00058                             lbsr      ccmult    ; long branch to subroutine to ccmult
+005A E368             (      ../qsort.as):00059                             addd      8,s       ; add stack-relative value 8,s into D
+005C EDE4             (      ../qsort.as):00060                             std       ,s        ; store D to memory pointed to by S
+005E 2006             (      ../qsort.as):00061                             bra       Loop_03   ; branch unconditionally to Loop_03
+                      (      ../qsort.as):00062         
+0060                  (      ../qsort.as):00063         Loop_02
+0060 ECA90000         (      ../qsort.as):00064                             ldd       _B0000,y  ; load D from indexed value _B0000,y
+0064 33CB             (      ../qsort.as):00065                             leau      d,u       ; compute effective address into U from d,u
+                      (      ../qsort.as):00066         
+0066                  (      ../qsort.as):00067         Loop_03
+0066 ECE4             (      ../qsort.as):00068                             ldd       ,s        ; load D from memory pointed to by S
+0068 3406             (      ../qsort.as):00069                             pshs      d         ; save D on the hardware stack
+006A 3440             (      ../qsort.as):00070                             pshs      u         ; save U on the hardware stack
+006C ADB90000         (      ../qsort.as):00071                             jsr       [_B0002,y] ; call subroutine at [_B0002,y]
+0070 3264             (      ../qsort.as):00072                             leas      4,s       ; adjust S using 4,s
+0072 ED7E             (      ../qsort.as):00073                             std       -2,s      ; store D to stack-relative value -2,s
+0074 2DEA             (      ../qsort.as):00074                             blt       Loop_02   ; branch if less than to Loop_02
+0076 2008             (      ../qsort.as):00075                             bra       Continue_01 ; branch unconditionally to Continue_01
+                      (      ../qsort.as):00076         
+0078                  (      ../qsort.as):00077         Loop_04
+0078 EC62             (      ../qsort.as):00078                             ldd       2,s       ; load D from stack-relative value 2,s
+007A A3A90000         (      ../qsort.as):00079                             subd      _B0000,y  ; subtract indexed value _B0000,y from D
+007E ED62             (      ../qsort.as):00080                             std       2,s       ; store D to stack-relative value 2,s
+                      (      ../qsort.as):00081         
+0080                  (      ../qsort.as):00082         Continue_01
+0080 EC62             (      ../qsort.as):00083                             ldd       2,s       ; load D from stack-relative value 2,s
+0082 3406             (      ../qsort.as):00084                             pshs      d         ; save D on the hardware stack
+0084 EC62             (      ../qsort.as):00085                             ldd       2,s       ; load D from stack-relative value 2,s
+0086 3406             (      ../qsort.as):00086                             pshs      d         ; save D on the hardware stack
+0088 ADB90000         (      ../qsort.as):00087                             jsr       [_B0002,y] ; call subroutine at [_B0002,y]
+008C 3264             (      ../qsort.as):00088                             leas      4,s       ; adjust S using 4,s
+008E ED7E             (      ../qsort.as):00089                             std       -2,s      ; store D to stack-relative value -2,s
+0090 2DE6             (      ../qsort.as):00090                             blt       Loop_04   ; branch if less than to Loop_04
+0092 11A362           (      ../qsort.as):00091                             cmpu      2,s       ; compare U against stack-relative value 2,s
+0095 2232             (      ../qsort.as):00092                             bhi       BranchTarget_03 ; branch if higher to BranchTarget_03
+0097 11A362           (      ../qsort.as):00093                             cmpu      2,s       ; compare U against stack-relative value 2,s
+009A 241F             (      ../qsort.as):00094                             bcc       BranchTarget_02 ; branch if carry is clear to BranchTarget_02
+009C EC62             (      ../qsort.as):00095                             ldd       2,s       ; load D from stack-relative value 2,s
+009E 3406             (      ../qsort.as):00096                             pshs      d         ; save D on the hardware stack
+00A0 3440             (      ../qsort.as):00097                             pshs      u         ; save U on the hardware stack
+00A2 170069           (      ../qsort.as):00098                             lbsr      Subroutine_02 ; long branch to subroutine to Subroutine_02
+00A5 3264             (      ../qsort.as):00099                             leas      4,s       ; adjust S using 4,s
+00A7 11A3E4           (      ../qsort.as):00100                             cmpu      ,s        ; compare U against memory pointed to by S
+00AA 2606             (      ../qsort.as):00101                             bne       BranchTarget_01 ; branch if not equal to BranchTarget_01
+00AC EC62             (      ../qsort.as):00102                             ldd       2,s       ; load D from stack-relative value 2,s
+00AE EDE4             (      ../qsort.as):00103                             std       ,s        ; store D to memory pointed to by S
+00B0 2009             (      ../qsort.as):00104                             bra       BranchTarget_02 ; branch unconditionally to BranchTarget_02
+                      (      ../qsort.as):00105         
+00B2                  (      ../qsort.as):00106         BranchTarget_01
+00B2 ECE4             (      ../qsort.as):00107                             ldd       ,s        ; load D from memory pointed to by S
+00B4 10A362           (      ../qsort.as):00108                             cmpd      2,s       ; compare D against stack-relative value 2,s
+00B7 2602             (      ../qsort.as):00109                             bne       BranchTarget_02 ; branch if not equal to BranchTarget_02
+00B9 EFE4             (      ../qsort.as):00110                             stu       ,s        ; store U to memory pointed to by S
+                      (      ../qsort.as):00111         
+00BB                  (      ../qsort.as):00112         BranchTarget_02
+00BB ECA90000         (      ../qsort.as):00113                             ldd       _B0000,y  ; load D from indexed value _B0000,y
+00BF 33CB             (      ../qsort.as):00114                             leau      d,u       ; compute effective address into U from d,u
+00C1 EC62             (      ../qsort.as):00115                             ldd       2,s       ; load D from stack-relative value 2,s
+00C3 A3A90000         (      ../qsort.as):00116                             subd      _B0000,y  ; subtract indexed value _B0000,y from D
+00C7 ED62             (      ../qsort.as):00117                             std       2,s       ; store D to stack-relative value 2,s
+                      (      ../qsort.as):00118         
+00C9                  (      ../qsort.as):00119         BranchTarget_03
+00C9 11A362           (      ../qsort.as):00120                             cmpu      2,s       ; compare U against stack-relative value 2,s
+00CC 1023FF96         (      ../qsort.as):00121                             lbls      Loop_03   ; long branch if lower or same to Loop_03
+00D0 EC62             (      ../qsort.as):00122                             ldd       2,s       ; load D from stack-relative value 2,s
+00D2 A368             (      ../qsort.as):00123                             subd      8,s       ; subtract stack-relative value 8,s from D
+00D4 3406             (      ../qsort.as):00124                             pshs      d         ; save D on the hardware stack
+00D6 3440             (      ../qsort.as):00125                             pshs      u         ; save U on the hardware stack
+00D8 EC6E             (      ../qsort.as):00126                             ldd       14,s      ; load D from stack-relative value 14,s
+00DA A3E1             (      ../qsort.as):00127                             subd      ,s++      ; subtract memory pointed to by S+, then advance S+ from D
+00DC 10A3E1           (      ../qsort.as):00128                             cmpd      ,s++      ; compare D against memory pointed to by S+, then advance S+
+00DF 2C11             (      ../qsort.as):00129                             bge       BranchTarget_04 ; branch if greater or equal to BranchTarget_04
+00E1 EC6A             (      ../qsort.as):00130                             ldd       10,s      ; load D from stack-relative value 10,s
+00E3 3406             (      ../qsort.as):00131                             pshs      d         ; save D on the hardware stack
+00E5 3440             (      ../qsort.as):00132                             pshs      u         ; save U on the hardware stack
+00E7 17FF45           (      ../qsort.as):00133                             lbsr      Subroutine_01 ; long branch to subroutine to Subroutine_01
+00EA 3264             (      ../qsort.as):00134                             leas      4,s       ; adjust S using 4,s
+00EC EC62             (      ../qsort.as):00135                             ldd       2,s       ; load D from stack-relative value 2,s
+00EE ED6A             (      ../qsort.as):00136                             std       10,s      ; store D to stack-relative value 10,s
+00F0 200F             (      ../qsort.as):00137                             bra       Continue_02 ; branch unconditionally to Continue_02
+                      (      ../qsort.as):00138         
+00F2                  (      ../qsort.as):00139         BranchTarget_04
+00F2 EC62             (      ../qsort.as):00140                             ldd       2,s       ; load D from stack-relative value 2,s
+00F4 3406             (      ../qsort.as):00141                             pshs      d         ; save D on the hardware stack
+00F6 EC6A             (      ../qsort.as):00142                             ldd       10,s      ; load D from stack-relative value 10,s
+00F8 3406             (      ../qsort.as):00143                             pshs      d         ; save D on the hardware stack
+00FA 17FF32           (      ../qsort.as):00144                             lbsr      Subroutine_01 ; long branch to subroutine to Subroutine_01
+00FD 3264             (      ../qsort.as):00145                             leas      4,s       ; adjust S using 4,s
+00FF EF68             (      ../qsort.as):00146                             stu       8,s       ; store U to stack-relative value 8,s
+                      (      ../qsort.as):00147         
+0101                  (      ../qsort.as):00148         Continue_02
+0101 EC68             (      ../qsort.as):00149                             ldd       8,s       ; load D from stack-relative value 8,s
+0103 10A36A           (      ../qsort.as):00150                             cmpd      10,s      ; compare D against stack-relative value 10,s
+0106 1025FF32         (      ../qsort.as):00151                             lblo      Loop_01   ; long branch if lower to Loop_01
+                      (      ../qsort.as):00152         
+010A                  (      ../qsort.as):00153         Continue_03
+010A 3264             (      ../qsort.as):00154                             leas      4,s       ; adjust S using 4,s
+010C 35C0             (      ../qsort.as):00155                             puls      u,pc      ; restore registers and return
+                      (      ../qsort.as):00156         
+010E                  (      ../qsort.as):00157         Subroutine_02
+010E 3440             (      ../qsort.as):00158                             pshs      u         ; save U on the hardware stack
+0110 CCFFBD           (      ../qsort.as):00159                             ldd       #$ffbd    ; load D from immediate value $ffbd
+0113 170000           (      ../qsort.as):00160                             lbsr      _stkcheck ; long branch to subroutine to _stkcheck
+0116 EE64             (      ../qsort.as):00161                             ldu       4,s       ; load U from stack-relative value 4,s
+0118 327D             (      ../qsort.as):00162                             leas      -3,s      ; adjust S using -3,s
+011A ECA90000         (      ../qsort.as):00163                             ldd       _B0000,y  ; load D from indexed value _B0000,y
+011E ED61             (      ../qsort.as):00164                             std       1,s       ; store D to stack-relative value 1,s
+0120 2013             (      ../qsort.as):00165                             bra       Continue_04 ; branch unconditionally to Continue_04
+                      (      ../qsort.as):00166         
+0122                  (      ../qsort.as):00167         Loop_05
+0122 E6C4             (      ../qsort.as):00168                             ldb       ,u        ; load B from memory pointed to by U
+0124 E7E4             (      ../qsort.as):00169                             stb       ,s        ; store B to memory pointed to by S
+0126 E6F809           (      ../qsort.as):00170                             ldb       [9,s]     ; load B from indirect address [9,s]
+0129 E7C0             (      ../qsort.as):00171                             stb       ,u+       ; store B to memory pointed to by U, then advance U
+012B E6E4             (      ../qsort.as):00172                             ldb       ,s        ; load B from memory pointed to by S
+012D AE69             (      ../qsort.as):00173                             ldx       9,s       ; load X from stack-relative value 9,s
+012F 3001             (      ../qsort.as):00174                             leax      1,x       ; compute effective address into X from 1,x
+0131 AF69             (      ../qsort.as):00175                             stx       9,s       ; store X to stack-relative value 9,s
+0133 E71F             (      ../qsort.as):00176                             stb       -1,x      ; store B to indexed value -1,x
+                      (      ../qsort.as):00177         
+0135                  (      ../qsort.as):00178         Continue_04
+0135 EC61             (      ../qsort.as):00179                             ldd       1,s       ; load D from stack-relative value 1,s
+0137 C3FFFF           (      ../qsort.as):00180                             addd      #-1       ; add immediate value -1 into D
+013A ED61             (      ../qsort.as):00181                             std       1,s       ; store D to stack-relative value 1,s
+013C 83FFFF           (      ../qsort.as):00182                             subd      #-1       ; subtract immediate value -1 from D
+013F 26E1             (      ../qsort.as):00183                             bne       Loop_05   ; branch if not equal to Loop_05
+0141 3263             (      ../qsort.as):00184                             leas      3,s       ; adjust S using 3,s
+0143 35C0             (      ../qsort.as):00185                             puls      u,pc      ; restore registers and return
+                      (      ../qsort.as):00186         
+                      (      ../qsort.as):00187                             endsect             ; end current section

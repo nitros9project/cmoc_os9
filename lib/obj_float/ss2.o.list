@@ -1,0 +1,33 @@
+                      (        ../ss2.as):00001         * Adapted from cmoc_os9/lib/todo/ss2.as for the live cmoc_os9 ABI.
+                      (        ../ss2.as):00002         
+                      (        ../ss2.as):00003                             section   code      ; begin code section
+                      (        ../ss2.as):00004         
+                      (        ../ss2.as):00005         _ss_lock            EXPORT              ; export this symbol
+                      (        ../ss2.as):00006         _ss_attr            EXPORT              ; export this symbol
+                      (        ../ss2.as):00007         _ss_size            EXPORT              ; export this symbol
+                      (        ../ss2.as):00008         
+                      (        ../ss2.as):00009         _sysret             EXTERNAL            ; import external symbol
+                      (        ../ss2.as):00010         
+     008E             (        ../ss2.as):00011         I_SetStt            equ       $8e       ; define constant as $8e
+                      (        ../ss2.as):00012         
+0000                  (        ../ss2.as):00013         _ss_lock
+0000 3440             (        ../ss2.as):00014                             pshs      u         ; save U on the hardware stack
+0002 C611             (        ../ss2.as):00015                             ldb       #$11      ; load B from immediate value $11
+0004 200A             (        ../ss2.as):00016                             bra       Continue_01 ; branch unconditionally to Continue_01
+                      (        ../ss2.as):00017         
+0006                  (        ../ss2.as):00018         _ss_attr
+0006 3440             (        ../ss2.as):00019                             pshs      u         ; save U on the hardware stack
+0008 C61C             (        ../ss2.as):00020                             ldb       #$1c      ; load B from immediate value $1c
+000A 2006             (        ../ss2.as):00021                             bra       Continue_02 ; branch unconditionally to Continue_02
+                      (        ../ss2.as):00022         
+000C                  (        ../ss2.as):00023         _ss_size
+000C 3440             (        ../ss2.as):00024                             pshs      u         ; save U on the hardware stack
+000E C602             (        ../ss2.as):00025                             ldb       #2        ; load B from immediate value 2
+0010 EE68             (        ../ss2.as):00026         Continue_01         ldu       8,s       ; load U from stack-relative value 8,s
+0012 AE66             (        ../ss2.as):00027         Continue_02         ldx       6,s       ; load X from stack-relative value 6,s
+0014 A665             (        ../ss2.as):00028                             lda       5,s       ; load A from stack-relative value 5,s
+0016 103F8E           (        ../ss2.as):00029                             os9       I_SetStt  ; invoke OS-9 system call I_SetStt
+0019 3540             (        ../ss2.as):00030                             puls      u         ; restore U from the hardware stack
+001B 160000           (        ../ss2.as):00031                             lbra      _sysret   ; long branch unconditionally to _sysret
+                      (        ../ss2.as):00032         
+                      (        ../ss2.as):00033                             endsect             ; end current section

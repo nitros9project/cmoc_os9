@@ -1,0 +1,202 @@
+                      (      ../fseek.as):00001         _fseek              EXPORT              ; export buffered seek helper
+                      (      ../fseek.as):00002         _rewind             EXPORT              ; export rewind helper
+                      (      ../fseek.as):00003         _ftell              EXPORT              ; export buffered tell helper
+                      (      ../fseek.as):00004         
+                      (      ../fseek.as):00005         _setbase            EXTERNAL            ; stdio buffer initializer
+                      (      ../fseek.as):00006         _fflush             EXTERNAL            ; stream flush helper
+                      (      ../fseek.as):00007         _lmove              EXTERNAL            ; long move helper
+                      (      ../fseek.as):00008         _lsub               EXTERNAL            ; long subtract helper
+                      (      ../fseek.as):00009         _litol              EXTERNAL            ; int-to-long helper
+                      (      ../fseek.as):00010         _lcmpr              EXTERNAL            ; long compare helper
+                      (      ../fseek.as):00011         _lneg               EXTERNAL            ; long negate helper
+                      (      ../fseek.as):00012         _ladd               EXTERNAL            ; long add helper
+                      (      ../fseek.as):00013         _flacc              EXTERNAL            ; shared long return accumulator
+                      (      ../fseek.as):00014         _lseek              EXTERNAL            ; absolute long seek helper
+                      (      ../fseek.as):00015         
+     0001             (      ../fseek.as):00016         _READ               equ       $01       ; FILE open-for-read flag
+     0002             (      ../fseek.as):00017         _WRITE              equ       $02       ; FILE open-for-write flag
+     0010             (      ../fseek.as):00018         _EOF                equ       $10       ; FILE end-of-file flag
+                      (      ../fseek.as):00019         
+                      (      ../fseek.as):00020                             section   code      ; begin code section
+                      (      ../fseek.as):00021         
+0000 3440             (      ../fseek.as):00022         _fseek              pshs      u         ; preserve caller's U register
+0002 EE64             (      ../fseek.as):00023                             ldu       4,s       ; load FILE pointer
+0004 327A             (      ../fseek.as):00024                             leas      -6,s      ; reserve scratch space for long temporaries
+0006 1027010A         (      ../fseek.as):00025                             lbeq      L0114     ; reject null stream pointers
+000A EC46             (      ../fseek.as):00026                             ldd       6,u       ; load FILE flags word
+000C C503             (      ../fseek.as):00027                             bitb      #_READ|_WRITE ; require an open stream in read or write mode
+000E 10270102         (      ../fseek.as):00028                             lbeq      L0114     ; fail if stream is not active
+0012 8580             (      ../fseek.as):00029                             bita      #$80      ; test initialized bit in high byte
+0014 260A             (      ../fseek.as):00030                             bne       L0020     ; skip initialization if stream is already set up
+0016 3440             (      ../fseek.as):00031                             pshs      u         ; pass FILE pointer to setbase
+0018 170000           (      ../fseek.as):00032                             lbsr      _setbase  ; allocate/setup stream buffering state
+001B 3262             (      ../fseek.as):00033                             leas      2,s       ; discard staged FILE pointer
+001D 1600C5           (      ../fseek.as):00034                             lbra      L00e5     ; jump into common reposition path
+0020 8501             (      ../fseek.as):00035         L0020               bita      #$01      ; test _WRITTEN state in high-byte flag bit
+0022 2716             (      ../fseek.as):00036                             beq       L003a     ; branch if stream is currently in read mode
+0024 3440             (      ../fseek.as):00037                             pshs      u         ; pass FILE pointer to fflush
+0026 170000           (      ../fseek.as):00038                             lbsr      _fflush   ; flush pending output before moving the file position
+0029 3262             (      ../fseek.as):00039                             leas      2,s       ; discard staged FILE pointer
+002B A646             (      ../fseek.as):00040                             lda       6,u       ; reload high byte of FILE flags
+002D 84FE             (      ../fseek.as):00041                             anda      #^$01     ; clear _WRITTEN bit after flush
+002F A746             (      ../fseek.as):00042                             sta       6,u       ; save cleaned update-state flag
+0031 EC42             (      ../fseek.as):00043                             ldd       2,u       ; load buffer base pointer
+0033 E34B             (      ../fseek.as):00044                             addd      11,u      ; recompute buffer end as base + size
+0035 ED44             (      ../fseek.as):00045                             std       4,u       ; restore end pointer after flush reset
+0037 1600A9           (      ../fseek.as):00046                             lbra      L00e3     ; point current pointer at end of buffer
+003A ECC4             (      ../fseek.as):00047         L003a               ldd       ,u        ; load current buffer pointer
+003C 10A344           (      ../fseek.as):00048                             cmpd      4,u       ; compare against buffer end pointer
+003F 102400A2         (      ../fseek.as):00049                             lbhs      L00e5     ; skip read-buffer optimization if buffer is exhausted
+0043 3062             (      ../fseek.as):00050                             leax      2,s       ; point X at local scratch long
+0045 3410             (      ../fseek.as):00051                             pshs      x         ; stage destination pointer for long move
+0047 306E             (      ../fseek.as):00052                             leax      14,s      ; point X at requested seek offset argument
+0049 170000           (      ../fseek.as):00053                             lbsr      _lmove    ; copy requested offset into local scratch
+004C AEE810           (      ../fseek.as):00054                             ldx       16,s      ; load whence selector
+004F 2708             (      ../fseek.as):00055                             beq       L0059     ; branch for SEEK_SET relative adjustment
+0051 8C0001           (      ../fseek.as):00056                             cmpx      #1        ; test SEEK_CUR case
+0054 271C             (      ../fseek.as):00057                             beq       L0072     ; branch for current-position adjustment
+0056 16006F           (      ../fseek.as):00058                             lbra      L00c8     ; SEEK_END needs extra compensation path
+0059 3062             (      ../fseek.as):00059         L0059               leax      2,s       ; point X at local scratch long
+005B 3410             (      ../fseek.as):00060                             pshs      x         ; stage destination pointer for long move
+005D EC02             (      ../fseek.as):00061                             ldd       2,x       ; fetch scratch low word
+005F 3406             (      ../fseek.as):00062                             pshs      d         ; stage low word for long subtraction
+0061 EC84             (      ../fseek.as):00063                             ldd       ,x        ; fetch scratch high word
+0063 3406             (      ../fseek.as):00064                             pshs      d         ; stage high word for long subtraction
+0065 3440             (      ../fseek.as):00065                             pshs      u         ; pass FILE pointer to ftell
+0067 1700CD           (      ../fseek.as):00066                             lbsr      _ftell    ; compute current buffered file position
+006A 3262             (      ../fseek.as):00067                             leas      2,s       ; discard staged FILE pointer
+006C 170000           (      ../fseek.as):00068                             lbsr      _lsub     ; subtract current position from requested absolute target
+006F 170000           (      ../fseek.as):00069                             lbsr      _lmove    ; store adjusted offset back into local scratch
+0072 EC4B             (      ../fseek.as):00070         L0072               ldd       11,u      ; load buffer size
+0074 170000           (      ../fseek.as):00071                             lbsr      _litol    ; convert buffer size to long in _flacc
+0077 EC02             (      ../fseek.as):00072                             ldd       2,x       ; fetch low word of buffer-size long
+0079 3406             (      ../fseek.as):00073                             pshs      d         ; stage low word for compare
+007B EC84             (      ../fseek.as):00074                             ldd       ,x        ; fetch high word of buffer-size long
+007D 3406             (      ../fseek.as):00075                             pshs      d         ; stage high word for compare
+007F 3066             (      ../fseek.as):00076                             leax      6,s       ; point X at requested/adjusted offset scratch
+0081 EC02             (      ../fseek.as):00077                             ldd       2,x       ; fetch scratch low word
+0083 3406             (      ../fseek.as):00078                             pshs      d         ; stage low word for compare
+0085 EC84             (      ../fseek.as):00079                             ldd       ,x        ; fetch scratch high word
+0087 3406             (      ../fseek.as):00080                             pshs      d         ; stage high word for compare
+0089 308D0092         (      ../fseek.as):00081                             leax      L011f,pcr ; point X at zero long constant
+008D 170000           (      ../fseek.as):00082                             lbsr      _lcmpr    ; compare requested offset against zero
+0090 2C07             (      ../fseek.as):00083                             bge       L0099     ; keep sign for non-negative offset
+0092 3066             (      ../fseek.as):00084                             leax      6,s       ; point X back at offset scratch
+0094 170000           (      ../fseek.as):00085                             lbsr      _lneg     ; negate negative offset for magnitude compare
+0097 2002             (      ../fseek.as):00086                             bra       L009b     ; continue with normalized magnitude
+0099 3066             (      ../fseek.as):00087         L0099               leax      6,s       ; point X at non-negative offset scratch
+009B 170000           (      ../fseek.as):00088         L009b               lbsr      _lcmpr    ; compare offset magnitude against buffer size
+009E 2D1F             (      ../fseek.as):00089                             blt       L00bf     ; skip optimization if offset reaches beyond buffer
+00A0 EC64             (      ../fseek.as):00090                             ldd       4,s       ; load low word of offset scratch
+00A2 E3C4             (      ../fseek.as):00091                             addd      ,u        ; add offset to current buffer pointer
+00A4 EDE4             (      ../fseek.as):00092                             std       ,s        ; save tentative new buffer pointer
+00A6 10A342           (      ../fseek.as):00093                             cmpd      2,u       ; ensure new pointer does not precede buffer base
+00A9 2514             (      ../fseek.as):00094                             bcs       L00bf     ; fall back to real seek if it underflows base
+00AB ECE4             (      ../fseek.as):00095                             ldd       ,s        ; reload tentative new buffer pointer
+00AD 10A344           (      ../fseek.as):00096                             cmpd      4,u       ; ensure new pointer stays before buffer end
+00B0 240D             (      ../fseek.as):00097                             bcc       L00bf     ; fall back to real seek if it reaches/passes end
+00B2 ECE4             (      ../fseek.as):00098                             ldd       ,s        ; reload tentative new buffer pointer
+00B4 EDC4             (      ../fseek.as):00099                             std       ,u        ; update current buffer pointer only
+00B6 E647             (      ../fseek.as):00100                             ldb       7,u       ; load low byte of FILE flags
+00B8 C4EF             (      ../fseek.as):00101                             andb      #^_EOF    ; clear EOF flag after successful reposition
+00BA E747             (      ../fseek.as):00102                             stb       7,u       ; save updated flag byte
+00BC 16005A           (      ../fseek.as):00103                             lbra      L0119     ; return success without touching the file descriptor
+00BF ECE810           (      ../fseek.as):00104         L00bf               ldd       16,s      ; load whence selector
+00C2 10830001         (      ../fseek.as):00105                             cmpd      #1        ; test SEEK_CUR case
+00C6 2619             (      ../fseek.as):00106                             bne       L00e1     ; only SEEK_CUR needs read-buffer compensation
+00C8 306C             (      ../fseek.as):00107         L00c8               leax      12,s      ; point X at original seek offset argument
+00CA 3410             (      ../fseek.as):00108                             pshs      x         ; stage destination pointer for long move
+00CC EC02             (      ../fseek.as):00109                             ldd       2,x       ; fetch original low word
+00CE 3406             (      ../fseek.as):00110                             pshs      d         ; stage low word for subtraction
+00D0 EC84             (      ../fseek.as):00111                             ldd       ,x        ; fetch original high word
+00D2 3406             (      ../fseek.as):00112                             pshs      d         ; stage high word for subtraction
+00D4 EC44             (      ../fseek.as):00113                             ldd       4,u       ; load buffer end pointer
+00D6 A3C4             (      ../fseek.as):00114                             subd      ,u        ; compute unread bytes left in buffer
+00D8 170000           (      ../fseek.as):00115                             lbsr      _litol    ; convert unread-byte count to long
+00DB 170000           (      ../fseek.as):00116                             lbsr      _lsub     ; subtract unread bytes from requested offset
+00DE 170000           (      ../fseek.as):00117                             lbsr      _lmove    ; store corrected offset back into local scratch
+00E1 EC44             (      ../fseek.as):00118         L00e1               ldd       4,u       ; load buffer end pointer
+00E3 EDC4             (      ../fseek.as):00119         L00e3               std       ,u        ; move current pointer to buffer end
+00E5 E647             (      ../fseek.as):00120         L00e5               ldb       7,u       ; load low byte of FILE flags
+00E7 C4EF             (      ../fseek.as):00121                             andb      #^_EOF    ; clear EOF flag before real reposition
+00E9 E747             (      ../fseek.as):00122                             stb       7,u       ; save updated flag byte
+00EB ECE810           (      ../fseek.as):00123                             ldd       16,s      ; load whence selector
+00EE 3406             (      ../fseek.as):00124                             pshs      d         ; stage whence for _lseek
+00F0 306E             (      ../fseek.as):00125                             leax      14,s      ; point X at corrected seek offset scratch
+00F2 EC02             (      ../fseek.as):00126                             ldd       2,x       ; fetch corrected low word
+00F4 3406             (      ../fseek.as):00127                             pshs      d         ; stage low word for _lseek
+00F6 EC84             (      ../fseek.as):00128                             ldd       ,x        ; fetch corrected high word
+00F8 3406             (      ../fseek.as):00129                             pshs      d         ; stage high word for _lseek
+00FA EC48             (      ../fseek.as):00130                             ldd       8,u       ; load underlying path number
+00FC 3406             (      ../fseek.as):00131                             pshs      d         ; stage path number for _lseek
+00FE 170000           (      ../fseek.as):00132                             lbsr      _lseek    ; perform absolute reposition through low-level helper
+0101 3268             (      ../fseek.as):00133                             leas      8,s       ; discard staged _lseek arguments
+0103 EC02             (      ../fseek.as):00134                             ldd       2,x       ; fetch returned low word from _flacc pointer
+0105 3406             (      ../fseek.as):00135                             pshs      d         ; stage low word for compare against -1
+0107 EC84             (      ../fseek.as):00136                             ldd       ,x        ; fetch returned high word from _flacc pointer
+0109 3406             (      ../fseek.as):00137                             pshs      d         ; stage high word for compare against -1
+010B 308D0014         (      ../fseek.as):00138                             leax      L0123,pcr ; point X at long -1 constant
+010F 170000           (      ../fseek.as):00139                             lbsr      _lcmpr    ; check whether _lseek signaled failure
+0112 2605             (      ../fseek.as):00140                             bne       L0119     ; non--1 return means seek succeeded
+0114 CCFFFF           (      ../fseek.as):00141         L0114               ldd       #-1       ; return EOF-style failure for unsuccessful seek
+0117 2002             (      ../fseek.as):00142                             bra       L011b     ; share teardown path
+0119 4F               (      ../fseek.as):00143         L0119               clra                ; return zero on success
+011A 5F               (      ../fseek.as):00144                             clrb                ; return zero on success
+011B 3266             (      ../fseek.as):00145         L011b               leas      6,s       ; discard local scratch space
+011D 35C0             (      ../fseek.as):00146                             puls      u,pc      ; restore U and return
+011F 00000000         (      ../fseek.as):00147         L011f               fdb       $0000,$0000 ; 32-bit zero constant for long compares
+0123 FFFFFFFF         (      ../fseek.as):00148         L0123               fdb       $FFFF,$FFFF ; 32-bit -1 constant for error compare
+                      (      ../fseek.as):00149         
+0127 4F               (      ../fseek.as):00150         _rewind             clra                ; build zero seek offset high byte
+0128 5F               (      ../fseek.as):00151                             clrb                ; build zero seek offset low byte
+0129 1F01             (      ../fseek.as):00152                             tfr       d,x       ; mirror zero into X for hidden long return frame
+012B 3416             (      ../fseek.as):00153                             pshs      d,x       ; stage whence 0 and zero offset
+012D EC66             (      ../fseek.as):00154                             ldd       6,s       ; reload FILE pointer
+012F 3416             (      ../fseek.as):00155                             pshs      d,x       ; stage FILE pointer and hidden return pointer
+0131 17FECC           (      ../fseek.as):00156                             lbsr      _fseek    ; seek to offset 0 from start of file
+0134 3268             (      ../fseek.as):00157                             leas      8,s       ; discard staged arguments
+0136 39               (      ../fseek.as):00158                             rts                 ; rewind has no explicit return value
+                      (      ../fseek.as):00159         
+0137 3440             (      ../fseek.as):00160         _ftell              pshs      u         ; preserve caller's U register
+0139 EE64             (      ../fseek.as):00161                             ldu       4,s       ; load FILE pointer
+013B 2706             (      ../fseek.as):00162                             beq       L0143     ; reject null stream pointers
+013D EC46             (      ../fseek.as):00163                             ldd       6,u       ; load FILE flags word
+013F C403             (      ../fseek.as):00164                             andb      #_READ|_WRITE ; require an open readable/writable stream
+0141 260D             (      ../fseek.as):00165                             bne       L0150     ; continue if stream is active
+0143 30A90000         (      ../fseek.as):00166         L0143               leax      _flacc,y  ; point X at shared long return accumulator
+0147 CCFFFF           (      ../fseek.as):00167                             ldd       #-1       ; prepare long -1 error result
+014A ED84             (      ../fseek.as):00168                             std       ,x        ; store high word of -1
+014C ED02             (      ../fseek.as):00169                             std       2,x       ; store low word of -1
+014E 35C0             (      ../fseek.as):00170                             puls      u,pc      ; restore U and return error result pointer
+0150 8480             (      ../fseek.as):00171         L0150               anda      #$80      ; test initialized bit in high byte
+0152 2607             (      ../fseek.as):00172                             bne       L015b     ; skip setup if stream is already initialized
+0154 3440             (      ../fseek.as):00173                             pshs      u         ; pass FILE pointer to setbase
+0156 170000           (      ../fseek.as):00174                             lbsr      _setbase  ; allocate/setup stream buffering state
+0159 3262             (      ../fseek.as):00175                             leas      2,s       ; discard staged FILE pointer
+015B CC0001           (      ../fseek.as):00176         L015b               ldd       #1        ; build SEEK_CUR selector
+015E 3406             (      ../fseek.as):00177                             pshs      d         ; stage whence for _lseek
+0160 5F               (      ../fseek.as):00178                             clrb                ; build zero offset low byte
+0161 3406             (      ../fseek.as):00179                             pshs      d         ; stage zero offset low word
+0163 3406             (      ../fseek.as):00180                             pshs      d         ; stage zero offset high word
+0165 EC48             (      ../fseek.as):00181                             ldd       8,u       ; load underlying path number
+0167 3406             (      ../fseek.as):00182                             pshs      d         ; stage path number for _lseek
+0169 170000           (      ../fseek.as):00183                             lbsr      _lseek    ; fetch current descriptor position through low-level helper
+016C 3268             (      ../fseek.as):00184                             leas      8,s       ; discard staged _lseek arguments
+016E EC02             (      ../fseek.as):00185                             ldd       2,x       ; fetch returned low word from _flacc pointer
+0170 3406             (      ../fseek.as):00186                             pshs      d         ; stage low word for adjusted total
+0172 EC84             (      ../fseek.as):00187                             ldd       ,x        ; fetch returned high word from _flacc pointer
+0174 3406             (      ../fseek.as):00188                             pshs      d         ; stage high word for adjusted total
+0176 A646             (      ../fseek.as):00189                             lda       6,u       ; load high byte of FILE flags
+0178 8401             (      ../fseek.as):00190                             anda      #$01      ; test _WRITTEN state
+017A 2704             (      ../fseek.as):00191                             beq       L0180     ; read mode uses buffer end for unread-byte correction
+017C EC42             (      ../fseek.as):00192                             ldd       2,u       ; write mode uses buffer base for unwritten-byte correction
+017E 2002             (      ../fseek.as):00193                             bra       L0182     ; share subtraction path
+0180 EC44             (      ../fseek.as):00194         L0180               ldd       4,u       ; read mode uses current buffer end pointer
+0182 3406             (      ../fseek.as):00195         L0182               pshs      d         ; stage reference pointer for subtraction
+0184 ECC4             (      ../fseek.as):00196                             ldd       ,u        ; load current buffer pointer
+0186 A3E1             (      ../fseek.as):00197                             subd      ,s++      ; compute buffered delta against reference pointer
+0188 170000           (      ../fseek.as):00198                             lbsr      _litol    ; convert buffered delta to long in _flacc
+018B 170000           (      ../fseek.as):00199                             lbsr      _ladd     ; add buffered delta to descriptor position
+018E 35C0             (      ../fseek.as):00200                             puls      u,pc      ; restore U and return pointer to long result
+                      (      ../fseek.as):00201         
+                      (      ../fseek.as):00202                             endsect             ; end code section

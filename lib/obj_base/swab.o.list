@@ -1,0 +1,12 @@
+                      (       ../swab.as):00001         * Adapted from cmoc_os9/lib/ported/swab.as for the live cmoc_os9 ABI.
+                      (       ../swab.as):00002         
+                      (       ../swab.as):00003                             section   code      ; begin code section
+                      (       ../swab.as):00004         
+                      (       ../swab.as):00005         _swab               EXPORT              ; export this symbol
+                      (       ../swab.as):00006         
+0000                  (       ../swab.as):00007         _swab
+0000 EC62             (       ../swab.as):00008                             ldd       2,s       ; load D from stack-relative value 2,s
+0002 1E89             (       ../swab.as):00009                             exg       a,b       ; exchange A,B
+0004 39               (       ../swab.as):00010                             rts                 ; return to caller
+                      (       ../swab.as):00011         
+                      (       ../swab.as):00012                             endsect             ; end current section

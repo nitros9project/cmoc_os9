@@ -1,0 +1,6 @@
+Symbol: _creat (create.o) = 0000
+Symbol: _create (create.o) = 0040
+Symbol: _ocreat (create.o) = 005E
+Symbol: L_creat_ret (create.o) = 006B
+Symbol: L_create_err (create.o) = 003B
+Symbol: L_ocreat_retry (create.o) = 004F

@@ -1,0 +1,5 @@
+Symbol: _memchr (memchr.o) = 0000
+Symbol: BranchTarget_01 (memchr.o) = 0014
+Symbol: Continue_01 (memchr.o) = 001A
+Symbol: Loop_01 (memchr.o) = 0008
+Symbol: ReturnZero_01 (memchr.o) = 0018

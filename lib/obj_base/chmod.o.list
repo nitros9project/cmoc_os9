@@ -1,0 +1,131 @@
+                      (      ../chmod.as):00001         *
+                      (      ../chmod.as):00002         * Adapted from cmoc_os9/lib/todo/chmod.a for the live CMOC ABI.
+                      (      ../chmod.as):00003         *
+                      (      ../chmod.as):00004         
+                      (      ../chmod.as):00005                             use       ../include/os9.d ; shared OS-9 service constants
+                      ( ../include/os9.d):00001         * Shared assembler-side OS-9 service, error, and status constants.
+                      ( ../include/os9.d):00002         
+     0000             ( ../include/os9.d):00003         F_Link              equ       $00       ; OS-9 link existing module
+     0001             ( ../include/os9.d):00004         F_Load              equ       $01       ; OS-9 load module from disk
+     0002             ( ../include/os9.d):00005         F_UnLink            equ       $02       ; OS-9 release linked module
+     0003             ( ../include/os9.d):00006         F_Fork              equ       $03       ; OS-9 fork system call
+     0004             ( ../include/os9.d):00007         F_Wait              equ       $04       ; OS-9 wait system call
+     0005             ( ../include/os9.d):00008         F_Chain             equ       $05       ; OS-9 chain system call
+     0006             ( ../include/os9.d):00009         F_Exit              equ       $06       ; OS-9 exit system call
+     0007             ( ../include/os9.d):00010         F_Mem               equ       $07       ; OS-9 memory-allocation service
+     0008             ( ../include/os9.d):00011         F_Send              equ       $08       ; OS-9 send-signal system call
+     0009             ( ../include/os9.d):00012         F_Icpt              equ       $09       ; OS-9 intercept-vector service
+     000A             ( ../include/os9.d):00013         F_Sleep             equ       $0A       ; OS-9 sleep system call
+     000C             ( ../include/os9.d):00014         F_ID                equ       $0C       ; OS-9 process identity service
+     000D             ( ../include/os9.d):00015         F_SPrior            equ       $0D       ; OS-9 set-priority system call
+     000F             ( ../include/os9.d):00016         F_PErr              equ       $0F       ; OS-9 print-error service
+     0015             ( ../include/os9.d):00017         F_Time              equ       $15       ; OS-9 read system time service
+     0016             ( ../include/os9.d):00018         F_STime             equ       $16       ; OS-9 set system time service
+     0017             ( ../include/os9.d):00019         F_CRC               equ       $17       ; OS-9 CRC helper service
+                      ( ../include/os9.d):00020         
+     0083             ( ../include/os9.d):00021         I_Create            equ       $83       ; OS-9 create path call
+     0084             ( ../include/os9.d):00022         I_Open              equ       $84       ; OS-9 open path call
+     0085             ( ../include/os9.d):00023         I_MakDir            equ       $85       ; OS-9 make-directory call
+     0086             ( ../include/os9.d):00024         I_ChgDir            equ       $86       ; OS-9 change-directory call
+     0088             ( ../include/os9.d):00025         I_Seek              equ       $88       ; OS-9 direct seek call
+     0089             ( ../include/os9.d):00026         I_Read              equ       $89       ; OS-9 read call
+     008A             ( ../include/os9.d):00027         I_Write             equ       $8A       ; OS-9 write call
+     008B             ( ../include/os9.d):00028         I_ReadLn            equ       $8B       ; OS-9 line-read call
+     008C             ( ../include/os9.d):00029         I_WritLn            equ       $8C       ; OS-9 line-write call
+     008D             ( ../include/os9.d):00030         I_GetStt            equ       $8D       ; OS-9 GetStat call
+     008E             ( ../include/os9.d):00031         I_SetStt            equ       $8E       ; OS-9 SetStat call
+     008F             ( ../include/os9.d):00032         I_Close             equ       $8F       ; OS-9 close call
+     0090             ( ../include/os9.d):00033         I_DeletX            equ       $90       ; OS-9 extended delete call
+                      ( ../include/os9.d):00034         
+     00D0             ( ../include/os9.d):00035         E_UnkSvc            equ       $D0       ; unknown service error code
+     00D3             ( ../include/os9.d):00036         E_EOF               equ       $D3       ; end-of-file status code
+     00D6             ( ../include/os9.d):00037         E_FNA               equ       $D6       ; file not accessible error code
+     00F7             ( ../include/os9.d):00038         E_Seek              equ       $F7       ; seek error code
+                      ( ../include/os9.d):00039         
+     0001             ( ../include/os9.d):00040         SS_Ready            equ       $01       ; path ready state query
+     0002             ( ../include/os9.d):00041         SS_Size             equ       $02       ; file size query/set
+     0003             ( ../include/os9.d):00042         SS_Reset            equ       $03       ; reset device/path state
+     0004             ( ../include/os9.d):00043         SS_WTrk             equ       $04       ; write-track style command
+     0005             ( ../include/os9.d):00044         SS_Pos              equ       $05       ; current file position query
+     0006             ( ../include/os9.d):00045         SS_EOF              equ       $06       ; end-of-file query
+     000A             ( ../include/os9.d):00046         SS_Frz              equ       $0A       ; freeze device command
+     000B             ( ../include/os9.d):00047         SS_SPT              equ       $0B       ; set sectors-per-track style command
+     000C             ( ../include/os9.d):00048         SS_SQD              equ       $0C       ; sequence-down command
+     000D             ( ../include/os9.d):00049         SS_DCmd             equ       $0D       ; device command with register block
+     000E             ( ../include/os9.d):00050         SS_DevNm            equ       $0E       ; device name query
+     000F             ( ../include/os9.d):00051         SS_FD               equ       $0F       ; file descriptor sector query/set
+     0010             ( ../include/os9.d):00052         SS_Ticks            equ       $10       ; tick count status
+     0011             ( ../include/os9.d):00053         SS_Lock             equ       $11       ; lock status command
+     0014             ( ../include/os9.d):00054         SS_BlkRd            equ       $14       ; block read command
+     0015             ( ../include/os9.d):00055         SS_BlkWr            equ       $15       ; block write command
+     0019             ( ../include/os9.d):00056         SS_ELog             equ       $19       ; error log command
+     001A             ( ../include/os9.d):00057         SS_SSig             equ       $1A       ; send signal command
+     001B             ( ../include/os9.d):00058         SS_Relea            equ       $1B       ; release command
+                      (      ../chmod.as):00006                             use       ../include/fcntl.d ; shared file-mode constants
+                      (./include/fcntl.d):00001         * Shared assembler-side file mode and access constants.
+                      (./include/fcntl.d):00002         
+     0001             (./include/fcntl.d):00003         S_IREAD             equ       $01       ; owner-read permission bit
+     0002             (./include/fcntl.d):00004         S_IWRITE            equ       $02       ; owner-write permission bit
+     0004             (./include/fcntl.d):00005         S_IEXEC             equ       $04       ; owner-execute permission bit
+     0008             (./include/fcntl.d):00006         S_IOREAD            equ       $08       ; public-read permission bit
+     0010             (./include/fcntl.d):00007         S_IOWRITE           equ       $10       ; public-write permission bit
+     0020             (./include/fcntl.d):00008         S_IOEXEC            equ       $20       ; public-execute permission bit
+     0040             (./include/fcntl.d):00009         S_SHARED            equ       $40       ; sharable file bit
+     0080             (./include/fcntl.d):00010         S_DIR               equ       $80       ; directory attribute bit
+                      (./include/fcntl.d):00011         
+     0001             (./include/fcntl.d):00012         FAM_READ            equ       S_IREAD   ; open for reading
+     0002             (./include/fcntl.d):00013         FAM_WRITE           equ       S_IWRITE  ; open for writing
+     0003             (./include/fcntl.d):00014         FAM_UPDATE          equ       S_IREAD|S_IWRITE ; open for read/write
+     0080             (./include/fcntl.d):00015         FAM_DIR             equ       S_DIR     ; operate on a directory path
+                      (      ../chmod.as):00007         
+                      (      ../chmod.as):00008                             section   code      ; begin code section
+                      (      ../chmod.as):00009         
+                      (      ../chmod.as):00010         _chmod              EXPORT              ; export this symbol
+                      (      ../chmod.as):00011         
+                      (      ../chmod.as):00012         _sysret             EXTERNAL            ; import external symbol
+                      (      ../chmod.as):00013         
+     0000             (      ../chmod.as):00014         FD_Att              equ       0         ; define constant as 0
+     0001             (      ../chmod.as):00015         FD_Own              equ       1         ; define constant as 1
+     0010             (      ../chmod.as):00016         Bufsize             equ       16        ; define constant as 16
+                      (      ../chmod.as):00017         
+0000 3460             (      ../chmod.as):00018         _chmod              pshs      y,u       ; save Y,U on the hardware stack
+0002 3270             (      ../chmod.as):00019                             leas      -Bufsize,s ; adjust S using -Bufsize,s
+                      (      ../chmod.as):00020         
+0004 8D2F             (      ../chmod.as):00021                             bsr       openfile  ; branch to subroutine to openfile
+0006 2525             (      ../chmod.as):00022                             bcs       chexit    ; branch if carry is set to chexit
+                      (      ../chmod.as):00023         
+0008 3422             (      ../chmod.as):00024                             pshs      a,y       ; save A,Y on the hardware stack
+000A 103F0C           (      ../chmod.as):00025                             os9       $0c       ; invoke OS-9 system call $0c
+000D 108C0000         (      ../chmod.as):00026                             cmpy      #0        ; compare Y against immediate value 0
+0011 2709             (      ../chmod.as):00027                             beq       chmod10   ; branch if equal/zero to chmod10
+0013 C6D6             (      ../chmod.as):00028                             ldb       #$d6      ; load B from immediate value $d6
+0015 10AC01           (      ../chmod.as):00029                             cmpy      FD_Own,x  ; compare Y against indexed value FD_Own,x
+0018 1A01             (      ../chmod.as):00030                             orcc      #1        ; set condition-code bits with mask #1
+001A 2611             (      ../chmod.as):00031                             bne       chexit    ; branch if not equal to chexit
+                      (      ../chmod.as):00032         
+001C E6E81C           (      ../chmod.as):00033         chmod10             ldb       Bufsize+12,s ; load B from stack-relative value Bufsize+12,s
+001F E784             (      ../chmod.as):00034                             stb       FD_Att,x  ; store B to indexed value FD_Att,x
+0021 3522             (      ../chmod.as):00035                             puls      a,y       ; restore A,Y from the hardware stack
+0023 C60F             (      ../chmod.as):00036                             ldb       #SS_FD    ; load B from immediate value SS_FD
+0025 103F8E           (      ../chmod.as):00037                             os9       $8e       ; invoke OS-9 system call $8e
+0028 2503             (      ../chmod.as):00038                             bcs       chexit    ; branch if carry is set to chexit
+002A 103F8F           (      ../chmod.as):00039                             os9       $8f       ; invoke OS-9 system call $8f
+                      (      ../chmod.as):00040         
+002D 32E810           (      ../chmod.as):00041         chexit              leas      Bufsize,s ; adjust S using Bufsize,s
+0030 3560             (      ../chmod.as):00042                             puls      y,u       ; restore Y,U from the hardware stack
+0032 160000           (      ../chmod.as):00043                             lbra      _sysret   ; long branch unconditionally to _sysret
+                      (      ../chmod.as):00044         
+0035                  (      ../chmod.as):00045         openfile
+0035 8602             (      ../chmod.as):00046                             lda       #FAM_WRITE ; load A from immediate value FAM_WRITE
+0037 AEE818           (      ../chmod.as):00047                             ldx       Bufsize+8,s ; load X from stack-relative value Bufsize+8,s
+003A 103F84           (      ../chmod.as):00048                             os9       $84       ; invoke OS-9 system call $84
+003D 2401             (      ../chmod.as):00049                             bcc       openf10   ; branch if carry is clear to openf10
+003F 39               (      ../chmod.as):00050                             rts                 ; return to caller
+                      (      ../chmod.as):00051         
+0040 3062             (      ../chmod.as):00052         openf10             leax      2,s       ; compute effective address into X from 2,s
+0042 108E0010         (      ../chmod.as):00053                             ldy       #Bufsize  ; load Y from immediate value Bufsize
+0046 C60F             (      ../chmod.as):00054                             ldb       #SS_FD    ; load B from immediate value SS_FD
+0048 103F8D           (      ../chmod.as):00055                             os9       $8d       ; invoke OS-9 system call $8d
+004B 39               (      ../chmod.as):00056                             rts                 ; return to caller
+                      (      ../chmod.as):00057         
+                      (      ../chmod.as):00058                             endsect             ; end current section

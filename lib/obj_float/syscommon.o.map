@@ -1,0 +1,4 @@
+Symbol: _os9err (syscommon.o) = 000B
+Symbol: _oserr (syscommon.o) = 0000
+Symbol: _osret (syscommon.o) = 0006
+Symbol: _sysret (syscommon.o) = 0014

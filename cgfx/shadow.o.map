@@ -1,0 +1,3 @@
+Symbol: _cgfx_shadow (shadow.o) = 0000
+Symbol: noerror (shadow.o) = 004C
+Symbol: srts (shadow.o) = 004E

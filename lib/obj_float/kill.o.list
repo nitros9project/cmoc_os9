@@ -1,0 +1,17 @@
+                      (       ../kill.as):00001         * Adapted from old Kreider process.a.
+                      (       ../kill.as):00002         * kill(pid, signal) -> 0 on success, -1 on error.
+                      (       ../kill.as):00003         
+                      (       ../kill.as):00004                             section   code      ; begin code section
+                      (       ../kill.as):00005         
+                      (       ../kill.as):00006         _kill               EXPORT              ; export this symbol
+                      (       ../kill.as):00007         _sysret             EXTERNAL            ; import external symbol
+                      (       ../kill.as):00008         
+     0008             (       ../kill.as):00009         F_Send              equ       $08       ; define constant as $08
+                      (       ../kill.as):00010         
+0000                  (       ../kill.as):00011         _kill
+0000 A663             (       ../kill.as):00012                             lda       3,s       ; get process id
+0002 E665             (       ../kill.as):00013                             ldb       5,s       ; get signal number
+0004 103F08           (       ../kill.as):00014                             os9       F_Send    ; invoke OS-9 system call F_Send
+0007 160000           (       ../kill.as):00015                             lbra      _sysret   ; long branch unconditionally to _sysret
+                      (       ../kill.as):00016         
+                      (       ../kill.as):00017                             endsect             ; end current section

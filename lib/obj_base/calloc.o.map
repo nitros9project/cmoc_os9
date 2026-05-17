@@ -1,0 +1,3 @@
+Symbol: _calloc (calloc.o) = 0000
+Symbol: BranchTarget_01 (calloc.o) = 001E
+Symbol: Loop_01 (calloc.o) = 0018

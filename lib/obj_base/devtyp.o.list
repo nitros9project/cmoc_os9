@@ -1,0 +1,35 @@
+                      (     ../devtyp.as):00001         * Adapted from cmoc_os9/lib/todo/devtyp.as
+                      (     ../devtyp.as):00002         
+                      (     ../devtyp.as):00003                             section   code      ; begin code section
+                      (     ../devtyp.as):00004         
+                      (     ../devtyp.as):00005         _devtyp             EXPORT              ; export this symbol
+                      (     ../devtyp.as):00006         _isatty             EXPORT              ; export this symbol
+                      (     ../devtyp.as):00007         
+                      (     ../devtyp.as):00008         _os9err             EXTERNAL            ; import external symbol
+                      (     ../devtyp.as):00009         
+0000                  (     ../devtyp.as):00010         _isatty
+0000 EC62             (     ../devtyp.as):00011                             ldd       2,s       ; load D from stack-relative value 2,s
+0002 3406             (     ../devtyp.as):00012                             pshs      d         ; save D on the hardware stack
+0004 8D08             (     ../devtyp.as):00013                             bsr       _devtyp   ; branch to subroutine to _devtyp
+0006 EDE1             (     ../devtyp.as):00014                             std       ,s++      ; store D to memory pointed to by S+, then advance S+
+0008 2702             (     ../devtyp.as):00015                             beq       tty_yes   ; branch if equal/zero to tty_yes
+000A 5F               (     ../devtyp.as):00016                             clrb                ; clear B
+000B 39               (     ../devtyp.as):00017                             rts                 ; return to caller
+000C                  (     ../devtyp.as):00018         tty_yes
+000C 5C               (     ../devtyp.as):00019                             incb                ; increment B
+000D 39               (     ../devtyp.as):00020                             rts                 ; return to caller
+                      (     ../devtyp.as):00021         
+000E                  (     ../devtyp.as):00022         _devtyp
+000E A663             (     ../devtyp.as):00023                             lda       3,s       ; load A from stack-relative value 3,s
+0010 5F               (     ../devtyp.as):00024                             clrb                ; clear B
+0011 32E8E0           (     ../devtyp.as):00025                             leas      -32,s     ; adjust S using -32,s
+0014 30E4             (     ../devtyp.as):00026                             leax      ,s        ; compute effective address into X from ,s
+0016 103F8D           (     ../devtyp.as):00027                             os9       $8D       ; invoke OS-9 system call $8D
+0019 A6E4             (     ../devtyp.as):00028                             lda       ,s        ; load A from memory pointed to by S
+001B 32E820           (     ../devtyp.as):00029                             leas      32,s      ; adjust S using 32,s
+001E 10250000         (     ../devtyp.as):00030                             lblo      _os9err   ; long branch if lower to _os9err
+0022 1F89             (     ../devtyp.as):00031                             tfr       a,b       ; transfer A,B
+0024 4F               (     ../devtyp.as):00032                             clra                ; clear A
+0025 39               (     ../devtyp.as):00033                             rts                 ; return to caller
+                      (     ../devtyp.as):00034         
+                      (     ../devtyp.as):00035                             endsect             ; end current section

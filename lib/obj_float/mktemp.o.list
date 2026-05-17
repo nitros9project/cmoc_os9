@@ -1,0 +1,34 @@
+                      (     ../mktemp.as):00001         * Compact assembly implementation of mktemp().
+                      (     ../mktemp.as):00002         
+                      (     ../mktemp.as):00003                             section   code      ; begin code section
+                      (     ../mktemp.as):00004         
+                      (     ../mktemp.as):00005         _mktemp             EXPORT              ; export this symbol
+                      (     ../mktemp.as):00006         
+                      (     ../mktemp.as):00007         _getpid             EXTERNAL            ; import external symbol
+                      (     ../mktemp.as):00008         _itoa               EXTERNAL            ; import external symbol
+                      (     ../mktemp.as):00009         
+0000                  (     ../mktemp.as):00010         _mktemp
+0000 3440             (     ../mktemp.as):00011                             pshs      u         ; save U on the hardware stack
+0002 EE64             (     ../mktemp.as):00012                             ldu       4,s       ; load U from stack-relative value 4,s
+0004                  (     ../mktemp.as):00013         L_mktemp_scan
+0004 E6C0             (     ../mktemp.as):00014                             ldb       ,u+       ; load B from memory pointed to by U, then advance U
+0006 271C             (     ../mktemp.as):00015                             beq       L_mktemp_done ; branch if equal/zero to L_mktemp_done
+0008 C158             (     ../mktemp.as):00016                             cmpb      #'X
+000A 26F8             (     ../mktemp.as):00017                             bne       L_mktemp_scan ; branch if not equal to L_mktemp_scan
+000C 335F             (     ../mktemp.as):00018                             leau      -1,u      ; compute effective address into U from -1,u
+000E 3440             (     ../mktemp.as):00019                             pshs      u         ; save U on the hardware stack
+0010 CC0005           (     ../mktemp.as):00020                             ldd       #5        ; load D from immediate value 5
+0013                  (     ../mktemp.as):00021         L_mktemp_zero
+0013 A7C0             (     ../mktemp.as):00022                             sta       ,u+       ; store A to memory pointed to by U, then advance U
+0015 5A               (     ../mktemp.as):00023                             decb                ; decrement B
+0016 26FB             (     ../mktemp.as):00024                             bne       L_mktemp_zero ; branch if not equal to L_mktemp_zero
+0018 3540             (     ../mktemp.as):00025                             puls      u         ; restore U from the hardware stack
+001A 170000           (     ../mktemp.as):00026                             lbsr      _getpid   ; long branch to subroutine to _getpid
+001D 3446             (     ../mktemp.as):00027                             pshs      d,u       ; save D,U on the hardware stack
+001F 170000           (     ../mktemp.as):00028                             lbsr      _itoa     ; long branch to subroutine to _itoa
+0022 3264             (     ../mktemp.as):00029                             leas      4,s       ; adjust S using 4,s
+0024                  (     ../mktemp.as):00030         L_mktemp_done
+0024 EC64             (     ../mktemp.as):00031                             ldd       4,s       ; load D from stack-relative value 4,s
+0026 35C0             (     ../mktemp.as):00032                             puls      u,pc      ; restore registers and return
+                      (     ../mktemp.as):00033         
+                      (     ../mktemp.as):00034                             endsect             ; end current section

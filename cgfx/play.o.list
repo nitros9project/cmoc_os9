@@ -1,0 +1,379 @@
+                      (          play.as):00001         * Adapted from cmoc_os9/cgfx/todo/play.a for the live cmoc_os9 ABI.
+                      (          play.as):00002         
+                      (          play.as):00003                 section bss
+0000                  (          play.as):00004         _play_tempo             rmb     1 * reserve 1 bytes
+0001                  (          play.as):00005         _play_length            rmb     1 * reserve 1 bytes
+0002                  (          play.as):00006         _play_dots              rmb     1 * reserve 1 bytes
+0003                  (          play.as):00007         _play_style             rmb     1 * reserve 1 bytes
+0004                  (          play.as):00008         _play_octave            rmb     1 * reserve 1 bytes
+0005                  (          play.as):00009         _play_volume            rmb     1 * reserve 1 bytes
+0006                  (          play.as):00010         _play_remainder         rmb     2 * reserve 2 bytes
+0008                  (          play.as):00011         _play_curdots           rmb     1 * reserve 1 bytes
+0009                  (          play.as):00012         _play_path              rmb     1 * reserve 1 bytes
+000A                  (          play.as):00013         _play_strings           rmb     2 * reserve 2 bytes
+                      (          play.as):00014                 endsect * end current section
+                      (          play.as):00015         
+                      (          play.as):00016                 section code
+                      (          play.as):00017         
+                      (          play.as):00018         _Play                   EXPORT * export this symbol
+                      (          play.as):00019         
+                      (          play.as):00020         _Flush                  EXTERNAL * import external symbol
+                      (          play.as):00021         _write                  EXTERNAL * import external symbol
+                      (          play.as):00022         
+0000                  (          play.as):00023         _play_notes
+0000 0BDE0B370A9309FA (          play.as):00024                 fdb     3038,2871,2707,2554,2411,2273,2150,2027,1914,1806,1704,1610 * define word data 3038,2871,2707,2554,2411,2273,2150,2027,1914,1806,1704,1610
+     096B08E1086607EB
+     077A070E06A8064A
+0018                  (          play.as):00025         _play_notetbl
+0018 090B0002040507   (          play.as):00026                 fcb     9,11,0,2,4,5,7 * define byte data 9,11,0,2,4,5,7
+                      (          play.as):00027         
+001F                  (          play.as):00028         _Play
+001F 3440             (          play.as):00029                 pshs    u
+0021 170000           (          play.as):00030                 lbsr    _Flush * flush pending screen or sound output before starting playback
+0024 8664             (          play.as):00031                 lda     #100 * load the default tempo
+0026 A7A90000         (          play.as):00032                 sta     _play_tempo,y * store the initial tempo for this score
+002A 8604             (          play.as):00033                 lda     #4 * load the default note length
+002C A7A90000         (          play.as):00034                 sta     _play_length,y * store the initial note length
+0030 6FA90000         (          play.as):00035                 clr     _play_dots,y * clear the default dotted-note count
+0034 6FA90000         (          play.as):00036                 clr     _play_style,y * clear the articulation style to normal
+0038 8603             (          play.as):00037                 lda     #3 * load the default octave
+003A A7A90000         (          play.as):00038                 sta     _play_octave,y * store the initial octave
+003E 8620             (          play.as):00039                 lda     #32 * load the default volume
+0040 A7A90000         (          play.as):00040                 sta     _play_volume,y * store the initial volume
+0044 6FA90000         (          play.as):00041                 clr     _play_remainder,y * clear the low byte of the note-length remainder accumulator
+0048 6FA90000         (          play.as):00042                 clr     _play_remainder+1,y * clear the high byte of the note-length remainder accumulator
+004C A665             (          play.as):00043                 lda     5,s * load the destination path for note output
+004E A7A90000         (          play.as):00044                 sta     _play_path,y * remember the active output path
+0052 3066             (          play.as):00045                 leax    6,s * point at the caller's string-vector argument list
+0054 AFA90000         (          play.as):00046                 stx     _play_strings,y * remember the current %S/%D string-expansion cursor
+0058 AE84             (          play.as):00047                 ldx     ,x * load the first music-string pointer
+005A 338CBB           (          play.as):00048                 leau    _play_notetbl,pcr * point U at the note-name to semitone lookup table
+005D 8D02             (          play.as):00049                 bsr     parse * parse and play the first music string
+005F 35C0             (          play.as):00050                 puls    u,pc
+                      (          play.as):00051         
+0061 A680             (          play.as):00052         parse   lda     ,x+ * fetch the next command character from the score string
+0063 8120             (          play.as):00053                 cmpa    #$20 * compare A against immediate value $20
+0065 27FA             (          play.as):00054                 beq     parse * ignore spaces between music tokens
+0067 813B             (          play.as):00055                 cmpa    #$3b * compare A against immediate value $3b
+0069 27F6             (          play.as):00056                 beq     parse * ignore semicolon separators
+006B 815F             (          play.as):00057                 cmpa    #$5f * compare A against immediate value $5f
+006D 2302             (          play.as):00058                 bls     p00 * keep ASCII punctuation and digits unchanged
+006F 845F             (          play.as):00059                 anda    #$5f * fold lowercase note commands to uppercase
+                      (          play.as):00060         
+0071 8141             (          play.as):00061         p00     cmpa    #$41 * compare A against immediate value $41
+0073 256C             (          play.as):00062                 blo     p10
+0075 8147             (          play.as):00063                 cmpa    #$47 * compare A against immediate value $47
+0077 2268             (          play.as):00064                 bhi     p10 * branch when the token is not a note letter
+0079 8041             (          play.as):00065                 suba    #$41 * convert A-G into a zero-based note index
+007B A6C6             (          play.as):00066                 lda     a,u * translate the note letter through the semitone lookup table
+007D 3402             (          play.as):00067                 pshs    a
+007F A680             (          play.as):00068         p01     lda     ,x+ * fetch the next modifier after the note letter
+0081 812F             (          play.as):00069                 cmpa    #$2f * compare A against immediate value $2f
+0083 2212             (          play.as):00070                 bhi     p03 * stop treating punctuation as accidental/octave modifiers
+0085 812D             (          play.as):00071                 cmpa    #$2d * compare A against immediate value $2d
+0087 2604             (          play.as):00072                 bne     p02
+0089 6AE4             (          play.as):00073                 dec     ,s * flatten the current note by one semitone
+008B 20F2             (          play.as):00074                 bra     p01 * keep scanning note modifiers
+008D 8403             (          play.as):00075         p02     anda    #$03 * AND A with immediate value $03
+008F 8103             (          play.as):00076                 cmpa    #3 * compare A against immediate value 3
+0091 261C             (          play.as):00077                 bne     p05
+0093 6CE4             (          play.as):00078                 inc     ,s * sharpen the current note by one semitone
+0095 20E8             (          play.as):00079                 bra     p01 * keep scanning note modifiers
+0097 813C             (          play.as):00080         p03     cmpa    #$3c * compare A against immediate value $3c
+0099 2608             (          play.as):00081                 bne     p04
+009B A6E4             (          play.as):00082                 lda     ,s * load A from memory pointed to by S
+009D 800C             (          play.as):00083                 suba    #12 * transpose the note down one octave
+009F A7E4             (          play.as):00084                 sta     ,s * store the transposed note value back on the stack
+00A1 20DC             (          play.as):00085                 bra     p01
+00A3 813E             (          play.as):00086         p04     cmpa    #$3e * compare A against immediate value $3e
+00A5 2608             (          play.as):00087                 bne     p05
+00A7 A6E4             (          play.as):00088                 lda     ,s * load A from memory pointed to by S
+00A9 8B0C             (          play.as):00089                 adda    #12 * transpose the note up one octave
+00AB A7E4             (          play.as):00090                 sta     ,s * store the transposed note value back on the stack
+00AD 20D0             (          play.as):00091                 bra     p01
+00AF 301F             (          play.as):00092         p05     leax    -1,x * push the non-modifier character back for the next parser stage
+00B1 E6A90000         (          play.as):00093                 ldb     _play_dots,y * load the default dotted-note count
+00B5 E7A90000         (          play.as):00094                 stb     _play_curdots,y * copy the default dots into the current-note state
+00B9 E6A90000         (          play.as):00095                 ldb     _play_length,y * load the default note length
+00BD 8130             (          play.as):00096                 cmpa    #$30 * compare A against immediate value $30
+00BF 2519             (          play.as):00097                 blo     p08
+00C1 8139             (          play.as):00098                 cmpa    #$39 * compare A against immediate value $39
+00C3 2215             (          play.as):00099                 bhi     p08 * branch when no explicit note length follows
+00C5 6FA90000         (          play.as):00100                 clr     _play_curdots,y * explicit note lengths reset the dotted-note count
+00C9 1700F6           (          play.as):00101                 lbsr    getnum * parse the explicit note length into B
+00CC A680             (          play.as):00102         p06     lda     ,x+ * scan for trailing dots after an explicit note length
+00CE 812E             (          play.as):00103                 cmpa    #$2e * compare A against immediate value $2e
+00D0 2606             (          play.as):00104                 bne     p07
+00D2 6CA90000         (          play.as):00105                 inc     _play_curdots,y * add one dotted-note extension
+00D6 20F4             (          play.as):00106                 bra     p06
+00D8 301F             (          play.as):00107         p07     leax    -1,x * push the first non-dot character back into the stream
+00DA 3502             (          play.as):00108         p08     puls    a * recover the final semitone value for the note
+00DC 170191           (          play.as):00109                 lbsr    playnote * synthesize the note using the current tempo, octave, and style
+00DF 2080             (          play.as):00110                 bra     parse * continue parsing the rest of the score
+                      (          play.as):00111         
+00E1 8125             (          play.as):00112         p10     cmpa    #$25 * compare A against immediate value $25
+00E3 2620             (          play.as):00113                 bne     p20
+00E5 A680             (          play.as):00114                 lda     ,x+ * load A from memory pointed to by X, then advance X
+00E7 845F             (          play.as):00115                 anda    #$5f * AND A with immediate value $5f
+00E9 8153             (          play.as):00116                 cmpa    #$53 * compare A against immediate value $53
+00EB 1026FF72         (          play.as):00117                 lbne    parse
+00EF 3410             (          play.as):00118                 pshs    x
+00F1 AEA90000         (          play.as):00119                 ldx     _play_strings,y * load X from indexed value _play_strings,y
+00F5 3002             (          play.as):00120                 leax    2,x * compute effective address into X from 2,x
+00F7 AFA90000         (          play.as):00121                 stx     _play_strings,y * store X to indexed value _play_strings,y
+00FB AE84             (          play.as):00122                 ldx     ,x * load X from memory pointed to by X
+00FD 17FF61           (          play.as):00123                 lbsr    parse
+0100 3510             (          play.as):00124                 puls    x
+0102 16FF5C           (          play.as):00125                 lbra    parse
+                      (          play.as):00126         
+0105 8154             (          play.as):00127         p20     cmpa    #$54 * compare A against immediate value $54
+0107 260E             (          play.as):00128                 bne     p30
+0109 E6A90000         (          play.as):00129                 ldb     _play_tempo,y * load B from indexed value _play_tempo,y
+010D 1700B2           (          play.as):00130                 lbsr    getnum
+0110 E7A90000         (          play.as):00131                 stb     _play_tempo,y * store B to indexed value _play_tempo,y
+0114 16FF4A           (          play.as):00132                 lbra    parse
+                      (          play.as):00133         
+0117 814C             (          play.as):00134         p30     cmpa    #$4c * compare A against immediate value $4c
+0119 2620             (          play.as):00135                 bne     p40
+011B E6A90000         (          play.as):00136                 ldb     _play_length,y * load B from indexed value _play_length,y
+011F 1700A0           (          play.as):00137                 lbsr    getnum
+0122 E7A90000         (          play.as):00138                 stb     _play_length,y * store B to indexed value _play_length,y
+0126 6FA90000         (          play.as):00139                 clr     _play_dots,y * clear indexed value _play_dots,y
+012A A680             (          play.as):00140         p31     lda     ,x+ * load A from memory pointed to by X, then advance X
+012C 812E             (          play.as):00141                 cmpa    #$2e * compare A against immediate value $2e
+012E 2606             (          play.as):00142                 bne     p32
+0130 6CA90000         (          play.as):00143                 inc     _play_dots,y * increment indexed value _play_dots,y
+0134 20F4             (          play.as):00144                 bra     p31
+0136 301F             (          play.as):00145         p32     leax    -1,x * compute effective address into X from -1,x
+0138 16FF26           (          play.as):00146                 lbra    parse
+                      (          play.as):00147         
+013B 814F             (          play.as):00148         p40     cmpa    #$4f * compare A against immediate value $4f
+013D 260E             (          play.as):00149                 bne     p50
+013F E6A90000         (          play.as):00150                 ldb     _play_octave,y * load B from indexed value _play_octave,y
+0143 17007C           (          play.as):00151                 lbsr    getnum
+0146 E7A90000         (          play.as):00152                 stb     _play_octave,y * store B to indexed value _play_octave,y
+014A 16FF14           (          play.as):00153                 lbra    parse
+                      (          play.as):00154         
+014D 8156             (          play.as):00155         p50     cmpa    #$56 * compare A against immediate value $56
+014F 260D             (          play.as):00156                 bne     p60
+0151 E6A90000         (          play.as):00157                 ldb     _play_volume,y * load B from indexed value _play_volume,y
+0155 8D6B             (          play.as):00158                 bsr     getnum
+0157 E7A90000         (          play.as):00159                 stb     _play_volume,y * store B to indexed value _play_volume,y
+015B 16FF03           (          play.as):00160                 lbra    parse
+                      (          play.as):00161         
+015E 8150             (          play.as):00162         p60     cmpa    #$50 * compare A against immediate value $50
+0160 2630             (          play.as):00163                 bne     p70
+0162 E6A90000         (          play.as):00164                 ldb     _play_dots,y * load B from indexed value _play_dots,y
+0166 E7A90000         (          play.as):00165                 stb     _play_curdots,y * store B to indexed value _play_curdots,y
+016A E6A90000         (          play.as):00166                 ldb     _play_length,y * load B from indexed value _play_length,y
+016E A680             (          play.as):00167                 lda     ,x+ * load A from memory pointed to by X, then advance X
+0170 8130             (          play.as):00168                 cmpa    #$30 * compare A against immediate value $30
+0172 2516             (          play.as):00169                 blo     p62
+0174 8139             (          play.as):00170                 cmpa    #$39 * compare A against immediate value $39
+0176 2212             (          play.as):00171                 bhi     p62
+0178 8D48             (          play.as):00172                 bsr     getnum
+017A 6FA90000         (          play.as):00173                 clr     _play_curdots,y * clear indexed value _play_curdots,y
+017E 812E             (          play.as):00174         p61     cmpa    #$2e * compare A against immediate value $2e
+0180 2608             (          play.as):00175                 bne     p62
+0182 6CA90000         (          play.as):00176                 inc     _play_curdots,y * increment indexed value _play_curdots,y
+0186 A680             (          play.as):00177                 lda     ,x+ * load A from memory pointed to by X, then advance X
+0188 20F4             (          play.as):00178                 bra     p61
+018A 301F             (          play.as):00179         p62     leax    -1,x * compute effective address into X from -1,x
+018C 170169           (          play.as):00180                 lbsr    playrest
+018F 16FECF           (          play.as):00181                 lbra    parse
+                      (          play.as):00182         
+0192 815D             (          play.as):00183         p70     cmpa    #$5d * compare A against immediate value $5d
+0194 262B             (          play.as):00184                 bne     prts
+0196 A680             (          play.as):00185                 lda     ,x+ * load A from memory pointed to by X, then advance X
+0198 845F             (          play.as):00186                 anda    #$5f * AND A with immediate value $5f
+019A 8153             (          play.as):00187                 cmpa    #$53 * compare A against immediate value $53
+019C 2609             (          play.as):00188                 bne     p71
+019E 86FF             (          play.as):00189                 lda     #-1 * load A from immediate value -1
+01A0 A7A90000         (          play.as):00190                 sta     _play_style,y * store A to indexed value _play_style,y
+01A4 16FEBA           (          play.as):00191                 lbra    parse
+01A7 814E             (          play.as):00192         p71     cmpa    #$4e * compare A against immediate value $4e
+01A9 2607             (          play.as):00193                 bne     p72
+01AB 6FA90000         (          play.as):00194                 clr     _play_style,y * clear indexed value _play_style,y
+01AF 16FEAF           (          play.as):00195                 lbra    parse
+01B2 814C             (          play.as):00196         p72     cmpa    #$4c * compare A against immediate value $4c
+01B4 1026FEA9         (          play.as):00197                 lbne    parse
+01B8 8601             (          play.as):00198                 lda     #1 * load A from immediate value 1
+01BA A7A90000         (          play.as):00199                 sta     _play_style,y * store A to indexed value _play_style,y
+01BE 16FEA0           (          play.as):00200                 lbra    parse
+                      (          play.as):00201         
+01C1 39               (          play.as):00202         prts    rts * return to caller
+                      (          play.as):00203         
+01C2 A680             (          play.as):00204         getnum  lda     ,x+ * load A from memory pointed to by X, then advance X
+01C4 8120             (          play.as):00205                 cmpa    #$20 * compare A against immediate value $20
+01C6 27FA             (          play.as):00206                 beq     getnum
+01C8 8130             (          play.as):00207                 cmpa    #$30 * compare A against immediate value $30
+01CA 2520             (          play.as):00208                 blo     g00
+01CC 8139             (          play.as):00209                 cmpa    #$39 * compare A against immediate value $39
+01CE 221C             (          play.as):00210                 bhi     g00
+01D0 8030             (          play.as):00211                 suba    #$30 * subtract immediate value $30 from A
+01D2 1F89             (          play.as):00212                 tfr     a,b
+01D4 A680             (          play.as):00213         gloop0  lda     ,x+ * load A from memory pointed to by X, then advance X
+01D6 8130             (          play.as):00214                 cmpa    #$30 * compare A against immediate value $30
+01D8 250F             (          play.as):00215                 blo     gnext0
+01DA 8139             (          play.as):00216                 cmpa    #$39 * compare A against immediate value $39
+01DC 220B             (          play.as):00217                 bhi     gnext0
+01DE 8030             (          play.as):00218                 suba    #$30 * subtract immediate value $30 from A
+01E0 3402             (          play.as):00219                 pshs    a
+01E2 860A             (          play.as):00220                 lda     #10 * load A from immediate value 10
+01E4 3D               (          play.as):00221                 mul * multiply A by B and leave the product in D
+01E5 EBE0             (          play.as):00222                 addb    ,s+ * add memory pointed to by S, then advance S into B
+01E7 20EB             (          play.as):00223                 bra     gloop0
+01E9 301F             (          play.as):00224         gnext0  leax    -1,x * compute effective address into X from -1,x
+01EB 39               (          play.as):00225         grts    rts * return to caller
+                      (          play.as):00226         
+01EC 8125             (          play.as):00227         g00     cmpa    #$25 * compare A against immediate value $25
+01EE 262E             (          play.as):00228                 bne     g10
+01F0 A680             (          play.as):00229                 lda     ,x+ * load A from memory pointed to by X, then advance X
+01F2 845F             (          play.as):00230                 anda    #$5f * AND A with immediate value $5f
+01F4 8144             (          play.as):00231                 cmpa    #$44 * compare A against immediate value $44
+01F6 2610             (          play.as):00232                 bne     g01
+01F8 3410             (          play.as):00233                 pshs    x
+01FA AEA90000         (          play.as):00234                 ldx     _play_strings,y * load X from indexed value _play_strings,y
+01FE 3002             (          play.as):00235                 leax    2,x * compute effective address into X from 2,x
+0200 EC84             (          play.as):00236                 ldd     ,x * load D from memory pointed to by X
+0202 AFA90000         (          play.as):00237                 stx     _play_strings,y * store X to indexed value _play_strings,y
+0206 3590             (          play.as):00238                 puls    x,pc
+0208 8153             (          play.as):00239         g01     cmpa    #$53 * compare A against immediate value $53
+020A 26DF             (          play.as):00240                 bne     grts
+020C 3410             (          play.as):00241                 pshs    x
+020E AEA90000         (          play.as):00242                 ldx     _play_strings,y * load X from indexed value _play_strings,y
+0212 3002             (          play.as):00243                 leax    2,x * compute effective address into X from 2,x
+0214 AFA90000         (          play.as):00244                 stx     _play_strings,y * store X to indexed value _play_strings,y
+0218 AE84             (          play.as):00245                 ldx     ,x * load X from memory pointed to by X
+021A 8DA6             (          play.as):00246                 bsr     getnum
+021C 3590             (          play.as):00247                 puls    x,pc
+                      (          play.as):00248         
+021E 812B             (          play.as):00249         g10     cmpa    #$2b * compare A against immediate value $2b
+0220 2603             (          play.as):00250                 bne     g20
+0222 5C               (          play.as):00251                 incb * increment B
+0223 209D             (          play.as):00252                 bra     getnum
+                      (          play.as):00253         
+0225 812D             (          play.as):00254         g20     cmpa    #$2d * compare A against immediate value $2d
+0227 2603             (          play.as):00255                 bne     g30
+0229 5A               (          play.as):00256                 decb * decrement B
+022A 2096             (          play.as):00257                 bra     getnum
+                      (          play.as):00258         
+022C 813C             (          play.as):00259         g30     cmpa    #$3c * compare A against immediate value $3c
+022E 2603             (          play.as):00260                 bne     g40
+0230 54               (          play.as):00261                 lsrb * logical shift B right by one bit
+0231 208F             (          play.as):00262                 bra     getnum
+                      (          play.as):00263         
+0233 813E             (          play.as):00264         g40     cmpa    #$3e * compare A against immediate value $3e
+0235 26B2             (          play.as):00265                 bne     gnext0
+0237 58               (          play.as):00266                 lslb * shift B left by one bit
+0238 2088             (          play.as):00267                 bra     getnum
+                      (          play.as):00268         
+023A                  (          play.as):00269         calctime
+023A 6CA90000         (          play.as):00270                 inc     _play_curdots,y * increment indexed value _play_curdots,y
+023E A6A90000         (          play.as):00271                 lda     _play_tempo,y * load A from indexed value _play_tempo,y
+0242 3D               (          play.as):00272                 mul * multiply A by B and leave the product in D
+0243 3406             (          play.as):00273                 pshs    d
+0245 CC3840           (          play.as):00274                 ldd     #14400 * load D from immediate value 14400
+0248 E3A90000         (          play.as):00275                 addd    _play_remainder,y * add indexed value _play_remainder,y into D
+024C 3406             (          play.as):00276                 pshs    d
+024E 6AA90000         (          play.as):00277         cloop0  dec     _play_curdots,y * decrement indexed value _play_curdots,y
+0252 2B08             (          play.as):00278                 bmi     cnext0
+0254 58               (          play.as):00279                 lslb * shift B left by one bit
+0255 49               (          play.as):00280                 rola * rotate A left through carry
+0256 6863             (          play.as):00281                 lsl     3,s * shift stack-relative value 3,s left by one bit
+0258 6962             (          play.as):00282                 rol     2,s * rotate stack-relative value 2,s left through carry
+025A 20F2             (          play.as):00283                 bra     cloop0
+025C A3E1             (          play.as):00284         cnext0  subd    ,s++ * subtract memory pointed to by S+, then advance S+ from D
+025E 8E0000           (          play.as):00285                 ldx     #0 * load X from immediate value 0
+0261 A3E4             (          play.as):00286         cloop1  subd    ,s * subtract memory pointed to by S from D
+0263 2B04             (          play.as):00287                 bmi     cnext1
+0265 3001             (          play.as):00288                 leax    1,x * compute effective address into X from 1,x
+0267 20F8             (          play.as):00289                 bra     cloop1
+0269 E3E1             (          play.as):00290         cnext1  addd    ,s++ * add memory pointed to by S+, then advance S+ into D
+026B EDA90000         (          play.as):00291                 std     _play_remainder,y * store D to indexed value _play_remainder,y
+026F 39               (          play.as):00292                 rts * return to caller
+                      (          play.as):00293         
+0270                  (          play.as):00294         playnote
+0270 6DA90000         (          play.as):00295                 tst     _play_volume,y * test indexed value _play_volume,y and update condition codes
+0274 10270080         (          play.as):00296                 lbeq    playrest
+0278 3432             (          play.as):00297                 pshs    a,x,y
+027A 8DBE             (          play.as):00298                 bsr     calctime
+027C 3502             (          play.as):00299                 puls    a
+027E 8C0000           (          play.as):00300                 cmpx    #0 * compare X against immediate value 0
+0281 2773             (          play.as):00301                 beq     playret
+0283 E6A90000         (          play.as):00302                 ldb     _play_octave,y * load B from indexed value _play_octave,y
+0287 338DFD75         (          play.as):00303                 leau    _play_notes,pcr * compute effective address into U from _play_notes,pcr
+028B 8100             (          play.as):00304         ploop0  cmpa    #0 * compare A against immediate value 0
+028D 2C05             (          play.as):00305                 bge     ploop1
+028F 8B0C             (          play.as):00306                 adda    #12 * add immediate value 12 into A
+0291 5A               (          play.as):00307                 decb * decrement B
+0292 20F7             (          play.as):00308                 bra     ploop0
+0294 810C             (          play.as):00309         ploop1  cmpa    #12 * compare A against immediate value 12
+0296 2D05             (          play.as):00310                 blt     pnext1
+0298 800C             (          play.as):00311                 suba    #12 * subtract immediate value 12 from A
+029A 5C               (          play.as):00312                 incb * increment B
+029B 20F7             (          play.as):00313                 bra     ploop1
+029D 48               (          play.as):00314         pnext1  lsla * shift A left by one bit
+029E 3404             (          play.as):00315                 pshs    b
+02A0 8018             (          play.as):00316                 suba    #24 * subtract immediate value 24 from A
+02A2 ECC6             (          play.as):00317                 ldd     a,u
+02A4 6AE4             (          play.as):00318         ploop2  dec     ,s * decrement memory pointed to by S
+02A6 2B04             (          play.as):00319                 bmi     pnext2
+02A8 44               (          play.as):00320                 lsra * logical shift A right by one bit
+02A9 56               (          play.as):00321                 rorb * rotate B right through carry
+02AA 20F8             (          play.as):00322                 bra     ploop2
+02AC 43               (          play.as):00323         pnext2  coma
+02AD 53               (          play.as):00324                 comb
+02AE C31001           (          play.as):00325                 addd    #4097 * add immediate value 4097 into D
+02B1 EDE2             (          play.as):00326                 std     ,-s * store D to memory pointed to by -S
+02B3 3410             (          play.as):00327                 pshs    x
+02B5 A6A90000         (          play.as):00328                 lda     _play_volume,y * load A from indexed value _play_volume,y
+02B9 A760             (          play.as):00329                 sta     0,s * store A to stack-relative value 0,s
+02BB E661             (          play.as):00330                 ldb     1,s * load B from stack-relative value 1,s
+02BD 6DA90000         (          play.as):00331                 tst     _play_style,y * test indexed value _play_style,y and update condition codes
+02C1 2B11             (          play.as):00332                 bmi     playstac
+02C3 2E1D             (          play.as):00333                 bgt     playleg
+02C5                  (          play.as):00334         playnorm
+02C5 54               (          play.as):00335                 lsrb * logical shift B right by one bit
+02C6 54               (          play.as):00336                 lsrb * logical shift B right by one bit
+02C7 54               (          play.as):00337                 lsrb * logical shift B right by one bit
+02C8 3404             (          play.as):00338                 pshs    b
+02CA 2718             (          play.as):00339                 beq     playit
+02CC 4F               (          play.as):00340                 clra * clear A
+02CD 1F01             (          play.as):00341                 tfr     d,x
+02CF 103F0A           (          play.as):00342                 os9     $0A * invoke OS-9 system call $0A
+02D2 2010             (          play.as):00343                 bra     playit
+                      (          play.as):00344         
+02D4                  (          play.as):00345         playstac
+02D4 54               (          play.as):00346                 lsrb * logical shift B right by one bit
+02D5 54               (          play.as):00347                 lsrb * logical shift B right by one bit
+02D6 3404             (          play.as):00348                 pshs    b
+02D8 270A             (          play.as):00349                 beq     playit
+02DA 4F               (          play.as):00350                 clra * clear A
+02DB 1F01             (          play.as):00351                 tfr     d,x
+02DD 103F0A           (          play.as):00352                 os9     $0A * invoke OS-9 system call $0A
+02E0 2002             (          play.as):00353                 bra     playit
+                      (          play.as):00354         
+02E2 6FE2             (          play.as):00355         playleg clr     ,-s * clear memory pointed to by -S
+                      (          play.as):00356         
+02E4 3504             (          play.as):00357         playit  puls    b * restore B from the hardware stack
+02E6 50               (          play.as):00358                 negb * negate B
+02E7 EB61             (          play.as):00359                 addb    1,s * add stack-relative value 1,s into B
+02E9 E761             (          play.as):00360                 stb     1,s * store B to stack-relative value 1,s
+02EB A6A90000         (          play.as):00361                 lda     _play_path,y * load A from indexed value _play_path,y
+02EF 3530             (          play.as):00362                 puls    x,y
+02F1 C698             (          play.as):00363                 ldb     #$98 * load B from immediate value $98
+02F3 103F8D           (          play.as):00364                 os9     $8D * invoke OS-9 system call $8D
+                      (          play.as):00365         
+02F6 35B0             (          play.as):00366         playret puls    x,y,pc * restore registers and return
+                      (          play.as):00367         
+02F8                  (          play.as):00368         playrest
+02F8 3410             (          play.as):00369                 pshs    x
+02FA 17FF3D           (          play.as):00370                 lbsr    calctime
+02FD 8C0000           (          play.as):00371                 cmpx    #0 * compare X against immediate value 0
+0300 2703             (          play.as):00372                 beq     playret2
+0302 103F0A           (          play.as):00373                 os9     $0A * invoke OS-9 system call $0A
+0305                  (          play.as):00374         playret2
+0305 3590             (          play.as):00375                 puls    x,pc
+                      (          play.as):00376         
+                      (          play.as):00377                 endsect * end current section

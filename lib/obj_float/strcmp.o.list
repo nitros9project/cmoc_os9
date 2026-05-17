@@ -1,0 +1,21 @@
+                      (     ../strcmp.as):00001         * Adapted from Deek's KLibc strcmp.a for the live cmoc_os9 ABI.
+                      (     ../strcmp.as):00002         
+                      (     ../strcmp.as):00003                             section   code      ; begin code section
+                      (     ../strcmp.as):00004         
+                      (     ../strcmp.as):00005         _strcmp             EXPORT              ; export this symbol
+                      (     ../strcmp.as):00006         
+0000                  (     ../strcmp.as):00007         _strcmp
+0000 3440             (     ../strcmp.as):00008                             pshs      u         ; save U on the hardware stack
+0002 AE64             (     ../strcmp.as):00009                             ldx       4,s       ; load X from stack-relative value 4,s
+0004 EE66             (     ../strcmp.as):00010                             ldu       6,s       ; load U from stack-relative value 6,s
+0006 2004             (     ../strcmp.as):00011                             bra       Continue_01 ; branch unconditionally to Continue_01
+0008 E6C0             (     ../strcmp.as):00012         Loop_01             ldb       ,u+       ; load B from memory pointed to by U, then advance U
+000A 2707             (     ../strcmp.as):00013                             beq       BranchTarget_01 ; branch if equal/zero to BranchTarget_01
+000C E6C4             (     ../strcmp.as):00014         Continue_01         ldb       ,u        ; load B from memory pointed to by U
+000E E080             (     ../strcmp.as):00015                             subb      ,x+       ; subtract memory pointed to by X, then advance X from B
+0010 27F6             (     ../strcmp.as):00016                             beq       Loop_01   ; branch if equal/zero to Loop_01
+0012 50               (     ../strcmp.as):00017                             negb                ; negate B
+0013 1D               (     ../strcmp.as):00018         BranchTarget_01     sex                 ; sign-extend B into A to form D
+0014 35C0             (     ../strcmp.as):00019                             puls      u,pc      ; restore registers and return
+                      (     ../strcmp.as):00020         
+                      (     ../strcmp.as):00021                             endsect             ; end current section

@@ -1,0 +1,47 @@
+                      (       ../htoi.as):00001                             section   code      ; begin code section
+                      (       ../htoi.as):00002         
+                      (       ../htoi.as):00003         _chcodes            EXTERNAL            ; import external symbol
+                      (       ../htoi.as):00004         
+                      (       ../htoi.as):00005         htoi                EXPORT              ; export this symbol
+                      (       ../htoi.as):00006         
+0000 4F               (       ../htoi.as):00007         htoi:               clra                ; clear A
+0001 5F               (       ../htoi.as):00008                             clrb                ; clear B
+0002 3446             (       ../htoi.as):00009                             pshs      d,u       ; save D,U on the hardware stack
+0004 EE66             (       ../htoi.as):00010                             ldu       6,s       ; load U from stack-relative value 6,s
+0006 30A90000         (       ../htoi.as):00011                             leax      _chcodes,y ; compute effective address into X from _chcodes,y
+000A E6C4             (       ../htoi.as):00012         Loop_01             ldb       ,u        ; load B from memory pointed to by U
+000C C120             (       ../htoi.as):00013                             cmpb      #$20      ; compare B against immediate value $20
+000E 2704             (       ../htoi.as):00014                             beq       BranchTarget_01 ; branch if equal/zero to BranchTarget_01
+0010 C109             (       ../htoi.as):00015                             cmpb      #9        ; compare B against immediate value 9
+0012 2627             (       ../htoi.as):00016                             bne       BranchTarget_03 ; branch if not equal to BranchTarget_03
+0014 3341             (       ../htoi.as):00017         BranchTarget_01     leau      1,u       ; compute effective address into U from 1,u
+0016 20F2             (       ../htoi.as):00018                             bra       Loop_01   ; branch unconditionally to Loop_01
+0018 ECE4             (       ../htoi.as):00019         Loop_02             ldd       ,s        ; load D from memory pointed to by S
+001A 58               (       ../htoi.as):00020                             lslb                ; shift B left by one bit
+001B 49               (       ../htoi.as):00021                             rola                ; rotate A left through carry
+001C 58               (       ../htoi.as):00022                             lslb                ; shift B left by one bit
+001D 49               (       ../htoi.as):00023                             rola                ; rotate A left through carry
+001E 58               (       ../htoi.as):00024                             lslb                ; shift B left by one bit
+001F 49               (       ../htoi.as):00025                             rola                ; rotate A left through carry
+0020 58               (       ../htoi.as):00026                             lslb                ; shift B left by one bit
+0021 49               (       ../htoi.as):00027                             rola                ; rotate A left through carry
+0022 EDE4             (       ../htoi.as):00028                             std       ,s        ; store D to memory pointed to by S
+0024 E6C0             (       ../htoi.as):00029                             ldb       ,u+       ; load B from memory pointed to by U, then advance U
+0026 C030             (       ../htoi.as):00030                             subb      #$30      ; subtract immediate value $30 from B
+0028 C109             (       ../htoi.as):00031                             cmpb      #9        ; compare B against immediate value 9
+002A 2F08             (       ../htoi.as):00032                             ble       BranchTarget_02 ; branch if less or equal to BranchTarget_02
+002C C007             (       ../htoi.as):00033                             subb      #7        ; subtract immediate value 7 from B
+002E C10F             (       ../htoi.as):00034                             cmpb      #$0f      ; compare B against immediate value $0f
+0030 2F02             (       ../htoi.as):00035                             ble       BranchTarget_02 ; branch if less or equal to BranchTarget_02
+0032 C020             (       ../htoi.as):00036                             subb      #$20      ; subtract immediate value $20 from B
+0034 4F               (       ../htoi.as):00037         BranchTarget_02     clra                ; clear A
+0035 E3E4             (       ../htoi.as):00038                             addd      ,s        ; add memory pointed to by S into D
+0037 EDE4             (       ../htoi.as):00039                             std       ,s        ; store D to memory pointed to by S
+0039 E6C4             (       ../htoi.as):00040                             ldb       ,u        ; load B from memory pointed to by U
+003B E685             (       ../htoi.as):00041         BranchTarget_03     ldb       b,x       ; load B from indexed value b,x
+003D C440             (       ../htoi.as):00042                             andb      #$40      ; AND B with immediate value $40
+003F 26D7             (       ../htoi.as):00043                             bne       Loop_02   ; branch if not equal to Loop_02
+0041 35C6             (       ../htoi.as):00044                             puls      d,u,pc    ; restore registers and return
+                      (       ../htoi.as):00045         
+                      (       ../htoi.as):00046                             endsect             ; end current section
+                      (       ../htoi.as):00047         

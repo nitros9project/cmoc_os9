@@ -1,0 +1,33 @@
+                      (    ../strucmp.as):00001         * Adapted from Deek's KLibc strucmp.a for the live cmoc_os9 ABI.
+                      (    ../strucmp.as):00002         
+                      (    ../strucmp.as):00003                             section   code      ; begin code section
+                      (    ../strucmp.as):00004         
+                      (    ../strucmp.as):00005         _strucmp            EXPORT              ; export this symbol
+                      (    ../strucmp.as):00006         
+                      (    ../strucmp.as):00007         toupper             EXTERN              ; import external symbol
+                      (    ../strucmp.as):00008         
+0000                  (    ../strucmp.as):00009         _strucmp
+0000 3440             (    ../strucmp.as):00010                             pshs      u         ; save U on the hardware stack
+0002 AE64             (    ../strucmp.as):00011                             ldx       4,s       ; load X from stack-relative value 4,s
+0004 EE66             (    ../strucmp.as):00012                             ldu       6,s       ; load U from stack-relative value 6,s
+0006 2004             (    ../strucmp.as):00013                             bra       Continue_01 ; branch unconditionally to Continue_01
+0008 E6C0             (    ../strucmp.as):00014         Loop_01             ldb       ,u+       ; load B from memory pointed to by U, then advance U
+000A 271E             (    ../strucmp.as):00015                             beq       BranchTarget_01 ; branch if equal/zero to BranchTarget_01
+000C E6C4             (    ../strucmp.as):00016         Continue_01         ldb       ,u        ; load B from memory pointed to by U
+000E 4F               (    ../strucmp.as):00017                             clra                ; clear A
+000F 3416             (    ../strucmp.as):00018                             pshs      d,x       ; save D,X on the hardware stack
+0011 170000           (    ../strucmp.as):00019                             lbsr      toupper   ; long branch to subroutine to toupper
+0014 3262             (    ../strucmp.as):00020                             leas      2,s       ; adjust S using 2,s
+0016 AEE4             (    ../strucmp.as):00021                             ldx       ,s        ; load X from memory pointed to by S
+0018 EDE4             (    ../strucmp.as):00022                             std       ,s        ; store D to memory pointed to by S
+001A E680             (    ../strucmp.as):00023                             ldb       ,x+       ; load B from memory pointed to by X, then advance X
+001C 4F               (    ../strucmp.as):00024                             clra                ; clear A
+001D 3416             (    ../strucmp.as):00025                             pshs      d,x       ; save D,X on the hardware stack
+001F 170000           (    ../strucmp.as):00026                             lbsr      toupper   ; long branch to subroutine to toupper
+0022 3262             (    ../strucmp.as):00027                             leas      2,s       ; adjust S using 2,s
+0024 3510             (    ../strucmp.as):00028                             puls      x         ; restore X from the hardware stack
+0026 A3E1             (    ../strucmp.as):00029                             subd      ,s++      ; subtract memory pointed to by S+, then advance S+ from D
+0028 27DE             (    ../strucmp.as):00030                             beq       Loop_01   ; branch if equal/zero to Loop_01
+002A 35C0             (    ../strucmp.as):00031         BranchTarget_01     puls      u,pc      ; restore registers and return
+                      (    ../strucmp.as):00032         
+                      (    ../strucmp.as):00033                             endsect             ; end current section

@@ -1,0 +1,22 @@
+                      (   ../clcommon.as):00001                             section   code      ; begin code section
+                      (   ../clcommon.as):00002         
+                      (   ../clcommon.as):00003         _flacc              EXTERNAL            ; import external symbol
+                      (   ../clcommon.as):00004         _lbexit             EXPORT              ; export this symbol
+                      (   ../clcommon.as):00005         _ltoacc             EXPORT              ; export this symbol
+                      (   ../clcommon.as):00006         
+0000 1FA8             (   ../clcommon.as):00007         _lbexit:            tfr       cc,a      ; transfer CC,A
+0002 3510             (   ../clcommon.as):00008                             puls      x         ; restore X from the hardware stack
+0004 AF62             (   ../clcommon.as):00009                             stx       2,s       ; store X to stack-relative value 2,s
+0006 3262             (   ../clcommon.as):00010                             leas      2,s       ; adjust S using 2,s
+0008 30A90000         (   ../clcommon.as):00011                             leax      _flacc,y  ; compute effective address into X from _flacc,y
+000C 1F8A             (   ../clcommon.as):00012                             tfr       a,cc      ; transfer A,CC
+000E 39               (   ../clcommon.as):00013                             rts                 ; return to caller
+000F EC84             (   ../clcommon.as):00014         _ltoacc:            ldd       ,x        ; load D from memory pointed to by X
+0011 EDA90000         (   ../clcommon.as):00015                             std       _flacc,y  ; store D to indexed value _flacc,y
+0015 EC02             (   ../clcommon.as):00016                             ldd       2,x       ; load D from indexed value 2,x
+0017 30A90000         (   ../clcommon.as):00017                             leax      _flacc,y  ; compute effective address into X from _flacc,y
+001B ED02             (   ../clcommon.as):00018                             std       2,x       ; store D to indexed value 2,x
+001D 39               (   ../clcommon.as):00019                             rts                 ; return to caller
+                      (   ../clcommon.as):00020         
+                      (   ../clcommon.as):00021                             endsect             ; end current section
+                      (   ../clcommon.as):00022         

@@ -1,0 +1,3 @@
+Symbol: _longjmp (setjmp.o) = 0011
+Symbol: _setjmp (setjmp.o) = 0000
+Symbol: longjmp1 (setjmp.o) = 001E

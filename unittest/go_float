@@ -1,0 +1,4 @@
+chx /d1/cmds
+chd /d1
+floattest >/d1/floattest.out
+floatfmttest >/d1/floatfmttest.out

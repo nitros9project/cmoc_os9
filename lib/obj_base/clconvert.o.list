@@ -1,0 +1,22 @@
+                      (  ../clconvert.as):00001                             section   code      ; begin code section
+                      (  ../clconvert.as):00002         
+                      (  ../clconvert.as):00003         _flacc              EXTERNAL            ; import external symbol
+                      (  ../clconvert.as):00004         
+                      (  ../clconvert.as):00005         _litol              EXPORT              ; export this symbol
+                      (  ../clconvert.as):00006         _lutol              EXPORT              ; export this symbol
+                      (  ../clconvert.as):00007         
+0000 30A90000         (  ../clconvert.as):00008         _litol:             leax      _flacc,y  ; compute effective address into X from _flacc,y
+0004 ED02             (  ../clconvert.as):00009                             std       2,x       ; store D to indexed value 2,x
+0006 1F89             (  ../clconvert.as):00010                             tfr       a,b       ; transfer A,B
+0008 1D               (  ../clconvert.as):00011                             sex                 ; sign-extend B into A to form D
+0009 1F89             (  ../clconvert.as):00012                             tfr       a,b       ; transfer A,B
+000B ED84             (  ../clconvert.as):00013                             std       ,x        ; store D to memory pointed to by X
+000D 39               (  ../clconvert.as):00014                             rts                 ; return to caller
+000E 30A90000         (  ../clconvert.as):00015         _lutol:             leax      _flacc,y  ; compute effective address into X from _flacc,y
+0012 ED02             (  ../clconvert.as):00016                             std       2,x       ; store D to indexed value 2,x
+0014 6F84             (  ../clconvert.as):00017                             clr       ,x        ; clear memory pointed to by X
+0016 6F01             (  ../clconvert.as):00018                             clr       1,x       ; clear indexed value 1,x
+0018 39               (  ../clconvert.as):00019                             rts                 ; return to caller
+                      (  ../clconvert.as):00020         
+                      (  ../clconvert.as):00021                             endsect             ; end current section
+                      (  ../clconvert.as):00022         

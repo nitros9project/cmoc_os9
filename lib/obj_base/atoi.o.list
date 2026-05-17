@@ -1,0 +1,66 @@
+                      (       ../atoi.as):00001         * Compact assembly implementation of atoi().
+                      (       ../atoi.as):00002         
+                      (       ../atoi.as):00003                             section   code      ; begin code section
+                      (       ../atoi.as):00004         
+                      (       ../atoi.as):00005         _atoi               EXPORT              ; export this symbol
+                      (       ../atoi.as):00006         
+0000                  (       ../atoi.as):00007         _atoi
+0000 3440             (       ../atoi.as):00008                             pshs      u         ; save U on the hardware stack
+0002 EE64             (       ../atoi.as):00009                             ldu       4,s       ; load U from stack-relative value 4,s
+0004 4F               (       ../atoi.as):00010                             clra                ; clear A
+0005 5F               (       ../atoi.as):00011                             clrb                ; clear B
+0006 3406             (       ../atoi.as):00012                             pshs      d         ; save D on the hardware stack
+0008 3404             (       ../atoi.as):00013                             pshs      b         ; save B on the hardware stack
+000A                  (       ../atoi.as):00014         L_atoi_skip
+000A E6C0             (       ../atoi.as):00015                             ldb       ,u+       ; load B from memory pointed to by U, then advance U
+000C C120             (       ../atoi.as):00016                             cmpb      #$20      ; compare B against ASCII space
+000E 27FA             (       ../atoi.as):00017                             beq       L_atoi_skip ; branch if equal/zero to L_atoi_skip
+0010 C109             (       ../atoi.as):00018                             cmpb      #9        ; compare B against immediate value 9
+0012 27F6             (       ../atoi.as):00019                             beq       L_atoi_skip ; branch if equal/zero to L_atoi_skip
+0014 C12D             (       ../atoi.as):00020                             cmpb      #'-'      ; compare B against character literal '-'
+0016 2604             (       ../atoi.as):00021                             bne       L_atoi_plus ; branch if not equal to L_atoi_plus
+0018 E7E4             (       ../atoi.as):00022                             stb       ,s        ; store B to memory pointed to by S
+001A 201B             (       ../atoi.as):00023                             bra       L_atoi_next ; branch unconditionally to L_atoi_next
+                      (       ../atoi.as):00024         
+001C                  (       ../atoi.as):00025         L_atoi_plus
+001C C12B             (       ../atoi.as):00026                             cmpb      #'+'      ; compare B against character literal '+'
+001E 2619             (       ../atoi.as):00027                             bne       L_atoi_check ; branch if not equal to L_atoi_check
+0020 2015             (       ../atoi.as):00028                             bra       L_atoi_next ; branch unconditionally to L_atoi_next
+                      (       ../atoi.as):00029         
+0022                  (       ../atoi.as):00030         L_atoi_accum
+0022 EC61             (       ../atoi.as):00031                             ldd       1,s       ; load D from stack-relative value 1,s
+0024 58               (       ../atoi.as):00032                             aslb                ; shift B left by one bit
+0025 49               (       ../atoi.as):00033                             rola                ; rotate A left through carry
+0026 58               (       ../atoi.as):00034                             aslb                ; shift B left by one bit
+0027 49               (       ../atoi.as):00035                             rola                ; rotate A left through carry
+0028 E361             (       ../atoi.as):00036                             addd      1,s       ; add stack-relative value 1,s into D
+002A 58               (       ../atoi.as):00037                             aslb                ; shift B left by one bit
+002B 49               (       ../atoi.as):00038                             rola                ; rotate A left through carry
+002C 3406             (       ../atoi.as):00039                             pshs      d         ; save D on the hardware stack
+002E E65F             (       ../atoi.as):00040                             ldb       -1,u      ; load B from indexed value -1,u
+0030 4F               (       ../atoi.as):00041                             clra                ; clear A
+0031 C030             (       ../atoi.as):00042                             subb      #'0'      ; subtract character literal '0' from B
+0033 E3E1             (       ../atoi.as):00043                             addd      ,s++      ; add memory pointed to by S+, then advance S+ into D
+0035 ED61             (       ../atoi.as):00044                             std       1,s       ; store D to stack-relative value 1,s
+                      (       ../atoi.as):00045         
+0037                  (       ../atoi.as):00046         L_atoi_next
+0037 E6C0             (       ../atoi.as):00047                             ldb       ,u+       ; load B from memory pointed to by U, then advance U
+                      (       ../atoi.as):00048         
+0039                  (       ../atoi.as):00049         L_atoi_check
+0039 C130             (       ../atoi.as):00050                             cmpb      #'0'      ; compare B against character literal '0'
+003B 2504             (       ../atoi.as):00051                             blo       L_atoi_done ; branch if lower to L_atoi_done
+003D C139             (       ../atoi.as):00052                             cmpb      #'9'      ; compare B against character literal '9'
+003F 23E1             (       ../atoi.as):00053                             bls       L_atoi_accum ; branch if lower or same to L_atoi_accum
+                      (       ../atoi.as):00054         
+0041                  (       ../atoi.as):00055         L_atoi_done
+0041 6DE0             (       ../atoi.as):00056                             tst       ,s+       ; test memory pointed to by S, then advance S and update condition codes
+0043 3506             (       ../atoi.as):00057                             puls      d         ; restore D from the hardware stack
+0045 2704             (       ../atoi.as):00058                             beq       L_atoi_exit ; branch if equal/zero to L_atoi_exit
+0047 40               (       ../atoi.as):00059                             nega                ; negate A
+0048 50               (       ../atoi.as):00060                             negb                ; negate B
+0049 8200             (       ../atoi.as):00061                             sbca      #0        ; subtract immediate value 0 from A
+                      (       ../atoi.as):00062         
+004B                  (       ../atoi.as):00063         L_atoi_exit
+004B 35C0             (       ../atoi.as):00064                             puls      u,pc      ; restore registers and return
+                      (       ../atoi.as):00065         
+                      (       ../atoi.as):00066                             endsect             ; end current section

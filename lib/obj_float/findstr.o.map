@@ -1,0 +1,13 @@
+Symbol: _findnstr (findstr.o) = 003A
+Symbol: _findstr (findstr.o) = 0015
+Symbol: BranchTarget_01 (findstr.o) = 0010
+Symbol: BranchTarget_02 (findstr.o) = 0021
+Symbol: BranchTarget_03 (findstr.o) = 0032
+Symbol: BranchTarget_04 (findstr.o) = 0046
+Symbol: BranchTarget_05 (findstr.o) = 0062
+Symbol: Loop_01 (findstr.o) = 0004
+Symbol: Loop_02 (findstr.o) = 0023
+Symbol: Loop_03 (findstr.o) = 004D
+Symbol: match_at (findstr.o) = 0000
+Symbol: ReturnZero_01 (findstr.o) = 0036
+Symbol: ReturnZero_02 (findstr.o) = 0066

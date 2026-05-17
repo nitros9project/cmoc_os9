@@ -1,0 +1,71 @@
+                      (    ../findstr.as):00001         * Live cmoc_os9 ABI assembly implementation of findstr()/findnstr().
+                      (    ../findstr.as):00002         
+                      (    ../findstr.as):00003                             section   code      ; begin code section
+                      (    ../findstr.as):00004         
+                      (    ../findstr.as):00005         _findstr            EXPORT              ; export this symbol
+                      (    ../findstr.as):00006         _findnstr           EXPORT              ; export this symbol
+                      (    ../findstr.as):00007         
+                      (    ../findstr.as):00008         * int match_at(const char *hay, const char *needle)
+                      (    ../findstr.as):00009         * X = hay, Y = needle
+                      (    ../findstr.as):00010         * returns D = 1 on match, 0 on mismatch
+0000                  (    ../findstr.as):00011         match_at
+0000 3470             (    ../findstr.as):00012                             pshs      x,y,u     ; save X,Y,U on the hardware stack
+0002 1F13             (    ../findstr.as):00013                             tfr       x,u       ; transfer X,U
+0004 E6A0             (    ../findstr.as):00014         Loop_01             ldb       ,y+       ; load B from memory pointed to by Y, then advance Y
+0006 2708             (    ../findstr.as):00015                             beq       BranchTarget_01 ; branch if equal/zero to BranchTarget_01
+0008 E1C0             (    ../findstr.as):00016                             cmpb      ,u+       ; compare B against memory pointed to by U, then advance U
+000A 27F8             (    ../findstr.as):00017                             beq       Loop_01   ; branch if equal/zero to Loop_01
+000C 4F               (    ../findstr.as):00018                             clra                ; clear A
+000D 5F               (    ../findstr.as):00019                             clrb                ; clear B
+000E 35F0             (    ../findstr.as):00020                             puls      x,y,u,pc  ; restore registers and return
+0010 CC0001           (    ../findstr.as):00021         BranchTarget_01     ldd       #1        ; load D from immediate value 1
+0013 35F0             (    ../findstr.as):00022                             puls      x,y,u,pc  ; restore registers and return
+                      (    ../findstr.as):00023         
+0015                  (    ../findstr.as):00024         _findstr
+0015 3460             (    ../findstr.as):00025                             pshs      y,u       ; save Y,U on the hardware stack
+0017 EE66             (    ../findstr.as):00026                             ldu       6,s       ; load U from stack-relative value 6,s
+0019 E6C4             (    ../findstr.as):00027                             ldb       ,u        ; load B from memory pointed to by U
+001B 2604             (    ../findstr.as):00028                             bne       BranchTarget_02 ; branch if not equal to BranchTarget_02
+001D EC64             (    ../findstr.as):00029                             ldd       4,s       ; load D from stack-relative value 4,s
+001F 35E0             (    ../findstr.as):00030                             puls      y,u,pc    ; restore registers and return
+0021 AE64             (    ../findstr.as):00031         BranchTarget_02     ldx       4,s       ; load X from stack-relative value 4,s
+0023 E684             (    ../findstr.as):00032         Loop_02             ldb       ,x        ; load B from memory pointed to by X
+0025 270F             (    ../findstr.as):00033                             beq       ReturnZero_01 ; branch if equal/zero to ReturnZero_01
+0027 10AE66           (    ../findstr.as):00034                             ldy       6,s       ; load Y from stack-relative value 6,s
+002A 8DD4             (    ../findstr.as):00035                             bsr       match_at  ; branch to subroutine to match_at
+002C 2604             (    ../findstr.as):00036                             bne       BranchTarget_03 ; branch if not equal to BranchTarget_03
+002E 3001             (    ../findstr.as):00037                             leax      1,x       ; compute effective address into X from 1,x
+0030 20F1             (    ../findstr.as):00038                             bra       Loop_02   ; branch unconditionally to Loop_02
+0032 1F10             (    ../findstr.as):00039         BranchTarget_03     tfr       x,d       ; transfer X,D
+0034 35E0             (    ../findstr.as):00040                             puls      y,u,pc    ; restore registers and return
+0036 4F               (    ../findstr.as):00041         ReturnZero_01       clra                ; clear A
+0037 5F               (    ../findstr.as):00042                             clrb                ; clear B
+0038 35E0             (    ../findstr.as):00043                             puls      y,u,pc    ; restore registers and return
+                      (    ../findstr.as):00044         
+003A                  (    ../findstr.as):00045         _findnstr
+003A 3460             (    ../findstr.as):00046                             pshs      y,u       ; save Y,U on the hardware stack
+003C EE68             (    ../findstr.as):00047                             ldu       8,s       ; load U from stack-relative value 8,s
+003E E6C4             (    ../findstr.as):00048                             ldb       ,u        ; load B from memory pointed to by U
+0040 2604             (    ../findstr.as):00049                             bne       BranchTarget_04 ; branch if not equal to BranchTarget_04
+0042 EC64             (    ../findstr.as):00050                             ldd       4,s       ; load D from stack-relative value 4,s
+0044 35E0             (    ../findstr.as):00051                             puls      y,u,pc    ; restore registers and return
+0046 AE64             (    ../findstr.as):00052         BranchTarget_04     ldx       4,s       ; load X from stack-relative value 4,s
+0048 10AE6A           (    ../findstr.as):00053                             ldy       10,s      ; load Y from stack-relative value 10,s
+004B 2719             (    ../findstr.as):00054                             beq       ReturnZero_02 ; branch if equal/zero to ReturnZero_02
+004D E684             (    ../findstr.as):00055         Loop_03             ldb       ,x        ; load B from memory pointed to by X
+004F 2715             (    ../findstr.as):00056                             beq       ReturnZero_02 ; branch if equal/zero to ReturnZero_02
+0051 3430             (    ../findstr.as):00057                             pshs      x,y       ; save X,Y on the hardware stack
+0053 10AE6C           (    ../findstr.as):00058                             ldy       12,s      ; load Y from stack-relative value 12,s
+0056 8DA8             (    ../findstr.as):00059                             bsr       match_at  ; branch to subroutine to match_at
+0058 3530             (    ../findstr.as):00060                             puls      x,y       ; restore X,Y from the hardware stack
+005A 2606             (    ../findstr.as):00061                             bne       BranchTarget_05 ; branch if not equal to BranchTarget_05
+005C 3001             (    ../findstr.as):00062                             leax      1,x       ; compute effective address into X from 1,x
+005E 313F             (    ../findstr.as):00063                             leay      -1,y      ; compute effective address into Y from -1,y
+0060 26EB             (    ../findstr.as):00064                             bne       Loop_03   ; branch if not equal to Loop_03
+0062 1F10             (    ../findstr.as):00065         BranchTarget_05     tfr       x,d       ; transfer X,D
+0064 35E0             (    ../findstr.as):00066                             puls      y,u,pc    ; restore registers and return
+0066 4F               (    ../findstr.as):00067         ReturnZero_02       clra                ; clear A
+0067 5F               (    ../findstr.as):00068                             clrb                ; clear B
+0068 35E0             (    ../findstr.as):00069                             puls      y,u,pc    ; restore registers and return
+                      (    ../findstr.as):00070         
+                      (    ../findstr.as):00071                             endsect             ; end current section

@@ -1,0 +1,43 @@
+                      (     ../strtok.as):00001         * Adapted from Deek's KLibc strtok.a for the live cmoc_os9 ABI.
+                      (     ../strtok.as):00002         
+                      (     ../strtok.as):00003                             section   code      ; begin code section
+                      (     ../strtok.as):00004         
+                      (     ../strtok.as):00005         _strtok             EXPORT              ; export this symbol
+                      (     ../strtok.as):00006         
+                      (     ../strtok.as):00007         _strspn             EXTERN              ; import external symbol
+                      (     ../strtok.as):00008         _strpbrk            EXTERN              ; import external symbol
+                      (     ../strtok.as):00009         
+0000                  (     ../strtok.as):00010         _strtok
+0000 4F               (     ../strtok.as):00011                             clra                ; clear A
+0001 5F               (     ../strtok.as):00012                             clrb                ; clear B
+0002 3446             (     ../strtok.as):00013                             pshs      d,u       ; save D,U on the hardware stack
+0004 EE66             (     ../strtok.as):00014                             ldu       6,s       ; load U from stack-relative value 6,s
+0006 2606             (     ../strtok.as):00015                             bne       BranchTarget_01 ; branch if not equal to BranchTarget_01
+0008 EEA90000         (     ../strtok.as):00016                             ldu       _save,y   ; load U from indexed value _save,y
+000C 272C             (     ../strtok.as):00017                             beq       BranchTarget_02 ; branch if equal/zero to BranchTarget_02
+000E AE68             (     ../strtok.as):00018         BranchTarget_01     ldx       8,s       ; load X from stack-relative value 8,s
+0010 3410             (     ../strtok.as):00019                             pshs      x         ; save X on the hardware stack
+0012 3440             (     ../strtok.as):00020                             pshs      u         ; save U on the hardware stack
+0014 170000           (     ../strtok.as):00021                             lbsr      _strspn   ; long branch to subroutine to _strspn
+0017 3264             (     ../strtok.as):00022                             leas      4,s       ; adjust S using 4,s
+0019 33CB             (     ../strtok.as):00023                             leau      d,u       ; compute effective address into U from d,u
+001B E6C4             (     ../strtok.as):00024                             ldb       ,u        ; load B from memory pointed to by U
+001D 271B             (     ../strtok.as):00025                             beq       BranchTarget_02 ; branch if equal/zero to BranchTarget_02
+001F EFE4             (     ../strtok.as):00026                             stu       ,s        ; store U to memory pointed to by S
+0021 AE68             (     ../strtok.as):00027                             ldx       8,s       ; load X from stack-relative value 8,s
+0023 3410             (     ../strtok.as):00028                             pshs      x         ; save X on the hardware stack
+0025 3440             (     ../strtok.as):00029                             pshs      u         ; save U on the hardware stack
+0027 170000           (     ../strtok.as):00030                             lbsr      _strpbrk  ; long branch to subroutine to _strpbrk
+002A 3264             (     ../strtok.as):00031                             leas      4,s       ; adjust S using 4,s
+002C EDA90000         (     ../strtok.as):00032                             std       _save,y   ; store D to indexed value _save,y
+0030 2708             (     ../strtok.as):00033                             beq       BranchTarget_02 ; branch if equal/zero to BranchTarget_02
+0032 1F01             (     ../strtok.as):00034                             tfr       d,x       ; transfer D,X
+0034 6F80             (     ../strtok.as):00035                             clr       ,x+       ; clear memory pointed to by X, then advance X
+0036 AFA90000         (     ../strtok.as):00036                             stx       _save,y   ; store X to indexed value _save,y
+003A 35C6             (     ../strtok.as):00037         BranchTarget_02     puls      d,u,pc    ; restore registers and return
+                      (     ../strtok.as):00038         
+                      (     ../strtok.as):00039                             section   bss       ; begin bss section
+                      (     ../strtok.as):00040         
+0000                  (     ../strtok.as):00041         _save               rmb       2         ; reserve 2 bytes
+                      (     ../strtok.as):00042         
+                      (     ../strtok.as):00043                             endsect             ; end current section

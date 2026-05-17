@@ -1,0 +1,4 @@
+Symbol: _write (write.o) = 0000
+Symbol: _writeln (write.o) = 0019
+Symbol: L_write_common (write.o) = 000E
+Symbol: L_write_exit (write.o) = 0015

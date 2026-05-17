@@ -1,0 +1,34 @@
+                      (     ../errmsg.as):00001                             section   code      ; begin code section
+                      (     ../errmsg.as):00002         
+                      (     ../errmsg.as):00003         __prgname           EXTERN              ; import external symbol
+                      (     ../errmsg.as):00004         __iob               EXTERN              ; import external symbol
+                      (     ../errmsg.as):00005         _fprintf            EXTERN              ; import external symbol
+                      (     ../errmsg.as):00006         
+                      (     ../errmsg.as):00007         __errmsg            EXPORT              ; export this symbol
+0000                  (     ../errmsg.as):00008         __errmsg
+0000 3440             (     ../errmsg.as):00009                             pshs      u         ; save U on the hardware stack
+0002 170000           (     ../errmsg.as):00010                             lbsr      __prgname ; long branch to subroutine to __prgname
+0005 3406             (     ../errmsg.as):00011                             pshs      d         ; save D on the hardware stack
+0007 338D0024         (     ../errmsg.as):00012                             leau      errmsg_prefix,pcr ; compute effective address into U from errmsg_prefix,pcr
+000B 30A90000         (     ../errmsg.as):00013                             leax      __iob+26,y ; compute effective address into X from __iob+26,y
+000F 3450             (     ../errmsg.as):00014                             pshs      x,u       ; save X,U on the hardware stack
+0011 170000           (     ../errmsg.as):00015                             lbsr      _fprintf  ; long branch to subroutine to _fprintf
+0014 3266             (     ../errmsg.as):00016                             leas      6,s       ; adjust S using 6,s
+0016 EE6C             (     ../errmsg.as):00017                             ldu       12,s      ; load U from stack-relative value 12,s
+0018 AE6A             (     ../errmsg.as):00018                             ldx       10,s      ; load X from stack-relative value 10,s
+001A EC68             (     ../errmsg.as):00019                             ldd       8,s       ; load D from stack-relative value 8,s
+001C 3456             (     ../errmsg.as):00020                             pshs      d,x,u     ; save D,X,U on the hardware stack
+001E EE6C             (     ../errmsg.as):00021                             ldu       12,s      ; load U from stack-relative value 12,s
+0020 30A90000         (     ../errmsg.as):00022                             leax      __iob+26,y ; compute effective address into X from __iob+26,y
+0024 3450             (     ../errmsg.as):00023                             pshs      x,u       ; save X,U on the hardware stack
+0026 170000           (     ../errmsg.as):00024                             lbsr      _fprintf  ; long branch to subroutine to _fprintf
+0029 326A             (     ../errmsg.as):00025                             leas      10,s      ; adjust S using 10,s
+002B EC64             (     ../errmsg.as):00026                             ldd       4,s       ; load D from stack-relative value 4,s
+002D 35C0             (     ../errmsg.as):00027                             puls      u,pc      ; restore registers and return
+                      (     ../errmsg.as):00028         
+002F                  (     ../errmsg.as):00029         errmsg_prefix
+002F 25733A2020202020 (     ../errmsg.as):00030                             fcc       "%s:      ; "
+     203B20
+003A 00               (     ../errmsg.as):00031                             fcb       0         ; define byte data 0
+                      (     ../errmsg.as):00032         
+                      (     ../errmsg.as):00033                             endsect             ; end current section

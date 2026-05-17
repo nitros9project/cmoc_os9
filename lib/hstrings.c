@@ -9,15 +9,16 @@ set as the last character. */
 NOTE: If dst is NULL the source
 string is modified
 Return: Pointer to string */
-char *strtohstr(char *dst, char *src)
+char *strtohstr(char *dst, const char *src)
 {
-	char *d, *s;
+	char *d;
+	const char *s;
 
 	if(src == NULL)
 		return NULL;
 
 	if(dst == NULL)
-		dst = src;
+		dst = (char *) src;
 
 	for (d=dst, s=src; *s; s++)
 		*d++ = *s;
@@ -51,17 +52,16 @@ char *hstrtostr(char *dst, char *src)
 }
 
 /* Print a hstr */
-int hputs(char *str)
+int hputs(const char *str)
 {
-	char *s;
+	const char *s;
 	s = str;
 	while (! (*s&0x80))
 		putchar(*s++);
 	putchar((*s)&0x7f);
 	return 0;
 }
-	
-	
+
 int Xmain()
 {
 	char s[]="test";
@@ -73,4 +73,3 @@ int Xmain()
 	printf("%s\n", buf);
 	return 0;
 }
-

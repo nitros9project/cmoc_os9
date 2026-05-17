@@ -1,0 +1,12 @@
+Symbol: __os_chain (process.o) = 0029
+Symbol: __os_fork (process.o) = 0042
+Symbol: __os_send (process.o) = 0000
+Symbol: __os_setpr (process.o) = 001F
+Symbol: __os_wait (process.o) = 000A
+Symbol: F_Chain (process.o) = 0005
+Symbol: F_Exit (process.o) = 0006
+Symbol: F_Fork (process.o) = 0003
+Symbol: F_Send (process.o) = 0008
+Symbol: F_SPrior (process.o) = 000D
+Symbol: F_Wait (process.o) = 0004
+Symbol: L001b (process.o) = 001B

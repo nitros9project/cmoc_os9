@@ -1,0 +1,61 @@
+                      (         ../id.as):00001         * Live cmoc_os9 ABI assembly implementation of OS-9 ID wrappers.
+                      (         ../id.as):00002         
+                      (         ../id.as):00003                             section   code      ; begin code section
+                      (         ../id.as):00004         
+                      (         ../id.as):00005         _os_getpid          EXPORT              ; export this symbol
+                      (         ../id.as):00006         _os_getuid          EXPORT              ; export this symbol
+                      (         ../id.as):00007         _os_asetuid         EXPORT              ; export this symbol
+                      (         ../id.as):00008         _os_setuid          EXPORT              ; export this symbol
+                      (         ../id.as):00009         
+                      (         ../id.as):00010         _getpid             EXTERNAL            ; import external symbol
+                      (         ../id.as):00011         _oserr              EXTERNAL            ; import external symbol
+                      (         ../id.as):00012         _osret              EXTERNAL            ; import external symbol
+                      (         ../id.as):00013         
+0000                  (         ../id.as):00014         _os_getpid
+0000 3420             (         ../id.as):00015                             pshs      y         ; save Y on the hardware stack
+0002 170000           (         ../id.as):00016                             lbsr      _getpid   ; long branch to subroutine to _getpid
+0005 AE64             (         ../id.as):00017                             ldx       4,s       ; load X from stack-relative value 4,s
+0007 2702             (         ../id.as):00018                             beq       ReturnZero_01 ; branch if equal/zero to ReturnZero_01
+0009 ED84             (         ../id.as):00019                             std       ,x        ; store D to memory pointed to by X
+000B 4F               (         ../id.as):00020         ReturnZero_01       clra                ; clear A
+000C 5F               (         ../id.as):00021                             clrb                ; clear B
+000D 35A0             (         ../id.as):00022                             puls      y,pc      ; restore registers and return
+                      (         ../id.as):00023         
+000F                  (         ../id.as):00024         _os_getuid
+000F 3420             (         ../id.as):00025                             pshs      y         ; save Y on the hardware stack
+0011 103F0C           (         ../id.as):00026                             os9       $0C       ; invoke OS-9 system call $0C
+0014 1F20             (         ../id.as):00027                             tfr       y,d       ; transfer Y,D
+0016 3520             (         ../id.as):00028                             puls      y         ; restore Y from the hardware stack
+0018 10250000         (         ../id.as):00029                             lbcs      _oserr    ; long branch if carry is set to _oserr
+001C AE62             (         ../id.as):00030                             ldx       2,s       ; load X from stack-relative value 2,s
+001E 2702             (         ../id.as):00031                             beq       BranchTarget_01 ; branch if equal/zero to BranchTarget_01
+0020 ED84             (         ../id.as):00032                             std       ,x        ; store D to memory pointed to by X
+0022 160000           (         ../id.as):00033         BranchTarget_01     lbra      _osret    ; long branch unconditionally to _osret
+                      (         ../id.as):00034         
+0025                  (         ../id.as):00035         _os_asetuid
+0025 3420             (         ../id.as):00036                             pshs      y         ; save Y on the hardware stack
+0027 2012             (         ../id.as):00037                             bra       BranchTarget_02 ; branch unconditionally to BranchTarget_02
+                      (         ../id.as):00038         
+                      (         ../id.as):00039         * WARNING: Writes to system globals and process descriptor
+                      (         ../id.as):00040         * won't work for Level 2 fallback path.
+0029                  (         ../id.as):00041         _os_setuid
+0029 3420             (         ../id.as):00042                             pshs      y         ; save Y on the hardware stack
+002B 103F0C           (         ../id.as):00043                             os9       $0C       ; invoke OS-9 system call $0C
+002E 1F20             (         ../id.as):00044                             tfr       y,d       ; transfer Y,D
+0030 ED7E             (         ../id.as):00045                             std       -2,s      ; store D to stack-relative value -2,s
+0032 2707             (         ../id.as):00046                             beq       BranchTarget_02 ; branch if equal/zero to BranchTarget_02
+0034 C6D6             (         ../id.as):00047                             ldb       #$D6      ; load B from immediate value $D6
+0036 3520             (         ../id.as):00048         Loop_01             puls      y         ; restore Y from the hardware stack
+0038 160000           (         ../id.as):00049                             lbra      _oserr    ; long branch unconditionally to _oserr
+003B 10AE64           (         ../id.as):00050         BranchTarget_02     ldy       4,s       ; load Y from stack-relative value 4,s
+003E 103F1C           (         ../id.as):00051                             os9       $1C       ; invoke OS-9 system call $1C
+0041 240C             (         ../id.as):00052                             bcc       BranchTarget_03 ; branch if carry is clear to BranchTarget_03
+0043 C1D0             (         ../id.as):00053                             cmpb      #$D0      ; compare B against immediate value $D0
+0045 26EF             (         ../id.as):00054                             bne       Loop_01   ; branch if not equal to Loop_01
+0047 1F20             (         ../id.as):00055                             tfr       y,d       ; transfer Y,D
+0049 10BE004B         (         ../id.as):00056                             ldy       $004B     ; load Y from $004B
+004D ED29             (         ../id.as):00057                             std       9,y       ; store D to indexed value 9,y
+004F 3520             (         ../id.as):00058         BranchTarget_03     puls      y         ; restore Y from the hardware stack
+0051 160000           (         ../id.as):00059                             lbra      _osret    ; long branch unconditionally to _osret
+                      (         ../id.as):00060         
+                      (         ../id.as):00061                             endsect             ; end current section

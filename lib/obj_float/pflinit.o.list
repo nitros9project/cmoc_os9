@@ -1,0 +1,161 @@
+                      (    ../pflinit.as):00001         *      stack u, ret, c, long
+                      (    ../pflinit.as):00002         
+                      (    ../pflinit.as):00003                             section   bss       ; begin bss section
+0000                  (    ../pflinit.as):00004         buf1                rmb       20        ; reserve 20 bytes
+                      (    ../pflinit.as):00005                             endsect             ; end current section
+                      (    ../pflinit.as):00006         
+                      (    ../pflinit.as):00007         
+                      (    ../pflinit.as):00008                             section   rodata    ; begin rodata section
+0000 3B9ACA00         (    ../pflinit.as):00009         ldectbl             fdb       $3b9a,$ca00 ; define word data $3b9a,$ca00
+0004 05F5E100         (    ../pflinit.as):00010                             fdb       $05f5,$e100 ; define word data $05f5,$e100
+0008 00989680         (    ../pflinit.as):00011                             fdb       $0098,$9680 ; define word data $0098,$9680
+000C 000F4240         (    ../pflinit.as):00012                             fdb       $000f,$4240 ; define word data $000f,$4240
+0010 000186A0         (    ../pflinit.as):00013                             fdb       $0001,$86a0 ; define word data $0001,$86a0
+0014 00002710         (    ../pflinit.as):00014                             fdb       $0000,10000 ; define word data $0000,10000
+0018 000003E8         (    ../pflinit.as):00015                             fdb       $0000,1000 ; define word data $0000,1000
+001C 00000064         (    ../pflinit.as):00016                             fdb       $0000,100 ; define word data $0000,100
+0020 0000000A         (    ../pflinit.as):00017                             fdb       $0000,10  ; define word data $0000,10
+                      (    ../pflinit.as):00018                             endsect             ; end current section
+                      (    ../pflinit.as):00019         
+                      (    ../pflinit.as):00020                             section   code      ; begin code section
+                      (    ../pflinit.as):00021         
+                      (    ../pflinit.as):00022         _pflinit            EXPORT              ; export this symbol
+0000 39               (    ../pflinit.as):00023         _pflinit:           rts                 ; return to caller
+                      (    ../pflinit.as):00024         
+                      (    ../pflinit.as):00025         
+                      (    ../pflinit.as):00026         _pflong             EXPORT              ; export this symbol
+0001 3440             (    ../pflinit.as):00027         _pflong:            pshs      u         ; save U on the hardware stack
+0003 33A90000         (    ../pflinit.as):00028                             leau      buf1,y    ; compute effective address into U from buf1,y
+0007 3440             (    ../pflinit.as):00029                             pshs      u         ; save U on the hardware stack
+0009 E667             (    ../pflinit.as):00030                             ldb       4+2+1,s   ; load B from stack-relative value 4+2+1,s
+000B C164             (    ../pflinit.as):00031         switch              cmpb      #'d
+000D 276B             (    ../pflinit.as):00032                             beq       case_d    ; branch if equal/zero to case_d
+000F C175             (    ../pflinit.as):00033                             cmpb      #'u
+0011 10270094         (    ../pflinit.as):00034                             lbeq      case_u    ; long branch if equal/zero to case_u
+0015 C16F             (    ../pflinit.as):00035                             cmpb      #'o
+0017 2710             (    ../pflinit.as):00036                             beq       case_o    ; branch if equal/zero to case_o
+0019 C178             (    ../pflinit.as):00037                             cmpb      #'x
+001B 2732             (    ../pflinit.as):00038                             beq       case_x    ; branch if equal/zero to case_x
+001D C158             (    ../pflinit.as):00039                             cmpb      #'X
+001F 272E             (    ../pflinit.as):00040                             beq       case_x    ; branch if equal/zero to case_x
+0021 866C             (    ../pflinit.as):00041                             lda       #'l
+0023 EDC1             (    ../pflinit.as):00042                             std       ,u++      ; store D to memory pointed to by U+, then advance U+
+0025 6FC4             (    ../pflinit.as):00043         pflxit              clr       ,u        ; clear memory pointed to by U
+0027 35C6             (    ../pflinit.as):00044                             puls      d,u,pc    ; restore registers and return
+                      (    ../pflinit.as):00045                             pag
+0029 3068             (    ../pflinit.as):00046         case_o              leax      8,s       ; long
+002B E603             (    ../pflinit.as):00047         case_o1             ldb       3,x       ; load B from indexed value 3,x
+002D C407             (    ../pflinit.as):00048                             andb      #$07      ; AND B with immediate value $07
+002F CB30             (    ../pflinit.as):00049                             addb      #'0
+0031 E7C0             (    ../pflinit.as):00050                             stb       ,u+       ; store B to memory pointed to by U, then advance U
+0033 C603             (    ../pflinit.as):00051                             ldb       #3        ; load B from immediate value 3
+0035 8D04             (    ../pflinit.as):00052                             bsr       fshifts   ; branch to subroutine to fshifts
+0037 26F2             (    ../pflinit.as):00053                             bne       case_o1   ; branch if not equal to case_o1
+0039 2036             (    ../pflinit.as):00054                             bra       case_x3   ; branch unconditionally to case_x3
+                      (    ../pflinit.as):00055         
+                      (    ../pflinit.as):00056         
+003B 6400             (    ../pflinit.as):00057         fshifts             lsr       0,x       ; logical shift indexed value 0,x right by one bit
+003D 6601             (    ../pflinit.as):00058                             ror       1,x       ; rotate indexed value 1,x right through carry
+003F 6602             (    ../pflinit.as):00059                             ror       2,x       ; rotate indexed value 2,x right through carry
+0041 6603             (    ../pflinit.as):00060                             ror       3,x       ; rotate indexed value 3,x right through carry
+0043 5A               (    ../pflinit.as):00061                             decb                ; decrement B
+0044 26F5             (    ../pflinit.as):00062                             bne       fshifts   ; branch if not equal to fshifts
+0046 A600             (    ../pflinit.as):00063                             lda       0,x       ; load A from indexed value 0,x
+0048 AA01             (    ../pflinit.as):00064                             ora       1,x       ; OR A with indexed value 1,x
+004A AA02             (    ../pflinit.as):00065                             ora       2,x       ; OR A with indexed value 2,x
+004C AA03             (    ../pflinit.as):00066                             ora       3,x       ; OR A with indexed value 3,x
+004E 39               (    ../pflinit.as):00067                             rts                 ; return to caller
+                      (    ../pflinit.as):00068         
+                      (    ../pflinit.as):00069         
+004F C420             (    ../pflinit.as):00070         case_x              andb      #$20      ; lower case bit
+0051 3404             (    ../pflinit.as):00071                             pshs      b         ; save B on the hardware stack
+0053 3069             (    ../pflinit.as):00072                             leax      9,s       ; compute effective address into X from 9,s
+0055 E603             (    ../pflinit.as):00073         case_x1             ldb       3,x       ; load B from indexed value 3,x
+0057 C40F             (    ../pflinit.as):00074                             andb      #$0f      ; AND B with immediate value $0f
+0059 3404             (    ../pflinit.as):00075                             pshs      b         ; save B on the hardware stack
+005B 8630             (    ../pflinit.as):00076                             lda       #'0
+005D C109             (    ../pflinit.as):00077                             cmpb      #9        ; compare B against immediate value 9
+005F 2F04             (    ../pflinit.as):00078                             ble       case_x2   ; branch if less or equal to case_x2
+0061 8637             (    ../pflinit.as):00079                             lda       #'A-10
+0063 AB61             (    ../pflinit.as):00080                             adda      1,s       ; add stack-relative value 1,s into A
+0065 ABE0             (    ../pflinit.as):00081         case_x2             adda      ,s+       ; add memory pointed to by S, then advance S into A
+0067 A7C0             (    ../pflinit.as):00082                             sta       ,u+       ; store A to memory pointed to by U, then advance U
+0069 C604             (    ../pflinit.as):00083                             ldb       #4        ; load B from immediate value 4
+006B 8DCE             (    ../pflinit.as):00084                             bsr       fshifts   ; branch to subroutine to fshifts
+006D 26E6             (    ../pflinit.as):00085                             bne       case_x1   ; branch if not equal to case_x1
+006F 3261             (    ../pflinit.as):00086                             leas      1,s       ; adjust S using 1,s
+0071 AEE4             (    ../pflinit.as):00087         case_x3             ldx       ,s        ; load X from memory pointed to by S
+0073 6FC4             (    ../pflinit.as):00088                             clr       ,u        ; clear memory pointed to by U
+                      (    ../pflinit.as):00089         frevers             EXTERNAL            ; import external symbol
+0075 170000           (    ../pflinit.as):00090                             lbsr      frevers   ; long branch to subroutine to frevers
+0078 35C6             (    ../pflinit.as):00091                             puls      d,u,pc    ; restore registers and return
+                      (    ../pflinit.as):00092         
+007A E668             (    ../pflinit.as):00093         case_d              ldb       8,s       ; load B from stack-relative value 8,s
+007C 2A2B             (    ../pflinit.as):00094                             bpl       case_d4   ; branch if plus to case_d4
+007E CC0000           (    ../pflinit.as):00095                             ldd       #0        ; load D from immediate value 0
+0081 A36A             (    ../pflinit.as):00096                             subd      10,s      ; subtract stack-relative value 10,s from D
+0083 ED6A             (    ../pflinit.as):00097                             std       10,s      ; store D to stack-relative value 10,s
+0085 CC0000           (    ../pflinit.as):00098                             ldd       #0        ; load D from immediate value 0
+0088 E269             (    ../pflinit.as):00099                             sbcb      9,s       ; subtract stack-relative value 9,s from B
+008A A268             (    ../pflinit.as):00100                             sbca      8,s       ; subtract stack-relative value 8,s from A
+008C ED68             (    ../pflinit.as):00101                             std       8,s       ; store D to stack-relative value 8,s
+008E 10838000         (    ../pflinit.as):00102                             cmpd      #$8000    ; compare D against immediate value $8000
+0092 2611             (    ../pflinit.as):00103                             bne       case_d3   ; branch if not equal to case_d3
+0094 EC02             (    ../pflinit.as):00104                             ldd       2,x       ; load D from indexed value 2,x
+0096 260D             (    ../pflinit.as):00105                             bne       case_d3   ; branch if not equal to case_d3
+0098 308D005B         (    ../pflinit.as):00106                             leax      >tminlong,pcr ; compute effective address into X from >tminlong,pcr
+009C A680             (    ../pflinit.as):00107         case_d2             lda       ,x+       ; load A from memory pointed to by X, then advance X
+009E A7C0             (    ../pflinit.as):00108                             sta       ,u+       ; store A to memory pointed to by U, then advance U
+00A0 26FA             (    ../pflinit.as):00109                             bne       case_d2   ; branch if not equal to case_d2
+00A2 16FF80           (    ../pflinit.as):00110         case_d1             lbra      pflxit    ; long branch unconditionally to pflxit
+                      (    ../pflinit.as):00111         
+00A5 C62D             (    ../pflinit.as):00112         case_d3             ldb       #'-
+00A7 E7C0             (    ../pflinit.as):00113                             stb       ,u+       ; store B to memory pointed to by U, then advance U
+00A9                  (    ../pflinit.as):00114         case_u
+00A9 308D0000         (    ../pflinit.as):00115         case_d4             leax      ldectbl,pcr ; compute effective address into X from ldectbl,pcr
+00AD 4F               (    ../pflinit.as):00116                             clra                ; clear A
+00AE C60A             (    ../pflinit.as):00117                             ldb       #10       ; load B from immediate value 10
+00B0 3402             (    ../pflinit.as):00118                             pshs      a         ; save A on the hardware stack
+00B2 3406             (    ../pflinit.as):00119                             pshs      d         ; save D on the hardware stack
+00B4 2033             (    ../pflinit.as):00120                             bra       case_d11  ; branch unconditionally to case_d11
+                      (    ../pflinit.as):00121         
+00B6 6CE4             (    ../pflinit.as):00122         case_d7             inc       ,s        ; increment memory pointed to by S
+00B8 EC6D             (    ../pflinit.as):00123         case_d8             ldd       13,s      ; load D from stack-relative value 13,s
+00BA A302             (    ../pflinit.as):00124                             subd      2,x       ; subtract indexed value 2,x from D
+00BC ED6D             (    ../pflinit.as):00125                             std       13,s      ; store D to stack-relative value 13,s
+00BE EC6B             (    ../pflinit.as):00126                             ldd       11,s      ; load D from stack-relative value 11,s
+00C0 E201             (    ../pflinit.as):00127                             sbcb      1,x       ; subtract indexed value 1,x from B
+00C2 A200             (    ../pflinit.as):00128                             sbca      0,x       ; subtract indexed value 0,x from A
+00C4 ED6B             (    ../pflinit.as):00129                             std       11,s      ; store D to stack-relative value 11,s
+00C6 24EE             (    ../pflinit.as):00130                             bcc       case_d7   ; branch if carry is clear to case_d7
+00C8 EC6D             (    ../pflinit.as):00131                             ldd       13,s      ; load D from stack-relative value 13,s
+00CA E302             (    ../pflinit.as):00132                             addd      2,x       ; add indexed value 2,x into D
+00CC ED6D             (    ../pflinit.as):00133                             std       13,s      ; store D to stack-relative value 13,s
+00CE EC6B             (    ../pflinit.as):00134                             ldd       11,s      ; load D from stack-relative value 11,s
+00D0 E901             (    ../pflinit.as):00135                             adcb      1,x       ; add indexed value 1,x into B
+00D2 A900             (    ../pflinit.as):00136                             adca      0,x       ; add indexed value 0,x into A
+00D4 ED6B             (    ../pflinit.as):00137                             std       11,s      ; store D to stack-relative value 11,s
+00D6 E6E4             (    ../pflinit.as):00138                             ldb       ,s        ; load B from memory pointed to by S
+00D8 6D62             (    ../pflinit.as):00139                             tst       2,s       ; test stack-relative value 2,s and update condition codes
+00DA 2605             (    ../pflinit.as):00140                             bne       case_d9   ; branch if not equal to case_d9
+00DC 5D               (    ../pflinit.as):00141                             tstb                ; test B and update condition codes
+00DD 2706             (    ../pflinit.as):00142                             beq       case_d10  ; branch if equal/zero to case_d10
+00DF 6C62             (    ../pflinit.as):00143                             inc       2,s       ; increment stack-relative value 2,s
+00E1 CB30             (    ../pflinit.as):00144         case_d9             addb      #'0
+00E3 E7C0             (    ../pflinit.as):00145                             stb       ,u+       ; store B to memory pointed to by U, then advance U
+00E5 3004             (    ../pflinit.as):00146         case_d10            leax      4,x       ; compute effective address into X from 4,x
+00E7 6FE4             (    ../pflinit.as):00147                             clr       ,s        ; clear memory pointed to by S
+00E9 6A61             (    ../pflinit.as):00148         case_d11            dec       1,s       ; decrement stack-relative value 1,s
+00EB 26CB             (    ../pflinit.as):00149                             bne       case_d8   ; branch if not equal to case_d8
+00ED E66E             (    ../pflinit.as):00150                             ldb       14,s      ; load B from stack-relative value 14,s
+00EF CB30             (    ../pflinit.as):00151                             addb      #'0
+00F1 E7C0             (    ../pflinit.as):00152                             stb       ,u+       ; store B to memory pointed to by U, then advance U
+00F3 3263             (    ../pflinit.as):00153                             leas      3,s       ; adjust S using 3,s
+00F5 20AB             (    ../pflinit.as):00154                             bra       case_d1   ; branch unconditionally to case_d1
+                      (    ../pflinit.as):00155         
+                      (    ../pflinit.as):00156         
+00F7 2D32313437343833 (    ../pflinit.as):00157         tminlong            fcc       '-2147483648' ; define string data '-2147483648'
+     363438
+0102 00               (    ../pflinit.as):00158                             fcb       0         ; define byte data 0
+                      (    ../pflinit.as):00159         
+                      (    ../pflinit.as):00160                             endsect             ; end current section

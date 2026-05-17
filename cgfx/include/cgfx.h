@@ -1,5 +1,110 @@
 #include <fcntl.h>
 
+/**
+ * @brief Move a block of memory, correctly handling overlap.
+ *
+ * @param dest Destination buffer.
+ * @param src Source buffer.
+ * @param bytes Number of bytes to move.
+ */
+void movemem(void *dest, const void *src, int bytes);
+
+/**
+ * @brief Configure a window type if it differs from the current one.
+ *
+ * @param path_id The path to the window device.
+ * @param stype Desired screen type.
+ * @param fg Foreground color.
+ * @param bg Background color.
+ */
+void SetType(path_id path, int stype, int fg, int bg);
+
+/**
+ * @brief Draw a raised button with a text label.
+ *
+ * @param path_id The path to the window device.
+ * @param column Text column.
+ * @param row Text row.
+ * @param s Button label.
+ * @param fg Foreground color.
+ * @param bg Background color.
+ */
+void BUp(path_id path, int column, int row, const char *s, int fg, int bg);
+
+/**
+ * @brief Draw a pressed button state by shifting the saved button image.
+ *
+ * @param path_id The path to the window device.
+ * @param column Text column.
+ * @param row Text row.
+ * @param s Button label.
+ */
+void BDown(path_id path, int column, int row, const char *s);
+
+/**
+ * @brief Draw a raised radio button.
+ *
+ * @param path_id The path to the window device.
+ * @param column Text column.
+ * @param row Text row.
+ * @param fg Foreground color.
+ * @param bg Background color.
+ */
+void RBUp(path_id path, int column, int row, int fg, int bg);
+
+/**
+ * @brief Draw a pressed radio button.
+ *
+ * @param path_id The path to the window device.
+ * @param column Text column.
+ * @param row Text row.
+ * @param fg Foreground color.
+ * @param bg Background color.
+ */
+void RBDown(path_id path, int column, int row, int fg, int bg);
+
+/**
+ * @brief Return a keyboard character or synthesized mouse button code.
+ *
+ * Returns a waiting key if one is ready, `-1` for left mouse button,
+ * `-2` for right mouse button, or `0` if no event is available yet.
+ *
+ * @param path_id The path to the window device.
+ */
+int MouseKey(path_id path);
+
+/**
+ * @brief Set a CoCo 3 alarm request.
+ *
+ * @param time_buffer Alarm parameter block.
+ * @return 0 if successful, otherwise the error code.
+ */
+error_code _cgfx_alarm_set(void *time_buffer);
+
+/**
+ * @brief Read the current CoCo 3 alarm settings.
+ *
+ * @param time_buffer Alarm parameter block.
+ * @return 0 if successful, otherwise the error code.
+ */
+error_code _cgfx_alarm_get(void *time_buffer);
+
+/**
+ * @brief Clear the current CoCo 3 alarm.
+ *
+ * @return 0 if successful, otherwise the error code.
+ */
+error_code _cgfx_alarm_clear(void);
+
+/**
+ * @brief Set an alarm that delivers a signal.
+ *
+ * @param time_buffer Alarm parameter block.
+ * @param signo Signal number to deliver.
+ * @return 0 if successful, otherwise the error code.
+ */
+error_code _cgfx_alarm_signal(void *time_buffer, int signo);
+
 /**** TEXT FUNCTIONS ****/
 
 /**
@@ -633,6 +738,22 @@ error_code _cgfx_boldsw(path_id path, int sw);
  */
 error_code _cgfx_propsw(path_id path, int sw);
 
+/**
+ * @brief Create a centered overlay shadow box on the current window.
+ *
+ * @param path_id The path to the window device.
+ * @param width Width in columns.
+ * @param length Height in rows.
+ * @param fg Foreground color.
+ * @param bg Background color.
+ * @return 0 if successful, otherwise the error code.
+ */
+error_code _cgfx_shadow(path_id path, int width, int length, int fg, int bg);
+
+char *FName(path_id path, const char *title, int fg, int bg);
+char *MVFName(path_id path, const char *title, int column, int row, int fg, int bg);
+int TandyMN(path_id path, int inum, int fg, int bg);
+
 
 /* definitions for _os_gs_keysense() bits */
 #define	_SS_KEYSENSE_SHIFT	(1<<0)
@@ -672,6 +793,62 @@ error_code _os_ss_keysense(path_id path, int keys);
  * @return 0 if successful, otherwise the error code.
  */
 error_code _cgfx_ss_tone(path_id path, int duration, int volume, int frequency);
+
+/**
+ * @brief Read a line from a window path and strip the trailing carriage return.
+ *
+ * @param path The path to the window device.
+ * @param s The destination buffer.
+ * @param n The maximum number of characters to read.
+ * @return The number of characters read, or -1 on error.
+ */
+int cread(path_id path, char *s, int n);
+
+/**
+ * @brief Read a line from a window path and append a terminating NUL.
+ *
+ * @param path The path to the window device.
+ * @param s The destination buffer.
+ * @param n The maximum number of characters to read.
+ * @return The number of characters read, or -1 on error.
+ */
+int creadln(path_id path, char *s, int n);
+
+/**
+ * @brief Write a NUL-terminated string to a window path, limited by n.
+ *
+ * @param path The path to the window device.
+ * @param s The source string.
+ * @param n The maximum number of characters to write.
+ * @return The number of characters written, or -1 on error.
+ */
+int cwrite(path_id path, const char *s, int n);
+
+/**
+ * @brief Write a string and trailing carriage return to a window path.
+ *
+ * @param path The path to the window device.
+ * @param s The source string.
+ * @param n The maximum number of characters to write.
+ * @return The number of characters written, or -1 on error.
+ */
+int cwriteln(path_id path, const char *s, int n);
+
+/**
+ * @brief Interpret a BASIC-style DRAW string on a window path.
+ *
+ * @param path The path to the window device.
+ * @param s The draw string, followed by optional substitutions.
+ */
+void Draw(path_id path, const char *s, ...);
+
+/**
+ * @brief Interpret a BASIC-style PLAY string on a window path.
+ *
+ * @param path The path to the window device.
+ * @param s The play string, followed by optional substitutions.
+ */
+void Play(path_id path, const char *s, ...);
 
 
 
@@ -881,11 +1058,14 @@ typedef struct wnstr {  	/* window descriptor */
 	struct mnstr *_wnmen;  	/* pointer to menu descriptor's array */
 } WNDSCR;
 
+#ifndef _CGFX_ITEM_DEFINED
+#define _CGFX_ITEM_DEFINED
 typedef struct {
 	char *i_name; 			/* name of this menu item */
 	char i_enabled; 		/* TRUE if this item is enabled */
 	char (*i_func)(); 		/* pointer to function to call if this item selected */
 } ITEM;
+#endif
 
 #define MN_DSBL 	0
 #define MN_ENBL 	1
@@ -1051,6 +1231,8 @@ error_code _cgfx_ss_mtyp(path_id path, int montype);
 
 /**** ADDED EXTRAS FROM MIKE SWEET ****/
 
+#ifndef _CGFX_DIALOG_DEFINED
+#define _CGFX_DIALOG_DEFINED
 typedef struct { 	/* dialog structure */
 	char d_type;    /* type- 0=string, 1=button */
 	char d_column;  /* column position within the overlay */
@@ -1059,6 +1241,7 @@ typedef struct { 	/* dialog structure */
 	char d_val;     /* value to return to caller */
 	char *d_string; /* pointer to actual string to be placed in overlay */
 } DIALOG;        	/* call this type DIALOG */
+#endif
 
 
 /* now for some define constants for the 'd_type' field... */
@@ -1070,6 +1253,8 @@ typedef struct { 	/* dialog structure */
 #define D_END 		-1  /* End marker of array */
 
 
+#ifndef _CGFX_OBJECT_DEFINED
+#define _CGFX_OBJECT_DEFINED
 typedef struct OBJSTR {
 	char group;          /* G/P group for this object */
 	char buffer;         /* G/P buffer for this object */
@@ -1083,6 +1268,7 @@ typedef struct OBJSTR {
 	struct OBJSTR *next; /* pointer to next object */
 	struct OBJSTR *prev; /* pointer to previous object */
 } OBJECT;   	         /* call this type OBJECT */
+#endif
 
 extern OBJECT *Objects; /* pointer to OBJECT list */
 
@@ -1091,4 +1277,13 @@ typedef struct {
 	int p_xcor;
 	int p_ycor;
 } VERTEX;
+
+int Sine(int n, int angle);
+int Cosine(int n, int angle);
+int PolyLine(path_id path, VERTEX *polygon);
+int PolyFill(path_id path, VERTEX *polygon);
+void PolyBox(VERTEX *polygon, int *left, int *right, int *top, int *bottom);
+VERTEX *PolyRot(VERTEX *polygon, int cx, int cy, int angle);
+VERTEX *PolyScal(VERTEX *polygon, int cx, int cy, int xmult, int ymult, int div);
+VERTEX *PolyTran(VERTEX *polygon, int xoff, int yoff);
  

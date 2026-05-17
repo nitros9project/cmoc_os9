@@ -1,0 +1,5 @@
+Symbol: _intercept (intercept.o) = 0000
+Symbol: _intsave (intercept.o) = 0000
+Symbol: _sigint (intercept.o) = 0000
+Symbol: F_Icpt (intercept.o) = 0009
+Symbol: receiver (intercept.o) = 0016

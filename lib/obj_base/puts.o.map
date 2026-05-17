@@ -1,0 +1,4 @@
+Symbol: _fputs (puts.o) = 0017
+Symbol: _puts (puts.o) = 0000
+Symbol: L_fputs_emit (puts.o) = 0021
+Symbol: L_fputs_loop (puts.o) = 0026

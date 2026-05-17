@@ -1,0 +1,9 @@
+Symbol: _index (index.o) = 0000
+Symbol: _rindex (index.o) = 0010
+Symbol: _strchr (index.o) = 0000
+Symbol: _strrchr (index.o) = 0010
+Symbol: L_strchr_loop (index.o) = 0002
+Symbol: L_strchr_not_found (index.o) = 000E
+Symbol: L_strrchr_done (index.o) = 0025
+Symbol: L_strrchr_match (index.o) = 0019
+Symbol: L_strrchr_scan (index.o) = 001F

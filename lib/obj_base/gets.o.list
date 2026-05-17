@@ -1,0 +1,34 @@
+                      (       ../gets.as):00001         * Compact assembly implementation of gets().
+                      (       ../gets.as):00002         
+                      (       ../gets.as):00003                             section   code      ; begin code section
+                      (       ../gets.as):00004         
+                      (       ../gets.as):00005         _gets               EXPORT              ; export this symbol
+                      (       ../gets.as):00006         
+                      (       ../gets.as):00007         _getc               EXTERNAL            ; import external symbol
+                      (       ../gets.as):00008         __iob               EXTERNAL            ; import external symbol
+                      (       ../gets.as):00009         
+0000                  (       ../gets.as):00010         _gets
+0000 3440             (       ../gets.as):00011                             pshs      u         ; save U on the hardware stack
+0002 EE64             (       ../gets.as):00012                             ldu       4,s       ; load U from stack-relative value 4,s
+0004 2002             (       ../gets.as):00013                             bra       L_gets_read ; branch unconditionally to L_gets_read
+0006                  (       ../gets.as):00014         L_gets_store
+0006 E7C0             (       ../gets.as):00015                             stb       ,u+       ; store B to memory pointed to by U, then advance U
+0008                  (       ../gets.as):00016         L_gets_read
+0008 30A90000         (       ../gets.as):00017                             leax      __iob,y   ; compute effective address into X from __iob,y
+000C 3410             (       ../gets.as):00018                             pshs      x         ; save X on the hardware stack
+000E 170000           (       ../gets.as):00019                             lbsr      _getc     ; long branch to subroutine to _getc
+0011 3262             (       ../gets.as):00020                             leas      2,s       ; adjust S using 2,s
+0013 C10D             (       ../gets.as):00021                             cmpb      #$0D      ; compare B against immediate value $0D
+0015 270A             (       ../gets.as):00022                             beq       L_gets_done ; branch if equal/zero to L_gets_done
+0017 1083FFFF         (       ../gets.as):00023                             cmpd      #-1       ; compare D against immediate value -1
+001B 26E9             (       ../gets.as):00024                             bne       L_gets_store ; branch if not equal to L_gets_store
+001D 4F               (       ../gets.as):00025                             clra                ; clear A
+001E 5F               (       ../gets.as):00026                             clrb                ; clear B
+001F 2004             (       ../gets.as):00027                             bra       L_gets_exit ; branch unconditionally to L_gets_exit
+0021                  (       ../gets.as):00028         L_gets_done
+0021 6FC4             (       ../gets.as):00029                             clr       ,u        ; clear memory pointed to by U
+0023 EC64             (       ../gets.as):00030                             ldd       4,s       ; load D from stack-relative value 4,s
+0025                  (       ../gets.as):00031         L_gets_exit
+0025 35C0             (       ../gets.as):00032                             puls      u,pc      ; restore registers and return
+                      (       ../gets.as):00033         
+                      (       ../gets.as):00034                             endsect             ; end current section

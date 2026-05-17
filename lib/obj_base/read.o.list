@@ -1,0 +1,38 @@
+                      (       ../read.as):00001         * Compact assembly implementation of read()/readln().
+                      (       ../read.as):00002         
+                      (       ../read.as):00003                             section   code      ; begin code section
+                      (       ../read.as):00004         
+                      (       ../read.as):00005         _read               EXPORT              ; export this symbol
+                      (       ../read.as):00006         _readln             EXPORT              ; export this symbol
+                      (       ../read.as):00007         
+                      (       ../read.as):00008         _os9err             EXTERNAL            ; import external symbol
+                      (       ../read.as):00009         
+0000                  (       ../read.as):00010         _read
+0000 3420             (       ../read.as):00011                             pshs      y         ; save Y on the hardware stack
+0002 A665             (       ../read.as):00012                             lda       5,s       ; load A from stack-relative value 5,s
+0004 10AE68           (       ../read.as):00013                             ldy       8,s       ; load Y from stack-relative value 8,s
+0007 3420             (       ../read.as):00014                             pshs      y         ; save Y on the hardware stack
+0009 103F89           (       ../read.as):00015                             os9       $89       ; invoke OS-9 system call $89
+000C                  (       ../read.as):00016         L_read_common
+000C 240D             (       ../read.as):00017                             bcc       L_read_exit ; branch if carry is clear to L_read_exit
+000E C1D3             (       ../read.as):00018                             cmpb      #$D3      ; compare B against immediate value $D3
+0010 2604             (       ../read.as):00019                             bne       L_read_error ; branch if not equal to L_read_error
+0012 4F               (       ../read.as):00020                             clra                ; clear A
+0013 5F               (       ../read.as):00021                             clrb                ; clear B
+0014 35B0             (       ../read.as):00022                             puls      x,y,pc    ; restore registers and return
+0016                  (       ../read.as):00023         L_read_error
+0016 3530             (       ../read.as):00024                             puls      x,y       ; restore X,Y from the hardware stack
+0018 160000           (       ../read.as):00025                             lbra      _os9err   ; long branch unconditionally to _os9err
+001B                  (       ../read.as):00026         L_read_exit
+001B 1F20             (       ../read.as):00027                             tfr       y,d       ; transfer Y,D
+001D 35B0             (       ../read.as):00028                             puls      x,y,pc    ; restore registers and return
+                      (       ../read.as):00029         
+001F                  (       ../read.as):00030         _readln
+001F 3420             (       ../read.as):00031                             pshs      y         ; save Y on the hardware stack
+0021 A665             (       ../read.as):00032                             lda       5,s       ; load A from stack-relative value 5,s
+0023 10AE68           (       ../read.as):00033                             ldy       8,s       ; load Y from stack-relative value 8,s
+0026 3420             (       ../read.as):00034                             pshs      y         ; save Y on the hardware stack
+0028 103F8B           (       ../read.as):00035                             os9       $8B       ; invoke OS-9 system call $8B
+002B 20DF             (       ../read.as):00036                             bra       L_read_common ; branch unconditionally to L_read_common
+                      (       ../read.as):00037         
+                      (       ../read.as):00038                             endsect             ; end current section

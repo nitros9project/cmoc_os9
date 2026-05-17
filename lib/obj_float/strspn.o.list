@@ -1,0 +1,38 @@
+                      (     ../strspn.as):00001         * Adapted from Deek's KLibc strspn.a for the live cmoc_os9 ABI.
+                      (     ../strspn.as):00002         
+                      (     ../strspn.as):00003                             section   code      ; begin code section
+                      (     ../strspn.as):00004         
+                      (     ../strspn.as):00005         _strspn             EXPORT              ; export this symbol
+                      (     ../strspn.as):00006         _strcspn            EXPORT              ; export this symbol
+                      (     ../strspn.as):00007         
+                      (     ../strspn.as):00008         _strchr             EXTERN              ; import external symbol
+                      (     ../strspn.as):00009         
+0000                  (     ../strspn.as):00010         _strspn
+0000 3450             (     ../strspn.as):00011                             pshs      x,u       ; save X,U on the hardware stack
+0002 AE68             (     ../strspn.as):00012                             ldx       8,s       ; load X from stack-relative value 8,s
+0004 EE66             (     ../strspn.as):00013                             ldu       6,s       ; load U from stack-relative value 6,s
+0006 3410             (     ../strspn.as):00014                             pshs      x         ; save X on the hardware stack
+0008 E6C0             (     ../strspn.as):00015         Loop_01             ldb       ,u+       ; load B from memory pointed to by U, then advance U
+000A 271C             (     ../strspn.as):00016                             beq       BranchTarget_01 ; branch if equal/zero to BranchTarget_01
+000C E763             (     ../strspn.as):00017                             stb       3,s       ; store B to stack-relative value 3,s
+000E 170000           (     ../strspn.as):00018                             lbsr      _strchr   ; long branch to subroutine to _strchr
+0011 26F5             (     ../strspn.as):00019                             bne       Loop_01   ; branch if not equal to Loop_01
+0013 2013             (     ../strspn.as):00020                             bra       BranchTarget_01 ; branch unconditionally to BranchTarget_01
+                      (     ../strspn.as):00021         
+0015                  (     ../strspn.as):00022         _strcspn
+0015 3450             (     ../strspn.as):00023                             pshs      x,u       ; save X,U on the hardware stack
+0017 AE68             (     ../strspn.as):00024                             ldx       8,s       ; load X from stack-relative value 8,s
+0019 EE66             (     ../strspn.as):00025                             ldu       6,s       ; load U from stack-relative value 6,s
+001B 3410             (     ../strspn.as):00026                             pshs      x         ; save X on the hardware stack
+001D E6C0             (     ../strspn.as):00027         Loop_02             ldb       ,u+       ; load B from memory pointed to by U, then advance U
+001F 2707             (     ../strspn.as):00028                             beq       BranchTarget_01 ; branch if equal/zero to BranchTarget_01
+0021 E763             (     ../strspn.as):00029                             stb       3,s       ; store B to stack-relative value 3,s
+0023 170000           (     ../strspn.as):00030                             lbsr      _strchr   ; long branch to subroutine to _strchr
+0026 27F5             (     ../strspn.as):00031                             beq       Loop_02   ; branch if equal/zero to Loop_02
+0028 335F             (     ../strspn.as):00032         BranchTarget_01     leau      -1,u      ; compute effective address into U from -1,u
+002A 1F30             (     ../strspn.as):00033                             tfr       u,d       ; transfer U,D
+002C A368             (     ../strspn.as):00034                             subd      8,s       ; subtract stack-relative value 8,s from D
+002E 3264             (     ../strspn.as):00035                             leas      4,s       ; adjust S using 4,s
+0030 35C0             (     ../strspn.as):00036                             puls      u,pc      ; restore registers and return
+                      (     ../strspn.as):00037         
+                      (     ../strspn.as):00038                             endsect             ; end current section

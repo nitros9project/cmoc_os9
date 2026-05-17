@@ -1,0 +1,5 @@
+Symbol: _strncat (strncat.o) = 0000
+Symbol: BranchTarget_01 (strncat.o) = 001C
+Symbol: BranchTarget_02 (strncat.o) = 001E
+Symbol: Loop_01 (strncat.o) = 000B
+Symbol: Loop_02 (strncat.o) = 0011

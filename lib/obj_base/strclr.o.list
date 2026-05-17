@@ -1,0 +1,19 @@
+                      (     ../strclr.as):00001         * Adapted from Deek's KLibc strclr_a for the live cmoc_os9 ABI.
+                      (     ../strclr.as):00002         
+                      (     ../strclr.as):00003                             section   code      ; begin code section
+                      (     ../strclr.as):00004         
+                      (     ../strclr.as):00005         _strclr             EXPORT              ; export this symbol
+                      (     ../strclr.as):00006         
+0000                  (     ../strclr.as):00007         _strclr
+0000 3440             (     ../strclr.as):00008                             pshs      u         ; save U on the hardware stack
+0002 EE64             (     ../strclr.as):00009                             ldu       4,s       ; load U from stack-relative value 4,s
+0004 5F               (     ../strclr.as):00010                             clrb                ; clear B
+0005 AE66             (     ../strclr.as):00011                             ldx       6,s       ; load X from stack-relative value 6,s
+0007 2706             (     ../strclr.as):00012                             beq       BranchTarget_01 ; branch if equal/zero to BranchTarget_01
+0009 E7C0             (     ../strclr.as):00013         Loop_01             stb       ,u+       ; store B to memory pointed to by U, then advance U
+000B 301F             (     ../strclr.as):00014                             leax      -1,x      ; compute effective address into X from -1,x
+000D 26FA             (     ../strclr.as):00015                             bne       Loop_01   ; branch if not equal to Loop_01
+000F EC64             (     ../strclr.as):00016         BranchTarget_01     ldd       4,s       ; load D from stack-relative value 4,s
+0011 35C0             (     ../strclr.as):00017                             puls      u,pc      ; restore registers and return
+                      (     ../strclr.as):00018         
+                      (     ../strclr.as):00019                             endsect             ; end current section

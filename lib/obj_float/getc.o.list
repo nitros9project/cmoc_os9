@@ -1,0 +1,115 @@
+                      (       ../getc.as):00001                             section   code      ; begin code section
+                      (       ../getc.as):00002         
+                      (       ../getc.as):00003         _getc               EXPORT              ; export this symbol
+                      (       ../getc.as):00004         _ungetc             EXPORT              ; export this symbol
+                      (       ../getc.as):00005         _getw               EXPORT              ; export this symbol
+                      (       ../getc.as):00006         
+                      (       ../getc.as):00007         __iob               EXTERN              ; import external symbol
+                      (       ../getc.as):00008         
+0000 3440             (       ../getc.as):00009         _getc               pshs      u         ; save U on the hardware stack
+0002 EE64             (       ../getc.as):00010                             ldu       4,s       ; load U from stack-relative value 4,s
+0004 2759             (       ../getc.as):00011                             beq       Loop_05   ; branch if equal/zero to Loop_05
+0006 A646             (       ../getc.as):00012                             lda       6,u       ; load A from indexed value 6,u
+0008 8401             (       ../getc.as):00013                             anda      #1        ; AND A with immediate value 1
+000A 2653             (       ../getc.as):00014                             bne       Loop_05   ; branch if not equal to Loop_05
+000C AEC4             (       ../getc.as):00015                             ldx       ,u        ; load X from memory pointed to by U
+000E AC44             (       ../getc.as):00016                             cmpx      4,u       ; compare X against indexed value 4,u
+0010 2452             (       ../getc.as):00017                             bcc       BranchTarget_02 ; branch if carry is clear to BranchTarget_02
+0012 E680             (       ../getc.as):00018         Loop_01             ldb       ,x+       ; load B from memory pointed to by X, then advance X
+0014 AFC4             (       ../getc.as):00019         Loop_02             stx       ,u        ; store X to memory pointed to by U
+0016 4F               (       ../getc.as):00020                             clra                ; clear A
+0017 35C0             (       ../getc.as):00021                             puls      u,pc      ; restore registers and return
+                      (       ../getc.as):00022         
+0019 3440             (       ../getc.as):00023         _ungetc             pshs      u         ; save U on the hardware stack
+001B EE66             (       ../getc.as):00024                             ldu       6,s       ; load U from stack-relative value 6,s
+001D 2740             (       ../getc.as):00025                             beq       Loop_05   ; branch if equal/zero to Loop_05
+001F E647             (       ../getc.as):00026                             ldb       7,u       ; load B from indexed value 7,u
+0021 C401             (       ../getc.as):00027                             andb      #1        ; AND B with immediate value 1
+0023 273A             (       ../getc.as):00028                             beq       Loop_05   ; branch if equal/zero to Loop_05
+0025 EC64             (       ../getc.as):00029                             ldd       4,s       ; load D from stack-relative value 4,s
+0027 1083FFFF         (       ../getc.as):00030                             cmpd      #-1       ; compare D against immediate value -1
+002B 2732             (       ../getc.as):00031                             beq       Loop_05   ; branch if equal/zero to Loop_05
+002D AEC4             (       ../getc.as):00032                             ldx       ,u        ; load X from memory pointed to by U
+002F AC42             (       ../getc.as):00033                             cmpx      2,u       ; compare X against indexed value 2,u
+0031 272C             (       ../getc.as):00034                             beq       Loop_05   ; branch if equal/zero to Loop_05
+0033 E782             (       ../getc.as):00035                             stb       ,-x       ; store B to memory pointed to by -X
+0035 20DD             (       ../getc.as):00036                             bra       Loop_02   ; branch unconditionally to Loop_02
+                      (       ../getc.as):00037         
+0037 3440             (       ../getc.as):00038         _getw               pshs      u         ; save U on the hardware stack
+0039 EE64             (       ../getc.as):00039                             ldu       4,s       ; load U from stack-relative value 4,s
+003B 34C0             (       ../getc.as):00040                             pshs      u,pc      ; save U,PC on the hardware stack
+003D 8DC1             (       ../getc.as):00041                             bsr       _getc     ; branch to subroutine to _getc
+003F ED62             (       ../getc.as):00042                             std       2,s       ; store D to stack-relative value 2,s
+0041 1083FFFF         (       ../getc.as):00043                             cmpd      #-1       ; compare D against immediate value -1
+0045 270A             (       ../getc.as):00044                             beq       BranchTarget_01 ; branch if equal/zero to BranchTarget_01
+0047 8DB7             (       ../getc.as):00045                             bsr       _getc     ; branch to subroutine to _getc
+0049 1083FFFF         (       ../getc.as):00046                             cmpd      #-1       ; compare D against immediate value -1
+004D 2702             (       ../getc.as):00047                             beq       BranchTarget_01 ; branch if equal/zero to BranchTarget_01
+004F A663             (       ../getc.as):00048                             lda       3,s       ; load A from stack-relative value 3,s
+0051 3264             (       ../getc.as):00049         BranchTarget_01     leas      4,s       ; adjust S using 4,s
+0053 35C0             (       ../getc.as):00050                             puls      u,pc      ; restore registers and return
+                      (       ../getc.as):00051         
+0055 C610             (       ../getc.as):00052         Loop_03             ldb       #$10      ; load B from immediate value $10
+0057 2002             (       ../getc.as):00053                             bra       Continue_01 ; branch unconditionally to Continue_01
+0059 C620             (       ../getc.as):00054         Loop_04             ldb       #$20      ; load B from immediate value $20
+005B EA47             (       ../getc.as):00055         Continue_01         orb       7,u       ; OR B with indexed value 7,u
+005D E747             (       ../getc.as):00056                             stb       7,u       ; store B to indexed value 7,u
+005F CCFFFF           (       ../getc.as):00057         Loop_05             ldd       #-1       ; load D from immediate value -1
+0062 35C0             (       ../getc.as):00058                             puls      u,pc      ; restore registers and return
+                      (       ../getc.as):00059         
+0064 EC46             (       ../getc.as):00060         BranchTarget_02     ldd       6,u       ; load D from indexed value 6,u
+0066 8480             (       ../getc.as):00061                             anda      #$80      ; AND A with immediate value $80
+0068 C431             (       ../getc.as):00062                             andb      #$31      ; AND B with immediate value $31
+006A C101             (       ../getc.as):00063                             cmpb      #1        ; compare B against immediate value 1
+006C 26F1             (       ../getc.as):00064                             bne       Loop_05   ; branch if not equal to Loop_05
+006E 8180             (       ../getc.as):00065                             cmpa      #$80      ; compare A against immediate value $80
+0070 2707             (       ../getc.as):00066                             beq       BranchTarget_03 ; branch if equal/zero to BranchTarget_03
+0072 3440             (       ../getc.as):00067                             pshs      u         ; save U on the hardware stack
+                      (       ../getc.as):00068         _setbase            EXTERN              ; import external symbol
+0074 170000           (       ../getc.as):00069                             lbsr      _setbase  ; long branch to subroutine to _setbase
+0077 3262             (       ../getc.as):00070                             leas      2,s       ; adjust S using 2,s
+0079 30A90000         (       ../getc.as):00071         BranchTarget_03     leax      __iob,y   ; compute effective address into X from __iob,y
+007D 3410             (       ../getc.as):00072                             pshs      x         ; save X on the hardware stack
+007F 11A3E1           (       ../getc.as):00073                             cmpu      ,s++      ; compare U against memory pointed to by S+, then advance S+
+0082 2611             (       ../getc.as):00074                             bne       BranchTarget_04 ; branch if not equal to BranchTarget_04
+0084 E647             (       ../getc.as):00075                             ldb       7,u       ; load B from indexed value 7,u
+0086 C440             (       ../getc.as):00076                             andb      #$40      ; AND B with immediate value $40
+0088 270B             (       ../getc.as):00077                             beq       BranchTarget_04 ; branch if equal/zero to BranchTarget_04
+008A 30A90000         (       ../getc.as):00078                             leax      __iob+13,y ; compute effective address into X from __iob+13,y
+008E 3410             (       ../getc.as):00079                             pshs      x         ; save X on the hardware stack
+                      (       ../getc.as):00080         _fflush             EXTERN              ; import external symbol
+0090 170000           (       ../getc.as):00081                             lbsr      _fflush   ; long branch to subroutine to _fflush
+0093 3262             (       ../getc.as):00082                             leas      2,s       ; adjust S using 2,s
+0095 E647             (       ../getc.as):00083         BranchTarget_04     ldb       7,u       ; load B from indexed value 7,u
+0097 C408             (       ../getc.as):00084                             andb      #8        ; AND B with immediate value 8
+0099 2715             (       ../getc.as):00085                             beq       BranchTarget_05 ; branch if equal/zero to BranchTarget_05
+009B EC4B             (       ../getc.as):00086                             ldd       11,u      ; load D from indexed value 11,u
+009D 3406             (       ../getc.as):00087                             pshs      d         ; save D on the hardware stack
+009F AE42             (       ../getc.as):00088                             ldx       2,u       ; load X from indexed value 2,u
+00A1 EC48             (       ../getc.as):00089                             ldd       8,u       ; load D from indexed value 8,u
+00A3 3416             (       ../getc.as):00090                             pshs      d,x       ; save D,X on the hardware stack
+00A5 E647             (       ../getc.as):00091                             ldb       7,u       ; load B from indexed value 7,u
+00A7 C440             (       ../getc.as):00092                             andb      #$40      ; AND B with immediate value $40
+00A9 2712             (       ../getc.as):00093                             beq       BranchTarget_06 ; branch if equal/zero to BranchTarget_06
+                      (       ../getc.as):00094         _readln             EXTERN              ; import external symbol
+00AB 170000           (       ../getc.as):00095                             lbsr      _readln   ; long branch to subroutine to _readln
+00AE 2010             (       ../getc.as):00096                             bra       Continue_02 ; branch unconditionally to Continue_02
+00B0 CC0001           (       ../getc.as):00097         BranchTarget_05     ldd       #1        ; load D from immediate value 1
+00B3 3406             (       ../getc.as):00098                             pshs      d         ; save D on the hardware stack
+00B5 304A             (       ../getc.as):00099                             leax      10,u      ; compute effective address into X from 10,u
+00B7 AF42             (       ../getc.as):00100                             stx       2,u       ; store X to indexed value 2,u
+00B9 EC48             (       ../getc.as):00101                             ldd       8,u       ; load D from indexed value 8,u
+00BB 3416             (       ../getc.as):00102                             pshs      d,x       ; save D,X on the hardware stack
+                      (       ../getc.as):00103         _read               EXTERN              ; import external symbol
+00BD 170000           (       ../getc.as):00104         BranchTarget_06     lbsr      _read     ; long branch to subroutine to _read
+00C0 3266             (       ../getc.as):00105         Continue_02         leas      6,s       ; adjust S using 6,s
+00C2 ED7E             (       ../getc.as):00106                             std       -2,s      ; store D to stack-relative value -2,s
+00C4 278F             (       ../getc.as):00107                             beq       Loop_03   ; branch if equal/zero to Loop_03
+00C6 2B91             (       ../getc.as):00108                             bmi       Loop_04   ; branch if minus to Loop_04
+00C8 AE42             (       ../getc.as):00109                             ldx       2,u       ; load X from indexed value 2,u
+00CA 308B             (       ../getc.as):00110                             leax      d,x       ; compute effective address into X from d,x
+00CC AF44             (       ../getc.as):00111                             stx       4,u       ; store X to indexed value 4,u
+00CE AE42             (       ../getc.as):00112                             ldx       2,u       ; load X from indexed value 2,u
+00D0 16FF3F           (       ../getc.as):00113                             lbra      Loop_01   ; long branch unconditionally to Loop_01
+                      (       ../getc.as):00114         
+                      (       ../getc.as):00115                             endsect             ; end current section

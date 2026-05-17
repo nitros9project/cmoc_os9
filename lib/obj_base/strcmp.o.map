@@ -1,0 +1,4 @@
+Symbol: _strcmp (strcmp.o) = 0000
+Symbol: BranchTarget_01 (strcmp.o) = 0013
+Symbol: Continue_01 (strcmp.o) = 000C
+Symbol: Loop_01 (strcmp.o) = 0008

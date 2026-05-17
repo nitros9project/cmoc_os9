@@ -1,0 +1,25 @@
+                      (    ../memncmp.as):00001         _memncmp            EXPORT              ; export memncmp entry point
+                      (    ../memncmp.as):00002         
+                      (    ../memncmp.as):00003                             section   code      ; begin code section
+                      (    ../memncmp.as):00004         
+0000                  (    ../memncmp.as):00005         _memncmp
+0000 3460             (    ../memncmp.as):00006                             pshs      y,u       ; preserve Y and U across the compare
+0002 AE66             (    ../memncmp.as):00007                             ldx       6,s       ; load first buffer pointer
+0004 EE68             (    ../memncmp.as):00008                             ldu       8,s       ; load second buffer pointer
+0006 10AE6A           (    ../memncmp.as):00009                             ldy       10,s      ; load remaining byte count
+0009 2712             (    ../memncmp.as):00010                             beq       L001f     ; return equal immediately for zero length
+000B 2006             (    ../memncmp.as):00011                             bra       L0015     ; enter compare loop
+000D 313F             (    ../memncmp.as):00012         L000d               leay      -1,y      ; consume one byte from the remaining count
+000F 270C             (    ../memncmp.as):00013                             beq       L001f     ; stop once all bytes matched
+0011 E6C0             (    ../memncmp.as):00014                             ldb       ,u+       ; advance second pointer to the next byte
+0013 E6C4             (    ../memncmp.as):00015         L0015               ldb       ,u        ; load current byte from second buffer
+0015 E080             (    ../memncmp.as):00016                             subb      ,x+       ; compare against current byte from first buffer
+0017 27F4             (    ../memncmp.as):00017                             beq       L000d     ; continue while bytes are equal
+0019 50               (    ../memncmp.as):00018                             negb                ; normalize sign so result matches first-second
+001A 1D               (    ../memncmp.as):00019                             sex                 ; sign-extend compare result into D
+001B 2002             (    ../memncmp.as):00020                             bra       L0021     ; return non-zero compare result
+001D 4F               (    ../memncmp.as):00021         L001f               clra                ; high byte zero for equal result
+001E 5F               (    ../memncmp.as):00022                             clrb                ; low byte zero for equal result
+001F 35E0             (    ../memncmp.as):00023         L0021               puls      y,u,pc    ; restore registers and return
+                      (    ../memncmp.as):00024         
+                      (    ../memncmp.as):00025                             endsect             ; end code section

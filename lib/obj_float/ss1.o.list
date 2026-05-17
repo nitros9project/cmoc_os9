@@ -1,0 +1,43 @@
+                      (        ../ss1.as):00001         * Adapted from cmoc_os9/lib/todo/ss1.as for the live cmoc_os9 ABI.
+                      (        ../ss1.as):00002         
+                      (        ../ss1.as):00003                             section   code      ; begin code section
+                      (        ../ss1.as):00004         
+                      (        ../ss1.as):00005         _ss_rel             EXPORT              ; export this symbol
+                      (        ../ss1.as):00006         _ss_rest            EXPORT              ; export this symbol
+                      (        ../ss1.as):00007         _ss_opt             EXPORT              ; export this symbol
+                      (        ../ss1.as):00008         _ss_pfd             EXPORT              ; export this symbol
+                      (        ../ss1.as):00009         _ss_ssig            EXPORT              ; export this symbol
+                      (        ../ss1.as):00010         _ss_tiks            EXPORT              ; export this symbol
+                      (        ../ss1.as):00011         
+                      (        ../ss1.as):00012         _sysret             EXTERNAL            ; import external symbol
+                      (        ../ss1.as):00013         
+     008E             (        ../ss1.as):00014         I_SetStt            equ       $8e       ; define constant as $8e
+                      (        ../ss1.as):00015         
+0000                  (        ../ss1.as):00016         _ss_rel
+0000 C61B             (        ../ss1.as):00017                             ldb       #$1b      ; load B from immediate value $1b
+0002 2014             (        ../ss1.as):00018                             bra       Continue_02 ; branch unconditionally to Continue_02
+                      (        ../ss1.as):00019         
+0004                  (        ../ss1.as):00020         _ss_rest
+0004 C603             (        ../ss1.as):00021                             ldb       #3        ; load B from immediate value 3
+0006 2010             (        ../ss1.as):00022                             bra       Continue_02 ; branch unconditionally to Continue_02
+                      (        ../ss1.as):00023         
+0008                  (        ../ss1.as):00024         _ss_opt
+0008 C600             (        ../ss1.as):00025                             ldb       #0        ; load B from immediate value 0
+000A 200A             (        ../ss1.as):00026                             bra       Continue_01 ; branch unconditionally to Continue_01
+                      (        ../ss1.as):00027         
+000C                  (        ../ss1.as):00028         _ss_pfd
+000C C60F             (        ../ss1.as):00029                             ldb       #$0f      ; load B from immediate value $0f
+000E 2006             (        ../ss1.as):00030                             bra       Continue_01 ; branch unconditionally to Continue_01
+                      (        ../ss1.as):00031         
+0010                  (        ../ss1.as):00032         _ss_ssig
+0010 C61A             (        ../ss1.as):00033                             ldb       #$1a      ; load B from immediate value $1a
+0012 2002             (        ../ss1.as):00034                             bra       Continue_01 ; branch unconditionally to Continue_01
+                      (        ../ss1.as):00035         
+0014                  (        ../ss1.as):00036         _ss_tiks
+0014 C610             (        ../ss1.as):00037                             ldb       #$10      ; load B from immediate value $10
+0016 AE64             (        ../ss1.as):00038         Continue_01         ldx       4,s       ; load X from stack-relative value 4,s
+0018 A663             (        ../ss1.as):00039         Continue_02         lda       3,s       ; load A from stack-relative value 3,s
+001A 103F8E           (        ../ss1.as):00040                             os9       I_SetStt  ; invoke OS-9 system call I_SetStt
+001D 160000           (        ../ss1.as):00041                             lbra      _sysret   ; long branch unconditionally to _sysret
+                      (        ../ss1.as):00042         
+                      (        ../ss1.as):00043                             endsect             ; end current section

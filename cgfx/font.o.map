@@ -1,0 +1,7 @@
+Symbol: _cgfx_boldsw (font.o) = 0020
+Symbol: _cgfx_font (font.o) = 0000
+Symbol: _cgfx_propsw (font.o) = 0025
+Symbol: _cgfx_tcharsw (font.o) = 001B
+Symbol: noerr0 (font.o) = 004B
+Symbol: os9err0 (font.o) = 003E
+Symbol: send3 (font.o) = 0028

@@ -1,0 +1,11 @@
+                      (   ../pffdummy.as):00001                             section   code      ; begin code section
+                      (   ../pffdummy.as):00002         
+                      (   ../pffdummy.as):00003         _pffloat            EXPORT              ; export this symbol
+0000                  (   ../pffdummy.as):00004         _pffloat
+0000 308D0003         (   ../pffdummy.as):00005                             leax      >Label_01,pcr ; compute effective address into X from >Label_01,pcr
+0004 1F10             (   ../pffdummy.as):00006                             tfr       x,d       ; transfer X,D
+0006 39               (   ../pffdummy.as):00007                             rts                 ; return to caller
+                      (   ../pffdummy.as):00008         
+0007 00               (   ../pffdummy.as):00009         Label_01            fcb       $00       ; define byte data $00
+                      (   ../pffdummy.as):00010         
+                      (   ../pffdummy.as):00011                             endsect             ; end current section

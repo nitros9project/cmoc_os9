@@ -1,0 +1,47 @@
+                      (      ../ccmod.as):00001                             section   bss       ; begin bss section
+                      (      ../ccmod.as):00002         
+                      (      ../ccmod.as):00003         * Uninitialized data (class B)
+0000                  (      ../ccmod.as):00004         B0000               rmb       1         ; reserve 1 bytes
+0001                  (      ../ccmod.as):00005         B0001               rmb       2         ; reserve 2 bytes
+                      (      ../ccmod.as):00006         * Initialized Data (class G)
+                      (      ../ccmod.as):00007         
+                      (      ../ccmod.as):00008                             endsect             ; end current section
+                      (      ../ccmod.as):00009         
+                      (      ../ccmod.as):00010                             section   code      ; begin code section
+                      (      ../ccmod.as):00011         
+                      (      ../ccmod.as):00012         ccdiv               EXTERNAL            ; import external symbol
+                      (      ../ccmod.as):00013         ccudiv              EXTERNAL            ; import external symbol
+                      (      ../ccmod.as):00014         
+                      (      ../ccmod.as):00015         ccumod              EXPORT              ; export this symbol
+                      (      ../ccmod.as):00016         ccmod               EXPORT              ; export this symbol
+                      (      ../ccmod.as):00017         
+0000 6FA90000         (      ../ccmod.as):00018         ccumod:             clr       B0000,y   ; clear indexed value B0000,y
+0004 308D0000         (      ../ccmod.as):00019                             leax      ccudiv,pcr ; compute the address of the unsigned division helper
+0008 AFA90000         (      ../ccmod.as):00020                             stx       B0001,y   ; remember which division routine this entry point should call
+000C 2014             (      ../ccmod.as):00021                             bra       BranchTarget_01 ; share the common division/modulus body
+000E 308D0000         (      ../ccmod.as):00022         ccmod:              leax      ccdiv,pcr ; compute effective address into X from ccdiv,pcr
+0012 AFA90000         (      ../ccmod.as):00023                             stx       B0001,y   ; remember which signed division helper should be called
+0016 6FA90000         (      ../ccmod.as):00024                             clr       B0000,y   ; clear the sign-adjust flag before inspecting the dividend
+001A 6D62             (      ../ccmod.as):00025                             tst       2,s       ; test stack-relative value 2,s and update condition codes
+001C 2A04             (      ../ccmod.as):00026                             bpl       BranchTarget_01 ; skip sign correction when the dividend is already non-negative
+001E 6CA90000         (      ../ccmod.as):00027                             inc       B0000,y   ; record that the final remainder needs sign correction
+0022 830000           (      ../ccmod.as):00028         BranchTarget_01     subd      #0        ; test whether the divisor in D is zero
+0025 2606             (      ../ccmod.as):00029                             bne       BranchTarget_02 ; branch to the shared division path when the divisor is non-zero
+0027 3510             (      ../ccmod.as):00030                             puls      x         ; discard the return address saved for the helper trampoline
+0029 ECE1             (      ../ccmod.as):00031                             ldd       ,s++      ; load D from memory pointed to by S+, then advance S+
+002B 6E84             (      ../ccmod.as):00032                             jmp       ,x        ; tail-jump to the caller's divide-by-zero handler
+002D AE62             (      ../ccmod.as):00033         BranchTarget_02     ldx       2,s       ; load X from stack-relative value 2,s
+002F 3410             (      ../ccmod.as):00034                             pshs      x         ; preserve the original dividend pointer for the helper call
+0031 ADB90000         (      ../ccmod.as):00035                             jsr       [B0001,y] ; call the selected signed or unsigned division routine
+0035 ECE4             (      ../ccmod.as):00036                             ldd       ,s        ; load D from memory pointed to by S
+0037 ED62             (      ../ccmod.as):00037                             std       2,s       ; write the computed quotient back into the caller's stack frame
+0039 1F10             (      ../ccmod.as):00038                             tfr       x,d       ; move the remainder from X into D for the final return value
+003B 6DA90000         (      ../ccmod.as):00039                             tst       B0000,y   ; test whether the remainder must be negated to match a signed dividend
+003F 2704             (      ../ccmod.as):00040                             beq       BranchTarget_03 ; leave the remainder alone for unsigned or non-negative input
+0041 40               (      ../ccmod.as):00041                             nega                ; negate A
+0042 50               (      ../ccmod.as):00042                             negb                ; negate B
+0043 8200             (      ../ccmod.as):00043                             sbca      #0        ; propagate the two-byte negation carry into the high byte
+0045 EDE1             (      ../ccmod.as):00044         BranchTarget_03     std       ,s++      ; store the final remainder into the caller's saved D slot
+0047 39               (      ../ccmod.as):00045                             rts                 ; return to caller
+                      (      ../ccmod.as):00046         
+                      (      ../ccmod.as):00047                             endsect             ; end current section

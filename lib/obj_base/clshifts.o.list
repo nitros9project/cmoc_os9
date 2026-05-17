@@ -1,0 +1,40 @@
+                      (   ../clshifts.as):00001                             section   code      ; begin code section
+                      (   ../clshifts.as):00002         
+                      (   ../clshifts.as):00003         _ltoacc             EXTERNAL            ; import external symbol
+                      (   ../clshifts.as):00004         
+                      (   ../clshifts.as):00005         _lshl               EXPORT              ; export this symbol
+                      (   ../clshifts.as):00006         _lshr               EXPORT              ; export this symbol
+                      (   ../clshifts.as):00007         
+0000 AE62             (   ../clshifts.as):00008         _lshl:              ldx       2,s       ; load X from stack-relative value 2,s
+0002 3404             (   ../clshifts.as):00009                             pshs      b         ; save B on the hardware stack
+0004 170000           (   ../clshifts.as):00010                             lbsr      _ltoacc   ; long branch to subroutine to _ltoacc
+0007 3504             (   ../clshifts.as):00011                             puls      b         ; restore B from the hardware stack
+0009 5D               (   ../clshifts.as):00012                             tstb                ; test B and update condition codes
+000A 270B             (   ../clshifts.as):00013                             beq       BranchTarget_01 ; branch if equal/zero to BranchTarget_01
+000C 6803             (   ../clshifts.as):00014         Loop_01             asl       3,x       ; shift indexed value 3,x left by one bit
+000E 6902             (   ../clshifts.as):00015                             rol       2,x       ; rotate indexed value 2,x left through carry
+0010 6901             (   ../clshifts.as):00016                             rol       1,x       ; rotate indexed value 1,x left through carry
+0012 6984             (   ../clshifts.as):00017                             rol       ,x        ; rotate memory pointed to by X left through carry
+0014 5A               (   ../clshifts.as):00018                             decb                ; decrement B
+0015 26F5             (   ../clshifts.as):00019                             bne       Loop_01   ; branch if not equal to Loop_01
+0017 3506             (   ../clshifts.as):00020         BranchTarget_01     puls      d         ; restore D from the hardware stack
+0019 EDE4             (   ../clshifts.as):00021                             std       ,s        ; store D to memory pointed to by S
+001B 39               (   ../clshifts.as):00022                             rts                 ; return to caller
+001C AE62             (   ../clshifts.as):00023         _lshr:              ldx       2,s       ; load X from stack-relative value 2,s
+001E 3404             (   ../clshifts.as):00024                             pshs      b         ; save B on the hardware stack
+0020 170000           (   ../clshifts.as):00025                             lbsr      _ltoacc   ; long branch to subroutine to _ltoacc
+0023 3504             (   ../clshifts.as):00026                             puls      b         ; restore B from the hardware stack
+0025 5D               (   ../clshifts.as):00027                             tstb                ; test B and update condition codes
+0026 270B             (   ../clshifts.as):00028                             beq       BranchTarget_02 ; branch if equal/zero to BranchTarget_02
+0028 6784             (   ../clshifts.as):00029         Loop_02             asr       ,x        ; arithmetic shift memory pointed to by X right by one bit
+002A 6601             (   ../clshifts.as):00030                             ror       1,x       ; rotate indexed value 1,x right through carry
+002C 6602             (   ../clshifts.as):00031                             ror       2,x       ; rotate indexed value 2,x right through carry
+002E 6603             (   ../clshifts.as):00032                             ror       3,x       ; rotate indexed value 3,x right through carry
+0030 5A               (   ../clshifts.as):00033                             decb                ; decrement B
+0031 26F5             (   ../clshifts.as):00034                             bne       Loop_02   ; branch if not equal to Loop_02
+0033 3506             (   ../clshifts.as):00035         BranchTarget_02     puls      d         ; restore D from the hardware stack
+0035 EDE4             (   ../clshifts.as):00036                             std       ,s        ; store D to memory pointed to by S
+0037 39               (   ../clshifts.as):00037                             rts                 ; return to caller
+                      (   ../clshifts.as):00038         
+                      (   ../clshifts.as):00039                             endsect             ; end current section
+                      (   ../clshifts.as):00040         

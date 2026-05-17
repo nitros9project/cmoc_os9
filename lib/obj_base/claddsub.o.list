@@ -1,0 +1,27 @@
+                      (   ../claddsub.as):00001                             section   code      ; begin code section
+                      (   ../claddsub.as):00002         
+                      (   ../claddsub.as):00003         _flacc              EXTERNAL            ; import external symbol
+                      (   ../claddsub.as):00004         _lbexit             EXTERNAL            ; import external symbol
+                      (   ../claddsub.as):00005         
+                      (   ../claddsub.as):00006         _ladd               EXPORT              ; export this symbol
+                      (   ../claddsub.as):00007         _lsub               EXPORT              ; export this symbol
+                      (   ../claddsub.as):00008         
+0000 EC64             (   ../claddsub.as):00009         _ladd:              ldd       4,s       ; load D from stack-relative value 4,s
+0002 E302             (   ../claddsub.as):00010                             addd      2,x       ; add indexed value 2,x into D
+0004 EDA90000         (   ../claddsub.as):00011                             std       _flacc+2,y ; store D to indexed value _flacc+2,y
+0008 EC62             (   ../claddsub.as):00012                             ldd       2,s       ; load D from stack-relative value 2,s
+000A E901             (   ../claddsub.as):00013                             adcb      1,x       ; add indexed value 1,x into B
+000C A984             (   ../claddsub.as):00014                             adca      ,x        ; add memory pointed to by X into A
+000E EDA90000         (   ../claddsub.as):00015                             std       _flacc,y  ; store D to indexed value _flacc,y
+0012 160000           (   ../claddsub.as):00016                             lbra      _lbexit   ; long branch unconditionally to _lbexit
+0015 EC64             (   ../claddsub.as):00017         _lsub:              ldd       4,s       ; load D from stack-relative value 4,s
+0017 A302             (   ../claddsub.as):00018                             subd      2,x       ; subtract indexed value 2,x from D
+0019 EDA90000         (   ../claddsub.as):00019                             std       _flacc+2,y ; store D to indexed value _flacc+2,y
+001D EC62             (   ../claddsub.as):00020                             ldd       2,s       ; load D from stack-relative value 2,s
+001F E201             (   ../claddsub.as):00021                             sbcb      1,x       ; subtract indexed value 1,x from B
+0021 A284             (   ../claddsub.as):00022                             sbca      ,x        ; subtract memory pointed to by X from A
+0023 EDA90000         (   ../claddsub.as):00023                             std       _flacc,y  ; store D to indexed value _flacc,y
+0027 160000           (   ../claddsub.as):00024                             lbra      _lbexit   ; long branch unconditionally to _lbexit
+                      (   ../claddsub.as):00025         
+                      (   ../claddsub.as):00026                             endsect             ; end current section
+                      (   ../claddsub.as):00027         

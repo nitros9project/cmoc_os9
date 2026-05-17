@@ -1,0 +1,882 @@
+                      (    ../cfloats.as):00001         * Disassembly by Os9disasm of cfloats.r
+                      (    ../cfloats.as):00002         
+                      (    ../cfloats.as):00003                             section   code      ; begin code section
+                      (    ../cfloats.as):00004         
+                      (    ../cfloats.as):00005         * class D external label equates
+                      (    ../cfloats.as):00006         
+                      (    ../cfloats.as):00007         _flacc              EXTERNAL            ; import external symbol
+                      (    ../cfloats.as):00008         _rpterr             EXTERNAL            ; import external symbol
+                      (    ../cfloats.as):00009         
+     0000             (    ../cfloats.as):00010         D0000               equ       $0000     ; define constant as $0000
+     0010             (    ../cfloats.as):00011         D0010               equ       $0010     ; define constant as $0010
+     0011             (    ../cfloats.as):00012         D0011               equ       $0011     ; define constant as $0011
+     0012             (    ../cfloats.as):00013         D0012               equ       $0012     ; define constant as $0012
+     0013             (    ../cfloats.as):00014         D0013               equ       $0013     ; define constant as $0013
+     0014             (    ../cfloats.as):00015         D0014               equ       $0014     ; define constant as $0014
+     0015             (    ../cfloats.as):00016         D0015               equ       $0015     ; define constant as $0015
+     0016             (    ../cfloats.as):00017         D0016               equ       $0016     ; define constant as $0016
+     0017             (    ../cfloats.as):00018         D0017               equ       $0017     ; define constant as $0017
+     0018             (    ../cfloats.as):00019         D0018               equ       $0018     ; define constant as $0018
+     0019             (    ../cfloats.as):00020         D0019               equ       $0019     ; define constant as $0019
+     001C             (    ../cfloats.as):00021         D001c               equ       $001c     ; define constant as $001c
+     001D             (    ../cfloats.as):00022         D001d               equ       $001d     ; define constant as $001d
+     001E             (    ../cfloats.as):00023         D001e               equ       $001e     ; define constant as $001e
+     0022             (    ../cfloats.as):00024         D0022               equ       $0022     ; define constant as $0022
+     0023             (    ../cfloats.as):00025         D0023               equ       $0023     ; define constant as $0023
+     0024             (    ../cfloats.as):00026         D0024               equ       $0024     ; define constant as $0024
+     0025             (    ../cfloats.as):00027         D0025               equ       $0025     ; define constant as $0025
+     0026             (    ../cfloats.as):00028         D0026               equ       $0026     ; define constant as $0026
+     0027             (    ../cfloats.as):00029         D0027               equ       $0027     ; define constant as $0027
+     0028             (    ../cfloats.as):00030         D0028               equ       $0028     ; define constant as $0028
+     0029             (    ../cfloats.as):00031         D0029               equ       $0029     ; define constant as $0029
+     002A             (    ../cfloats.as):00032         D002a               equ       $002a     ; define constant as $002a
+     0081             (    ../cfloats.as):00033         D0081               equ       $0081     ; define constant as $0081
+                      (    ../cfloats.as):00034         
+                      (    ../cfloats.as):00035         _dnorm              EXPORT              ; export this symbol
+                      (    ../cfloats.as):00036         _dneg               EXPORT              ; export this symbol
+                      (    ../cfloats.as):00037         _dadd               EXPORT              ; export this symbol
+                      (    ../cfloats.as):00038         _dsub               EXPORT              ; export this symbol
+                      (    ../cfloats.as):00039         _ddiv               EXPORT              ; export this symbol
+                      (    ../cfloats.as):00040         _dmul               EXPORT              ; export this symbol
+                      (    ../cfloats.as):00041         _ddiv               EXPORT              ; export this symbol
+                      (    ../cfloats.as):00042         _dtoi               EXPORT              ; export this symbol
+                      (    ../cfloats.as):00043         _ltod               EXPORT              ; export this symbol
+                      (    ../cfloats.as):00044         _itod               EXPORT              ; export this symbol
+                      (    ../cfloats.as):00045         _utod               EXPORT              ; export this symbol
+                      (    ../cfloats.as):00046         _dtof               EXPORT              ; export this symbol
+                      (    ../cfloats.as):00047         _ftod               EXPORT              ; export this symbol
+                      (    ../cfloats.as):00048         _dcmpr              EXPORT              ; export this symbol
+                      (    ../cfloats.as):00049         _xtofla             EXPORT              ; export this symbol
+                      (    ../cfloats.as):00050         _dinc               EXPORT              ; export this symbol
+                      (    ../cfloats.as):00051         _ddec               EXPORT              ; export this symbol
+                      (    ../cfloats.as):00052         _finc               EXPORT              ; export this symbol
+                      (    ../cfloats.as):00053         _fdec               EXPORT              ; export this symbol
+                      (    ../cfloats.as):00054         _fstack             EXPORT              ; export this symbol
+                      (    ../cfloats.as):00055         _dstack             EXPORT              ; export this symbol
+                      (    ../cfloats.as):00056         _fmove              EXPORT              ; export this symbol
+                      (    ../cfloats.as):00057         _dmove              EXPORT              ; export this symbol
+                      (    ../cfloats.as):00058         
+0000 AE62             (    ../cfloats.as):00059         _dnorm:             ldx       2,s       ; load X from stack-relative value 2,s
+0002 1706E7           (    ../cfloats.as):00060                             lbsr      _dstack   ; long branch to subroutine to _dstack
+0005 8D01             (    ../cfloats.as):00061                             bsr       Subroutine_01 ; branch to subroutine to Subroutine_01
+0007 39               (    ../cfloats.as):00062                             rts                 ; return to caller
+0008 3440             (    ../cfloats.as):00063         Subroutine_01       pshs      u         ; save U on the hardware stack
+000A 32E8E2           (    ../cfloats.as):00064                             leas      -30,s     ; adjust S using -30,s
+000D 1F43             (    ../cfloats.as):00065                             tfr       s,u       ; transfer S,U
+000F 6FC81D           (    ../cfloats.as):00066                             clr       D001d,u   ; clear indexed value D001d,u
+0012 6FC819           (    ../cfloats.as):00067                             clr       D0019,u   ; clear indexed value D0019,u
+0015 170277           (    ../cfloats.as):00068                             lbsr      Subroutine_04 ; long branch to subroutine to Subroutine_04
+0018 160099           (    ../cfloats.as):00069                             lbra      Continue_01 ; long branch unconditionally to Continue_01
+001B C607             (    ../cfloats.as):00070         _dneg:              ldb       #7        ; load B from immediate value 7
+001D 4F               (    ../cfloats.as):00071                             clra                ; clear A
+001E AA85             (    ../cfloats.as):00072         Loop_01             ora       b,x       ; OR A with indexed value b,x
+0020 5A               (    ../cfloats.as):00073                             decb                ; decrement B
+0021 2AFB             (    ../cfloats.as):00074                             bpl       Loop_01   ; branch if plus to Loop_01
+0023 4D               (    ../cfloats.as):00075                             tsta                ; test A and update condition codes
+0024 10270626         (    ../cfloats.as):00076                             lbeq      _xtofla   ; long branch if equal/zero to _xtofla
+0028 EC84             (    ../cfloats.as):00077                             ldd       ,x        ; load D from memory pointed to by X
+002A 8880             (    ../cfloats.as):00078                             eora      #$80      ; XOR A with immediate value $80
+002C 160621           (    ../cfloats.as):00079                             lbra      Continue_07 ; long branch unconditionally to Continue_07
+002F 170475           (    ../cfloats.as):00080         _dadd:              lbsr      Subroutine_12 ; long branch to subroutine to Subroutine_12
+0032 170154           (    ../cfloats.as):00081                             lbsr      Subroutine_03 ; long branch to subroutine to Subroutine_03
+0035 16007C           (    ../cfloats.as):00082                             lbra      Continue_01 ; long branch unconditionally to Continue_01
+0038 17046C           (    ../cfloats.as):00083         _dsub:              lbsr      Subroutine_12 ; long branch to subroutine to Subroutine_12
+003B 170121           (    ../cfloats.as):00084                             lbsr      Subroutine_02 ; long branch to subroutine to Subroutine_02
+003E 160073           (    ../cfloats.as):00085                             lbra      Continue_01 ; long branch unconditionally to Continue_01
+0041 170463           (    ../cfloats.as):00086         _dmul:              lbsr      Subroutine_12 ; long branch to subroutine to Subroutine_12
+0044 1702BB           (    ../cfloats.as):00087                             lbsr      Subroutine_06 ; long branch to subroutine to Subroutine_06
+0047 206B             (    ../cfloats.as):00088                             bra       Continue_01 ; branch unconditionally to Continue_01
+0049 17045B           (    ../cfloats.as):00089         _ddiv:              lbsr      Subroutine_12 ; long branch to subroutine to Subroutine_12
+004C 1702DF           (    ../cfloats.as):00090                             lbsr      Subroutine_08 ; long branch to subroutine to Subroutine_08
+004F 2063             (    ../cfloats.as):00091                             bra       Continue_01 ; branch unconditionally to Continue_01
+0051 1705FA           (    ../cfloats.as):00092         _dtol:              lbsr      _xtofla   ; long branch to subroutine to _xtofla
+0054 1604F3           (    ../cfloats.as):00093                             lbra      Continue_06 ; long branch unconditionally to Continue_06
+0057 8DF8             (    ../cfloats.as):00094         _dtoi:              bsr       _dtol     ; branch to subroutine to _dtol
+0059 EC02             (    ../cfloats.as):00095                             ldd       2,x       ; load D from indexed value 2,x
+005B 39               (    ../cfloats.as):00096                             rts                 ; return to caller
+005C EC84             (    ../cfloats.as):00097         _ltod:              ldd       ,x        ; load D from memory pointed to by X
+005E EDA90000         (    ../cfloats.as):00098                             std       _flacc,y  ; store D to indexed value _flacc,y
+0062 EC02             (    ../cfloats.as):00099                             ldd       2,x       ; load D from indexed value 2,x
+0064 30A90000         (    ../cfloats.as):00100                             leax      _flacc,y  ; compute effective address into X from _flacc,y
+0068 ED02             (    ../cfloats.as):00101                             std       2,x       ; store D to indexed value 2,x
+006A 16047D           (    ../cfloats.as):00102                             lbra      Continue_05 ; long branch unconditionally to Continue_05
+006D 30A90000         (    ../cfloats.as):00103         _itod:              leax      _flacc,y  ; compute effective address into X from _flacc,y
+0071 ED02             (    ../cfloats.as):00104                             std       2,x       ; store D to indexed value 2,x
+0073 1F89             (    ../cfloats.as):00105                             tfr       a,b       ; transfer A,B
+0075 1D               (    ../cfloats.as):00106                             sex                 ; sign-extend B into A to form D
+0076 1F89             (    ../cfloats.as):00107                             tfr       a,b       ; transfer A,B
+0078 ED84             (    ../cfloats.as):00108                             std       ,x        ; store D to memory pointed to by X
+007A 16046D           (    ../cfloats.as):00109                             lbra      Continue_05 ; long branch unconditionally to Continue_05
+007D 30A90000         (    ../cfloats.as):00110         _utod:              leax      _flacc,y  ; compute effective address into X from _flacc,y
+0081 ED02             (    ../cfloats.as):00111                             std       2,x       ; store D to indexed value 2,x
+0083 6F84             (    ../cfloats.as):00112                             clr       ,x        ; clear memory pointed to by X
+0085 6F01             (    ../cfloats.as):00113                             clr       1,x       ; clear indexed value 1,x
+0087 160460           (    ../cfloats.as):00114                             lbra      Continue_05 ; long branch unconditionally to Continue_05
+008A EC84             (    ../cfloats.as):00115         _dtof:              ldd       ,x        ; load D from memory pointed to by X
+008C EDA90000         (    ../cfloats.as):00116                             std       _flacc,y  ; store D to indexed value _flacc,y
+0090 A602             (    ../cfloats.as):00117                             lda       2,x       ; load A from indexed value 2,x
+0092 E607             (    ../cfloats.as):00118                             ldb       7,x       ; load B from indexed value 7,x
+0094 30A90000         (    ../cfloats.as):00119                             leax      _flacc,y  ; compute effective address into X from _flacc,y
+0098 ED02             (    ../cfloats.as):00120                             std       2,x       ; store D to indexed value 2,x
+009A 39               (    ../cfloats.as):00121                             rts                 ; return to caller
+009B EC84             (    ../cfloats.as):00122         _ftod:              ldd       ,x        ; load D from memory pointed to by X
+009D EDA90000         (    ../cfloats.as):00123                             std       _flacc,y  ; store D to indexed value _flacc,y
+00A1 EC02             (    ../cfloats.as):00124                             ldd       2,x       ; load D from indexed value 2,x
+00A3 30A90000         (    ../cfloats.as):00125                             leax      _flacc,y  ; compute effective address into X from _flacc,y
+00A7 A702             (    ../cfloats.as):00126                             sta       2,x       ; store A to indexed value 2,x
+00A9 E707             (    ../cfloats.as):00127                             stb       7,x       ; store B to indexed value 7,x
+00AB 6F03             (    ../cfloats.as):00128                             clr       3,x       ; clear indexed value 3,x
+00AD 6F04             (    ../cfloats.as):00129                             clr       4,x       ; clear indexed value 4,x
+00AF 6F05             (    ../cfloats.as):00130                             clr       5,x       ; clear indexed value 5,x
+00B1 6F06             (    ../cfloats.as):00131                             clr       6,x       ; clear indexed value 6,x
+00B3 39               (    ../cfloats.as):00132                             rts                 ; return to caller
+00B4 30A90000         (    ../cfloats.as):00133         Continue_01         leax      _flacc,y  ; compute effective address into X from _flacc,y
+00B8 ECC822           (    ../cfloats.as):00134                             ldd       D0022,u   ; load D from indexed value D0022,u
+00BB ED84             (    ../cfloats.as):00135                             std       ,x        ; store D to memory pointed to by X
+00BD ECC824           (    ../cfloats.as):00136                             ldd       D0024,u   ; load D from indexed value D0024,u
+00C0 ED02             (    ../cfloats.as):00137                             std       2,x       ; store D to indexed value 2,x
+00C2 ECC826           (    ../cfloats.as):00138                             ldd       D0026,u   ; load D from indexed value D0026,u
+00C5 ED04             (    ../cfloats.as):00139                             std       4,x       ; store D to indexed value 4,x
+00C7 ECC828           (    ../cfloats.as):00140                             ldd       D0028,u   ; load D from indexed value D0028,u
+00CA ED06             (    ../cfloats.as):00141                             std       6,x       ; store D to indexed value 6,x
+00CC 32C81E           (    ../cfloats.as):00142                             leas      D001e,u   ; adjust S using D001e,u
+00CF 3540             (    ../cfloats.as):00143                             puls      u         ; restore U from the hardware stack
+00D1 3506             (    ../cfloats.as):00144                             puls      d         ; restore D from the hardware stack
+00D3 ED66             (    ../cfloats.as):00145                             std       6,s       ; store D to stack-relative value 6,s
+00D5 3266             (    ../cfloats.as):00146                             leas      6,s       ; adjust S using 6,s
+00D7 39               (    ../cfloats.as):00147                             rts                 ; return to caller
+00D8 A662             (    ../cfloats.as):00148         _dcmpr:             lda       2,s       ; load A from stack-relative value 2,s
+00DA A884             (    ../cfloats.as):00149                             eora      ,x        ; XOR A with memory pointed to by X
+00DC 2B69             (    ../cfloats.as):00150                             bmi       BranchTarget_03 ; branch if minus to BranchTarget_03
+00DE A662             (    ../cfloats.as):00151                             lda       2,s       ; load A from stack-relative value 2,s
+00E0 2B38             (    ../cfloats.as):00152                             bmi       BranchTarget_02 ; branch if minus to BranchTarget_02
+00E2 A669             (    ../cfloats.as):00153                             lda       9,s       ; load A from stack-relative value 9,s
+00E4 272D             (    ../cfloats.as):00154                             beq       BranchTarget_01 ; branch if equal/zero to BranchTarget_01
+00E6 E607             (    ../cfloats.as):00155                             ldb       7,x       ; load B from indexed value 7,x
+00E8 2761             (    ../cfloats.as):00156                             beq       BranchTarget_04 ; branch if equal/zero to BranchTarget_04
+00EA A107             (    ../cfloats.as):00157                             cmpa      7,x       ; compare A against indexed value 7,x
+00EC 2630             (    ../cfloats.as):00158                             bne       Loop_02   ; branch if not equal to Loop_02
+00EE EC62             (    ../cfloats.as):00159                             ldd       2,s       ; load D from stack-relative value 2,s
+00F0 10A384           (    ../cfloats.as):00160                             cmpd      ,x        ; compare D against memory pointed to by X
+00F3 2629             (    ../cfloats.as):00161                             bne       Loop_02   ; branch if not equal to Loop_02
+00F5 EC64             (    ../cfloats.as):00162                             ldd       4,s       ; load D from stack-relative value 4,s
+00F7 10A302           (    ../cfloats.as):00163                             cmpd      2,x       ; compare D against indexed value 2,x
+00FA 2622             (    ../cfloats.as):00164                             bne       Loop_02   ; branch if not equal to Loop_02
+00FC EC66             (    ../cfloats.as):00165                             ldd       6,s       ; load D from stack-relative value 6,s
+00FE 10A304           (    ../cfloats.as):00166                             cmpd      4,x       ; compare D against indexed value 4,x
+0101 261B             (    ../cfloats.as):00167                             bne       Loop_02   ; branch if not equal to Loop_02
+0103 A668             (    ../cfloats.as):00168                             lda       8,s       ; load A from stack-relative value 8,s
+0105 84FE             (    ../cfloats.as):00169                             anda      #254      ; AND A with immediate value 254
+0107 3402             (    ../cfloats.as):00170                             pshs      a         ; save A on the hardware stack
+0109 E606             (    ../cfloats.as):00171                             ldb       6,x       ; load B from indexed value 6,x
+010B C4FE             (    ../cfloats.as):00172                             andb      #254      ; AND B with immediate value 254
+010D A1E0             (    ../cfloats.as):00173                             cmpa      ,s+       ; compare A against memory pointed to by S, then advance S
+010F 260D             (    ../cfloats.as):00174                             bne       Loop_02   ; branch if not equal to Loop_02
+0111 203C             (    ../cfloats.as):00175                             bra       Loop_03   ; branch unconditionally to Loop_03
+0113 A607             (    ../cfloats.as):00176         BranchTarget_01     lda       7,x       ; load A from indexed value 7,x
+0115 2643             (    ../cfloats.as):00177                             bne       BranchTarget_05 ; branch if not equal to BranchTarget_05
+0117 4F               (    ../cfloats.as):00178                             clra                ; clear A
+0118 2035             (    ../cfloats.as):00179                             bra       Loop_03   ; branch unconditionally to Loop_03
+011A A607             (    ../cfloats.as):00180         BranchTarget_02     lda       7,x       ; load A from indexed value 7,x
+011C A169             (    ../cfloats.as):00181                             cmpa      9,s       ; compare A against stack-relative value 9,s
+011E 222B             (    ../cfloats.as):00182         Loop_02             bhi       BranchTarget_04 ; branch if higher to BranchTarget_04
+0120 2538             (    ../cfloats.as):00183                             bcs       BranchTarget_05 ; branch if carry is set to BranchTarget_05
+0122 EC84             (    ../cfloats.as):00184                             ldd       ,x        ; load D from memory pointed to by X
+0124 10A362           (    ../cfloats.as):00185                             cmpd      2,s       ; compare D against stack-relative value 2,s
+0127 26F5             (    ../cfloats.as):00186                             bne       Loop_02   ; branch if not equal to Loop_02
+0129 EC02             (    ../cfloats.as):00187                             ldd       2,x       ; load D from indexed value 2,x
+012B 10A364           (    ../cfloats.as):00188                             cmpd      4,s       ; compare D against stack-relative value 4,s
+012E 26EE             (    ../cfloats.as):00189                             bne       Loop_02   ; branch if not equal to Loop_02
+0130 EC04             (    ../cfloats.as):00190                             ldd       4,x       ; load D from indexed value 4,x
+0132 10A366           (    ../cfloats.as):00191                             cmpd      6,s       ; compare D against stack-relative value 6,s
+0135 26E7             (    ../cfloats.as):00192                             bne       Loop_02   ; branch if not equal to Loop_02
+0137 A606             (    ../cfloats.as):00193                             lda       6,x       ; load A from indexed value 6,x
+0139 84FE             (    ../cfloats.as):00194                             anda      #254      ; AND A with immediate value 254
+013B 3402             (    ../cfloats.as):00195                             pshs      a         ; save A on the hardware stack
+013D A668             (    ../cfloats.as):00196                             lda       8,s       ; load A from stack-relative value 8,s
+013F 84FE             (    ../cfloats.as):00197                             anda      #254      ; AND A with immediate value 254
+0141 A1E0             (    ../cfloats.as):00198                             cmpa      ,s+       ; compare A against memory pointed to by S, then advance S
+0143 26D9             (    ../cfloats.as):00199                             bne       Loop_02   ; branch if not equal to Loop_02
+0145 2008             (    ../cfloats.as):00200                             bra       Loop_03   ; branch unconditionally to Loop_03
+0147 A684             (    ../cfloats.as):00201         BranchTarget_03     lda       ,x        ; load A from memory pointed to by X
+0149 2A0F             (    ../cfloats.as):00202                             bpl       BranchTarget_05 ; branch if plus to BranchTarget_05
+014B 8601             (    ../cfloats.as):00203         BranchTarget_04     lda       #1        ; load A from immediate value 1
+014D 1CFE             (    ../cfloats.as):00204                             andcc     #254      ; clear condition-code bits with mask #254
+014F 3401             (    ../cfloats.as):00205         Loop_03             pshs      cc        ; save CC on the hardware stack
+0151 EC61             (    ../cfloats.as):00206                             ldd       1,s       ; load D from stack-relative value 1,s
+0153 ED69             (    ../cfloats.as):00207                             std       9,s       ; store D to stack-relative value 9,s
+0155 3501             (    ../cfloats.as):00208                             puls      cc        ; restore CC from the hardware stack
+0157 3268             (    ../cfloats.as):00209                             leas      8,s       ; adjust S using 8,s
+0159 39               (    ../cfloats.as):00210                             rts                 ; return to caller
+015A 4F               (    ../cfloats.as):00211         BranchTarget_05     clra                ; clear A
+015B 8101             (    ../cfloats.as):00212                             cmpa      #1        ; compare A against immediate value 1
+015D 20F0             (    ../cfloats.as):00213                             bra       Loop_03   ; branch unconditionally to Loop_03
+015F A6C817           (    ../cfloats.as):00214         Subroutine_02       lda       D0017,u   ; load A from indexed value D0017,u
+0162 271C             (    ../cfloats.as):00215                             beq       Loop_04   ; branch if equal/zero to Loop_04
+0164 E6C81C           (    ../cfloats.as):00216                             ldb       D001c,u   ; load B from indexed value D001c,u
+0167 C880             (    ../cfloats.as):00217                             eorb      #$80      ; XOR B with immediate value $80
+0169 E7C81C           (    ../cfloats.as):00218                             stb       D001c,u   ; store B to indexed value D001c,u
+016C E8C818           (    ../cfloats.as):00219                             eorb      D0018,u   ; XOR B with indexed value D0018,u
+016F E7C819           (    ../cfloats.as):00220                             stb       D0019,u   ; store B to indexed value D0019,u
+0172 E6C829           (    ../cfloats.as):00221                             ldb       D0029,u   ; load B from indexed value D0029,u
+0175 261B             (    ../cfloats.as):00222                             bne       BranchTarget_06 ; branch if not equal to BranchTarget_06
+0177 1704A4           (    ../cfloats.as):00223                             lbsr      Subroutine_14 ; long branch to subroutine to Subroutine_14
+017A A6C822           (    ../cfloats.as):00224                             lda       D0022,u   ; load A from indexed value D0022,u
+017D 160152           (    ../cfloats.as):00225                             lbra      BranchTarget_15 ; long branch unconditionally to BranchTarget_15
+0180 A6C822           (    ../cfloats.as):00226         Loop_04             lda       D0022,u   ; load A from indexed value D0022,u
+0183 E6C818           (    ../cfloats.as):00227                             ldb       D0018,u   ; load B from indexed value D0018,u
+0186 16014C           (    ../cfloats.as):00228                             lbra      Continue_03 ; long branch unconditionally to Continue_03
+0189 10270491         (    ../cfloats.as):00229         Subroutine_03       lbeq      Subroutine_14 ; long branch if equal/zero to Subroutine_14
+018D A6C817           (    ../cfloats.as):00230                             lda       D0017,u   ; load A from indexed value D0017,u
+0190 27EE             (    ../cfloats.as):00231                             beq       Loop_04   ; branch if equal/zero to Loop_04
+0192 A0C829           (    ../cfloats.as):00232         BranchTarget_06     suba      D0029,u   ; subtract indexed value D0029,u from A
+0195 272C             (    ../cfloats.as):00233                             beq       BranchTarget_07 ; branch if equal/zero to BranchTarget_07
+0197 A7C4             (    ../cfloats.as):00234                             sta       ,u        ; store A to memory pointed to by U
+0199 252E             (    ../cfloats.as):00235                             bcs       BranchTarget_08 ; branch if carry is set to BranchTarget_08
+019B E6C817           (    ../cfloats.as):00236                             ldb       D0017,u   ; load B from indexed value D0017,u
+019E E7C829           (    ../cfloats.as):00237                             stb       D0029,u   ; store B to indexed value D0029,u
+01A1 ECC822           (    ../cfloats.as):00238                             ldd       D0022,u   ; load D from indexed value D0022,u
+01A4 44               (    ../cfloats.as):00239         Loop_05             lsra                ; logical shift A right by one bit
+01A5 56               (    ../cfloats.as):00240                             rorb                ; rotate B right through carry
+01A6 66C824           (    ../cfloats.as):00241                             ror       D0024,u   ; rotate indexed value D0024,u right through carry
+01A9 66C825           (    ../cfloats.as):00242                             ror       D0025,u   ; rotate indexed value D0025,u right through carry
+01AC 66C826           (    ../cfloats.as):00243                             ror       D0026,u   ; rotate indexed value D0026,u right through carry
+01AF 66C827           (    ../cfloats.as):00244                             ror       D0027,u   ; rotate indexed value D0027,u right through carry
+01B2 66C828           (    ../cfloats.as):00245                             ror       D0028,u   ; rotate indexed value D0028,u right through carry
+01B5 6AC4             (    ../cfloats.as):00246                             dec       ,u        ; decrement memory pointed to by U
+01B7 26EB             (    ../cfloats.as):00247                             bne       Loop_05   ; branch if not equal to Loop_05
+01B9 EDC822           (    ../cfloats.as):00248                             std       D0022,u   ; store D to indexed value D0022,u
+01BC A6C819           (    ../cfloats.as):00249         Loop_06             lda       D0019,u   ; load A from indexed value D0019,u
+01BF 2B77             (    ../cfloats.as):00250                             bmi       BranchTarget_10 ; branch if minus to BranchTarget_10
+01C1 2026             (    ../cfloats.as):00251                             bra       Continue_02 ; branch unconditionally to Continue_02
+01C3 6CC4             (    ../cfloats.as):00252         BranchTarget_07     inc       ,u        ; increment memory pointed to by U
+01C5 1A01             (    ../cfloats.as):00253                             orcc      #1        ; set condition-code bits with mask #1
+01C7 20F3             (    ../cfloats.as):00254                             bra       Loop_06   ; branch unconditionally to Loop_06
+01C9 ECC810           (    ../cfloats.as):00255         BranchTarget_08     ldd       D0010,u   ; load D from indexed value D0010,u
+01CC 44               (    ../cfloats.as):00256         Loop_07             lsra                ; logical shift A right by one bit
+01CD 56               (    ../cfloats.as):00257                             rorb                ; rotate B right through carry
+01CE 66C812           (    ../cfloats.as):00258                             ror       D0012,u   ; rotate indexed value D0012,u right through carry
+01D1 66C813           (    ../cfloats.as):00259                             ror       D0013,u   ; rotate indexed value D0013,u right through carry
+01D4 66C814           (    ../cfloats.as):00260                             ror       D0014,u   ; rotate indexed value D0014,u right through carry
+01D7 66C815           (    ../cfloats.as):00261                             ror       D0015,u   ; rotate indexed value D0015,u right through carry
+01DA 66C816           (    ../cfloats.as):00262                             ror       D0016,u   ; rotate indexed value D0016,u right through carry
+01DD 6CC4             (    ../cfloats.as):00263                             inc       ,u        ; increment memory pointed to by U
+01DF 26EB             (    ../cfloats.as):00264                             bne       Loop_07   ; branch if not equal to Loop_07
+01E1 EDC810           (    ../cfloats.as):00265                             std       D0010,u   ; store D to indexed value D0010,u
+01E4 A6C819           (    ../cfloats.as):00266                             lda       D0019,u   ; load A from indexed value D0019,u
+01E7 2B52             (    ../cfloats.as):00267                             bmi       BranchTarget_11 ; branch if minus to BranchTarget_11
+01E9 ECC827           (    ../cfloats.as):00268         Continue_02         ldd       D0027,u   ; load D from indexed value D0027,u
+01EC E9C816           (    ../cfloats.as):00269                             adcb      D0016,u   ; add indexed value D0016,u into B
+01EF A9C815           (    ../cfloats.as):00270                             adca      D0015,u   ; add indexed value D0015,u into A
+01F2 EDC827           (    ../cfloats.as):00271                             std       D0027,u   ; store D to indexed value D0027,u
+01F5 ECC825           (    ../cfloats.as):00272                             ldd       D0025,u   ; load D from indexed value D0025,u
+01F8 E9C814           (    ../cfloats.as):00273                             adcb      D0014,u   ; add indexed value D0014,u into B
+01FB A9C813           (    ../cfloats.as):00274                             adca      D0013,u   ; add indexed value D0013,u into A
+01FE EDC825           (    ../cfloats.as):00275                             std       D0025,u   ; store D to indexed value D0025,u
+0201 E6C824           (    ../cfloats.as):00276                             ldb       D0024,u   ; load B from indexed value D0024,u
+0204 E9C812           (    ../cfloats.as):00277                             adcb      D0012,u   ; add indexed value D0012,u into B
+0207 E7C824           (    ../cfloats.as):00278                             stb       D0024,u   ; store B to indexed value D0024,u
+020A ECC822           (    ../cfloats.as):00279                             ldd       D0022,u   ; load D from indexed value D0022,u
+020D E9C811           (    ../cfloats.as):00280                             adcb      D0011,u   ; add indexed value D0011,u into B
+0210 A9C810           (    ../cfloats.as):00281                             adca      D0010,u   ; add indexed value D0010,u into A
+0213 EDC822           (    ../cfloats.as):00282                             std       D0022,u   ; store D to indexed value D0022,u
+0216 2418             (    ../cfloats.as):00283                             bcc       BranchTarget_09 ; branch if carry is clear to BranchTarget_09
+0218 6CC829           (    ../cfloats.as):00284                             inc       D0029,u   ; increment indexed value D0029,u
+021B 66C822           (    ../cfloats.as):00285                             ror       D0022,u   ; rotate indexed value D0022,u right through carry
+021E 66C823           (    ../cfloats.as):00286                             ror       D0023,u   ; rotate indexed value D0023,u right through carry
+0221 66C824           (    ../cfloats.as):00287                             ror       D0024,u   ; rotate indexed value D0024,u right through carry
+0224 66C825           (    ../cfloats.as):00288                             ror       D0025,u   ; rotate indexed value D0025,u right through carry
+0227 66C826           (    ../cfloats.as):00289                             ror       D0026,u   ; rotate indexed value D0026,u right through carry
+022A 66C827           (    ../cfloats.as):00290                             ror       D0027,u   ; rotate indexed value D0027,u right through carry
+022D 66C828           (    ../cfloats.as):00291                             ror       D0028,u   ; rotate indexed value D0028,u right through carry
+0230 A6C81C           (    ../cfloats.as):00292         BranchTarget_09     lda       D001c,u   ; load A from indexed value D001c,u
+0233 A7C819           (    ../cfloats.as):00293                             sta       D0019,u   ; store A to indexed value D0019,u
+0236 2057             (    ../cfloats.as):00294                             bra       Subroutine_04 ; branch unconditionally to Subroutine_04
+0238 49               (    ../cfloats.as):00295         BranchTarget_10     rola                ; rotate A left through carry
+0239 43               (    ../cfloats.as):00296                             coma
+023A 47               (    ../cfloats.as):00297                             asra                ; arithmetic shift A right by one bit
+023B ECC827           (    ../cfloats.as):00298         BranchTarget_11     ldd       D0027,u   ; load D from indexed value D0027,u
+023E E2C816           (    ../cfloats.as):00299                             sbcb      D0016,u   ; subtract indexed value D0016,u from B
+0241 A2C815           (    ../cfloats.as):00300                             sbca      D0015,u   ; subtract indexed value D0015,u from A
+0244 EDC827           (    ../cfloats.as):00301                             std       D0027,u   ; store D to indexed value D0027,u
+0247 ECC825           (    ../cfloats.as):00302                             ldd       D0025,u   ; load D from indexed value D0025,u
+024A E2C814           (    ../cfloats.as):00303                             sbcb      D0014,u   ; subtract indexed value D0014,u from B
+024D A2C813           (    ../cfloats.as):00304                             sbca      D0013,u   ; subtract indexed value D0013,u from A
+0250 EDC825           (    ../cfloats.as):00305                             std       D0025,u   ; store D to indexed value D0025,u
+0253 ECC823           (    ../cfloats.as):00306                             ldd       D0023,u   ; load D from indexed value D0023,u
+0256 E2C812           (    ../cfloats.as):00307                             sbcb      D0012,u   ; subtract indexed value D0012,u from B
+0259 A2C811           (    ../cfloats.as):00308                             sbca      D0011,u   ; subtract indexed value D0011,u from A
+025C EDC823           (    ../cfloats.as):00309                             std       D0023,u   ; store D to indexed value D0023,u
+025F A6C822           (    ../cfloats.as):00310                             lda       D0022,u   ; load A from indexed value D0022,u
+0262 A2C810           (    ../cfloats.as):00311                             sbca      D0010,u   ; subtract indexed value D0010,u from A
+0265 A7C822           (    ../cfloats.as):00312                             sta       D0022,u   ; store A to indexed value D0022,u
+0268 A6C818           (    ../cfloats.as):00313                             lda       D0018,u   ; load A from indexed value D0018,u
+026B 241F             (    ../cfloats.as):00314                             bcc       BranchTarget_13 ; branch if carry is clear to BranchTarget_13
+026D 63C822           (    ../cfloats.as):00315                             com       D0022,u
+0270 63C823           (    ../cfloats.as):00316                             com       D0023,u
+0273 63C824           (    ../cfloats.as):00317                             com       D0024,u
+0276 63C825           (    ../cfloats.as):00318                             com       D0025,u
+0279 63C826           (    ../cfloats.as):00319                             com       D0026,u
+027C 63C827           (    ../cfloats.as):00320                             com       D0027,u
+027F 63C828           (    ../cfloats.as):00321                             com       D0028,u
+0282 A6C4             (    ../cfloats.as):00322                             lda       ,u        ; load A from memory pointed to by U
+0284 2703             (    ../cfloats.as):00323                             beq       BranchTarget_12 ; branch if equal/zero to BranchTarget_12
+0286 17034E           (    ../cfloats.as):00324                             lbsr      Subroutine_13 ; long branch to subroutine to Subroutine_13
+0289 A6C81C           (    ../cfloats.as):00325         BranchTarget_12     lda       D001c,u   ; load A from indexed value D001c,u
+028C A7C819           (    ../cfloats.as):00326         BranchTarget_13     sta       D0019,u   ; store A to indexed value D0019,u
+028F 6FC4             (    ../cfloats.as):00327         Subroutine_04       clr       ,u        ; clear memory pointed to by U
+0291 A6C822           (    ../cfloats.as):00328         Subroutine_05       lda       D0022,u   ; load A from indexed value D0022,u
+0294 2B3C             (    ../cfloats.as):00329                             bmi       BranchTarget_15 ; branch if minus to BranchTarget_15
+0296 AAC823           (    ../cfloats.as):00330                             ora       D0023,u   ; OR A with indexed value D0023,u
+0299 AAC824           (    ../cfloats.as):00331                             ora       D0024,u   ; OR A with indexed value D0024,u
+029C AAC825           (    ../cfloats.as):00332                             ora       D0025,u   ; OR A with indexed value D0025,u
+029F AAC826           (    ../cfloats.as):00333                             ora       D0026,u   ; OR A with indexed value D0026,u
+02A2 AAC827           (    ../cfloats.as):00334                             ora       D0027,u   ; OR A with indexed value D0027,u
+02A5 AAC828           (    ../cfloats.as):00335                             ora       D0028,u   ; OR A with indexed value D0028,u
+02A8 273C             (    ../cfloats.as):00336                             beq       BranchTarget_16 ; branch if equal/zero to BranchTarget_16
+02AA ECC822           (    ../cfloats.as):00337                             ldd       D0022,u   ; load D from indexed value D0022,u
+02AD 6AC829           (    ../cfloats.as):00338         Loop_08             dec       D0029,u   ; decrement indexed value D0029,u
+02B0 2603             (    ../cfloats.as):00339                             bne       BranchTarget_14 ; branch if not equal to BranchTarget_14
+02B2 6AC81D           (    ../cfloats.as):00340                             dec       D001d,u   ; decrement indexed value D001d,u
+02B5 68C4             (    ../cfloats.as):00341         BranchTarget_14     asl       ,u        ; shift memory pointed to by U left by one bit
+02B7 69C828           (    ../cfloats.as):00342                             rol       D0028,u   ; rotate indexed value D0028,u left through carry
+02BA 69C827           (    ../cfloats.as):00343                             rol       D0027,u   ; rotate indexed value D0027,u left through carry
+02BD 69C826           (    ../cfloats.as):00344                             rol       D0026,u   ; rotate indexed value D0026,u left through carry
+02C0 69C825           (    ../cfloats.as):00345                             rol       D0025,u   ; rotate indexed value D0025,u left through carry
+02C3 69C824           (    ../cfloats.as):00346                             rol       D0024,u   ; rotate indexed value D0024,u left through carry
+02C6 59               (    ../cfloats.as):00347                             rolb                ; rotate B left through carry
+02C7 49               (    ../cfloats.as):00348                             rola                ; rotate A left through carry
+02C8 2AE3             (    ../cfloats.as):00349                             bpl       Loop_08   ; branch if plus to Loop_08
+02CA E7C823           (    ../cfloats.as):00350                             stb       D0023,u   ; store B to indexed value D0023,u
+02CD E6C829           (    ../cfloats.as):00351                             ldb       D0029,u   ; load B from indexed value D0029,u
+02D0 2718             (    ../cfloats.as):00352                             beq       BranchTarget_17 ; branch if equal/zero to BranchTarget_17
+02D2 E6C819           (    ../cfloats.as):00353         BranchTarget_15     ldb       D0019,u   ; load B from indexed value D0019,u
+02D5 847F             (    ../cfloats.as):00354         Continue_03         anda      #$7f      ; AND A with immediate value $7f
+02D7 C480             (    ../cfloats.as):00355                             andb      #$80      ; AND B with immediate value $80
+02D9 3404             (    ../cfloats.as):00356                             pshs      b         ; save B on the hardware stack
+02DB ABE0             (    ../cfloats.as):00357                             adda      ,s+       ; add memory pointed to by S, then advance S into A
+02DD A7C822           (    ../cfloats.as):00358                             sta       D0022,u   ; store A to indexed value D0022,u
+02E0 6DC81D           (    ../cfloats.as):00359                             tst       D001d,u   ; test indexed value D001d,u and update condition codes
+02E3 2605             (    ../cfloats.as):00360                             bne       BranchTarget_17 ; branch if not equal to BranchTarget_17
+02E5 39               (    ../cfloats.as):00361         Return_01           rts                 ; return to caller
+02E6 A7C829           (    ../cfloats.as):00362         BranchTarget_16     sta       D0029,u   ; store A to indexed value D0029,u
+02E9 39               (    ../cfloats.as):00363                             rts                 ; return to caller
+02EA A6C81D           (    ../cfloats.as):00364         BranchTarget_17     lda       D001d,u   ; load A from indexed value D001d,u
+02ED E6C829           (    ../cfloats.as):00365                             ldb       D0029,u   ; load B from indexed value D0029,u
+02F0 830000           (    ../cfloats.as):00366                             subd      #0        ; subtract immediate value 0 from D
+02F3 2708             (    ../cfloats.as):00367                             beq       BranchTarget_18 ; branch if equal/zero to BranchTarget_18
+02F5 2B06             (    ../cfloats.as):00368                             bmi       BranchTarget_18 ; branch if minus to BranchTarget_18
+02F7 CC0028           (    ../cfloats.as):00369         Loop_09             ldd       #$0028    ; load D from immediate value $0028
+02FA 160000           (    ../cfloats.as):00370                             lbra      _rpterr   ; long branch unconditionally to _rpterr
+02FD 170028           (    ../cfloats.as):00371         BranchTarget_18     lbsr      Subroutine_07 ; long branch to subroutine to Subroutine_07
+0300 20F5             (    ../cfloats.as):00372                             bra       Loop_09   ; branch unconditionally to Loop_09
+0302 2724             (    ../cfloats.as):00373         Subroutine_06       beq       Subroutine_07 ; branch if equal/zero to Subroutine_07
+0304 A6C817           (    ../cfloats.as):00374                             lda       D0017,u   ; load A from indexed value D0017,u
+0307 271F             (    ../cfloats.as):00375                             beq       Subroutine_07 ; branch if equal/zero to Subroutine_07
+0309 170098           (    ../cfloats.as):00376                             lbsr      Subroutine_10 ; long branch to subroutine to Subroutine_10
+030C 4F               (    ../cfloats.as):00377                             clra                ; clear A
+030D E6C829           (    ../cfloats.as):00378                             ldb       D0029,u   ; load B from indexed value D0029,u
+0310 EBC817           (    ../cfloats.as):00379                             addb      D0017,u   ; add indexed value D0017,u into B
+0313 8900             (    ../cfloats.as):00380                             adca      #0        ; add immediate value 0 into A
+0315 830080           (    ../cfloats.as):00381                             subd      #$0080    ; subtract immediate value $0080 from D
+0318 E7C829           (    ../cfloats.as):00382                             stb       D0029,u   ; store B to indexed value D0029,u
+031B A7C81D           (    ../cfloats.as):00383                             sta       D001d,u   ; store A to indexed value D001d,u
+031E 17FF70           (    ../cfloats.as):00384                             lbsr      Subroutine_05 ; long branch to subroutine to Subroutine_05
+0321 A6C4             (    ../cfloats.as):00385                             lda       ,u        ; load A from memory pointed to by U
+0323 2AC0             (    ../cfloats.as):00386                             bpl       Return_01 ; branch if plus to Return_01
+0325 1602AF           (    ../cfloats.as):00387                             lbra      Subroutine_13 ; long branch unconditionally to Subroutine_13
+0328 4F               (    ../cfloats.as):00388         Subroutine_07       clra                ; clear A
+0329 A7C829           (    ../cfloats.as):00389                             sta       D0029,u   ; store A to indexed value D0029,u
+032C 2060             (    ../cfloats.as):00390                             bra       Continue_04 ; branch unconditionally to Continue_04
+032E E6C817           (    ../cfloats.as):00391         Subroutine_08       ldb       D0017,u   ; load B from indexed value D0017,u
+0331 2606             (    ../cfloats.as):00392                             bne       BranchTarget_19 ; branch if not equal to BranchTarget_19
+0333 CC0029           (    ../cfloats.as):00393                             ldd       #$0029    ; load D from immediate value $0029
+0336 160000           (    ../cfloats.as):00394                             lbra      _rpterr   ; long branch unconditionally to _rpterr
+0339 4D               (    ../cfloats.as):00395         BranchTarget_19     tsta                ; test A and update condition codes
+033A 27EC             (    ../cfloats.as):00396                             beq       Subroutine_07 ; branch if equal/zero to Subroutine_07
+033C 1700C3           (    ../cfloats.as):00397                             lbsr      Subroutine_11 ; long branch to subroutine to Subroutine_11
+033F 4F               (    ../cfloats.as):00398                             clra                ; clear A
+0340 E6C829           (    ../cfloats.as):00399                             ldb       D0029,u   ; load B from indexed value D0029,u
+0343 E0C817           (    ../cfloats.as):00400                             subb      D0017,u   ; subtract indexed value D0017,u from B
+0346 8200             (    ../cfloats.as):00401                             sbca      #0        ; subtract immediate value 0 from A
+0348 C30081           (    ../cfloats.as):00402                             addd      #$0081    ; add immediate value $0081 into D
+034B A7C81D           (    ../cfloats.as):00403                             sta       D001d,u   ; store A to indexed value D001d,u
+034E E7C829           (    ../cfloats.as):00404                             stb       D0029,u   ; store B to indexed value D0029,u
+0351 A646             (    ../cfloats.as):00405                             lda       6,u       ; load A from indexed value 6,u
+0353 43               (    ../cfloats.as):00406                             coma
+0354 47               (    ../cfloats.as):00407                             asra                ; arithmetic shift A right by one bit
+0355 66C822           (    ../cfloats.as):00408                             ror       D0022,u   ; rotate indexed value D0022,u right through carry
+0358 66C823           (    ../cfloats.as):00409                             ror       D0023,u   ; rotate indexed value D0023,u right through carry
+035B 66C824           (    ../cfloats.as):00410                             ror       D0024,u   ; rotate indexed value D0024,u right through carry
+035E 66C825           (    ../cfloats.as):00411                             ror       D0025,u   ; rotate indexed value D0025,u right through carry
+0361 66C826           (    ../cfloats.as):00412                             ror       D0026,u   ; rotate indexed value D0026,u right through carry
+0364 66C827           (    ../cfloats.as):00413                             ror       D0027,u   ; rotate indexed value D0027,u right through carry
+0367 66C828           (    ../cfloats.as):00414                             ror       D0028,u   ; rotate indexed value D0028,u right through carry
+036A 66C4             (    ../cfloats.as):00415                             ror       ,u        ; rotate memory pointed to by U right through carry
+036C 17FF22           (    ../cfloats.as):00416                             lbsr      Subroutine_05 ; long branch to subroutine to Subroutine_05
+036F A6C4             (    ../cfloats.as):00417                             lda       ,u        ; load A from memory pointed to by U
+0371 2A30             (    ../cfloats.as):00418                             bpl       Return_02 ; branch if plus to Return_02
+0373 160261           (    ../cfloats.as):00419                             lbra      Subroutine_13 ; long branch unconditionally to Subroutine_13
+0376 3402             (    ../cfloats.as):00420         Subroutine_09       pshs      a         ; save A on the hardware stack
+0378 ECC822           (    ../cfloats.as):00421                             ldd       D0022,u   ; load D from indexed value D0022,u
+037B EDC4             (    ../cfloats.as):00422                             std       ,u        ; store D to memory pointed to by U
+037D ECC824           (    ../cfloats.as):00423                             ldd       D0024,u   ; load D from indexed value D0024,u
+0380 ED42             (    ../cfloats.as):00424                             std       2,u       ; store D to indexed value 2,u
+0382 ECC826           (    ../cfloats.as):00425                             ldd       D0026,u   ; load D from indexed value D0026,u
+0385 ED44             (    ../cfloats.as):00426                             std       4,u       ; store D to indexed value 4,u
+0387 E6C828           (    ../cfloats.as):00427                             ldb       D0028,u   ; load B from indexed value D0028,u
+038A E746             (    ../cfloats.as):00428                             stb       6,u       ; store B to indexed value 6,u
+038C 3502             (    ../cfloats.as):00429                             puls      a         ; restore A from the hardware stack
+038E A7C822           (    ../cfloats.as):00430         Continue_04         sta       D0022,u   ; store A to indexed value D0022,u
+0391 A7C823           (    ../cfloats.as):00431                             sta       D0023,u   ; store A to indexed value D0023,u
+0394 A7C824           (    ../cfloats.as):00432                             sta       D0024,u   ; store A to indexed value D0024,u
+0397 A7C825           (    ../cfloats.as):00433                             sta       D0025,u   ; store A to indexed value D0025,u
+039A A7C826           (    ../cfloats.as):00434                             sta       D0026,u   ; store A to indexed value D0026,u
+039D A7C827           (    ../cfloats.as):00435                             sta       D0027,u   ; store A to indexed value D0027,u
+03A0 A7C828           (    ../cfloats.as):00436                             sta       D0028,u   ; store A to indexed value D0028,u
+03A3 39               (    ../cfloats.as):00437         Return_02           rts                 ; return to caller
+03A4 4F               (    ../cfloats.as):00438         Subroutine_10       clra                ; clear A
+03A5 8DCF             (    ../cfloats.as):00439                             bsr       Subroutine_09 ; branch to subroutine to Subroutine_09
+03A7 C638             (    ../cfloats.as):00440                             ldb       #$38      ; load B from immediate value $38
+03A9 E748             (    ../cfloats.as):00441                             stb       8,u       ; store B to indexed value 8,u
+03AB A646             (    ../cfloats.as):00442         Loop_10             lda       6,u       ; load A from indexed value 6,u
+03AD 44               (    ../cfloats.as):00443                             lsra                ; logical shift A right by one bit
+03AE 242A             (    ../cfloats.as):00444                             bcc       BranchTarget_20 ; branch if carry is clear to BranchTarget_20
+03B0 ECC827           (    ../cfloats.as):00445                             ldd       D0027,u   ; load D from indexed value D0027,u
+03B3 E3C815           (    ../cfloats.as):00446                             addd      D0015,u   ; add indexed value D0015,u into D
+03B6 EDC827           (    ../cfloats.as):00447                             std       D0027,u   ; store D to indexed value D0027,u
+03B9 ECC825           (    ../cfloats.as):00448                             ldd       D0025,u   ; load D from indexed value D0025,u
+03BC E9C814           (    ../cfloats.as):00449                             adcb      D0014,u   ; add indexed value D0014,u into B
+03BF A9C813           (    ../cfloats.as):00450                             adca      D0013,u   ; add indexed value D0013,u into A
+03C2 EDC825           (    ../cfloats.as):00451                             std       D0025,u   ; store D to indexed value D0025,u
+03C5 ECC823           (    ../cfloats.as):00452                             ldd       D0023,u   ; load D from indexed value D0023,u
+03C8 E9C812           (    ../cfloats.as):00453                             adcb      D0012,u   ; add indexed value D0012,u into B
+03CB A9C811           (    ../cfloats.as):00454                             adca      D0011,u   ; add indexed value D0011,u into A
+03CE EDC823           (    ../cfloats.as):00455                             std       D0023,u   ; store D to indexed value D0023,u
+03D1 A6C822           (    ../cfloats.as):00456                             lda       D0022,u   ; load A from indexed value D0022,u
+03D4 A9C810           (    ../cfloats.as):00457                             adca      D0010,u   ; add indexed value D0010,u into A
+03D7 A7C822           (    ../cfloats.as):00458                             sta       D0022,u   ; store A to indexed value D0022,u
+03DA 66C822           (    ../cfloats.as):00459         BranchTarget_20     ror       D0022,u   ; rotate indexed value D0022,u right through carry
+03DD 66C823           (    ../cfloats.as):00460                             ror       D0023,u   ; rotate indexed value D0023,u right through carry
+03E0 66C824           (    ../cfloats.as):00461                             ror       D0024,u   ; rotate indexed value D0024,u right through carry
+03E3 66C825           (    ../cfloats.as):00462                             ror       D0025,u   ; rotate indexed value D0025,u right through carry
+03E6 66C826           (    ../cfloats.as):00463                             ror       D0026,u   ; rotate indexed value D0026,u right through carry
+03E9 66C827           (    ../cfloats.as):00464                             ror       D0027,u   ; rotate indexed value D0027,u right through carry
+03EC 66C828           (    ../cfloats.as):00465                             ror       D0028,u   ; rotate indexed value D0028,u right through carry
+03EF 66C4             (    ../cfloats.as):00466                             ror       ,u        ; rotate memory pointed to by U right through carry
+03F1 6641             (    ../cfloats.as):00467                             ror       1,u       ; rotate indexed value 1,u right through carry
+03F3 6642             (    ../cfloats.as):00468                             ror       2,u       ; rotate indexed value 2,u right through carry
+03F5 6643             (    ../cfloats.as):00469                             ror       3,u       ; rotate indexed value 3,u right through carry
+03F7 6644             (    ../cfloats.as):00470                             ror       4,u       ; rotate indexed value 4,u right through carry
+03F9 6645             (    ../cfloats.as):00471                             ror       5,u       ; rotate indexed value 5,u right through carry
+03FB 6646             (    ../cfloats.as):00472                             ror       6,u       ; rotate indexed value 6,u right through carry
+03FD 6A48             (    ../cfloats.as):00473                             dec       8,u       ; decrement indexed value 8,u
+03FF 26AA             (    ../cfloats.as):00474                             bne       Loop_10   ; branch if not equal to Loop_10
+0401 39               (    ../cfloats.as):00475                             rts                 ; return to caller
+0402 4F               (    ../cfloats.as):00476         Subroutine_11       clra                ; clear A
+0403 17FF70           (    ../cfloats.as):00477                             lbsr      Subroutine_09 ; long branch to subroutine to Subroutine_09
+0406 C639             (    ../cfloats.as):00478                             ldb       #$39      ; load B from immediate value $39
+0408 E748             (    ../cfloats.as):00479                             stb       8,u       ; store B to indexed value 8,u
+040A E6C4             (    ../cfloats.as):00480         Loop_11             ldb       ,u        ; load B from memory pointed to by U
+040C E1C810           (    ../cfloats.as):00481                             cmpb      D0010,u   ; compare B against indexed value D0010,u
+040F 2530             (    ../cfloats.as):00482                             bcs       Loop_12   ; branch if carry is set to Loop_12
+0411 EC45             (    ../cfloats.as):00483                             ldd       5,u       ; load D from indexed value 5,u
+0413 A3C815           (    ../cfloats.as):00484                             subd      D0015,u   ; subtract indexed value D0015,u from D
+0416 ED4D             (    ../cfloats.as):00485                             std       13,u      ; store D to indexed value 13,u
+0418 EC43             (    ../cfloats.as):00486                             ldd       3,u       ; load D from indexed value 3,u
+041A E2C814           (    ../cfloats.as):00487                             sbcb      D0014,u   ; subtract indexed value D0014,u from B
+041D A2C813           (    ../cfloats.as):00488                             sbca      D0013,u   ; subtract indexed value D0013,u from A
+0420 ED4B             (    ../cfloats.as):00489                             std       11,u      ; store D to indexed value 11,u
+0422 E642             (    ../cfloats.as):00490                             ldb       2,u       ; load B from indexed value 2,u
+0424 E2C812           (    ../cfloats.as):00491                             sbcb      D0012,u   ; subtract indexed value D0012,u from B
+0427 E74A             (    ../cfloats.as):00492                             stb       10,u      ; store B to indexed value 10,u
+0429 ECC4             (    ../cfloats.as):00493                             ldd       ,u        ; load D from memory pointed to by U
+042B E2C811           (    ../cfloats.as):00494                             sbcb      D0011,u   ; subtract indexed value D0011,u from B
+042E A2C810           (    ../cfloats.as):00495                             sbca      D0010,u   ; subtract indexed value D0010,u from A
+0431 250E             (    ../cfloats.as):00496                             bcs       Loop_12   ; branch if carry is set to Loop_12
+0433 EDC4             (    ../cfloats.as):00497                             std       ,u        ; store D to memory pointed to by U
+0435 A64A             (    ../cfloats.as):00498                             lda       10,u      ; load A from indexed value 10,u
+0437 A742             (    ../cfloats.as):00499                             sta       2,u       ; store A to indexed value 2,u
+0439 EC4B             (    ../cfloats.as):00500                             ldd       11,u      ; load D from indexed value 11,u
+043B ED43             (    ../cfloats.as):00501                             std       3,u       ; store D to indexed value 3,u
+043D EC4D             (    ../cfloats.as):00502                             ldd       13,u      ; load D from indexed value 13,u
+043F ED45             (    ../cfloats.as):00503                             std       5,u       ; store D to indexed value 5,u
+0441 69C828           (    ../cfloats.as):00504         Loop_12             rol       D0028,u   ; rotate indexed value D0028,u left through carry
+0444 69C827           (    ../cfloats.as):00505                             rol       D0027,u   ; rotate indexed value D0027,u left through carry
+0447 69C826           (    ../cfloats.as):00506                             rol       D0026,u   ; rotate indexed value D0026,u left through carry
+044A 69C825           (    ../cfloats.as):00507                             rol       D0025,u   ; rotate indexed value D0025,u left through carry
+044D 69C824           (    ../cfloats.as):00508                             rol       D0024,u   ; rotate indexed value D0024,u left through carry
+0450 69C823           (    ../cfloats.as):00509                             rol       D0023,u   ; rotate indexed value D0023,u left through carry
+0453 69C822           (    ../cfloats.as):00510                             rol       D0022,u   ; rotate indexed value D0022,u left through carry
+0456 6946             (    ../cfloats.as):00511                             rol       6,u       ; rotate indexed value 6,u left through carry
+0458 6945             (    ../cfloats.as):00512                             rol       5,u       ; rotate indexed value 5,u left through carry
+045A 6944             (    ../cfloats.as):00513                             rol       4,u       ; rotate indexed value 4,u left through carry
+045C 6943             (    ../cfloats.as):00514                             rol       3,u       ; rotate indexed value 3,u left through carry
+045E 6942             (    ../cfloats.as):00515                             rol       2,u       ; rotate indexed value 2,u left through carry
+0460 6941             (    ../cfloats.as):00516                             rol       1,u       ; rotate indexed value 1,u left through carry
+0462 69C4             (    ../cfloats.as):00517                             rol       ,u        ; rotate memory pointed to by U left through carry
+0464 6A48             (    ../cfloats.as):00518                             dec       8,u       ; decrement indexed value 8,u
+0466 22A2             (    ../cfloats.as):00519                             bhi       Loop_11   ; branch if higher to Loop_11
+0468 2725             (    ../cfloats.as):00520                             beq       BranchTarget_21 ; branch if equal/zero to BranchTarget_21
+046A EC45             (    ../cfloats.as):00521                             ldd       5,u       ; load D from indexed value 5,u
+046C A3C815           (    ../cfloats.as):00522                             subd      D0015,u   ; subtract indexed value D0015,u from D
+046F ED45             (    ../cfloats.as):00523                             std       5,u       ; store D to indexed value 5,u
+0471 EC43             (    ../cfloats.as):00524                             ldd       3,u       ; load D from indexed value 3,u
+0473 E2C814           (    ../cfloats.as):00525                             sbcb      D0014,u   ; subtract indexed value D0014,u from B
+0476 A2C813           (    ../cfloats.as):00526                             sbca      D0013,u   ; subtract indexed value D0013,u from A
+0479 ED43             (    ../cfloats.as):00527                             std       3,u       ; store D to indexed value 3,u
+047B EC41             (    ../cfloats.as):00528                             ldd       1,u       ; load D from indexed value 1,u
+047D E2C812           (    ../cfloats.as):00529                             sbcb      D0012,u   ; subtract indexed value D0012,u from B
+0480 A2C811           (    ../cfloats.as):00530                             sbca      D0011,u   ; subtract indexed value D0011,u from A
+0483 ED41             (    ../cfloats.as):00531                             std       1,u       ; store D to indexed value 1,u
+0485 A6C4             (    ../cfloats.as):00532                             lda       ,u        ; load A from memory pointed to by U
+0487 A2C810           (    ../cfloats.as):00533                             sbca      D0010,u   ; subtract indexed value D0010,u from A
+048A A7C4             (    ../cfloats.as):00534                             sta       ,u        ; store A to memory pointed to by U
+048C 4F               (    ../cfloats.as):00535                             clra                ; clear A
+048D 20B2             (    ../cfloats.as):00536                             bra       Loop_12   ; branch unconditionally to Loop_12
+048F 66C4             (    ../cfloats.as):00537         BranchTarget_21     ror       ,u        ; rotate memory pointed to by U right through carry
+0491 63C822           (    ../cfloats.as):00538                             com       D0022,u
+0494 63C823           (    ../cfloats.as):00539                             com       D0023,u
+0497 63C824           (    ../cfloats.as):00540                             com       D0024,u
+049A 63C825           (    ../cfloats.as):00541                             com       D0025,u
+049D 63C826           (    ../cfloats.as):00542                             com       D0026,u
+04A0 63C827           (    ../cfloats.as):00543                             com       D0027,u
+04A3 63C828           (    ../cfloats.as):00544                             com       D0028,u
+04A6 39               (    ../cfloats.as):00545                             rts                 ; return to caller
+04A7 3506             (    ../cfloats.as):00546         Subroutine_12       puls      d         ; get return address
+04A9 3440             (    ../cfloats.as):00547                             pshs      u         ; save U
+04AB 32E8E2           (    ../cfloats.as):00548                             leas      -30,s     ; allocate 30 bytes
+04AE 1F43             (    ../cfloats.as):00549                             tfr       s,u       ; transfer stack to U
+04B0 3406             (    ../cfloats.as):00550                             pshs      d         ; save return address
+04B2 6FC81D           (    ../cfloats.as):00551                             clr       D001d,u   ; clear indexed value D001d,u
+04B5 EC06             (    ../cfloats.as):00552                             ldd       6,x       ; get bits 15-0 of double
+04B7 EDC816           (    ../cfloats.as):00553                             std       D0016,u   ; store on stack
+04BA EC04             (    ../cfloats.as):00554                             ldd       4,x       ; get bits 31-16 of double
+04BC EDC814           (    ../cfloats.as):00555                             std       D0014,u   ; store on stack
+04BF EC02             (    ../cfloats.as):00556                             ldd       2,x       ; get bits 47-32 of double
+04C1 EDC812           (    ../cfloats.as):00557                             std       D0012,u   ; store on stack
+04C4 EC84             (    ../cfloats.as):00558                             ldd       ,x        ; get bits 63-48 of double
+04C6 E7C811           (    ../cfloats.as):00559                             stb       D0011,u   ; store bits 55-48 on stack
+04C9 1F89             (    ../cfloats.as):00560                             tfr       a,b       ; copy A into B
+04CB A7C81C           (    ../cfloats.as):00561                             sta       D001c,u   ; store bits 63-56 on stack
+04CE 8A80             (    ../cfloats.as):00562                             ora       #$80      ; get sign bit
+04D0 A7C810           (    ../cfloats.as):00563                             sta       D0010,u   ; store here
+04D3 E8C822           (    ../cfloats.as):00564                             eorb      D0022,u   ; XOR B with this location
+04D6 E7C819           (    ../cfloats.as):00565                             stb       D0019,u   ; store it
+04D9 A6C822           (    ../cfloats.as):00566                             lda       D0022,u   ; get byte here
+04DC A7C818           (    ../cfloats.as):00567                             sta       D0018,u   ; store it
+04DF 8A80             (    ../cfloats.as):00568                             ora       #$80      ; get sign bit
+04E1 A7C822           (    ../cfloats.as):00569                             sta       D0022,u   ; store it
+04E4 A6C829           (    ../cfloats.as):00570                             lda       D0029,u   ; get byte
+04E7                  (    ../cfloats.as):00571         return
+04E7 30C822           (    ../cfloats.as):00572                             leax      D0022,u   ; compute effective address into X from D0022,u
+04EA 86A0             (    ../cfloats.as):00573         Continue_05         lda       #$a0      ; load A from immediate value $a0
+04EC A707             (    ../cfloats.as):00574                             sta       7,x       ; store A to indexed value 7,x
+04EE 6F04             (    ../cfloats.as):00575                             clr       4,x       ; clear indexed value 4,x
+04F0 6F05             (    ../cfloats.as):00576                             clr       5,x       ; clear indexed value 5,x
+04F2 6F06             (    ../cfloats.as):00577                             clr       6,x       ; clear indexed value 6,x
+04F4 A684             (    ../cfloats.as):00578                             lda       ,x        ; load A from memory pointed to by X
+04F6 1F89             (    ../cfloats.as):00579                             tfr       a,b       ; transfer A,B
+04F8 EA01             (    ../cfloats.as):00580                             orb       1,x       ; OR B with indexed value 1,x
+04FA EA02             (    ../cfloats.as):00581                             orb       2,x       ; OR B with indexed value 2,x
+04FC EA03             (    ../cfloats.as):00582                             orb       3,x       ; OR B with indexed value 3,x
+04FE 2736             (    ../cfloats.as):00583                             beq       BranchTarget_23 ; branch if equal/zero to BranchTarget_23
+0500 E601             (    ../cfloats.as):00584                             ldb       1,x       ; load B from indexed value 1,x
+0502 4D               (    ../cfloats.as):00585                             tsta                ; test A and update condition codes
+0503 2A13             (    ../cfloats.as):00586                             bpl       Loop_13   ; branch if plus to Loop_13
+0505 3406             (    ../cfloats.as):00587                             pshs      d         ; save D on the hardware stack
+0507 4F               (    ../cfloats.as):00588                             clra                ; clear A
+0508 5F               (    ../cfloats.as):00589                             clrb                ; clear B
+0509 A302             (    ../cfloats.as):00590                             subd      2,x       ; subtract indexed value 2,x from D
+050B ED02             (    ../cfloats.as):00591                             std       2,x       ; store D to indexed value 2,x
+050D CC0000           (    ../cfloats.as):00592                             ldd       #0        ; load D from immediate value 0
+0510 E261             (    ../cfloats.as):00593                             sbcb      1,s       ; subtract stack-relative value 1,s from B
+0512 A2E4             (    ../cfloats.as):00594                             sbca      ,s        ; subtract memory pointed to by S from A
+0514 3262             (    ../cfloats.as):00595                             leas      2,s       ; adjust S using 2,s
+0516 290A             (    ../cfloats.as):00596                             bvs       Label_01
+0518 6A07             (    ../cfloats.as):00597         Loop_13             dec       7,x       ; decrement indexed value 7,x
+051A 6803             (    ../cfloats.as):00598                             asl       3,x       ; shift indexed value 3,x left by one bit
+051C 6902             (    ../cfloats.as):00599                             rol       2,x       ; rotate indexed value 2,x left through carry
+051E 59               (    ../cfloats.as):00600                             rolb                ; rotate B left through carry
+051F 49               (    ../cfloats.as):00601                             rola                ; rotate A left through carry
+0520 2AF6             (    ../cfloats.as):00602                             bpl       Loop_13   ; branch if plus to Loop_13
+0522 847F             (    ../cfloats.as):00603         Label_01            anda      #$7f      ; AND A with immediate value $7f
+0524 6D84             (    ../cfloats.as):00604                             tst       ,x        ; test memory pointed to by X and update condition codes
+0526 2A02             (    ../cfloats.as):00605                             bpl       BranchTarget_22 ; branch if plus to BranchTarget_22
+0528 8A80             (    ../cfloats.as):00606                             ora       #$80      ; OR A with immediate value $80
+052A ED84             (    ../cfloats.as):00607         BranchTarget_22     std       ,x        ; store D to memory pointed to by X
+052C 39               (    ../cfloats.as):00608                             rts                 ; return to caller
+052D 30C822           (    ../cfloats.as):00609                             leax      D0022,u   ; compute effective address into X from D0022,u
+0530 6F04             (    ../cfloats.as):00610                             clr       4,x       ; clear indexed value 4,x
+0532 6F05             (    ../cfloats.as):00611                             clr       5,x       ; clear indexed value 5,x
+0534 6F06             (    ../cfloats.as):00612                             clr       6,x       ; clear indexed value 6,x
+0536 6F07             (    ../cfloats.as):00613         BranchTarget_23     clr       7,x       ; clear indexed value 7,x
+0538 6F84             (    ../cfloats.as):00614         Loop_14             clr       ,x        ; clear memory pointed to by X
+053A 6F01             (    ../cfloats.as):00615                             clr       1,x       ; clear indexed value 1,x
+053C 6F02             (    ../cfloats.as):00616                             clr       2,x       ; clear indexed value 2,x
+053E 6F03             (    ../cfloats.as):00617                             clr       3,x       ; clear indexed value 3,x
+0540 39               (    ../cfloats.as):00618                             rts                 ; return to caller
+0541 CC002A           (    ../cfloats.as):00619         Loop_15             ldd       #$002a    ; load D from immediate value $002a
+0544 160000           (    ../cfloats.as):00620                             lbra      _rpterr   ; long branch unconditionally to _rpterr
+0547 30C822           (    ../cfloats.as):00621                             leax      D0022,u   ; compute effective address into X from D0022,u
+054A E607             (    ../cfloats.as):00622         Continue_06         ldb       7,x       ; load B from indexed value 7,x
+054C 27EA             (    ../cfloats.as):00623                             beq       Loop_14   ; branch if equal/zero to Loop_14
+054E C081             (    ../cfloats.as):00624                             subb      #$81      ; subtract immediate value $81 from B
+0550 2577             (    ../cfloats.as):00625                             bcs       BranchTarget_28 ; branch if carry is set to BranchTarget_28
+0552 50               (    ../cfloats.as):00626                             negb                ; negate B
+0553 CB1F             (    ../cfloats.as):00627                             addb      #$1f      ; add immediate value $1f into B
+0555 2BEA             (    ../cfloats.as):00628                             bmi       Loop_15   ; branch if minus to Loop_15
+0557 2615             (    ../cfloats.as):00629                             bne       BranchTarget_24 ; branch if not equal to BranchTarget_24
+0559 EC84             (    ../cfloats.as):00630                             ldd       ,x        ; load D from memory pointed to by X
+055B 10838000         (    ../cfloats.as):00631                             cmpd      #$8000    ; compare D against immediate value $8000
+055F 26E0             (    ../cfloats.as):00632                             bne       Loop_15   ; branch if not equal to Loop_15
+0561 A602             (    ../cfloats.as):00633                             lda       2,x       ; load A from indexed value 2,x
+0563 AA03             (    ../cfloats.as):00634                             ora       3,x       ; OR A with indexed value 3,x
+0565 AA04             (    ../cfloats.as):00635                             ora       4,x       ; OR A with indexed value 4,x
+0567 AA05             (    ../cfloats.as):00636                             ora       5,x       ; OR A with indexed value 5,x
+0569 AA06             (    ../cfloats.as):00637                             ora       6,x       ; OR A with indexed value 6,x
+056B 26D4             (    ../cfloats.as):00638                             bne       Loop_15   ; branch if not equal to Loop_15
+056D 39               (    ../cfloats.as):00639                             rts                 ; return to caller
+056E 3404             (    ../cfloats.as):00640         BranchTarget_24     pshs      b         ; save B on the hardware stack
+0570 EC84             (    ../cfloats.as):00641                             ldd       ,x        ; load D from memory pointed to by X
+0572 2B10             (    ../cfloats.as):00642                             bmi       BranchTarget_25 ; branch if minus to BranchTarget_25
+0574 8A80             (    ../cfloats.as):00643                             ora       #$80      ; OR A with immediate value $80
+0576 44               (    ../cfloats.as):00644         Loop_16             lsra                ; logical shift A right by one bit
+0577 56               (    ../cfloats.as):00645                             rorb                ; rotate B right through carry
+0578 6602             (    ../cfloats.as):00646                             ror       2,x       ; rotate indexed value 2,x right through carry
+057A 6603             (    ../cfloats.as):00647                             ror       3,x       ; rotate indexed value 3,x right through carry
+057C 6AE4             (    ../cfloats.as):00648                             dec       ,s        ; decrement memory pointed to by S
+057E 26F6             (    ../cfloats.as):00649                             bne       Loop_16   ; branch if not equal to Loop_16
+0580 ED84             (    ../cfloats.as):00650                             std       ,x        ; store D to memory pointed to by X
+0582 3584             (    ../cfloats.as):00651                             puls      b,pc      ; restore registers and return
+0584 6FE2             (    ../cfloats.as):00652         BranchTarget_25     clr       ,-s       ; clear memory pointed to by -S
+0586 44               (    ../cfloats.as):00653         Loop_17             lsra                ; logical shift A right by one bit
+0587 56               (    ../cfloats.as):00654                             rorb                ; rotate B right through carry
+0588 6602             (    ../cfloats.as):00655                             ror       2,x       ; rotate indexed value 2,x right through carry
+058A 6603             (    ../cfloats.as):00656                             ror       3,x       ; rotate indexed value 3,x right through carry
+058C 6604             (    ../cfloats.as):00657                             ror       4,x       ; rotate indexed value 4,x right through carry
+058E 6605             (    ../cfloats.as):00658                             ror       5,x       ; rotate indexed value 5,x right through carry
+0590 6606             (    ../cfloats.as):00659                             ror       6,x       ; rotate indexed value 6,x right through carry
+0592 2402             (    ../cfloats.as):00660                             bcc       BranchTarget_26 ; branch if carry is clear to BranchTarget_26
+0594 6CE4             (    ../cfloats.as):00661                             inc       ,s        ; increment memory pointed to by S
+0596 6A61             (    ../cfloats.as):00662         BranchTarget_26     dec       1,s       ; decrement stack-relative value 1,s
+0598 26EC             (    ../cfloats.as):00663                             bne       Loop_17   ; branch if not equal to Loop_17
+059A ED84             (    ../cfloats.as):00664                             std       ,x        ; store D to memory pointed to by X
+059C ECE1             (    ../cfloats.as):00665                             ldd       ,s++      ; load D from memory pointed to by S+, then advance S+
+059E 2608             (    ../cfloats.as):00666                             bne       BranchTarget_27 ; branch if not equal to BranchTarget_27
+05A0 A604             (    ../cfloats.as):00667                             lda       4,x       ; load A from indexed value 4,x
+05A2 AA05             (    ../cfloats.as):00668                             ora       5,x       ; OR A with indexed value 5,x
+05A4 AA06             (    ../cfloats.as):00669                             ora       6,x       ; OR A with indexed value 6,x
+05A6 2711             (    ../cfloats.as):00670                             beq       ReturnZero_01 ; branch if equal/zero to ReturnZero_01
+05A8 EC02             (    ../cfloats.as):00671         BranchTarget_27     ldd       2,x       ; load D from indexed value 2,x
+05AA C30001           (    ../cfloats.as):00672                             addd      #1        ; add immediate value 1 into D
+05AD ED02             (    ../cfloats.as):00673                             std       2,x       ; store D to indexed value 2,x
+05AF EC84             (    ../cfloats.as):00674                             ldd       ,x        ; load D from memory pointed to by X
+05B1 C900             (    ../cfloats.as):00675                             adcb      #0        ; add immediate value 0 into B
+05B3 8900             (    ../cfloats.as):00676                             adca      #0        ; add immediate value 0 into A
+05B5 258A             (    ../cfloats.as):00677                             bcs       Loop_15   ; branch if carry is set to Loop_15
+05B7 ED84             (    ../cfloats.as):00678                             std       ,x        ; store D to memory pointed to by X
+05B9 4F               (    ../cfloats.as):00679         ReturnZero_01       clra                ; clear A
+05BA 5F               (    ../cfloats.as):00680                             clrb                ; clear B
+05BB A302             (    ../cfloats.as):00681                             subd      2,x       ; subtract indexed value 2,x from D
+05BD ED02             (    ../cfloats.as):00682                             std       2,x       ; store D to indexed value 2,x
+05BF CC0000           (    ../cfloats.as):00683                             ldd       #0        ; load D from immediate value 0
+05C2 E201             (    ../cfloats.as):00684                             sbcb      1,x       ; subtract indexed value 1,x from B
+05C4 A284             (    ../cfloats.as):00685                             sbca      ,x        ; subtract memory pointed to by X from A
+05C6 ED84             (    ../cfloats.as):00686                             std       ,x        ; store D to memory pointed to by X
+05C8 39               (    ../cfloats.as):00687                             rts                 ; return to caller
+05C9 A684             (    ../cfloats.as):00688         BranchTarget_28     lda       ,x        ; load A from memory pointed to by X
+05CB 102AFF69         (    ../cfloats.as):00689                             lbpl      Loop_14   ; long branch if plus to Loop_14
+05CF CCFFFF           (    ../cfloats.as):00690                             ldd       #-1       ; load D from immediate value -1
+05D2 ED02             (    ../cfloats.as):00691                             std       2,x       ; store D to indexed value 2,x
+05D4 ED84             (    ../cfloats.as):00692                             std       ,x        ; store D to memory pointed to by X
+05D6 39               (    ../cfloats.as):00693                             rts                 ; return to caller
+05D7 6CC828           (    ../cfloats.as):00694         Subroutine_13       inc       D0028,u   ; increment indexed value D0028,u
+05DA 2631             (    ../cfloats.as):00695                             bne       Return_03 ; branch if not equal to Return_03
+05DC 6CC827           (    ../cfloats.as):00696                             inc       D0027,u   ; increment indexed value D0027,u
+05DF 262C             (    ../cfloats.as):00697                             bne       Return_03 ; branch if not equal to Return_03
+05E1 6CC826           (    ../cfloats.as):00698                             inc       D0026,u   ; increment indexed value D0026,u
+05E4 2627             (    ../cfloats.as):00699                             bne       Return_03 ; branch if not equal to Return_03
+05E6 6CC825           (    ../cfloats.as):00700                             inc       D0025,u   ; increment indexed value D0025,u
+05E9 2622             (    ../cfloats.as):00701                             bne       Return_03 ; branch if not equal to Return_03
+05EB 6CC824           (    ../cfloats.as):00702                             inc       D0024,u   ; increment indexed value D0024,u
+05EE 261D             (    ../cfloats.as):00703                             bne       Return_03 ; branch if not equal to Return_03
+05F0 6CC823           (    ../cfloats.as):00704                             inc       D0023,u   ; increment indexed value D0023,u
+05F3 2618             (    ../cfloats.as):00705                             bne       Return_03 ; branch if not equal to Return_03
+05F5 E6C822           (    ../cfloats.as):00706                             ldb       D0022,u   ; load B from indexed value D0022,u
+05F8 1F98             (    ../cfloats.as):00707                             tfr       b,a       ; transfer B,A
+05FA 847F             (    ../cfloats.as):00708                             anda      #$7f      ; AND A with immediate value $7f
+05FC 4C               (    ../cfloats.as):00709                             inca                ; increment A
+05FD 2A05             (    ../cfloats.as):00710                             bpl       BranchTarget_29 ; branch if plus to BranchTarget_29
+05FF 6CC829           (    ../cfloats.as):00711                             inc       D0029,u   ; increment indexed value D0029,u
+0602 847F             (    ../cfloats.as):00712                             anda      #$7f      ; AND A with immediate value $7f
+0604 C480             (    ../cfloats.as):00713         BranchTarget_29     andb      #$80      ; AND B with immediate value $80
+0606 3404             (    ../cfloats.as):00714                             pshs      b         ; save B on the hardware stack
+0608 ABE0             (    ../cfloats.as):00715                             adda      ,s+       ; add memory pointed to by S, then advance S into A
+060A A7C822           (    ../cfloats.as):00716                             sta       D0022,u   ; store A to indexed value D0022,u
+060D 39               (    ../cfloats.as):00717         Return_03           rts                 ; return to caller
+060E 700000           (    ../cfloats.as):00718         Label_02            neg       D0000     ; negate D0000
+0611 700000           (    ../cfloats.as):00719                             neg       D0000     ; negate D0000
+0614 700000           (    ../cfloats.as):00720                             neg       D0000     ; negate D0000
+0617 700081           (    ../cfloats.as):00721                             neg       D0081     ; negate D0081
+061A 308DFFF0         (    ../cfloats.as):00722                             leax      >Label_02,pcr ; compute effective address into X from >Label_02,pcr
+061E 3402             (    ../cfloats.as):00723         Subroutine_14       pshs      a         ; save A on the hardware stack
+0620 EC84             (    ../cfloats.as):00724                             ldd       ,x        ; load D from memory pointed to by X
+0622 EDC822           (    ../cfloats.as):00725                             std       D0022,u   ; store D to indexed value D0022,u
+0625 EC02             (    ../cfloats.as):00726                             ldd       2,x       ; load D from indexed value 2,x
+0627 EDC824           (    ../cfloats.as):00727                             std       D0024,u   ; store D to indexed value D0024,u
+062A EC04             (    ../cfloats.as):00728                             ldd       4,x       ; load D from indexed value 4,x
+062C EDC826           (    ../cfloats.as):00729                             std       D0026,u   ; store D to indexed value D0026,u
+062F EC06             (    ../cfloats.as):00730                             ldd       6,x       ; load D from indexed value 6,x
+0631 EDC828           (    ../cfloats.as):00731                             std       D0028,u   ; store D to indexed value D0028,u
+0634 3582             (    ../cfloats.as):00732                             puls      a,pc      ; restore registers and return
+0636 3402             (    ../cfloats.as):00733         Subroutine_15       pshs      a         ; save A on the hardware stack
+0638 ECC822           (    ../cfloats.as):00734                             ldd       D0022,u   ; load D from indexed value D0022,u
+063B ED84             (    ../cfloats.as):00735                             std       ,x        ; store D to memory pointed to by X
+063D ECC824           (    ../cfloats.as):00736                             ldd       D0024,u   ; load D from indexed value D0024,u
+0640 ED02             (    ../cfloats.as):00737                             std       2,x       ; store D to indexed value 2,x
+0642 ECC826           (    ../cfloats.as):00738                             ldd       D0026,u   ; load D from indexed value D0026,u
+0645 ED04             (    ../cfloats.as):00739                             std       4,x       ; store D to indexed value 4,x
+0647 ECC828           (    ../cfloats.as):00740                             ldd       D0028,u   ; load D from indexed value D0028,u
+064A ED06             (    ../cfloats.as):00741                             std       6,x       ; store D to indexed value 6,x
+064C 3582             (    ../cfloats.as):00742                             puls      a,pc      ; restore registers and return
+064E EC84             (    ../cfloats.as):00743         _xtofla:            ldd       ,x        ; load D from memory pointed to by X
+0650 EDA90000         (    ../cfloats.as):00744         Continue_07         std       _flacc,y  ; store D to indexed value _flacc,y
+0654 EC02             (    ../cfloats.as):00745                             ldd       2,x       ; load D from indexed value 2,x
+0656 EDA90000         (    ../cfloats.as):00746                             std       _flacc+2,y ; store D to indexed value _flacc+2,y
+065A EC04             (    ../cfloats.as):00747                             ldd       4,x       ; load D from indexed value 4,x
+065C EDA90000         (    ../cfloats.as):00748                             std       _flacc+4,y ; store D to indexed value _flacc+4,y
+0660 EC06             (    ../cfloats.as):00749                             ldd       6,x       ; load D from indexed value 6,x
+0662 30A90000         (    ../cfloats.as):00750                             leax      _flacc,y  ; compute effective address into X from _flacc,y
+0666 ED06             (    ../cfloats.as):00751                             std       6,x       ; store D to indexed value 6,x
+0668 39               (    ../cfloats.as):00752                             rts                 ; return to caller
+0669 3410             (    ../cfloats.as):00753         _dinc:              pshs      x         ; save X on the hardware stack
+066B 8D7F             (    ../cfloats.as):00754                             bsr       _dstack   ; branch to subroutine to _dstack
+066D 308C9E           (    ../cfloats.as):00755                             leax      <Label_02,pcr ; compute effective address into X from <Label_02,pcr
+0670 3410             (    ../cfloats.as):00756                             pshs      x         ; save X on the hardware stack
+0672 17FE32           (    ../cfloats.as):00757                             lbsr      Subroutine_12 ; long branch to subroutine to Subroutine_12
+0675 17FB11           (    ../cfloats.as):00758                             lbsr      Subroutine_03 ; long branch to subroutine to Subroutine_03
+0678 AEC82A           (    ../cfloats.as):00759         Loop_18             ldx       D002a,u   ; load X from indexed value D002a,u
+067B 8DB9             (    ../cfloats.as):00760                             bsr       Subroutine_15 ; branch to subroutine to Subroutine_15
+067D AEC81E           (    ../cfloats.as):00761                             ldx       D001e,u   ; load X from indexed value D001e,u
+0680 32C82A           (    ../cfloats.as):00762                             leas      D002a,u   ; adjust S using D002a,u
+0683 1F13             (    ../cfloats.as):00763                             tfr       x,u       ; transfer X,U
+0685 3590             (    ../cfloats.as):00764                             puls      x,pc      ; restore registers and return
+0687 3410             (    ../cfloats.as):00765         _ddec:              pshs      x         ; save X on the hardware stack
+0689 8D61             (    ../cfloats.as):00766                             bsr       _dstack   ; branch to subroutine to _dstack
+068B 308DFF7F         (    ../cfloats.as):00767                             leax      >Label_02,pcr ; compute effective address into X from >Label_02,pcr
+068F 3410             (    ../cfloats.as):00768                             pshs      x         ; save X on the hardware stack
+0691 17FE13           (    ../cfloats.as):00769                             lbsr      Subroutine_12 ; long branch to subroutine to Subroutine_12
+0694 17FAC8           (    ../cfloats.as):00770                             lbsr      Subroutine_02 ; long branch to subroutine to Subroutine_02
+0697 20DF             (    ../cfloats.as):00771                             bra       Loop_18   ; branch unconditionally to Loop_18
+0699 3410             (    ../cfloats.as):00772         _finc:              pshs      x         ; save X on the hardware stack
+069B 8D38             (    ../cfloats.as):00773                             bsr       _fstack   ; branch to subroutine to _fstack
+069D 308DFF6D         (    ../cfloats.as):00774                             leax      Label_02,pcr ; compute effective address into X from Label_02,pcr
+06A1 3410             (    ../cfloats.as):00775                             pshs      x         ; save X on the hardware stack
+06A3 17FE01           (    ../cfloats.as):00776                             lbsr      Subroutine_12 ; long branch to subroutine to Subroutine_12
+06A6 17FAE0           (    ../cfloats.as):00777                             lbsr      Subroutine_03 ; long branch to subroutine to Subroutine_03
+06A9 AEC82A           (    ../cfloats.as):00778         Loop_19             ldx       D002a,u   ; load X from indexed value D002a,u
+06AC ECC822           (    ../cfloats.as):00779                             ldd       D0022,u   ; load D from indexed value D0022,u
+06AF ED84             (    ../cfloats.as):00780                             std       ,x        ; store D to memory pointed to by X
+06B1 A6C824           (    ../cfloats.as):00781                             lda       D0024,u   ; load A from indexed value D0024,u
+06B4 E6C829           (    ../cfloats.as):00782                             ldb       D0029,u   ; load B from indexed value D0029,u
+06B7 ED02             (    ../cfloats.as):00783                             std       2,x       ; store D to indexed value 2,x
+06B9 AEC81E           (    ../cfloats.as):00784                             ldx       D001e,u   ; load X from indexed value D001e,u
+06BC 32C82A           (    ../cfloats.as):00785                             leas      D002a,u   ; adjust S using D002a,u
+06BF 1F13             (    ../cfloats.as):00786                             tfr       x,u       ; transfer X,U
+06C1 3590             (    ../cfloats.as):00787                             puls      x,pc      ; restore registers and return
+06C3 3410             (    ../cfloats.as):00788         _fdec:              pshs      x         ; save X on the hardware stack
+06C5 8D0E             (    ../cfloats.as):00789                             bsr       _fstack   ; branch to subroutine to _fstack
+06C7 308DFF43         (    ../cfloats.as):00790                             leax      Label_02,pcr ; compute effective address into X from Label_02,pcr
+06CB 3410             (    ../cfloats.as):00791                             pshs      x         ; save X on the hardware stack
+06CD 17FDD7           (    ../cfloats.as):00792                             lbsr      Subroutine_12 ; long branch to subroutine to Subroutine_12
+06D0 17FA8C           (    ../cfloats.as):00793                             lbsr      Subroutine_02 ; long branch to subroutine to Subroutine_02
+06D3 20D4             (    ../cfloats.as):00794                             bra       Loop_19   ; branch unconditionally to Loop_19
+06D5 3278             (    ../cfloats.as):00795         _fstack:            leas      -8,s      ; adjust S using -8,s
+06D7 EC68             (    ../cfloats.as):00796                             ldd       8,s       ; load D from stack-relative value 8,s
+06D9 EDE4             (    ../cfloats.as):00797                             std       ,s        ; store D to memory pointed to by S
+06DB 4F               (    ../cfloats.as):00798                             clra                ; clear A
+06DC 5F               (    ../cfloats.as):00799                             clrb                ; clear B
+06DD ED65             (    ../cfloats.as):00800                             std       5,s       ; store D to stack-relative value 5,s
+06DF ED67             (    ../cfloats.as):00801                             std       7,s       ; store D to stack-relative value 7,s
+06E1 EC84             (    ../cfloats.as):00802                             ldd       ,x        ; load D from memory pointed to by X
+06E3 ED62             (    ../cfloats.as):00803                             std       2,s       ; store D to stack-relative value 2,s
+06E5 EC02             (    ../cfloats.as):00804                             ldd       2,x       ; load D from indexed value 2,x
+06E7 A764             (    ../cfloats.as):00805                             sta       4,s       ; store A to stack-relative value 4,s
+06E9 E769             (    ../cfloats.as):00806                             stb       9,s       ; store B to stack-relative value 9,s
+06EB 39               (    ../cfloats.as):00807                             rts                 ; return to caller
+06EC 3278             (    ../cfloats.as):00808         _dstack:            leas      -8,s      ; adjust S using -8,s
+06EE EC68             (    ../cfloats.as):00809                             ldd       8,s       ; load D from stack-relative value 8,s
+06F0 EDE4             (    ../cfloats.as):00810                             std       ,s        ; store D to memory pointed to by S
+06F2 EC84             (    ../cfloats.as):00811                             ldd       ,x        ; load D from memory pointed to by X
+06F4 ED62             (    ../cfloats.as):00812                             std       2,s       ; store D to stack-relative value 2,s
+06F6 EC02             (    ../cfloats.as):00813                             ldd       2,x       ; load D from indexed value 2,x
+06F8 ED64             (    ../cfloats.as):00814                             std       4,s       ; store D to stack-relative value 4,s
+06FA EC04             (    ../cfloats.as):00815                             ldd       4,x       ; load D from indexed value 4,x
+06FC ED66             (    ../cfloats.as):00816                             std       6,s       ; store D to stack-relative value 6,s
+06FE EC06             (    ../cfloats.as):00817                             ldd       6,x       ; load D from indexed value 6,x
+0700 ED68             (    ../cfloats.as):00818                             std       8,s       ; store D to stack-relative value 8,s
+0702 39               (    ../cfloats.as):00819                             rts                 ; return to caller
+0703 3440             (    ../cfloats.as):00820         _fmove:             pshs      u         ; save U on the hardware stack
+0705 EE64             (    ../cfloats.as):00821                             ldu       4,s       ; load U from stack-relative value 4,s
+0707 1E13             (    ../cfloats.as):00822                             exg       x,u       ; exchange X,U
+0709 ECC4             (    ../cfloats.as):00823                             ldd       ,u        ; load D from memory pointed to by U
+070B ED84             (    ../cfloats.as):00824                             std       ,x        ; store D to memory pointed to by X
+070D EC42             (    ../cfloats.as):00825                             ldd       2,u       ; load D from indexed value 2,u
+070F ED02             (    ../cfloats.as):00826                             std       2,x       ; store D to indexed value 2,x
+0711 2016             (    ../cfloats.as):00827                             bra       Continue_08 ; branch unconditionally to Continue_08
+                      (    ../cfloats.as):00828         
+                      (    ../cfloats.as):00829         * move double
+                      (    ../cfloats.as):00830         * entry:
+                      (    ../cfloats.as):00831         * X   = address of src - 8 byte double
+                      (    ../cfloats.as):00832         * 2,s = address of destination
+0713 3440             (    ../cfloats.as):00833         _dmove:             pshs      u         ; save U on the hardware stack
+0715 EE64             (    ../cfloats.as):00834                             ldu       2+2,s     ; get ptr to double in U
+0717 1E13             (    ../cfloats.as):00835                             exg       x,u       ; swap so that U points to src, X points to destination
+0719 ECC4             (    ../cfloats.as):00836                             ldd       ,u        ; get 2 bytes from src
+071B ED84             (    ../cfloats.as):00837                             std       ,x        ; save it
+071D EC42             (    ../cfloats.as):00838                             ldd       2,u       ; get next 2 bytes from src
+071F ED02             (    ../cfloats.as):00839                             std       2,x       ; save it
+0721 EC44             (    ../cfloats.as):00840                             ldd       4,u       ; get next 2 bytes from src
+0723 ED04             (    ../cfloats.as):00841                             std       4,x       ; save it
+0725 EC46             (    ../cfloats.as):00842                             ldd       6,u       ; get next 2 bytes from src
+0727 ED06             (    ../cfloats.as):00843                             std       6,x       ; save it
+0729 3540             (    ../cfloats.as):00844         Continue_08         puls      u         ; recover U pushed earlier
+072B 3506             (    ../cfloats.as):00845                             puls      d         ; get return address off stack
+072D EDE4             (    ../cfloats.as):00846                             std       ,s        ; save back and return
+072F 39               (    ../cfloats.as):00847                             rts                 ; return to caller
+                      (    ../cfloats.as):00848         
+                      (    ../cfloats.as):00849         
+                      (    ../cfloats.as):00850         * XXX: Should be in the compiler's runtime/builtin
+                      (    ../cfloats.as):00851         copyDWord           IMPORT
+                      (    ../cfloats.as):00852         copySingle          EXPORT              ; export this symbol
+0730                  (    ../cfloats.as):00853         copySingle
+0730 160000           (    ../cfloats.as):00854                             lbra      copyDWord ; long branch unconditionally to copyDWord
+                      (    ../cfloats.as):00855         
+                      (    ../cfloats.as):00856         * XXX: Should be in the compiler's runtime/builtin
+                      (    ../cfloats.as):00857         divSingleSingle     EXPORT              ; export this symbol
+0733                  (    ../cfloats.as):00858         divSingleSingle
+0733 39               (    ../cfloats.as):00859                             rts                 ; return to caller
+                      (    ../cfloats.as):00860         
+                      (    ../cfloats.as):00861         * XXX: Should be in the compiler's runtime/builtin
+                      (    ../cfloats.as):00862         mulSingleSingle     EXPORT              ; export this symbol
+0734                  (    ../cfloats.as):00863         mulSingleSingle
+0734 39               (    ../cfloats.as):00864                             rts                 ; return to caller
+                      (    ../cfloats.as):00865         
+                      (    ../cfloats.as):00866         * XXX: Should be in the compiler's runtime/builtin
+                      (    ../cfloats.as):00867         cmpSingleSingle     EXPORT              ; export this symbol
+0735                  (    ../cfloats.as):00868         cmpSingleSingle                         ; compare   SINGLESINGLE against the current operand
+0735 39               (    ../cfloats.as):00869                             rts                 ; return to caller
+                      (    ../cfloats.as):00870         
+                      (    ../cfloats.as):00871         * XXX: Should be in the compiler's runtime/builtin
+                      (    ../cfloats.as):00872         isSingleZero        EXPORT              ; export this symbol
+0736                  (    ../cfloats.as):00873         isSingleZero
+0736 39               (    ../cfloats.as):00874                             rts                 ; return to caller
+                      (    ../cfloats.as):00875         
+                      (    ../cfloats.as):00876         * XXX: Should be in the compiler's runtime/builtin
+                      (    ../cfloats.as):00877         subSingleSingle     EXPORT              ; export this symbol
+0737                  (    ../cfloats.as):00878         subSingleSingle
+0737 39               (    ../cfloats.as):00879                             rts                 ; return to caller
+                      (    ../cfloats.as):00880         
+                      (    ../cfloats.as):00881                             endsect             ; end current section
+                      (    ../cfloats.as):00882         

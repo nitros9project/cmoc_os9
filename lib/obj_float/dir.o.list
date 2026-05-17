@@ -1,0 +1,22 @@
+                      (        ../dir.as):00001         * Adapted from cmoc_os9/lib/todo/dir.as for the live cmoc_os9 ABI.
+                      (        ../dir.as):00002         
+                      (        ../dir.as):00003                             section   code      ; begin code section
+                      (        ../dir.as):00004         
+                      (        ../dir.as):00005         * OS-9 system function equates
+                      (        ../dir.as):00006         
+     0086             (        ../dir.as):00007         I_ChgDir            equ       $86       ; define constant as $86
+                      (        ../dir.as):00008         
+                      (        ../dir.as):00009         _chdir              EXPORT              ; export this symbol
+                      (        ../dir.as):00010         _chxdir             EXPORT              ; export this symbol
+                      (        ../dir.as):00011         
+                      (        ../dir.as):00012         _sysret             EXTERNAL            ; import external symbol
+                      (        ../dir.as):00013         
+0000 8601             (        ../dir.as):00014         _chdir              lda       #1        ; load A from immediate value 1
+0002 AE62             (        ../dir.as):00015         Loop_01             ldx       2,s       ; load X from stack-relative value 2,s
+0004 103F86           (        ../dir.as):00016                             os9       I_ChgDir  ; invoke OS-9 system call I_ChgDir
+0007 160000           (        ../dir.as):00017                             lbra      _sysret   ; long branch unconditionally to _sysret
+                      (        ../dir.as):00018         
+000A 8604             (        ../dir.as):00019         _chxdir             lda       #4        ; load A from immediate value 4
+000C 20F4             (        ../dir.as):00020                             bra       Loop_01   ; branch unconditionally to Loop_01
+                      (        ../dir.as):00021         
+                      (        ../dir.as):00022                             endsect             ; end current section

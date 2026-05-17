@@ -1,0 +1,146 @@
+                      (    ../setbase.as):00001         * Compact assembly implementation of setbase().
+                      (    ../setbase.as):00002         
+                      (    ../setbase.as):00003                             use       ../include/os9.d ; shared OS-9 service constants
+                      ( ../include/os9.d):00001         * Shared assembler-side OS-9 service, error, and status constants.
+                      ( ../include/os9.d):00002         
+     0000             ( ../include/os9.d):00003         F_Link              equ       $00       ; OS-9 link existing module
+     0001             ( ../include/os9.d):00004         F_Load              equ       $01       ; OS-9 load module from disk
+     0002             ( ../include/os9.d):00005         F_UnLink            equ       $02       ; OS-9 release linked module
+     0003             ( ../include/os9.d):00006         F_Fork              equ       $03       ; OS-9 fork system call
+     0004             ( ../include/os9.d):00007         F_Wait              equ       $04       ; OS-9 wait system call
+     0005             ( ../include/os9.d):00008         F_Chain             equ       $05       ; OS-9 chain system call
+     0006             ( ../include/os9.d):00009         F_Exit              equ       $06       ; OS-9 exit system call
+     0007             ( ../include/os9.d):00010         F_Mem               equ       $07       ; OS-9 memory-allocation service
+     0008             ( ../include/os9.d):00011         F_Send              equ       $08       ; OS-9 send-signal system call
+     0009             ( ../include/os9.d):00012         F_Icpt              equ       $09       ; OS-9 intercept-vector service
+     000A             ( ../include/os9.d):00013         F_Sleep             equ       $0A       ; OS-9 sleep system call
+     000C             ( ../include/os9.d):00014         F_ID                equ       $0C       ; OS-9 process identity service
+     000D             ( ../include/os9.d):00015         F_SPrior            equ       $0D       ; OS-9 set-priority system call
+     000F             ( ../include/os9.d):00016         F_PErr              equ       $0F       ; OS-9 print-error service
+     0015             ( ../include/os9.d):00017         F_Time              equ       $15       ; OS-9 read system time service
+     0016             ( ../include/os9.d):00018         F_STime             equ       $16       ; OS-9 set system time service
+     0017             ( ../include/os9.d):00019         F_CRC               equ       $17       ; OS-9 CRC helper service
+                      ( ../include/os9.d):00020         
+     0083             ( ../include/os9.d):00021         I_Create            equ       $83       ; OS-9 create path call
+     0084             ( ../include/os9.d):00022         I_Open              equ       $84       ; OS-9 open path call
+     0085             ( ../include/os9.d):00023         I_MakDir            equ       $85       ; OS-9 make-directory call
+     0086             ( ../include/os9.d):00024         I_ChgDir            equ       $86       ; OS-9 change-directory call
+     0088             ( ../include/os9.d):00025         I_Seek              equ       $88       ; OS-9 direct seek call
+     0089             ( ../include/os9.d):00026         I_Read              equ       $89       ; OS-9 read call
+     008A             ( ../include/os9.d):00027         I_Write             equ       $8A       ; OS-9 write call
+     008B             ( ../include/os9.d):00028         I_ReadLn            equ       $8B       ; OS-9 line-read call
+     008C             ( ../include/os9.d):00029         I_WritLn            equ       $8C       ; OS-9 line-write call
+     008D             ( ../include/os9.d):00030         I_GetStt            equ       $8D       ; OS-9 GetStat call
+     008E             ( ../include/os9.d):00031         I_SetStt            equ       $8E       ; OS-9 SetStat call
+     008F             ( ../include/os9.d):00032         I_Close             equ       $8F       ; OS-9 close call
+     0090             ( ../include/os9.d):00033         I_DeletX            equ       $90       ; OS-9 extended delete call
+                      ( ../include/os9.d):00034         
+     00D0             ( ../include/os9.d):00035         E_UnkSvc            equ       $D0       ; unknown service error code
+     00D3             ( ../include/os9.d):00036         E_EOF               equ       $D3       ; end-of-file status code
+     00D6             ( ../include/os9.d):00037         E_FNA               equ       $D6       ; file not accessible error code
+     00F7             ( ../include/os9.d):00038         E_Seek              equ       $F7       ; seek error code
+                      ( ../include/os9.d):00039         
+     0001             ( ../include/os9.d):00040         SS_Ready            equ       $01       ; path ready state query
+     0002             ( ../include/os9.d):00041         SS_Size             equ       $02       ; file size query/set
+     0003             ( ../include/os9.d):00042         SS_Reset            equ       $03       ; reset device/path state
+     0004             ( ../include/os9.d):00043         SS_WTrk             equ       $04       ; write-track style command
+     0005             ( ../include/os9.d):00044         SS_Pos              equ       $05       ; current file position query
+     0006             ( ../include/os9.d):00045         SS_EOF              equ       $06       ; end-of-file query
+     000A             ( ../include/os9.d):00046         SS_Frz              equ       $0A       ; freeze device command
+     000B             ( ../include/os9.d):00047         SS_SPT              equ       $0B       ; set sectors-per-track style command
+     000C             ( ../include/os9.d):00048         SS_SQD              equ       $0C       ; sequence-down command
+     000D             ( ../include/os9.d):00049         SS_DCmd             equ       $0D       ; device command with register block
+     000E             ( ../include/os9.d):00050         SS_DevNm            equ       $0E       ; device name query
+     000F             ( ../include/os9.d):00051         SS_FD               equ       $0F       ; file descriptor sector query/set
+     0010             ( ../include/os9.d):00052         SS_Ticks            equ       $10       ; tick count status
+     0011             ( ../include/os9.d):00053         SS_Lock             equ       $11       ; lock status command
+     0014             ( ../include/os9.d):00054         SS_BlkRd            equ       $14       ; block read command
+     0015             ( ../include/os9.d):00055         SS_BlkWr            equ       $15       ; block write command
+     0019             ( ../include/os9.d):00056         SS_ELog             equ       $19       ; error log command
+     001A             ( ../include/os9.d):00057         SS_SSig             equ       $1A       ; send signal command
+     001B             ( ../include/os9.d):00058         SS_Relea            equ       $1B       ; release command
+                      (    ../setbase.as):00004         
+                      (    ../setbase.as):00005                             section   code      ; begin code section
+                      (    ../setbase.as):00006         
+                      (    ../setbase.as):00007         _setbase            EXPORT              ; export this symbol
+                      (    ../setbase.as):00008         
+                      (    ../setbase.as):00009         _ibrk               EXTERNAL            ; import external symbol
+                      (    ../setbase.as):00010         _getstat            EXTERNAL            ; import external symbol
+                      (    ../setbase.as):00011         
+     00C0             (    ../setbase.as):00012         DEVMASK             equ       $C0       ; define constant as $C0
+     0040             (    ../setbase.as):00013         SCF                 equ       $40       ; define constant as $40
+     0080             (    ../setbase.as):00014         RBF                 equ       $80       ; define constant as $80
+     0080             (    ../setbase.as):00015         INIT                equ       $80       ; define constant as $80
+     0008             (    ../setbase.as):00016         BIGBUF              equ       $08       ; define constant as $08
+     0004             (    ../setbase.as):00017         UNBUF               equ       $04       ; define constant as $04
+     0100             (    ../setbase.as):00018         BUFSIZ_C            equ       256       ; define constant as 256
+                      (    ../setbase.as):00019         
+0000                  (    ../setbase.as):00020         _setbase
+0000 3440             (    ../setbase.as):00021                             pshs      u         ; save U on the hardware stack
+0002 EE64             (    ../setbase.as):00022                             ldu       4,s       ; load U from stack-relative value 4,s
+0004 E647             (    ../setbase.as):00023                             ldb       7,u       ; load B from indexed value 7,u
+0006 C5C0             (    ../setbase.as):00024                             bitb      #DEVMASK  ; test bits in B against immediate value DEVMASK
+0008 261F             (    ../setbase.as):00025                             bne       L_setbase_known ; branch if not equal to L_setbase_known
+000A 32E8E0           (    ../setbase.as):00026                             leas      -32,s     ; adjust S using -32,s
+000D 30E4             (    ../setbase.as):00027                             leax      ,s        ; compute effective address into X from ,s
+000F EC48             (    ../setbase.as):00028                             ldd       8,u       ; load D from indexed value 8,u
+0011 3416             (    ../setbase.as):00029                             pshs      d,x       ; save D,X on the hardware stack
+0013 4F               (    ../setbase.as):00030                             clra                ; clear A
+0014 5F               (    ../setbase.as):00031                             clrb                ; clear B
+0015 3406             (    ../setbase.as):00032                             pshs      d         ; save D on the hardware stack
+0017 170000           (    ../setbase.as):00033                             lbsr      _getstat  ; long branch to subroutine to _getstat
+001A C640             (    ../setbase.as):00034                             ldb       #SCF      ; load B from immediate value SCF
+001C A666             (    ../setbase.as):00035                             lda       6,s       ; load A from stack-relative value 6,s
+001E 2702             (    ../setbase.as):00036                             beq       L_setbase_merge ; branch if equal/zero to L_setbase_merge
+0020 C680             (    ../setbase.as):00037                             ldb       #RBF      ; load B from immediate value RBF
+0022                  (    ../setbase.as):00038         L_setbase_merge
+0022 32E826           (    ../setbase.as):00039                             leas      38,s      ; adjust S using 38,s
+0025 EA47             (    ../setbase.as):00040                             orb       7,u       ; OR B with indexed value 7,u
+0027 E747             (    ../setbase.as):00041                             stb       7,u       ; store B to indexed value 7,u
+0029                  (    ../setbase.as):00042         L_setbase_known
+0029 A646             (    ../setbase.as):00043                             lda       6,u       ; load A from indexed value 6,u
+002B 8A80             (    ../setbase.as):00044                             ora       #INIT     ; OR A with immediate value INIT
+002D A746             (    ../setbase.as):00045                             sta       6,u       ; store A to indexed value 6,u
+002F EC48             (    ../setbase.as):00046                             ldd       8,u       ; load D from indexed value 8,u
+0031 10830001         (    ../setbase.as):00047                             cmpd      #1        ; compare D against immediate value 1
+0035 2606             (    ../setbase.as):00048                             bne       L_setbase_check ; branch if not equal to L_setbase_check
+0037 E647             (    ../setbase.as):00049                             ldb       7,u       ; load B from indexed value 7,u
+0039 CA04             (    ../setbase.as):00050                             orb       #UNBUF    ; OR B with immediate value UNBUF
+003B E747             (    ../setbase.as):00051                             stb       7,u       ; store B to indexed value 7,u
+003D                  (    ../setbase.as):00052         L_setbase_check
+003D C40C             (    ../setbase.as):00053                             andb      #BIGBUF+UNBUF ; AND B with immediate value BIGBUF+UNBUF
+003F 2639             (    ../setbase.as):00054                             bne       L_setbase_done ; branch if not equal to L_setbase_done
+0041 EC4B             (    ../setbase.as):00055                             ldd       11,u      ; load D from indexed value 11,u
+0043 2605             (    ../setbase.as):00056                             bne       L_setbase_have_size ; branch if not equal to L_setbase_have_size
+0045 CC0100           (    ../setbase.as):00057                             ldd       #BUFSIZ_C ; load D from immediate value BUFSIZ_C
+0048 ED4B             (    ../setbase.as):00058                             std       11,u      ; store D to indexed value 11,u
+004A                  (    ../setbase.as):00059         L_setbase_have_size
+004A EC42             (    ../setbase.as):00060                             ldd       2,u       ; load D from indexed value 2,u
+004C 2611             (    ../setbase.as):00061                             bne       L_setbase_big ; branch if not equal to L_setbase_big
+004E EC4B             (    ../setbase.as):00062                             ldd       11,u      ; load D from indexed value 11,u
+0050 3406             (    ../setbase.as):00063                             pshs      d         ; save D on the hardware stack
+0052 170000           (    ../setbase.as):00064                             lbsr      _ibrk     ; long branch to subroutine to _ibrk
+0055 3262             (    ../setbase.as):00065                             leas      2,s       ; adjust S using 2,s
+0057 ED42             (    ../setbase.as):00066                             std       2,u       ; store D to indexed value 2,u
+0059 1083FFFF         (    ../setbase.as):00067                             cmpd      #-1       ; compare D against immediate value -1
+005D 2704             (    ../setbase.as):00068                             beq       L_setbase_unbuf ; branch if equal/zero to L_setbase_unbuf
+005F                  (    ../setbase.as):00069         L_setbase_big
+005F C608             (    ../setbase.as):00070                             ldb       #BIGBUF   ; load B from immediate value BIGBUF
+0061 200B             (    ../setbase.as):00071                             bra       L_setbase_flag ; branch unconditionally to L_setbase_flag
+0063                  (    ../setbase.as):00072         L_setbase_unbuf
+0063 304A             (    ../setbase.as):00073                             leax      10,u      ; compute effective address into X from 10,u
+0065 AF42             (    ../setbase.as):00074                             stx       2,u       ; store X to indexed value 2,u
+0067 CC0001           (    ../setbase.as):00075                             ldd       #1        ; load D from immediate value 1
+006A ED4B             (    ../setbase.as):00076                             std       11,u      ; store D to indexed value 11,u
+006C C604             (    ../setbase.as):00077                             ldb       #UNBUF    ; load B from immediate value UNBUF
+006E                  (    ../setbase.as):00078         L_setbase_flag
+006E EA47             (    ../setbase.as):00079                             orb       7,u       ; OR B with indexed value 7,u
+0070 E747             (    ../setbase.as):00080                             stb       7,u       ; store B to indexed value 7,u
+0072 EC42             (    ../setbase.as):00081                             ldd       2,u       ; load D from indexed value 2,u
+0074 E34B             (    ../setbase.as):00082                             addd      11,u      ; add indexed value 11,u into D
+0076 ED44             (    ../setbase.as):00083                             std       4,u       ; store D to indexed value 4,u
+0078 EDC4             (    ../setbase.as):00084                             std       ,u        ; store D to memory pointed to by U
+007A                  (    ../setbase.as):00085         L_setbase_done
+007A 35C0             (    ../setbase.as):00086                             puls      u,pc      ; restore registers and return
+                      (    ../setbase.as):00087         
+                      (    ../setbase.as):00088                             endsect             ; end current section

@@ -1,0 +1,269 @@
+                      (         ../io.as):00001         __os_create         EXPORT              ; export low-level create wrapper
+                      (         ../io.as):00002         __os_open           EXPORT              ; export low-level open wrapper
+                      (         ../io.as):00003         __os_close          EXPORT              ; export low-level close wrapper
+                      (         ../io.as):00004         __os_delete         EXPORT              ; export low-level delete wrapper
+                      (         ../io.as):00005         __os_makdir         EXPORT              ; export low-level make-directory wrapper
+                      (         ../io.as):00006         __os_read           EXPORT              ; export low-level read wrapper
+                      (         ../io.as):00007         __os_readln         EXPORT              ; export low-level readln wrapper
+                      (         ../io.as):00008         __os_write          EXPORT              ; export low-level write wrapper
+                      (         ../io.as):00009         __os_writeln        EXPORT              ; export low-level writeln wrapper
+                      (         ../io.as):00010         __os_seek           EXPORT              ; export direct OS-9 seek wrapper
+                      (         ../io.as):00011         _lseek              EXPORT              ; export stdio-style long seek helper
+                      (         ../io.as):00012         
+                      (         ../io.as):00013         _oserr              EXTERNAL            ; common OS-9 error-return helper
+                      (         ../io.as):00014         _osret              EXTERNAL            ; common OS-9 success-return helper
+                      (         ../io.as):00015         _errno              EXTERNAL            ; C errno storage
+                      (         ../io.as):00016         _flacc              EXTERNAL            ; shared long return accumulator
+                      (         ../io.as):00017         
+     0083             (         ../io.as):00018         I_Create            equ       $83       ; OS-9 create path call
+     0084             (         ../io.as):00019         I_Open              equ       $84       ; OS-9 open path call
+     0085             (         ../io.as):00020         I_MakDir            equ       $85       ; OS-9 make-directory call
+     0088             (         ../io.as):00021         I_Seek              equ       $88       ; OS-9 direct seek call
+     0089             (         ../io.as):00022         I_Read              equ       $89       ; OS-9 read call
+     008A             (         ../io.as):00023         I_Write             equ       $8A       ; OS-9 write call
+     008B             (         ../io.as):00024         I_ReadLn            equ       $8B       ; OS-9 line-read call
+     008C             (         ../io.as):00025         I_WritLn            equ       $8C       ; OS-9 line-write call
+     008D             (         ../io.as):00026         I_GetStt            equ       $8D       ; OS-9 GetStat call
+     008E             (         ../io.as):00027         I_SetStt            equ       $8E       ; OS-9 SetStat call
+     008F             (         ../io.as):00028         I_Close             equ       $8F       ; OS-9 close call
+     0090             (         ../io.as):00029         I_DeletX            equ       $90       ; OS-9 extended delete call
+     00D3             (         ../io.as):00030         E_EOF               equ       $D3       ; end-of-file status code
+     00F7             (         ../io.as):00031         E_Seek              equ       $F7       ; seek error code
+     0002             (         ../io.as):00032         SS_Size             equ       $02       ; GetStat file-size selector
+     0005             (         ../io.as):00033         SS_Pos              equ       $05       ; GetStat file-position selector
+                      (         ../io.as):00034         
+                      (         ../io.as):00035                             section   code      ; begin code section
+                      (         ../io.as):00036         
+0000                  (         ../io.as):00037         __os_create
+0000 3460             (         ../io.as):00038                             pshs      y,u       ; preserve registers used by OS-9
+0002 1FB8             (         ../io.as):00039                             tfr       dp,a      ; save caller's direct-page register
+0004 3402             (         ../io.as):00040                             pshs      a         ; keep saved DP on the stack
+0006 AE67             (         ../io.as):00041                             ldx       7,s       ; load pathname pointer
+0008 A66E             (         ../io.as):00042                             lda       14,s      ; load permissions byte
+000A 1F89             (         ../io.as):00043                             tfr       a,b       ; copy permissions into B for masking
+000C C424             (         ../io.as):00044                             andb      #$24      ; keep public write/share bits only
+000E CA0B             (         ../io.as):00045                             orb       #$0B      ; force owner read/write and public read
+0010 103F83           (         ../io.as):00046                             os9       I_Create  ; try to create the path
+0013 243D             (         ../io.as):00047                             bcc       createok  ; continue on successful create
+0015 C1DA             (         ../io.as):00048                             cmpb      #$DA      ; check for already-exists error
+0017 2630             (         ../io.as):00049                             bne       createerr ; fail immediately for any other error
+0019 A66A             (         ../io.as):00050                             lda       10,s      ; load requested mode byte
+001B 8580             (         ../io.as):00051                             bita      #$80      ; test directory bit in mode
+001D 262A             (         ../io.as):00052                             bne       createerr ; do not retry open for directory create
+001F 8407             (         ../io.as):00053                             anda      #7        ; keep low-level access mode bits only
+0021 AE67             (         ../io.as):00054                             ldx       7,s       ; reload pathname pointer
+0023 103F84           (         ../io.as):00055                             os9       I_Open    ; fall back to opening the existing file
+0026 2521             (         ../io.as):00056                             bcs       createerr ; fail if open also failed
+0028 3406             (         ../io.as):00057                             pshs      d         ; save returned path descriptor
+002A 1F89             (         ../io.as):00058                             tfr       a,b       ; normalize path number into D
+002C 4F               (         ../io.as):00059                             clra                ; clear high byte for 16-bit store
+002D EDF80D           (         ../io.as):00060                             std       [13,s]    ; write opened path number to caller output pointer
+0030 3506             (         ../io.as):00061                             puls      d         ; recover original path descriptor bytes
+0032 3442             (         ../io.as):00062                             pshs      a,u       ; save path and U around SetStat call
+0034 8E0000           (         ../io.as):00063                             ldx       #0        ; pass null X parameter
+0037 3384             (         ../io.as):00064                             leau      ,x        ; pass null U parameter
+0039 C602             (         ../io.as):00065                             ldb       #2        ; request SS_Size style truncation-on-create update
+003B 103F8E           (         ../io.as):00066                             os9       I_SetStt  ; truncate the reopened file
+003E 3542             (         ../io.as):00067                             puls      a,u       ; restore path and U
+0040 2410             (         ../io.as):00068                             bcc       createok  ; keep the reopened path on success
+0042 3404             (         ../io.as):00069                             pshs      b         ; preserve SetStat error code
+0044 103F8F           (         ../io.as):00070                             os9       I_Close   ; close the reopened path on truncation failure
+0047 3504             (         ../io.as):00071                             puls      b         ; restore original error code
+0049                  (         ../io.as):00072         createerr
+0049 3502             (         ../io.as):00073                             puls      a         ; recover saved direct-page byte
+004B 1F8B             (         ../io.as):00074                             tfr       a,dp      ; restore caller's direct-page register
+004D 3560             (         ../io.as):00075                             puls      y,u       ; restore preserved registers
+004F 160000           (         ../io.as):00076                             lbra      _oserr    ; return with errno set from OS-9 status
+0052                  (         ../io.as):00077         createok
+0052 1F89             (         ../io.as):00078                             tfr       a,b       ; copy path number into B for 16-bit return store
+0054 4F               (         ../io.as):00079                             clra                ; clear high byte for 16-bit path value
+0055 EDF80B           (         ../io.as):00080                             std       [11,s]    ; store created path through caller's output pointer
+0058 3502             (         ../io.as):00081                             puls      a         ; recover saved direct-page byte
+005A 1F8B             (         ../io.as):00082                             tfr       a,dp      ; restore caller's direct-page register
+005C 3560             (         ../io.as):00083                             puls      y,u       ; restore preserved registers
+005E 160000           (         ../io.as):00084                             lbra      _osret    ; return success through shared helper
+                      (         ../io.as):00085         
+0061                  (         ../io.as):00086         __os_open
+0061 3460             (         ../io.as):00087                             pshs      y,u       ; preserve registers used by OS-9
+0063 1FB8             (         ../io.as):00088                             tfr       dp,a      ; save caller's direct-page register
+0065 3402             (         ../io.as):00089                             pshs      a         ; keep saved DP on the stack
+0067 AE67             (         ../io.as):00090                             ldx       7,s       ; load pathname pointer
+0069 A66A             (         ../io.as):00091                             lda       10,s      ; load open mode byte
+006B 103F84           (         ../io.as):00092                             os9       I_Open    ; open the requested path
+006E 10250013         (         ../io.as):00093                             lblo      openerr   ; branch to error path on carry set
+0072 3406             (         ../io.as):00094                             pshs      d         ; save returned path descriptor bytes
+0074 1F89             (         ../io.as):00095                             tfr       a,b       ; normalize path number into D
+0076 4F               (         ../io.as):00096                             clra                ; clear high byte for 16-bit store
+0077 EDF80D           (         ../io.as):00097                             std       [13,s]    ; write opened path to caller output pointer
+007A 3506             (         ../io.as):00098                             puls      d         ; discard saved descriptor bytes
+007C 3502             (         ../io.as):00099                             puls      a         ; recover saved direct-page byte
+007E 1F8B             (         ../io.as):00100                             tfr       a,dp      ; restore caller's direct-page register
+0080 3560             (         ../io.as):00101                             puls      y,u       ; restore preserved registers
+0082 160000           (         ../io.as):00102                             lbra      _osret    ; return success through shared helper
+0085                  (         ../io.as):00103         openerr
+0085 3502             (         ../io.as):00104                             puls      a         ; recover saved direct-page byte
+0087 1F8B             (         ../io.as):00105                             tfr       a,dp      ; restore caller's direct-page register
+0089 3560             (         ../io.as):00106                             puls      y,u       ; restore preserved registers
+008B 160000           (         ../io.as):00107                             lbra      _oserr    ; return OS-9 error through shared helper
+                      (         ../io.as):00108         
+008E                  (         ../io.as):00109         __os_close
+008E 3460             (         ../io.as):00110                             pshs      y,u       ; preserve registers used by OS-9
+0090 1FB8             (         ../io.as):00111                             tfr       dp,a      ; save caller's direct-page register
+0092 3402             (         ../io.as):00112                             pshs      a         ; keep saved DP on the stack
+0094 A668             (         ../io.as):00113                             lda       8,s       ; load path number
+0096 103F8F           (         ../io.as):00114                             os9       I_Close   ; close the path
+0099 3502             (         ../io.as):00115                             puls      a         ; recover saved direct-page byte
+009B 1F8B             (         ../io.as):00116                             tfr       a,dp      ; restore caller's direct-page register
+009D 3560             (         ../io.as):00117                             puls      y,u       ; restore preserved registers
+009F 160000           (         ../io.as):00118                             lbra      _osret    ; return status through shared helper
+                      (         ../io.as):00119         
+00A2                  (         ../io.as):00120         __os_delete
+00A2 3460             (         ../io.as):00121                             pshs      y,u       ; preserve registers used by OS-9
+00A4 1FB8             (         ../io.as):00122                             tfr       dp,a      ; save caller's direct-page register
+00A6 3402             (         ../io.as):00123                             pshs      a         ; keep saved DP on the stack
+00A8 AE67             (         ../io.as):00124                             ldx       7,s       ; load pathname pointer
+00AA A66A             (         ../io.as):00125                             lda       10,s      ; load mode byte
+00AC 103F90           (         ../io.as):00126                             os9       I_DeletX  ; delete the named path with mode bits
+00AF 3502             (         ../io.as):00127                             puls      a         ; recover saved direct-page byte
+00B1 1F8B             (         ../io.as):00128                             tfr       a,dp      ; restore caller's direct-page register
+00B3 3560             (         ../io.as):00129                             puls      y,u       ; restore preserved registers
+00B5 160000           (         ../io.as):00130                             lbra      _osret    ; return status through shared helper
+                      (         ../io.as):00131         
+00B8                  (         ../io.as):00132         __os_makdir
+00B8 3460             (         ../io.as):00133                             pshs      y,u       ; preserve registers used by OS-9
+00BA 1FB8             (         ../io.as):00134                             tfr       dp,a      ; save caller's direct-page register
+00BC 3402             (         ../io.as):00135                             pshs      a         ; keep saved DP on the stack
+00BE AE67             (         ../io.as):00136                             ldx       7,s       ; load pathname pointer
+00C0 E66A             (         ../io.as):00137                             ldb       10,s      ; load permission byte
+00C2 103F85           (         ../io.as):00138                             os9       I_MakDir  ; create the directory
+00C5 3502             (         ../io.as):00139                             puls      a         ; recover saved direct-page byte
+00C7 1F8B             (         ../io.as):00140                             tfr       a,dp      ; restore caller's direct-page register
+00C9 3560             (         ../io.as):00141                             puls      y,u       ; restore preserved registers
+00CB 160000           (         ../io.as):00142                             lbra      _osret    ; return status through shared helper
+                      (         ../io.as):00143         
+00CE                  (         ../io.as):00144         __os_read
+00CE 3420             (         ../io.as):00145                             pshs      y         ; preserve Y while staging count pointer
+00D0 A665             (         ../io.as):00146                             lda       5,s       ; load path number
+00D2 AE66             (         ../io.as):00147                             ldx       6,s       ; load destination buffer pointer
+00D4 10AEF808         (         ../io.as):00148                             ldy       [8,s]     ; load requested byte count from caller pointer
+00D8 3420             (         ../io.as):00149                             pshs      y         ; save original count on stack for writeback slot
+00DA 103F89           (         ../io.as):00150                             os9       I_Read    ; read bytes from the path
+00DD                  (         ../io.as):00151         afterread
+00DD 240F             (         ../io.as):00152                             bcc       savecount ; continue if the read succeeded
+00DF C1D3             (         ../io.as):00153                             cmpb      #E_EOF    ; treat EOF as a short read rather than hard error
+00E1 2606             (         ../io.as):00154                             bne       readerr   ; branch out for all other OS-9 errors
+00E3 108E0000         (         ../io.as):00155                             ldy       #0        ; report zero bytes read at end of file
+00E7 2005             (         ../io.as):00156                             bra       savecount ; write back zero count and return success
+00E9                  (         ../io.as):00157         readerr
+00E9 3530             (         ../io.as):00158                             puls      x,y       ; discard saved count and restore caller's Y
+00EB 160000           (         ../io.as):00159                             lbra      _oserr    ; return OS-9 error through shared helper
+00EE                  (         ../io.as):00160         savecount
+00EE 10AFF80A         (         ../io.as):00161                             sty       [10,s]    ; store actual byte count through caller pointer
+00F2 3530             (         ../io.as):00162                             puls      x,y       ; discard saved count slot and restore caller's Y
+00F4 160000           (         ../io.as):00163                             lbra      _osret    ; return success through shared helper
+                      (         ../io.as):00164         
+00F7                  (         ../io.as):00165         __os_readln
+00F7 3420             (         ../io.as):00166                             pshs      y         ; preserve Y while staging count pointer
+00F9 A665             (         ../io.as):00167                             lda       5,s       ; load path number
+00FB AE66             (         ../io.as):00168                             ldx       6,s       ; load destination buffer pointer
+00FD 10AEF808         (         ../io.as):00169                             ldy       [8,s]     ; load requested byte count from caller pointer
+0101 3420             (         ../io.as):00170                             pshs      y         ; save original count on stack for writeback slot
+0103 103F8B           (         ../io.as):00171                             os9       I_ReadLn  ; read one line from the path
+0106 20D5             (         ../io.as):00172                             bra       afterread ; share the count/error handling path
+                      (         ../io.as):00173         
+0108                  (         ../io.as):00174         __os_write
+0108 3420             (         ../io.as):00175                             pshs      y         ; preserve Y while using it as the count register
+010A 10AEF808         (         ../io.as):00176                             ldy       [8,s]     ; load requested byte count from caller pointer
+010E 2712             (         ../io.as):00177                             beq       writeex   ; treat zero-length write as immediate success
+0110 A665             (         ../io.as):00178                             lda       5,s       ; load path number
+0112 AE66             (         ../io.as):00179                             ldx       6,s       ; load source buffer pointer
+0114 103F8A           (         ../io.as):00180                             os9       I_Write   ; write bytes to the path
+0117 2405             (         ../io.as):00181         L00xe               bcc       store_writeex ; continue if the write succeeded
+0119 3520             (         ../io.as):00182                             puls      y         ; restore caller's Y before error return
+011B 160000           (         ../io.as):00183                             lbra      _oserr    ; return OS-9 error through shared helper
+011E                  (         ../io.as):00184         store_writeex
+011E 10AFF808         (         ../io.as):00185                             sty       [8,s]     ; store actual byte count through caller pointer
+0122                  (         ../io.as):00186         writeex
+0122 3520             (         ../io.as):00187                             puls      y         ; restore caller's Y register
+0124 160000           (         ../io.as):00188                             lbra      _osret    ; return success through shared helper
+                      (         ../io.as):00189         
+0127                  (         ../io.as):00190         __os_writeln
+0127 3420             (         ../io.as):00191                             pshs      y         ; preserve Y while using it as the count register
+0129 10AEF808         (         ../io.as):00192                             ldy       [8,s]     ; load requested byte count from caller pointer
+012D 27F3             (         ../io.as):00193                             beq       writeex   ; treat zero-length write as immediate success
+012F A665             (         ../io.as):00194                             lda       5,s       ; load path number
+0131 AE66             (         ../io.as):00195                             ldx       6,s       ; load source buffer pointer
+0133 103F8C           (         ../io.as):00196                             os9       I_WritLn  ; write bytes followed by line termination
+0136 20DF             (         ../io.as):00197                             bra       L00xe     ; share the count/error handling path
+                      (         ../io.as):00198         
+0138                  (         ../io.as):00199         __os_seek
+0138 3476             (         ../io.as):00200                             pshs      y,d,x,u   ; preserve live registers around OS-9 call
+013A 1FB8             (         ../io.as):00201                             tfr       dp,a      ; save caller's direct-page register
+013C 3402             (         ../io.as):00202                             pshs      a         ; keep saved DP on the stack
+013E AE6D             (         ../io.as):00203                             ldx       13,s      ; load high word of 32-bit file position
+0140 EE6F             (         ../io.as):00204                             ldu       15,s      ; load low word of 32-bit file position
+0142 A66C             (         ../io.as):00205                             lda       12,s      ; load path number
+0144 103F88           (         ../io.as):00206                             os9       I_Seek    ; perform direct OS-9 seek
+0147 3502             (         ../io.as):00207                             puls      a         ; recover saved direct-page byte
+0149 1F8B             (         ../io.as):00208                             tfr       a,dp      ; restore caller's direct-page register
+014B 3576             (         ../io.as):00209                             puls      y,d,x,u   ; restore preserved registers
+014D 160000           (         ../io.as):00210                             lbra      _osret    ; return status through shared helper
+                      (         ../io.as):00211         
+0150                  (         ../io.as):00212         _lseek
+0150 3440             (         ../io.as):00213                             pshs      u         ; preserve caller's U register
+0152 EC6C             (         ../io.as):00214                             ldd       12,s      ; load whence selector
+0154 2608             (         ../io.as):00215                             bne       lseek10   ; branch for SEEK_CUR/SEEK_END cases
+0156 CE0000           (         ../io.as):00216                             ldu       #0        ; SEEK_SET starts from absolute zero low word
+0159 8E0000           (         ../io.as):00217                             ldx       #0        ; SEEK_SET starts from absolute zero high word
+015C 2032             (         ../io.as):00218                             bra       doseek    ; combine base and requested offset
+                      (         ../io.as):00219         
+015E                  (         ../io.as):00220         lseek10
+015E 10830001         (         ../io.as):00221                             cmpd      #1        ; test for SEEK_CUR
+0162 2723             (         ../io.as):00222                             beq       here      ; fetch current file position as base
+0164 10830002         (         ../io.as):00223                             cmpd      #2        ; test for SEEK_END
+0168 2712             (         ../io.as):00224                             beq       end       ; fetch file size as base
+016A C6F7             (         ../io.as):00225                             ldb       #E_Seek   ; preload invalid-whence error code
+016C                  (         ../io.as):00226         lserr
+016C 4F               (         ../io.as):00227                             clra                ; clear high byte for errno store
+016D EDA90000         (         ../io.as):00228                             std       _errno,y  ; update errno with the seek failure code
+0171 CCFFFF           (         ../io.as):00229                             ldd       #-1       ; prepare long -1 return value
+0174 AE64             (         ../io.as):00230                             ldx       4,s       ; load hidden pointer to 32-bit return slot
+0176 ED00             (         ../io.as):00231                             std       0,x       ; store high word of -1
+0178 ED02             (         ../io.as):00232                             std       2,x       ; store low word of -1
+017A 35C0             (         ../io.as):00233                             puls      u,pc      ; restore U and return failure
+                      (         ../io.as):00234         
+017C                  (         ../io.as):00235         end
+017C A667             (         ../io.as):00236                             lda       7,s       ; load path number
+017E C602             (         ../io.as):00237                             ldb       #SS_Size  ; request 32-bit file size
+0180 103F8D           (         ../io.as):00238                             os9       I_GetStt  ; fetch end-of-file position into X/U
+0183 25E7             (         ../io.as):00239                             bcs       lserr     ; fail if GetStat did not succeed
+0185 2009             (         ../io.as):00240                             bra       doseek    ; add requested offset to file size
+                      (         ../io.as):00241         
+0187                  (         ../io.as):00242         here
+0187 A667             (         ../io.as):00243                             lda       7,s       ; load path number
+0189 C605             (         ../io.as):00244                             ldb       #SS_Pos   ; request current 32-bit file position
+018B 103F8D           (         ../io.as):00245                             os9       I_GetStt  ; fetch current offset into X/U
+018E 25DC             (         ../io.as):00246                             bcs       lserr     ; fail if GetStat did not succeed
+                      (         ../io.as):00247         
+0190                  (         ../io.as):00248         doseek
+0190 1F30             (         ../io.as):00249                             tfr       u,d       ; copy base low word into D
+0192 E36A             (         ../io.as):00250                             addd      10,s      ; add requested low-word offset
+0194 EDA90000         (         ../io.as):00251                             std       _flacc+2,y ; save tentative low word in long accumulator
+0198 1F03             (         ../io.as):00252                             tfr       d,u       ; keep combined low word in U for direct seek
+019A 1F10             (         ../io.as):00253                             tfr       x,d       ; copy base high word into D
+019C E967             (         ../io.as):00254                             adcb      7,s       ; add carry and requested low byte of high word
+019E A966             (         ../io.as):00255                             adca      6,s       ; add requested high byte of high word
+01A0 2BCA             (         ../io.as):00256                             bmi       lserr     ; reject negative resulting file positions
+01A2 1F01             (         ../io.as):00257                             tfr       d,x       ; keep combined high word in X for direct seek
+01A4 EDA90000         (         ../io.as):00258                             std       _flacc,y  ; save tentative high word in long accumulator
+01A8 A665             (         ../io.as):00259                             lda       5,s       ; load path number
+01AA 103F88           (         ../io.as):00260                             os9       I_Seek    ; apply the new absolute file position
+01AD 25BD             (         ../io.as):00261                             bcs       lserr     ; fail if the direct seek was rejected
+01AF AE64             (         ../io.as):00262                             ldx       4,s       ; load hidden pointer to 32-bit return slot
+01B1 ECA90000         (         ../io.as):00263                             ldd       _flacc,y  ; fetch resulting high word
+01B5 ED00             (         ../io.as):00264                             std       0,x       ; store high word through return pointer
+01B7 ECA90000         (         ../io.as):00265                             ldd       _flacc+2,y ; fetch resulting low word
+01BB ED02             (         ../io.as):00266                             std       2,x       ; store low word through return pointer
+01BD 35C0             (         ../io.as):00267                             puls      u,pc      ; restore U and return success
+                      (         ../io.as):00268         
+                      (         ../io.as):00269                             endsect             ; end code section

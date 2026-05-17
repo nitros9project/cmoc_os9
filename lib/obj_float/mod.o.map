@@ -1,0 +1,7 @@
+Symbol: __os_modlink (mod.o) = 0000
+Symbol: __os_modload (mod.o) = 001D
+Symbol: __os_modunlink (mod.o) = 002E
+Symbol: F_Link (mod.o) = 0000
+Symbol: F_Load (mod.o) = 0001
+Symbol: F_UnLink (mod.o) = 0002
+Symbol: L000f (mod.o) = 000F

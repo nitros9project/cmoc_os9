@@ -1,0 +1,3 @@
+Symbol: _memset (memset.o) = 0000
+Symbol: BranchTarget_01 (memset.o) = 0010
+Symbol: Loop_01 (memset.o) = 000A

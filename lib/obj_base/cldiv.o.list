@@ -1,0 +1,115 @@
+                      (      ../cldiv.as):00001         
+                      (      ../cldiv.as):00002                             section   bss       ; begin bss section
+                      (      ../cldiv.as):00003         
+                      (      ../cldiv.as):00004         * Uninitialized data (class B)
+0000                  (      ../cldiv.as):00005         B0000               rmb       1         ; reserve 1 bytes
+                      (      ../cldiv.as):00006         * Initialized Data (class G)
+                      (      ../cldiv.as):00007         
+                      (      ../cldiv.as):00008                             endsect             ; end current section
+                      (      ../cldiv.as):00009         
+                      (      ../cldiv.as):00010                             section   code      ; begin code section
+                      (      ../cldiv.as):00011         
+                      (      ../cldiv.as):00012         _flacc              EXTERNAL            ; import external symbol
+                      (      ../cldiv.as):00013         _rpterr             EXTERNAL            ; import external symbol
+                      (      ../cldiv.as):00014         _lnegx              EXTERNAL            ; import external symbol
+                      (      ../cldiv.as):00015         _lbexit             EXTERNAL            ; import external symbol
+                      (      ../cldiv.as):00016         
+                      (      ../cldiv.as):00017         _ldiv               EXPORT              ; export this symbol
+                      (      ../cldiv.as):00018         _lmod               EXPORT              ; export this symbol
+                      (      ../cldiv.as):00019         
+0000 8D46             (      ../cldiv.as):00020         _ldiv:              bsr       Subroutine_01 ; branch to subroutine to Subroutine_01
+0002 A661             (      ../cldiv.as):00021                             lda       1,s       ; load A from stack-relative value 1,s
+0004 2703             (      ../cldiv.as):00022                             beq       BranchTarget_01 ; branch if equal/zero to BranchTarget_01
+0006 170000           (      ../cldiv.as):00023         Loop_01             lbsr      _lnegx    ; long branch to subroutine to _lnegx
+0009 3268             (      ../cldiv.as):00024         BranchTarget_01     leas      8,s       ; adjust S using 8,s
+000B 160000           (      ../cldiv.as):00025                             lbra      _lbexit   ; long branch unconditionally to _lbexit
+000E A684             (      ../cldiv.as):00026         _lmod:              lda       ,x        ; load A from memory pointed to by X
+0010 AA01             (      ../cldiv.as):00027                             ora       1,x       ; OR A with indexed value 1,x
+0012 AA02             (      ../cldiv.as):00028                             ora       2,x       ; OR A with indexed value 2,x
+0014 AA03             (      ../cldiv.as):00029                             ora       3,x       ; OR A with indexed value 3,x
+0016 2611             (      ../cldiv.as):00030                             bne       BranchTarget_02 ; branch if not equal to BranchTarget_02
+0018 EC84             (      ../cldiv.as):00031                             ldd       ,x        ; load D from memory pointed to by X
+001A EDA90000         (      ../cldiv.as):00032                             std       _flacc,y  ; store D to indexed value _flacc,y
+001E EC02             (      ../cldiv.as):00033                             ldd       2,x       ; load D from indexed value 2,x
+0020 30A90000         (      ../cldiv.as):00034                             leax      _flacc,y  ; compute effective address into X from _flacc,y
+0024 ED02             (      ../cldiv.as):00035                             std       2,x       ; store D to indexed value 2,x
+0026 160000           (      ../cldiv.as):00036                             lbra      _lbexit   ; long branch unconditionally to _lbexit
+0029 A662             (      ../cldiv.as):00037         BranchTarget_02     lda       2,s       ; load A from stack-relative value 2,s
+002B A7A90000         (      ../cldiv.as):00038                             sta       B0000,y   ; store A to indexed value B0000,y
+002F 8D2D             (      ../cldiv.as):00039                             bsr       Subroutine_02 ; branch to subroutine to Subroutine_02
+0031 EC6A             (      ../cldiv.as):00040                             ldd       10,s      ; load D from stack-relative value 10,s
+0033 30A90000         (      ../cldiv.as):00041                             leax      _flacc,y  ; compute effective address into X from _flacc,y
+0037 ED84             (      ../cldiv.as):00042                             std       ,x        ; store D to memory pointed to by X
+0039 EC6C             (      ../cldiv.as):00043                             ldd       12,s      ; load D from stack-relative value 12,s
+003B ED02             (      ../cldiv.as):00044                             std       2,x       ; store D to indexed value 2,x
+003D 6DA90000         (      ../cldiv.as):00045                             tst       B0000,y   ; test indexed value B0000,y and update condition codes
+0041 2BC3             (      ../cldiv.as):00046                             bmi       Loop_01   ; branch if minus to Loop_01
+0043 3268             (      ../cldiv.as):00047                             leas      8,s       ; adjust S using 8,s
+0045 160000           (      ../cldiv.as):00048                             lbra      _lbexit   ; long branch unconditionally to _lbexit
+0048 A684             (      ../cldiv.as):00049         Subroutine_01       lda       ,x        ; load A from memory pointed to by X
+004A AA01             (      ../cldiv.as):00050                             ora       1,x       ; OR A with indexed value 1,x
+004C AA02             (      ../cldiv.as):00051                             ora       2,x       ; OR A with indexed value 2,x
+004E AA03             (      ../cldiv.as):00052                             ora       3,x       ; OR A with indexed value 3,x
+0050 260C             (      ../cldiv.as):00053                             bne       Subroutine_02 ; branch if not equal to Subroutine_02
+0052 EC62             (      ../cldiv.as):00054                             ldd       2,s       ; load D from stack-relative value 2,s
+0054 ED66             (      ../cldiv.as):00055                             std       6,s       ; store D to stack-relative value 6,s
+0056 3266             (      ../cldiv.as):00056                             leas      6,s       ; adjust S using 6,s
+0058 CC002D           (      ../cldiv.as):00057                             ldd       #$002d    ; load D from immediate value $002d
+005B 160000           (      ../cldiv.as):00058                             lbra      _rpterr   ; long branch unconditionally to _rpterr
+005E EC84             (      ../cldiv.as):00059         Subroutine_02       ldd       ,x        ; load D from memory pointed to by X
+0060 AE02             (      ../cldiv.as):00060                             ldx       2,x       ; load X from indexed value 2,x
+0062 3416             (      ../cldiv.as):00061                             pshs      d,x       ; save D,X on the hardware stack
+0064 CC0000           (      ../cldiv.as):00062                             ldd       #0        ; load D from immediate value 0
+0067 3406             (      ../cldiv.as):00063                             pshs      d         ; save D on the hardware stack
+0069 EDA90000         (      ../cldiv.as):00064                             std       _flacc,y  ; store D to indexed value _flacc,y
+006D EDA90000         (      ../cldiv.as):00065                             std       _flacc+2,y ; store D to indexed value _flacc+2,y
+0071 6D62             (      ../cldiv.as):00066                             tst       2,s       ; test stack-relative value 2,s and update condition codes
+0073 2A07             (      ../cldiv.as):00067                             bpl       BranchTarget_03 ; branch if plus to BranchTarget_03
+0075 3062             (      ../cldiv.as):00068                             leax      2,s       ; compute effective address into X from 2,s
+0077 170000           (      ../cldiv.as):00069                             lbsr      _lnegx    ; long branch to subroutine to _lnegx
+007A 6C61             (      ../cldiv.as):00070                             inc       1,s       ; increment stack-relative value 1,s
+007C 6D6A             (      ../cldiv.as):00071         BranchTarget_03     tst       10,s      ; test stack-relative value 10,s and update condition codes
+007E 2A07             (      ../cldiv.as):00072                             bpl       BranchTarget_04 ; branch if plus to BranchTarget_04
+0080 306A             (      ../cldiv.as):00073                             leax      10,s      ; compute effective address into X from 10,s
+0082 170000           (      ../cldiv.as):00074                             lbsr      _lnegx    ; long branch to subroutine to _lnegx
+0085 6361             (      ../cldiv.as):00075                             com       1,s
+0087 30A90000         (      ../cldiv.as):00076         BranchTarget_04     leax      _flacc,y  ; compute effective address into X from _flacc,y
+008B 8601             (      ../cldiv.as):00077                             lda       #1        ; load A from immediate value 1
+008D 4C               (      ../cldiv.as):00078         Loop_02             inca                ; increment A
+008E 6865             (      ../cldiv.as):00079                             asl       5,s       ; shift stack-relative value 5,s left by one bit
+0090 6964             (      ../cldiv.as):00080                             rol       4,s       ; rotate stack-relative value 4,s left through carry
+0092 6963             (      ../cldiv.as):00081                             rol       3,s       ; rotate stack-relative value 3,s left through carry
+0094 6962             (      ../cldiv.as):00082                             rol       2,s       ; rotate stack-relative value 2,s left through carry
+0096 2AF5             (      ../cldiv.as):00083                             bpl       Loop_02   ; branch if plus to Loop_02
+0098 A7E4             (      ../cldiv.as):00084                             sta       ,s        ; store A to memory pointed to by S
+009A EC6C             (      ../cldiv.as):00085         Loop_03             ldd       12,s      ; load D from stack-relative value 12,s
+009C A364             (      ../cldiv.as):00086                             subd      4,s       ; subtract stack-relative value 4,s from D
+009E ED6C             (      ../cldiv.as):00087                             std       12,s      ; store D to stack-relative value 12,s
+00A0 EC6A             (      ../cldiv.as):00088                             ldd       10,s      ; load D from stack-relative value 10,s
+00A2 E263             (      ../cldiv.as):00089                             sbcb      3,s       ; subtract stack-relative value 3,s from B
+00A4 A262             (      ../cldiv.as):00090                             sbca      2,s       ; subtract stack-relative value 2,s from A
+00A6 ED6A             (      ../cldiv.as):00091                             std       10,s      ; store D to stack-relative value 10,s
+00A8 2412             (      ../cldiv.as):00092                             bcc       BranchTarget_05 ; branch if carry is clear to BranchTarget_05
+00AA EC6C             (      ../cldiv.as):00093                             ldd       12,s      ; load D from stack-relative value 12,s
+00AC E364             (      ../cldiv.as):00094                             addd      4,s       ; add stack-relative value 4,s into D
+00AE ED6C             (      ../cldiv.as):00095                             std       12,s      ; store D to stack-relative value 12,s
+00B0 EC6A             (      ../cldiv.as):00096                             ldd       10,s      ; load D from stack-relative value 10,s
+00B2 E963             (      ../cldiv.as):00097                             adcb      3,s       ; add stack-relative value 3,s into B
+00B4 A962             (      ../cldiv.as):00098                             adca      2,s       ; add stack-relative value 2,s into A
+00B6 ED6A             (      ../cldiv.as):00099                             std       10,s      ; store D to stack-relative value 10,s
+00B8 1CFE             (      ../cldiv.as):00100                             andcc     #254      ; clear condition-code bits with mask #254
+00BA 2002             (      ../cldiv.as):00101                             bra       Continue_01 ; branch unconditionally to Continue_01
+00BC 1A01             (      ../cldiv.as):00102         BranchTarget_05     orcc      #1        ; set condition-code bits with mask #1
+00BE 6903             (      ../cldiv.as):00103         Continue_01         rol       3,x       ; rotate indexed value 3,x left through carry
+00C0 6902             (      ../cldiv.as):00104                             rol       2,x       ; rotate indexed value 2,x left through carry
+00C2 6901             (      ../cldiv.as):00105                             rol       1,x       ; rotate indexed value 1,x left through carry
+00C4 6984             (      ../cldiv.as):00106                             rol       ,x        ; rotate memory pointed to by X left through carry
+00C6 6462             (      ../cldiv.as):00107                             lsr       2,s       ; logical shift stack-relative value 2,s right by one bit
+00C8 6663             (      ../cldiv.as):00108                             ror       3,s       ; rotate stack-relative value 3,s right through carry
+00CA 6664             (      ../cldiv.as):00109                             ror       4,s       ; rotate stack-relative value 4,s right through carry
+00CC 6665             (      ../cldiv.as):00110                             ror       5,s       ; rotate stack-relative value 5,s right through carry
+00CE 6AE4             (      ../cldiv.as):00111                             dec       ,s        ; decrement memory pointed to by S
+00D0 26C8             (      ../cldiv.as):00112                             bne       Loop_03   ; branch if not equal to Loop_03
+00D2 6EF806           (      ../cldiv.as):00113                             jmp       [6,s]     ; jump to [6,s]
+                      (      ../cldiv.as):00114         
+                      (      ../cldiv.as):00115                             endsect             ; end current section

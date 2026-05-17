@@ -1,0 +1,10 @@
+                      (    ../prgname.as):00001                             section   code      ; begin code section
+                      (    ../prgname.as):00002         
+                      (    ../prgname.as):00003         argv                EXTERN              ; import external symbol
+                      (    ../prgname.as):00004         
+                      (    ../prgname.as):00005         __prgname           EXPORT              ; export this symbol
+0000                  (    ../prgname.as):00006         __prgname
+0000 ECA90000         (    ../prgname.as):00007                             ldd       argv,y    ; load D from indexed value argv,y
+0004 39               (    ../prgname.as):00008                             rts                 ; return to caller
+                      (    ../prgname.as):00009         
+                      (    ../prgname.as):00010                             endsect             ; end current section

@@ -1,0 +1,47 @@
+                      (       movemem.as):00001         * Adapted from cmoc_os9/cgfx/todo/movemem.a for the live cmoc_os9 ABI.
+                      (       movemem.as):00002         
+                      (       movemem.as):00003                 section code
+                      (       movemem.as):00004         
+                      (       movemem.as):00005         _movemem                EXPORT * export this symbol
+                      (       movemem.as):00006         
+0000                  (       movemem.as):00007         _movemem
+0000 3460             (       movemem.as):00008                 pshs    y,u
+0002 AE66             (       movemem.as):00009                 ldx     6,s * load X from stack-relative value 6,s
+0004 10AE68           (       movemem.as):00010                 ldy     8,s * load Y from stack-relative value 8,s
+0007 EE6A             (       movemem.as):00011                 ldu     10,s * load U from stack-relative value 10,s
+0009 AC68             (       movemem.as):00012                 cmpx    8,s * compare the destination pointer against the source pointer
+000B 221A             (       movemem.as):00013                 bhi     movehigh * copy backward when the regions overlap with destination above source
+                      (       movemem.as):00014         
+000D 11830002         (       movemem.as):00015         movelow cmpu    #2 * see whether at least two bytes remain to copy forward
+0011 2508             (       movemem.as):00016                 blo     movelst1 * fall through to the one-byte tail when fewer than two bytes remain
+0013 ECA1             (       movemem.as):00017                 ldd     ,y++ * load D from memory pointed to by Y+, then advance Y+
+0015 ED81             (       movemem.as):00018                 std     ,x++ * store D to memory pointed to by X+, then advance X+
+0017 335E             (       movemem.as):00019                 leau    -2,u * subtract the copied word from the remaining byte count
+0019 20F2             (       movemem.as):00020                 bra     movelow * continue the forward word-copy loop
+001B                  (       movemem.as):00021         movelst1
+001B 11830001         (       movemem.as):00022                 cmpu    #1 * test whether a single trailing byte still needs copying
+001F 2604             (       movemem.as):00023                 bne     moverts * return immediately when the copy is complete
+0021 A6A4             (       movemem.as):00024                 lda     ,y * load A from memory pointed to by Y
+0023 A784             (       movemem.as):00025                 sta     ,x * store A to memory pointed to by X
+0025                  (       movemem.as):00026         moverts
+0025 35E0             (       movemem.as):00027                 puls    y,u,pc * restore preserved registers and return
+                      (       movemem.as):00028         
+0027                  (       movemem.as):00029         movehigh
+0027 1F30             (       movemem.as):00030                 tfr     u,d * copy the byte count into D to form end pointers
+0029 31AB             (       movemem.as):00031                 leay    d,y * advance Y to one byte past the source region
+002B 308B             (       movemem.as):00032                 leax    d,x * advance X to one byte past the destination region
+                      (       movemem.as):00033         
+002D 11830002         (       movemem.as):00034         mloop1  cmpu    #2 * see whether at least two bytes remain to copy backward
+0031 2508             (       movemem.as):00035                 blo     movelst2 * finish with the one-byte tail when only one byte remains
+0033 ECA3             (       movemem.as):00036                 ldd     ,--y * load D from memory pointed to by --Y
+0035 ED83             (       movemem.as):00037                 std     ,--x * store D to memory pointed to by --X
+0037 335E             (       movemem.as):00038                 leau    -2,u * subtract the copied word from the remaining byte count
+0039 20F2             (       movemem.as):00039                 bra     mloop1 * continue the backward word-copy loop
+003B                  (       movemem.as):00040         movelst2
+003B 11830001         (       movemem.as):00041                 cmpu    #1 * test whether a final byte still needs copying
+003F 26E4             (       movemem.as):00042                 bne     moverts * return immediately when the backward copy is complete
+0041 A6A2             (       movemem.as):00043                 lda     ,-y * load A from memory pointed to by -Y
+0043 A782             (       movemem.as):00044                 sta     ,-x * store A to memory pointed to by -X
+0045 35E0             (       movemem.as):00045                 puls    y,u,pc * restore preserved registers and return
+                      (       movemem.as):00046         
+                      (       movemem.as):00047                 endsect * end current section

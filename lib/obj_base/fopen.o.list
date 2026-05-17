@@ -1,0 +1,225 @@
+                      (      ../fopen.as):00001                             section   code      ; begin code section
+                      (      ../fopen.as):00002         
+     0001             (      ../fopen.as):00003         _READ               equ       1         ; define constant as 1
+     0002             (      ../fopen.as):00004         _WRITE              equ       2         ; define constant as 2
+                      (      ../fopen.as):00005         
+                      (      ../fopen.as):00006         _fdopen             EXPORT              ; export this symbol
+                      (      ../fopen.as):00007         _fopen              EXPORT              ; export this symbol
+                      (      ../fopen.as):00008         _freopen            EXPORT              ; export this symbol
+                      (      ../fopen.as):00009         
+                      (      ../fopen.as):00010         __iob               EXTERN              ; import external symbol
+                      (      ../fopen.as):00011         _errno              EXTERN              ; import external symbol
+                      (      ../fopen.as):00012         _fclose             EXTERN              ; import external symbol
+                      (      ../fopen.as):00013         _open               EXTERN              ; import external symbol
+                      (      ../fopen.as):00014         _creat              EXTERN              ; import external symbol
+                      (      ../fopen.as):00015         _lseek              EXTERN              ; import external symbol
+                      (      ../fopen.as):00016         
+                      (      ../fopen.as):00017         * stack:
+                      (      ../fopen.as):00018         *   0,s = return address
+                      (      ../fopen.as):00019         *   2,s = file descriptor
+                      (      ../fopen.as):00020         *   4,s = mode
+0000                  (      ../fopen.as):00021         _fdopen
+0000 3440             (      ../fopen.as):00022                             pshs      u         ; save U on the hardware stack
+0002 CE0000           (      ../fopen.as):00023                             ldu       #0        ; load U from immediate value 0
+0005 AE66             (      ../fopen.as):00024                             ldx       6,s       ; load X from stack-relative value 6,s
+0007 EC64             (      ../fopen.as):00025                             ldd       4,s       ; load D from stack-relative value 4,s
+0009 170038           (      ../fopen.as):00026                             lbsr      setiob    ; bind the existing file descriptor to a FILE structure
+000C 35C0             (      ../fopen.as):00027                             puls      u,pc      ; restore registers and return
+                      (      ../fopen.as):00028         
+                      (      ../fopen.as):00029         * stack:
+                      (      ../fopen.as):00030         *   0,s = return address
+                      (      ../fopen.as):00031         *   2,s = pathname pointer
+                      (      ../fopen.as):00032         *   4,s = mode
+000E                  (      ../fopen.as):00033         _fopen
+000E 3440             (      ../fopen.as):00034                             pshs      u         ; save U on the hardware stack
+0010 AE66             (      ../fopen.as):00035                             ldx       6,s       ; load X from stack-relative value 6,s
+0012 EE64             (      ../fopen.as):00036                             ldu       4,s       ; load U from stack-relative value 4,s
+0014 170085           (      ../fopen.as):00037                             lbsr      openit    ; open or create the path according to the mode string
+0017 2B0A             (      ../fopen.as):00038                             bmi       open1     ; return NULL when the low-level open helper failed
+0019 CE0000           (      ../fopen.as):00039                             ldu       #0        ; load U from immediate value 0
+001C AE66             (      ../fopen.as):00040                             ldx       6,s       ; load X from stack-relative value 6,s
+001E 170023           (      ../fopen.as):00041                             lbsr      setiob    ; allocate or find a free FILE entry for the new path
+0021 35C0             (      ../fopen.as):00042                             puls      u,pc      ; restore registers and return
+0023                  (      ../fopen.as):00043         open1
+0023 4F               (      ../fopen.as):00044                             clra                ; clear A
+0024 5F               (      ../fopen.as):00045                             clrb                ; clear B
+0025 35C0             (      ../fopen.as):00046                             puls      u,pc      ; restore registers and return
+                      (      ../fopen.as):00047         
+                      (      ../fopen.as):00048         * stack:
+                      (      ../fopen.as):00049         *   0,s = return address
+                      (      ../fopen.as):00050         *   2,s = pathname pointer
+                      (      ../fopen.as):00051         *   4,s = mode
+                      (      ../fopen.as):00052         *   6,s = FILE *stream
+0027                  (      ../fopen.as):00053         _freopen
+0027 3440             (      ../fopen.as):00054                             pshs      u         ; save U on the hardware stack
+0029 EC68             (      ../fopen.as):00055                             ldd       8,s       ; load D from stack-relative value 8,s
+002B 3406             (      ../fopen.as):00056                             pshs      d         ; save D on the hardware stack
+002D 170000           (      ../fopen.as):00057                             lbsr      _fclose   ; close the existing stream before reopening it on a new path
+0030 3262             (      ../fopen.as):00058                             leas      2,s       ; adjust S using 2,s
+0032 AE66             (      ../fopen.as):00059                             ldx       6,s       ; load X from stack-relative value 6,s
+0034 EE64             (      ../fopen.as):00060                             ldu       4,s       ; load U from stack-relative value 4,s
+0036 170063           (      ../fopen.as):00061                             lbsr      openit    ; reopen the path using the supplied mode string
+0039 2BE8             (      ../fopen.as):00062                             bmi       open1     ; return NULL when the low-level open helper failed
+003B EE68             (      ../fopen.as):00063                             ldu       8,s       ; load U from stack-relative value 8,s
+003D AE66             (      ../fopen.as):00064                             ldx       6,s       ; load X from stack-relative value 6,s
+003F 170002           (      ../fopen.as):00065                             lbsr      setiob    ; reinitialize the existing FILE structure for the reopened path
+0042 35C0             (      ../fopen.as):00066                             puls      u,pc      ; restore registers and return
+                      (      ../fopen.as):00067         
+                      (      ../fopen.as):00068         * input:
+                      (      ../fopen.as):00069         *   d = path number
+                      (      ../fopen.as):00070         *   x = *mode
+                      (      ../fopen.as):00071         *   u = FILE * or 0
+                      (      ../fopen.as):00072         * output:
+                      (      ../fopen.as):00073         *   d = FILE * or 0
+0044                  (      ../fopen.as):00074         setiob
+0044 3406             (      ../fopen.as):00075                             pshs      d         ; save D on the hardware stack
+0046 11830000         (      ../fopen.as):00076                             cmpu      #0        ; compare U against immediate value 0
+004A 261C             (      ../fopen.as):00077                             bne       setiob3   ; skip the FILE-slot search when the caller supplied one explicitly
+004C 33A90000         (      ../fopen.as):00078                             leau      __iob+39,y ; start at the last FILE entry in the static I/O table
+0050 860D             (      ../fopen.as):00079                             lda       #13       ; load A from immediate value 13
+0052                  (      ../fopen.as):00080         setiob1
+0052 E647             (      ../fopen.as):00081                             ldb       7,u       ; load B from indexed value 7,u
+0054 C403             (      ../fopen.as):00082                             andb      #_READ+_WRITE ; AND B with immediate value _READ+_WRITE
+0056 2710             (      ../fopen.as):00083                             beq       setiob3   ; stop when a free FILE slot is found
+0058 334D             (      ../fopen.as):00084                             leau      13,u      ; move to the previous FILE entry in the table
+005A 4A               (      ../fopen.as):00085                             deca                ; decrement A
+005B 26F5             (      ../fopen.as):00086                             bne       setiob1   ; continue searching until all 13 slots have been checked
+005D CC00C8           (      ../fopen.as):00087                             ldd       #$00C8    ; load D from immediate value $00C8
+0060 EDA90000         (      ../fopen.as):00088                             std       _errno,y  ; report EMFILE when no FILE slots remain
+0064 4F               (      ../fopen.as):00089                             clra                ; clear A
+0065 5F               (      ../fopen.as):00090                             clrb                ; clear B
+0066 3590             (      ../fopen.as):00091                             puls      x,pc      ; restore registers and return
+                      (      ../fopen.as):00092         
+0068                  (      ../fopen.as):00093         setiob3
+0068 3506             (      ../fopen.as):00094                             puls      d         ; restore D from the hardware stack
+006A ED48             (      ../fopen.as):00095                             std       8,u       ; record the OS-9 path number in the FILE entry
+006C EC01             (      ../fopen.as):00096                             ldd       1,x       ; load D from indexed value 1,x
+006E 4D               (      ../fopen.as):00097                             tsta                ; test A and update condition codes
+006F 270C             (      ../fopen.as):00098                             beq       setiob5   ; branch when the mode string is only one character long
+0071 812B             (      ../fopen.as):00099                             cmpa      #'+
+0073 2704             (      ../fopen.as):00100                             beq       setiob4   ; handle modes like r+ and w+ as read/write
+0075 C12B             (      ../fopen.as):00101                             cmpb      #'+
+0077 2604             (      ../fopen.as):00102                             bne       setiob5   ; treat one-character modes separately
+0079                  (      ../fopen.as):00103         setiob4
+0079 C603             (      ../fopen.as):00104                             ldb       #_READ+_WRITE ; load B from immediate value _READ+_WRITE
+007B 2010             (      ../fopen.as):00105                             bra       setiob8   ; branch unconditionally to setiob8
+                      (      ../fopen.as):00106         
+007D                  (      ../fopen.as):00107         setiob5
+007D E684             (      ../fopen.as):00108                             ldb       ,x        ; load B from memory pointed to by X
+007F C172             (      ../fopen.as):00109                             cmpb      #'r
+0081 2704             (      ../fopen.as):00110                             beq       setiob6   ; mark read-only streams as input
+0083 C164             (      ../fopen.as):00111                             cmpb      #'d
+0085 2604             (      ../fopen.as):00112                             bne       setiob7   ; treat all other recognized modes as write-only here
+0087                  (      ../fopen.as):00113         setiob6
+0087 C601             (      ../fopen.as):00114                             ldb       #_READ    ; load B from immediate value _READ
+0089 2002             (      ../fopen.as):00115                             bra       setiob8   ; branch unconditionally to setiob8
+                      (      ../fopen.as):00116         
+008B                  (      ../fopen.as):00117         setiob7
+008B C602             (      ../fopen.as):00118                             ldb       #_WRITE   ; load B from immediate value _WRITE
+008D                  (      ../fopen.as):00119         setiob8
+008D EA47             (      ../fopen.as):00120                             orb       7,u       ; merge the new mode bits into the FILE entry flags
+008F E747             (      ../fopen.as):00121                             stb       7,u       ; store the updated mode flags back into the FILE entry
+0091 EC42             (      ../fopen.as):00122                             ldd       2,u       ; load the buffer base address from the FILE entry
+0093 E34B             (      ../fopen.as):00123                             addd      11,u      ; advance to the logical end of the FILE buffer
+0095 EDC4             (      ../fopen.as):00124                             std       ,u        ; initialize the current pointer to the buffer end
+0097 ED44             (      ../fopen.as):00125                             std       4,u       ; initialize the alternate current pointer field to the same position
+0099 1F30             (      ../fopen.as):00126                             tfr       u,d       ; return the FILE structure pointer in D
+009B 39               (      ../fopen.as):00127                             rts                 ; return to caller
+                      (      ../fopen.as):00128         
+                      (      ../fopen.as):00129         * input:
+                      (      ../fopen.as):00130         *   x = *mode
+                      (      ../fopen.as):00131         *   u = *filename
+                      (      ../fopen.as):00132         * output:
+                      (      ../fopen.as):00133         *   d = path number or -1
+009C                  (      ../fopen.as):00134         openit
+009C 4F               (      ../fopen.as):00135                             clra                ; clear A
+009D 5F               (      ../fopen.as):00136                             clrb                ; clear B
+009E 3446             (      ../fopen.as):00137                             pshs      d,u       ; save the initial open/create flags and pathname pointer on the stack
+00A0 EC01             (      ../fopen.as):00138                             ldd       1,x       ; load D from indexed value 1,x
+00A2 4D               (      ../fopen.as):00139                             tsta                ; test A and update condition codes
+00A3 271B             (      ../fopen.as):00140                             beq       openit4   ; branch when the mode string is only one character long
+00A5 8178             (      ../fopen.as):00141                             cmpa      #'x
+00A7 260E             (      ../fopen.as):00142                             bne       openit2   ; handle exclusive-create modifiers separately
+00A9 C12B             (      ../fopen.as):00143                             cmpb      #'+
+00AB 2605             (      ../fopen.as):00144                             bne       openit1   ; choose create-only flags for plain x mode
+00AD CC0007           (      ../fopen.as):00145                             ldd       #$0007    ; load D from immediate value $0007
+00B0 200C             (      ../fopen.as):00146                             bra       openit3   ; branch unconditionally to openit3
+                      (      ../fopen.as):00147         
+00B2                  (      ../fopen.as):00148         openit1
+00B2 CC0004           (      ../fopen.as):00149                             ldd       #$0004    ; load D from immediate value $0004
+00B5 2007             (      ../fopen.as):00150                             bra       openit3   ; branch unconditionally to openit3
+                      (      ../fopen.as):00151         
+00B7                  (      ../fopen.as):00152         openit2
+00B7 812B             (      ../fopen.as):00153                             cmpa      #'+
+00B9 2657             (      ../fopen.as):00154                             bne       openit9   ; branch if not equal to openit9
+00BB CC0003           (      ../fopen.as):00155                             ldd       #$0003    ; load D from immediate value $0003
+00BE                  (      ../fopen.as):00156         openit3
+00BE EDE4             (      ../fopen.as):00157                             std       ,s        ; update the saved open/create flags on the stack
+                      (      ../fopen.as):00158         
+00C0                  (      ../fopen.as):00159         openit4
+00C0 E684             (      ../fopen.as):00160                             ldb       ,x        ; load B from memory pointed to by X
+00C2 C172             (      ../fopen.as):00161                             cmpb      #'r
+00C4 2606             (      ../fopen.as):00162                             bne       openit5   ; branch when the mode is not read-only
+00C6 ECE4             (      ../fopen.as):00163                             ldd       ,s        ; load D from memory pointed to by S
+00C8 CA01             (      ../fopen.as):00164                             orb       #1        ; add OS-9 read permission to the open flags
+00CA 2056             (      ../fopen.as):00165                             bra       openit11  ; branch unconditionally to openit11
+                      (      ../fopen.as):00166         
+00CC                  (      ../fopen.as):00167         openit5
+00CC C161             (      ../fopen.as):00168                             cmpb      #'a
+00CE 262D             (      ../fopen.as):00169                             bne       openit6   ; branch when the mode is not append
+00D0 ECE4             (      ../fopen.as):00170                             ldd       ,s        ; load D from memory pointed to by S
+00D2 CA02             (      ../fopen.as):00171                             orb       #$02      ; add OS-9 write permission for append mode
+00D4 3406             (      ../fopen.as):00172                             pshs      d         ; save D on the hardware stack
+00D6 3440             (      ../fopen.as):00173                             pshs      u         ; save U on the hardware stack
+00D8 170000           (      ../fopen.as):00174                             lbsr      _open     ; try opening the file before seeking to the end
+00DB 3264             (      ../fopen.as):00175                             leas      4,s       ; adjust S using 4,s
+00DD ED62             (      ../fopen.as):00176                             std       2,s       ; keep the returned path number on the stack across the seek
+00DF 1083FFFF         (      ../fopen.as):00177                             cmpd      #-1       ; compare D against immediate value -1
+00E3 271C             (      ../fopen.as):00178                             beq       openit7   ; fall back to create when append-open failed
+00E5 CC0002           (      ../fopen.as):00179                             ldd       #2        ; load D from immediate value 2
+00E8 3406             (      ../fopen.as):00180                             pshs      d         ; save D on the hardware stack
+00EA 4F               (      ../fopen.as):00181                             clra                ; clear A
+00EB 5F               (      ../fopen.as):00182                             clrb                ; clear B
+00EC 3406             (      ../fopen.as):00183                             pshs      d         ; save D on the hardware stack
+00EE 3406             (      ../fopen.as):00184                             pshs      d         ; save D on the hardware stack
+00F0 EC68             (      ../fopen.as):00185                             ldd       8,s       ; load D from stack-relative value 8,s
+00F2 3406             (      ../fopen.as):00186                             pshs      d         ; save D on the hardware stack
+00F4 170000           (      ../fopen.as):00187                             lbsr      _lseek    ; seek to end-of-file so subsequent writes append
+00F7 3268             (      ../fopen.as):00188                             leas      8,s       ; adjust S using 8,s
+00F9 EC62             (      ../fopen.as):00189                             ldd       2,s       ; recover the path number after the seek
+00FB 202E             (      ../fopen.as):00190                             bra       openit13  ; branch unconditionally to openit13
+                      (      ../fopen.as):00191         
+00FD                  (      ../fopen.as):00192         openit6
+00FD C177             (      ../fopen.as):00193                             cmpb      #'w
+00FF 260D             (      ../fopen.as):00194                             bne       openit8   ; branch when the mode is neither append nor write
+0101                  (      ../fopen.as):00195         openit7
+0101 ECE4             (      ../fopen.as):00196                             ldd       ,s        ; load D from memory pointed to by S
+0103 CA02             (      ../fopen.as):00197                             orb       #$02      ; add OS-9 write permission for create/truncate modes
+0105 3406             (      ../fopen.as):00198                             pshs      d         ; save D on the hardware stack
+0107 3440             (      ../fopen.as):00199                             pshs      u         ; save U on the hardware stack
+0109 170000           (      ../fopen.as):00200                             lbsr      _creat    ; create or truncate the target file
+010C 201B             (      ../fopen.as):00201                             bra       openit12  ; branch unconditionally to openit12
+                      (      ../fopen.as):00202         
+010E                  (      ../fopen.as):00203         openit8
+010E C164             (      ../fopen.as):00204                             cmpb      #'d
+0110 270C             (      ../fopen.as):00205                             beq       openit10  ; handle direct-access mode separately
+0112                  (      ../fopen.as):00206         openit9
+0112 CC00CB           (      ../fopen.as):00207                             ldd       #$00CB    ; load D from immediate value $00CB
+0115 EDA90000         (      ../fopen.as):00208                             std       _errno,y  ; report EINVAL for an unsupported mode string
+0119 CCFFFF           (      ../fopen.as):00209                             ldd       #-1       ; load D from immediate value -1
+011C 200D             (      ../fopen.as):00210                             bra       openit13  ; branch unconditionally to openit13
+                      (      ../fopen.as):00211         
+011E                  (      ../fopen.as):00212         openit10
+011E ECE4             (      ../fopen.as):00213                             ldd       ,s        ; load D from memory pointed to by S
+0120 CA81             (      ../fopen.as):00214                             orb       #$81      ; request direct-access open flags along with read permission
+0122                  (      ../fopen.as):00215         openit11
+0122 3406             (      ../fopen.as):00216                             pshs      d         ; save D on the hardware stack
+0124 3440             (      ../fopen.as):00217                             pshs      u         ; save U on the hardware stack
+0126 170000           (      ../fopen.as):00218                             lbsr      _open     ; issue the final OS-9 open call with the computed flags
+0129                  (      ../fopen.as):00219         openit12
+0129 3264             (      ../fopen.as):00220                             leas      4,s       ; adjust S using 4,s
+012B                  (      ../fopen.as):00221         openit13
+012B 3264             (      ../fopen.as):00222                             leas      4,s       ; discard the saved flags and pathname pointer before returning
+012D 39               (      ../fopen.as):00223                             rts                 ; return to caller
+                      (      ../fopen.as):00224         
+                      (      ../fopen.as):00225                             endsect             ; end current section

@@ -1,0 +1,4 @@
+Symbol: _chdir (dir.o) = 0000
+Symbol: _chxdir (dir.o) = 000A
+Symbol: I_ChgDir (dir.o) = 0086
+Symbol: Loop_01 (dir.o) = 0002

@@ -5,12 +5,29 @@
  * os.h - OS-9/NitrOS-9 Definitions
  */
 
+/**
+ * @file os.h
+ * @brief Core OS-9 and NitrOS-9 constants, types, and low-level syscall helpers.
+ */
+
+/**
+ * @brief Last OS-9 or library error code observed by the runtime.
+ */
 extern int errno;
 
+/**
+ * @brief Numeric OS-9 error-code type.
+ */
 typedef int error_code;
 
 /* These probably need to go into cmoc.h */
+/**
+ * @brief Unsigned 8-bit byte type used by OS-9 interfaces.
+ */
 typedef unsigned char byte;
+/**
+ * @brief Legacy boolean type used by older interfaces.
+ */
 typedef byte BOOL;
 
 /* System calls */
@@ -305,21 +322,250 @@ typedef struct _registers_6809 {
  */
 error_code _os_syscall(int callcode, registers_6809 *registers);
 
+/* Small GetStat/SetStat helpers used by the old Kreider CGfx code. */
+/**
+ * @brief Return the object size reported by `SS_Size`.
+ *
+ * @param path Open path descriptor.
+ * @return Size value, or a negative result on failure.
+ */
+long _gs_size(int path);
+
+/**
+ * @brief Return the current file position reported by `SS_Pos`.
+ *
+ * @param path Open path descriptor.
+ * @return Current position, or a negative result on failure.
+ */
+long _gs_pos(int path);
+
+/**
+ * @brief Query readiness using `SS_Ready`.
+ *
+ * @param path Open path descriptor.
+ * @return Ready status, or a negative result on failure.
+ */
+int _gs_rdy(int path);
+
+/**
+ * @brief Query end-of-file state using `SS_EOF`.
+ *
+ * @param path Open path descriptor.
+ * @return EOF status, or a negative result on failure.
+ */
+int _gs_eof(int path);
+
+/**
+ * @brief Read an OS-9 options packet using `SS_Opt`.
+ *
+ * @param path Open path descriptor.
+ * @param opts Destination options buffer.
+ * @return `0` on success, otherwise an OS-9 error code.
+ */
+error_code _gs_opt(int path, void *opts);
+
+/**
+ * @brief Read the device name associated with a path.
+ *
+ * @param path Open path descriptor.
+ * @param name Destination buffer.
+ * @return `0` on success, otherwise an OS-9 error code.
+ */
+error_code _gs_devn(int path, char *name);
+
+/**
+ * @brief Write an options packet using `SS_Opt`.
+ *
+ * @param path Open path descriptor.
+ * @param opts Source options buffer.
+ * @return `0` on success, otherwise an OS-9 error code.
+ */
+error_code _ss_opt(int path, void *opts);
+
+/**
+ * @brief Set attributes using `SS_Attr`.
+ *
+ * @param path Open path descriptor.
+ * @param value Attribute block or value pointer.
+ * @return `0` on success, otherwise an OS-9 error code.
+ */
+error_code _ss_attr(int path, void *value);
+
+/**
+ * @brief Set size-related information using `SS_Size`.
+ *
+ * @param path Open path descriptor.
+ * @param value Size block or value pointer.
+ * @return `0` on success, otherwise an OS-9 error code.
+ */
+error_code _ss_size(int path, void *value);
+
+/**
+ * @brief Lock a path or resource using `SS_Lock`.
+ *
+ * @param path Open path descriptor.
+ * @param value Lock parameter block.
+ * @return `0` on success, otherwise an OS-9 error code.
+ */
+error_code _ss_lock(int path, void *value);
+
+/**
+ * @brief Release a path or resource using the matching SetStat call.
+ *
+ * @param path Open path descriptor.
+ * @param value Release parameter block.
+ * @return `0` on success, otherwise an OS-9 error code.
+ */
+error_code _ss_rel(int path, void *value);
+
+/**
+ * @brief Reset a device or stream using `SS_Reset`.
+ *
+ * @param path Open path descriptor.
+ * @param value Reset parameter block.
+ * @return `0` on success, otherwise an OS-9 error code.
+ */
+error_code _ss_rest(int path, void *value);
+
+/**
+ * @brief Configure signal-on-status behavior for a path.
+ *
+ * @param path Open path descriptor.
+ * @param value Signal parameter block.
+ * @return `0` on success, otherwise an OS-9 error code.
+ */
+error_code _ss_ssig(int path, void *value);
+
+/**
+ * @brief Set or read tick-related status information.
+ *
+ * @param path Open path descriptor.
+ * @param value Tick parameter block.
+ * @return `0` on success, otherwise an OS-9 error code.
+ */
+error_code _ss_tiks(int path, void *value);
+
+/**
+ * @brief Return the absolute value of a signed integer.
+ *
+ * @param value Input value.
+ * @return Absolute value of `value`.
+ */
 int abs(int value);
 
+/**
+ * @brief Return the current process identifier through an output pointer.
+ *
+ * @param pid Receives the process identifier.
+ * @return `0` on success, otherwise an OS-9 error code.
+ */
 error_code _os_getpid(int *pid);
+
+/**
+ * @brief Return the current user identifier through an output pointer.
+ *
+ * @param uid Receives the user identifier.
+ * @return `0` on success, otherwise an OS-9 error code.
+ */
 error_code _os_getuid(int *uid);
+
+/**
+ * @brief Set the active user identifier using administrative semantics.
+ *
+ * @param uid New user identifier.
+ * @return `0` on success, otherwise an OS-9 error code.
+ */
 error_code _os_asetuid(int uid);
+
+/**
+ * @brief Set the current user identifier.
+ *
+ * @param uid New user identifier.
+ * @return `0` on success, otherwise an OS-9 error code.
+ */
 error_code _os_setuid(int uid);
 
+/**
+ * @brief Send a signal to a target process or task.
+ *
+ * @param pid Target process or task identifier.
+ * @param sig Signal number to deliver.
+ * @return `0` on success, otherwise an OS-9 error code.
+ */
 error_code _os_send(int pid, int sig);
-error_code _os_wait(int *pid);
-error_code _os_setpr(int pid, int priority);
-error_code _os_chain(void *modaddr, int paramsize, void *paramaddr, int lang, int type, int datasize);
-error_code _os_fork(void *modaddr, int paramsize, void *paramaddr, int lang, int type, int datasize, int *pid);
 
+/**
+ * @brief Wait for a child process to change state or exit.
+ *
+ * @param status Receives the child status code when non-`NULL`.
+ * @return Child identifier on success, or `-1` on failure.
+ */
+int _os_wait(int *status);
+
+/**
+ * @brief Set the priority of a process or task.
+ *
+ * @param pid Target process or task identifier.
+ * @param priority New priority value.
+ * @return `0` on success, otherwise an OS-9 error code.
+ */
+error_code _os_setpr(int pid, int priority);
+
+/**
+ * @brief Replace the current process image with another module.
+ *
+ * @param modname Module name to execute.
+ * @param paramsize Size of the parameter block.
+ * @param paramaddr Address of the parameter block.
+ * @param lang Module language code.
+ * @param type Module type code.
+ * @param datasize Requested data area size.
+ * @return `0` on success, otherwise an OS-9 error code.
+ */
+error_code _os_chain(const char *modname, int paramsize, void *paramaddr, int lang, int type, int datasize);
+
+/**
+ * @brief Start another program module as a child process.
+ *
+ * @param modname Module name to execute.
+ * @param paramsize Size of the parameter block.
+ * @param paramaddr Address of the parameter block.
+ * @param lang Module language code.
+ * @param type Module type code.
+ * @param datasize Requested data area size.
+ * @param pid Receives the child process identifier.
+ * @return `0` on success, otherwise an OS-9 error code.
+ */
+error_code _os_fork(const char *modname, int paramsize, void *paramaddr, int lang, int type, int datasize, int *pid);
+
+/**
+ * @brief Link to an already-loaded module.
+ *
+ * @param modname Module name to link.
+ * @param lang Module language code.
+ * @param type Module type code.
+ * @param modaddr Receives the module header address.
+ * @return `0` on success, otherwise an OS-9 error code.
+ */
 error_code _os_modlink(char *modname, int lang, int type, void **modaddr);
+
+/**
+ * @brief Load a module by name and return its header address.
+ *
+ * @param modname Module name to load.
+ * @param lang Module language code.
+ * @param type Module type code.
+ * @param modaddr Receives the module header address.
+ * @return `0` on success, otherwise an OS-9 error code.
+ */
 error_code _os_modload(char *modname, int lang, int type, void **modaddr);
+
+/**
+ * @brief Unlink a previously linked or loaded module.
+ *
+ * @param modaddr Module header address to unlink.
+ * @return `0` on success, otherwise an OS-9 error code.
+ */
 error_code _os_modunlink(void *modaddr);
 
 #endif

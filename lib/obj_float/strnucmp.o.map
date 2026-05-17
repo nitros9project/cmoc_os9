@@ -1,0 +1,5 @@
+Symbol: _strnucmp (strnucmp.o) = 0000
+Symbol: BranchTarget_01 (strnucmp.o) = 0037
+Symbol: Continue_01 (strnucmp.o) = 0017
+Symbol: Loop_01 (strnucmp.o) = 000A
+Symbol: ReturnZero_01 (strnucmp.o) = 0035

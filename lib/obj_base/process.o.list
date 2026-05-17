@@ -1,0 +1,125 @@
+                      (    ../process.as):00001                             use       ../include/os9.d ; shared OS-9 service constants
+                      ( ../include/os9.d):00001         * Shared assembler-side OS-9 service, error, and status constants.
+                      ( ../include/os9.d):00002         
+     0000             ( ../include/os9.d):00003         F_Link              equ       $00       ; OS-9 link existing module
+     0001             ( ../include/os9.d):00004         F_Load              equ       $01       ; OS-9 load module from disk
+     0002             ( ../include/os9.d):00005         F_UnLink            equ       $02       ; OS-9 release linked module
+     0003             ( ../include/os9.d):00006         F_Fork              equ       $03       ; OS-9 fork system call
+     0004             ( ../include/os9.d):00007         F_Wait              equ       $04       ; OS-9 wait system call
+     0005             ( ../include/os9.d):00008         F_Chain             equ       $05       ; OS-9 chain system call
+     0006             ( ../include/os9.d):00009         F_Exit              equ       $06       ; OS-9 exit system call
+     0007             ( ../include/os9.d):00010         F_Mem               equ       $07       ; OS-9 memory-allocation service
+     0008             ( ../include/os9.d):00011         F_Send              equ       $08       ; OS-9 send-signal system call
+     0009             ( ../include/os9.d):00012         F_Icpt              equ       $09       ; OS-9 intercept-vector service
+     000A             ( ../include/os9.d):00013         F_Sleep             equ       $0A       ; OS-9 sleep system call
+     000C             ( ../include/os9.d):00014         F_ID                equ       $0C       ; OS-9 process identity service
+     000D             ( ../include/os9.d):00015         F_SPrior            equ       $0D       ; OS-9 set-priority system call
+     000F             ( ../include/os9.d):00016         F_PErr              equ       $0F       ; OS-9 print-error service
+     0015             ( ../include/os9.d):00017         F_Time              equ       $15       ; OS-9 read system time service
+     0016             ( ../include/os9.d):00018         F_STime             equ       $16       ; OS-9 set system time service
+     0017             ( ../include/os9.d):00019         F_CRC               equ       $17       ; OS-9 CRC helper service
+                      ( ../include/os9.d):00020         
+     0083             ( ../include/os9.d):00021         I_Create            equ       $83       ; OS-9 create path call
+     0084             ( ../include/os9.d):00022         I_Open              equ       $84       ; OS-9 open path call
+     0085             ( ../include/os9.d):00023         I_MakDir            equ       $85       ; OS-9 make-directory call
+     0086             ( ../include/os9.d):00024         I_ChgDir            equ       $86       ; OS-9 change-directory call
+     0088             ( ../include/os9.d):00025         I_Seek              equ       $88       ; OS-9 direct seek call
+     0089             ( ../include/os9.d):00026         I_Read              equ       $89       ; OS-9 read call
+     008A             ( ../include/os9.d):00027         I_Write             equ       $8A       ; OS-9 write call
+     008B             ( ../include/os9.d):00028         I_ReadLn            equ       $8B       ; OS-9 line-read call
+     008C             ( ../include/os9.d):00029         I_WritLn            equ       $8C       ; OS-9 line-write call
+     008D             ( ../include/os9.d):00030         I_GetStt            equ       $8D       ; OS-9 GetStat call
+     008E             ( ../include/os9.d):00031         I_SetStt            equ       $8E       ; OS-9 SetStat call
+     008F             ( ../include/os9.d):00032         I_Close             equ       $8F       ; OS-9 close call
+     0090             ( ../include/os9.d):00033         I_DeletX            equ       $90       ; OS-9 extended delete call
+                      ( ../include/os9.d):00034         
+     00D0             ( ../include/os9.d):00035         E_UnkSvc            equ       $D0       ; unknown service error code
+     00D3             ( ../include/os9.d):00036         E_EOF               equ       $D3       ; end-of-file status code
+     00D6             ( ../include/os9.d):00037         E_FNA               equ       $D6       ; file not accessible error code
+     00F7             ( ../include/os9.d):00038         E_Seek              equ       $F7       ; seek error code
+                      ( ../include/os9.d):00039         
+     0001             ( ../include/os9.d):00040         SS_Ready            equ       $01       ; path ready state query
+     0002             ( ../include/os9.d):00041         SS_Size             equ       $02       ; file size query/set
+     0003             ( ../include/os9.d):00042         SS_Reset            equ       $03       ; reset device/path state
+     0004             ( ../include/os9.d):00043         SS_WTrk             equ       $04       ; write-track style command
+     0005             ( ../include/os9.d):00044         SS_Pos              equ       $05       ; current file position query
+     0006             ( ../include/os9.d):00045         SS_EOF              equ       $06       ; end-of-file query
+     000A             ( ../include/os9.d):00046         SS_Frz              equ       $0A       ; freeze device command
+     000B             ( ../include/os9.d):00047         SS_SPT              equ       $0B       ; set sectors-per-track style command
+     000C             ( ../include/os9.d):00048         SS_SQD              equ       $0C       ; sequence-down command
+     000D             ( ../include/os9.d):00049         SS_DCmd             equ       $0D       ; device command with register block
+     000E             ( ../include/os9.d):00050         SS_DevNm            equ       $0E       ; device name query
+     000F             ( ../include/os9.d):00051         SS_FD               equ       $0F       ; file descriptor sector query/set
+     0010             ( ../include/os9.d):00052         SS_Ticks            equ       $10       ; tick count status
+     0011             ( ../include/os9.d):00053         SS_Lock             equ       $11       ; lock status command
+     0014             ( ../include/os9.d):00054         SS_BlkRd            equ       $14       ; block read command
+     0015             ( ../include/os9.d):00055         SS_BlkWr            equ       $15       ; block write command
+     0019             ( ../include/os9.d):00056         SS_ELog             equ       $19       ; error log command
+     001A             ( ../include/os9.d):00057         SS_SSig             equ       $1A       ; send signal command
+     001B             ( ../include/os9.d):00058         SS_Relea            equ       $1B       ; release command
+                      (    ../process.as):00002         
+                      (    ../process.as):00003         __os_send           EXPORT              ; export signal-send wrapper
+                      (    ../process.as):00004         __os_wait           EXPORT              ; export wait wrapper
+                      (    ../process.as):00005         __os_setpr          EXPORT              ; export set-priority wrapper
+                      (    ../process.as):00006         __os_chain          EXPORT              ; export chain wrapper
+                      (    ../process.as):00007         __os_fork           EXPORT              ; export fork wrapper
+                      (    ../process.as):00008         
+                      (    ../process.as):00009         _oserr              EXTERNAL            ; common OS-9 error-return helper
+                      (    ../process.as):00010         _osret              EXTERNAL            ; common OS-9 success-return helper
+                      (    ../process.as):00011         
+                      (    ../process.as):00012                             section   code      ; begin code section
+                      (    ../process.as):00013         
+0000                  (    ../process.as):00014         __os_send
+0000 A663             (    ../process.as):00015                             lda       3,s       ; load target process id byte
+0002 E665             (    ../process.as):00016                             ldb       5,s       ; load signal number byte
+0004 103F08           (    ../process.as):00017                             os9       F_Send    ; deliver signal directly through OS-9
+0007 160000           (    ../process.as):00018                             lbra      _osret    ; return 0 on success or errno on failure
+                      (    ../process.as):00019         
+000A                  (    ../process.as):00020         __os_wait
+000A 4F               (    ../process.as):00021                             clra                ; clear high byte before wait call
+000B 5F               (    ../process.as):00022                             clrb                ; clear low byte before wait call
+000C 103F04           (    ../process.as):00023                             os9       F_Wait    ; wait for any child process to terminate
+000F 10250000         (    ../process.as):00024                             lblo      _oserr    ; return errno-style error when no child or failure
+0013 AE62             (    ../process.as):00025                             ldx       2,s       ; load caller's status pointer
+0015 2704             (    ../process.as):00026                             beq       L001b     ; skip status writeback when pointer is NULL
+0017 E701             (    ../process.as):00027                             stb       1,x       ; store child exit status in low byte
+0019 6F84             (    ../process.as):00028                             clr       ,x        ; clear high byte of stored status word
+001B 1F89             (    ../process.as):00029         L001b               tfr       a,b       ; move child pid byte into low byte of return value
+001D 4F               (    ../process.as):00030                             clra                ; clear high byte of returned pid
+001E 39               (    ../process.as):00031                             rts                 ; return child pid in D
+                      (    ../process.as):00032         
+001F                  (    ../process.as):00033         __os_setpr
+001F A663             (    ../process.as):00034                             lda       3,s       ; load process id byte
+0021 E665             (    ../process.as):00035                             ldb       5,s       ; load requested priority byte
+0023 103F0D           (    ../process.as):00036                             os9       F_SPrior  ; update process priority
+0026 160000           (    ../process.as):00037                             lbra      _osret    ; return 0 on success or errno on failure
+                      (    ../process.as):00038         
+0029                  (    ../process.as):00039         __os_chain
+0029 33E4             (    ../process.as):00040                             leau      ,s        ; capture original argument frame in U
+002B 32A900FF         (    ../process.as):00041                             leas      255,y     ; move stack out of the way before chaining
+002F AE42             (    ../process.as):00042                             ldx       2,u       ; load module name pointer
+0031 10AE44           (    ../process.as):00043                             ldy       4,u       ; load parameter size in pages
+0034 A649             (    ../process.as):00044                             lda       9,u       ; load language byte
+0036 AA4B             (    ../process.as):00045                             ora       11,u      ; merge requested module type byte
+0038 E64D             (    ../process.as):00046                             ldb       13,u      ; load requested data size in pages
+003A EE46             (    ../process.as):00047                             ldu       6,u       ; load parameter address
+003C 103F05           (    ../process.as):00048                             os9       F_Chain   ; replace current process image with target module
+003F 103F06           (    ../process.as):00049                             os9       F_Exit    ; terminate if chain unexpectedly returns
+                      (    ../process.as):00050         
+0042                  (    ../process.as):00051         __os_fork
+0042 3460             (    ../process.as):00052                             pshs      y,u       ; preserve caller's Y and U registers
+0044 AE66             (    ../process.as):00053                             ldx       6,s       ; load module name pointer
+0046 10AE68           (    ../process.as):00054                             ldy       8,s       ; load parameter size in pages
+0049 EE6A             (    ../process.as):00055                             ldu       10,s      ; load parameter address
+004B A66D             (    ../process.as):00056                             lda       13,s      ; load language byte
+004D AA6F             (    ../process.as):00057                             ora       15,s      ; merge requested module type byte
+004F E6E811           (    ../process.as):00058                             ldb       17,s      ; load requested data size in pages
+0052 103F03           (    ../process.as):00059                             os9       F_Fork    ; create child process
+0055 3560             (    ../process.as):00060                             puls      y,u       ; restore caller's Y and U registers
+0057 10250000         (    ../process.as):00061                             lblo      _oserr    ; return errno-style error on fork failure
+005B 1F89             (    ../process.as):00062                             tfr       a,b       ; normalize returned child pid into D
+005D 4F               (    ../process.as):00063                             clra                ; clear high byte of returned pid
+005E EDF80E           (    ../process.as):00064                             std       [14,s]    ; store child pid through caller's output pointer
+0061 160000           (    ../process.as):00065                             lbra      _osret    ; return 0 on success or errno on failure
+                      (    ../process.as):00066         
+                      (    ../process.as):00067                             endsect             ; end code section

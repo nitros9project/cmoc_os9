@@ -1,0 +1,5 @@
+Symbol: _memccpy (memccpy.o) = 0000
+Symbol: BranchTarget_01 (memccpy.o) = 0017
+Symbol: BranchTarget_02 (memccpy.o) = 001B
+Symbol: Continue_01 (memccpy.o) = 001D
+Symbol: Loop_01 (memccpy.o) = 000B

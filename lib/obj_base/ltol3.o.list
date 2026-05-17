@@ -1,0 +1,29 @@
+                      (      ../ltol3.as):00001         * Adapted from cmoc_os9/lib/todo/ltol3.as for the live cmoc_os9 ABI.
+                      (      ../ltol3.as):00002         
+                      (      ../ltol3.as):00003                             section   code      ; begin code section
+                      (      ../ltol3.as):00004         
+                      (      ../ltol3.as):00005         _ltol3              EXPORT              ; export this symbol
+                      (      ../ltol3.as):00006         
+0000                  (      ../ltol3.as):00007         _ltol3
+0000 3440             (      ../ltol3.as):00008                             pshs      u         ; save U on the hardware stack
+0002 EE64             (      ../ltol3.as):00009                             ldu       4,s       ; load U from stack-relative value 4,s
+0004 3341             (      ../ltol3.as):00010                             leau      1,u       ; compute effective address into U from 1,u
+0006 2015             (      ../ltol3.as):00011                             bra       Continue_01 ; branch unconditionally to Continue_01
+0008 AE66             (      ../ltol3.as):00012         Loop_01             ldx       6,s       ; load X from stack-relative value 6,s
+000A E601             (      ../ltol3.as):00013                             ldb       1,x       ; load B from indexed value 1,x
+000C E75F             (      ../ltol3.as):00014                             stb       -1,u      ; store B to indexed value -1,u
+000E AE66             (      ../ltol3.as):00015                             ldx       6,s       ; load X from stack-relative value 6,s
+0010 EC02             (      ../ltol3.as):00016                             ldd       2,x       ; load D from indexed value 2,x
+0012 EDC4             (      ../ltol3.as):00017                             std       ,u        ; store D to memory pointed to by U
+0014 EC66             (      ../ltol3.as):00018                             ldd       6,s       ; load D from stack-relative value 6,s
+0016 C30004           (      ../ltol3.as):00019                             addd      #4        ; add immediate value 4 into D
+0019 ED66             (      ../ltol3.as):00020                             std       6,s       ; store D to stack-relative value 6,s
+001B 3343             (      ../ltol3.as):00021                             leau      3,u       ; compute effective address into U from 3,u
+001D EC68             (      ../ltol3.as):00022         Continue_01         ldd       8,s       ; load D from stack-relative value 8,s
+001F C3FFFF           (      ../ltol3.as):00023                             addd      #-1       ; add immediate value -1 into D
+0022 ED68             (      ../ltol3.as):00024                             std       8,s       ; store D to stack-relative value 8,s
+0024 83FFFF           (      ../ltol3.as):00025                             subd      #-1       ; subtract immediate value -1 from D
+0027 2EDF             (      ../ltol3.as):00026                             bgt       Loop_01   ; branch if greater than to Loop_01
+0029 35C0             (      ../ltol3.as):00027                             puls      u,pc      ; restore registers and return
+                      (      ../ltol3.as):00028         
+                      (      ../ltol3.as):00029                             endsect             ; end current section

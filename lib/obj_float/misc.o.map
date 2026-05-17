@@ -1,0 +1,9 @@
+Symbol: _crc (misc.o) = 000C
+Symbol: _lock (misc.o) = 0000
+Symbol: _pause (misc.o) = 0001
+Symbol: _prerr (misc.o) = 001A
+Symbol: _sync (misc.o) = 000B
+Symbol: _tsleep (misc.o) = 0026
+Symbol: F_CRC (misc.o) = 0017
+Symbol: F_PErr (misc.o) = 000F
+Symbol: F_Sleep (misc.o) = 000A

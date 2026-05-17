@@ -1,0 +1,6 @@
+Symbol: _lshl (clshifts.o) = 0000
+Symbol: _lshr (clshifts.o) = 001C
+Symbol: BranchTarget_01 (clshifts.o) = 0017
+Symbol: BranchTarget_02 (clshifts.o) = 0033
+Symbol: Loop_01 (clshifts.o) = 000C
+Symbol: Loop_02 (clshifts.o) = 0028

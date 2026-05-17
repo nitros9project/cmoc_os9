@@ -1,0 +1,58 @@
+                      (        ../gs2.as):00001         * Adapted from cmoc_os9/lib/todo/gs2.as for the live cmoc_os9 ABI.
+                      (        ../gs2.as):00002         
+                      (        ../gs2.as):00003                             section   code      ; begin code section
+                      (        ../gs2.as):00004         
+                      (        ../gs2.as):00005         _gs_rdy             EXPORT              ; export this symbol
+                      (        ../gs2.as):00006         _gs_eof             EXPORT              ; export this symbol
+                      (        ../gs2.as):00007         _gs_opt             EXPORT              ; export this symbol
+                      (        ../gs2.as):00008         _gs_devn            EXPORT              ; export this symbol
+                      (        ../gs2.as):00009         _gs_gfd             EXPORT              ; export this symbol
+                      (        ../gs2.as):00010         
+                      (        ../gs2.as):00011         _os9err             EXTERNAL            ; import external symbol
+                      (        ../gs2.as):00012         _sysret             EXTERNAL            ; import external symbol
+                      (        ../gs2.as):00013         
+     008D             (        ../gs2.as):00014         I_GetStt            equ       $8d       ; define constant as $8d
+                      (        ../gs2.as):00015         
+0000                  (        ../gs2.as):00016         _gs_rdy
+0000 C601             (        ../gs2.as):00017                             ldb       #1        ; load B from immediate value 1
+0002 A663             (        ../gs2.as):00018                             lda       3,s       ; load A from stack-relative value 3,s
+0004 103F8D           (        ../gs2.as):00019                             os9       I_GetStt  ; invoke OS-9 system call I_GetStt
+0007 10250000         (        ../gs2.as):00020                             lblo      _os9err   ; long branch if lower to _os9err
+000B 4F               (        ../gs2.as):00021                             clra                ; clear A
+000C 39               (        ../gs2.as):00022                             rts                 ; return to caller
+                      (        ../gs2.as):00023         
+000D                  (        ../gs2.as):00024         _gs_eof
+000D C606             (        ../gs2.as):00025                             ldb       #6        ; load B from immediate value 6
+000F 2004             (        ../gs2.as):00026                             bra       Continue_01 ; branch unconditionally to Continue_01
+                      (        ../gs2.as):00027         
+0011                  (        ../gs2.as):00028         _gs_opt
+0011 C600             (        ../gs2.as):00029                             ldb       #0        ; load B from immediate value 0
+0013 AE64             (        ../gs2.as):00030                             ldx       4,s       ; load X from stack-relative value 4,s
+0015 A663             (        ../gs2.as):00031         Continue_01         lda       3,s       ; load A from stack-relative value 3,s
+0017 103F8D           (        ../gs2.as):00032                             os9       I_GetStt  ; invoke OS-9 system call I_GetStt
+001A 2026             (        ../gs2.as):00033                             bra       BranchTarget_01 ; branch unconditionally to BranchTarget_01
+                      (        ../gs2.as):00034         
+001C                  (        ../gs2.as):00035         _gs_devn
+001C C60E             (        ../gs2.as):00036                             ldb       #$0e      ; load B from immediate value $0e
+001E AE64             (        ../gs2.as):00037                             ldx       4,s       ; load X from stack-relative value 4,s
+0020 A663             (        ../gs2.as):00038                             lda       3,s       ; load A from stack-relative value 3,s
+0022 103F8D           (        ../gs2.as):00039                             os9       I_GetStt  ; invoke OS-9 system call I_GetStt
+0025 251B             (        ../gs2.as):00040                             bcs       BranchTarget_01 ; branch if carry is set to BranchTarget_01
+0027 A680             (        ../gs2.as):00041         Loop_01             lda       ,x+       ; load A from memory pointed to by X, then advance X
+0029 2AFC             (        ../gs2.as):00042                             bpl       Loop_01   ; branch if plus to Loop_01
+002B 847F             (        ../gs2.as):00043                             anda      #$7f      ; AND A with immediate value $7f
+002D A71F             (        ../gs2.as):00044                             sta       -1,x      ; store A to indexed value -1,x
+002F 6F84             (        ../gs2.as):00045                             clr       ,x        ; clear memory pointed to by X
+0031 39               (        ../gs2.as):00046                             rts                 ; return to caller
+                      (        ../gs2.as):00047         
+0032                  (        ../gs2.as):00048         _gs_gfd
+0032 3420             (        ../gs2.as):00049                             pshs      y         ; save Y on the hardware stack
+0034 C60F             (        ../gs2.as):00050                             ldb       #$0f      ; load B from immediate value $0f
+0036 A665             (        ../gs2.as):00051                             lda       5,s       ; load A from stack-relative value 5,s
+0038 AE66             (        ../gs2.as):00052                             ldx       6,s       ; load X from stack-relative value 6,s
+003A 10AE68           (        ../gs2.as):00053                             ldy       8,s       ; load Y from stack-relative value 8,s
+003D 103F8D           (        ../gs2.as):00054                             os9       I_GetStt  ; invoke OS-9 system call I_GetStt
+0040 3520             (        ../gs2.as):00055                             puls      y         ; restore Y from the hardware stack
+0042 160000           (        ../gs2.as):00056         BranchTarget_01     lbra      _sysret   ; long branch unconditionally to _sysret
+                      (        ../gs2.as):00057         
+                      (        ../gs2.as):00058                             endsect             ; end current section

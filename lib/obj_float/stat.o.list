@@ -1,0 +1,116 @@
+                      (       ../stat.as):00001         _getstat            EXPORT              ; export generic GetStat wrapper
+                      (       ../stat.as):00002         _setstat            EXPORT              ; export generic SetStat wrapper
+                      (       ../stat.as):00003         
+                      (       ../stat.as):00004         _os9err             EXTERNAL            ; common OS-9 error return helper
+                      (       ../stat.as):00005         _sysret             EXTERNAL            ; common system-call return helper
+                      (       ../stat.as):00006         
+     008D             (       ../stat.as):00007         I_GetStt            equ       $8D       ; OS-9 GetStat system call
+     008E             (       ../stat.as):00008         I_SetStt            equ       $8E       ; OS-9 SetStat system call
+     00D0             (       ../stat.as):00009         E_UnkSvc            equ       $D0       ; unknown service error code
+     0001             (       ../stat.as):00010         SS_Ready            equ       $01       ; path ready state query
+     0002             (       ../stat.as):00011         SS_Size             equ       $02       ; file size query/set
+     0003             (       ../stat.as):00012         SS_Reset            equ       $03       ; reset device/path state
+     0004             (       ../stat.as):00013         SS_WTrk             equ       $04       ; write-track style command
+     0005             (       ../stat.as):00014         SS_Pos              equ       $05       ; current file position query
+     0006             (       ../stat.as):00015         SS_EOF              equ       $06       ; end-of-file query
+     000A             (       ../stat.as):00016         SS_Frz              equ       $0A       ; freeze device command
+     000B             (       ../stat.as):00017         SS_SPT              equ       $0B       ; set sectors-per-track style command
+     000C             (       ../stat.as):00018         SS_SQD              equ       $0C       ; sequence-down command
+     000D             (       ../stat.as):00019         SS_DCmd             equ       $0D       ; device command with register block
+     000E             (       ../stat.as):00020         SS_DevNm            equ       $0E       ; device name query
+     000F             (       ../stat.as):00021         SS_FD               equ       $0F       ; file descriptor sector query/set
+     0010             (       ../stat.as):00022         SS_Ticks            equ       $10       ; tick count status
+     0011             (       ../stat.as):00023         SS_Lock             equ       $11       ; lock status command
+     0014             (       ../stat.as):00024         SS_BlkRd            equ       $14       ; block read command
+     0015             (       ../stat.as):00025         SS_BlkWr            equ       $15       ; block write command
+     0019             (       ../stat.as):00026         SS_ELog             equ       $19       ; error log command
+     001A             (       ../stat.as):00027         SS_SSig             equ       $1A       ; send signal command
+     001B             (       ../stat.as):00028         SS_Relea            equ       $1B       ; release command
+                      (       ../stat.as):00029         
+                      (       ../stat.as):00030                             section   code      ; begin code section
+                      (       ../stat.as):00031         
+0000                  (       ../stat.as):00032         _getstat
+0000 3460             (       ../stat.as):00033                             pshs      y,u       ; preserve Y and U across the system call
+0002 A669             (       ../stat.as):00034                             lda       9,s       ; load path number argument
+0004 E667             (       ../stat.as):00035                             ldb       7,s       ; load requested GetStat code
+0006 272F             (       ../stat.as):00036                             beq       L003c     ; SS_Opt uses only X as parameter
+0008 C101             (       ../stat.as):00037                             cmpb      #SS_Ready ; check for simple status query using registers only
+000A 272D             (       ../stat.as):00038                             beq       L003e     ; issue call directly for single-register forms
+000C C102             (       ../stat.as):00039                             cmpb      #SS_Size  ; query 32-bit file size
+000E 2714             (       ../stat.as):00040                             beq       L0024     ; handle X/U return pair specially
+0010 C105             (       ../stat.as):00041                             cmpb      #SS_Pos   ; query 32-bit file position
+0012 2710             (       ../stat.as):00042                             beq       L0024     ; handle X/U return pair specially
+0014 C106             (       ../stat.as):00043                             cmpb      #SS_EOF   ; check end-of-file status
+0016 2721             (       ../stat.as):00044                             beq       L003e     ; direct GetStat with no pointer setup
+0018 C10E             (       ../stat.as):00045                             cmpb      #SS_DevNm ; request device name string
+001A 271B             (       ../stat.as):00046                             beq       L003c     ; load X only before the call
+001C C10F             (       ../stat.as):00047                             cmpb      #SS_FD    ; request file descriptor sector
+001E 2714             (       ../stat.as):00048                             beq       L0039     ; load both X and Y before the call
+0020 C6D0             (       ../stat.as):00049                             ldb       #E_UnkSvc ; reject unsupported traditional codes
+0022 2018             (       ../stat.as):00050                             bra       gsbye     ; return error through shared exit
+0024 103F8D           (       ../stat.as):00051         L0024               os9       I_GetStt  ; perform size/position GetStat call
+0027 2513             (       ../stat.as):00052                             bcs       gsbye     ; return immediately if OS-9 signaled an error
+0029 AFF80A           (       ../stat.as):00053         L002e               stx       [10,s]    ; store high word of 32-bit result through p1
+002C AE6A             (       ../stat.as):00054                             ldx       10,s      ; reload destination pointer
+002E EF02             (       ../stat.as):00055                             stu       2,x       ; store low word of 32-bit result through p1
+0030 5F               (       ../stat.as):00056                             clrb                ; clear low byte of success return value
+0031 4F               (       ../stat.as):00057                             clra                ; clear high byte of success return value
+0032 2008             (       ../stat.as):00058                             bra       gsbye     ; finish through shared return path
+0034 10AE6C           (       ../stat.as):00059         L0039               ldy       12,s      ; load byte-count/aux pointer argument for SS_FD
+0037 AE6A             (       ../stat.as):00060         L003c               ldx       10,s      ; load primary buffer pointer argument
+0039 103F8D           (       ../stat.as):00061         L003e               os9       I_GetStt  ; issue the requested GetStat call
+003C 3560             (       ../stat.as):00062         gsbye               puls      y,u       ; restore preserved registers
+003E 160000           (       ../stat.as):00063                             lbra      _sysret   ; return using shared status-to-C helper
+                      (       ../stat.as):00064         
+0041                  (       ../stat.as):00065         _setstat
+0041 3460             (       ../stat.as):00066                             pshs      y,u       ; preserve Y and U across the system call
+0043 A669             (       ../stat.as):00067                             lda       9,s       ; load path number argument
+0045 E667             (       ../stat.as):00068                             ldb       7,s       ; load requested SetStat code
+0047 2748             (       ../stat.as):00069                             beq       L0096     ; SS_Opt uses X only
+0049 C102             (       ../stat.as):00070                             cmpb      #SS_Size  ; file size update uses X and U
+004B 2742             (       ../stat.as):00071                             beq       L0094     ; prepare both registers before calling
+004D C103             (       ../stat.as):00072                             cmpb      #SS_Reset ; reset uses X only
+004F 2740             (       ../stat.as):00073                             beq       L0096     ; prepare X before calling
+0051 C104             (       ../stat.as):00074                             cmpb      #SS_WTrk  ; commands needing X and Y
+0053 2737             (       ../stat.as):00075                             beq       L0091     ; prepare Y then fall through to X/U setup
+0055 C10A             (       ../stat.as):00076                             cmpb      #SS_Frz   ; command uses registers as-is
+0057 2748             (       ../stat.as):00077                             beq       L00a6     ; issue call directly
+0059 C10B             (       ../stat.as):00078                             cmpb      #SS_SPT   ; command uses X only
+005B 2734             (       ../stat.as):00079                             beq       L0096     ; prepare X before calling
+005D C10C             (       ../stat.as):00080                             cmpb      #SS_SQD   ; command uses registers as-is
+005F 2740             (       ../stat.as):00081                             beq       L00a6     ; issue call directly
+0061 C10D             (       ../stat.as):00082                             cmpb      #SS_DCmd  ; device command uses A/B/X/Y/U packed args
+0063 2730             (       ../stat.as):00083                             beq       L009a     ; unpack extended register set
+0065 C10F             (       ../stat.as):00084                             cmpb      #SS_FD    ; descriptor update uses X only
+0067 2728             (       ../stat.as):00085                             beq       L0096     ; prepare X before calling
+0069 C110             (       ../stat.as):00086                             cmpb      #SS_Ticks ; tick update uses X only
+006B 2724             (       ../stat.as):00087                             beq       L0096     ; prepare X before calling
+006D C111             (       ../stat.as):00088                             cmpb      #SS_Lock  ; lock command uses X and U
+006F 271E             (       ../stat.as):00089                             beq       L0094     ; prepare X and U before calling
+0071 C114             (       ../stat.as):00090                             cmpb      #SS_BlkRd ; block commands use X and Y
+0073 2717             (       ../stat.as):00091                             beq       L0091     ; prepare Y then X/U sequence
+0075 C115             (       ../stat.as):00092                             cmpb      #SS_BlkWr ; block commands use X and Y
+0077 2713             (       ../stat.as):00093                             beq       L0091     ; prepare Y then X/U sequence
+0079 C119             (       ../stat.as):00094                             cmpb      #SS_ELog  ; error log command uses X and Y
+007B 270F             (       ../stat.as):00095                             beq       L0091     ; prepare Y then X/U sequence
+007D C11A             (       ../stat.as):00096                             cmpb      #SS_SSig  ; signal command uses X only
+007F 2710             (       ../stat.as):00097                             beq       L0096     ; prepare X before calling
+0081 C11B             (       ../stat.as):00098                             cmpb      #SS_Relea ; release command uses registers as-is
+0083 271C             (       ../stat.as):00099                             beq       L00a6     ; issue call directly
+0085 C6D0             (       ../stat.as):00100                             ldb       #E_UnkSvc ; reject unsupported traditional codes
+0087 3560             (       ../stat.as):00101                             puls      y,u       ; restore preserved registers before error path
+0089 160000           (       ../stat.as):00102                             lbra      _os9err   ; return unknown-service error
+008C 10AE6E           (       ../stat.as):00103         L0091               ldy       14,s      ; load secondary pointer/count argument
+008F EE6C             (       ../stat.as):00104         L0094               ldu       12,s      ; load auxiliary pointer/value argument
+0091 AE6A             (       ../stat.as):00105         L0096               ldx       10,s      ; load primary pointer/value argument
+0093 200C             (       ../stat.as):00106                             bra       L00a6     ; issue SetStat with prepared registers
+0095 1F89             (       ../stat.as):00107         L009a               tfr       a,b       ; move path number into B for SS_DCmd convention
+0097 A66B             (       ../stat.as):00108                             lda       11,s      ; load command byte into A
+0099 AE6C             (       ../stat.as):00109                             ldx       12,s      ; load primary pointer/value into X
+009B 10AE6E           (       ../stat.as):00110                             ldy       14,s      ; load secondary pointer/value into Y
+009E EEE810           (       ../stat.as):00111                             ldu       16,s      ; load tertiary pointer/value into U
+00A1 103F8E           (       ../stat.as):00112         L00a6               os9       I_SetStt  ; issue the requested SetStat call
+00A4 3560             (       ../stat.as):00113                             puls      y,u       ; restore preserved registers
+00A6 160000           (       ../stat.as):00114                             lbra      _sysret   ; return using shared status-to-C helper
+                      (       ../stat.as):00115         
+                      (       ../stat.as):00116                             endsect             ; end code section

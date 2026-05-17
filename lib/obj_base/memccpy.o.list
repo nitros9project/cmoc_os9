@@ -1,0 +1,24 @@
+                      (    ../memccpy.as):00001         * Adapted from Deek's KLibc memccpy.a for the live cmoc_os9 ABI.
+                      (    ../memccpy.as):00002         
+                      (    ../memccpy.as):00003                             section   code      ; begin code section
+                      (    ../memccpy.as):00004         
+                      (    ../memccpy.as):00005         _memccpy            EXPORT              ; export this symbol
+                      (    ../memccpy.as):00006         
+0000                  (    ../memccpy.as):00007         _memccpy
+0000 3460             (    ../memccpy.as):00008                             pshs      y,u       ; save Y,U on the hardware stack
+0002 EE68             (    ../memccpy.as):00009                             ldu       8,s       ; load U from stack-relative value 8,s
+0004 AE66             (    ../memccpy.as):00010                             ldx       6,s       ; load X from stack-relative value 6,s
+0006 10AE6C           (    ../memccpy.as):00011                             ldy       12,s      ; load Y from stack-relative value 12,s
+0009 2710             (    ../memccpy.as):00012                             beq       BranchTarget_02 ; branch if equal/zero to BranchTarget_02
+000B A6C0             (    ../memccpy.as):00013         Loop_01             lda       ,u+       ; load A from memory pointed to by U, then advance U
+000D A780             (    ../memccpy.as):00014                             sta       ,x+       ; store A to memory pointed to by X, then advance X
+000F A16B             (    ../memccpy.as):00015                             cmpa      11,s      ; compare A against stack-relative value 11,s
+0011 2604             (    ../memccpy.as):00016                             bne       BranchTarget_01 ; branch if not equal to BranchTarget_01
+0013 1F30             (    ../memccpy.as):00017                             tfr       u,d       ; transfer U,D
+0015 2006             (    ../memccpy.as):00018                             bra       Continue_01 ; branch unconditionally to Continue_01
+0017 313F             (    ../memccpy.as):00019         BranchTarget_01     leay      -1,y      ; compute effective address into Y from -1,y
+0019 26F0             (    ../memccpy.as):00020                             bne       Loop_01   ; branch if not equal to Loop_01
+001B 1F20             (    ../memccpy.as):00021         BranchTarget_02     tfr       y,d       ; transfer Y,D
+001D 35E0             (    ../memccpy.as):00022         Continue_01         puls      y,u,pc    ; restore registers and return
+                      (    ../memccpy.as):00023         
+                      (    ../memccpy.as):00024                             endsect             ; end current section

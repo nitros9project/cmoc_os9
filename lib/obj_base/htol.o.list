@@ -1,0 +1,53 @@
+                      (       ../htol.as):00001                             section   code      ; begin code section
+                      (       ../htol.as):00002         
+                      (       ../htol.as):00003         _flacc              EXTERNAL            ; import external symbol
+                      (       ../htol.as):00004         _chcodes            EXTERNAL            ; import external symbol
+                      (       ../htol.as):00005         
+                      (       ../htol.as):00006         htol                EXPORT              ; export this symbol
+                      (       ../htol.as):00007         
+0000 3460             (       ../htol.as):00008         htol:               pshs      y,u       ; save Y,U on the hardware stack
+0002 30A90000         (       ../htol.as):00009                             leax      _flacc,y  ; compute effective address into X from _flacc,y
+0006 31A90000         (       ../htol.as):00010                             leay      _chcodes,y ; compute effective address into Y from _chcodes,y
+000A EE66             (       ../htol.as):00011                             ldu       6,s       ; load U from stack-relative value 6,s
+000C 4F               (       ../htol.as):00012                             clra                ; clear A
+000D 5F               (       ../htol.as):00013                             clrb                ; clear B
+000E ED84             (       ../htol.as):00014                             std       ,x        ; store D to memory pointed to by X
+0010 ED02             (       ../htol.as):00015                             std       2,x       ; store D to indexed value 2,x
+0012 E6C4             (       ../htol.as):00016         Loop_01             ldb       ,u        ; load B from memory pointed to by U
+0014 C120             (       ../htol.as):00017                             cmpb      #$20      ; compare B against immediate value $20
+0016 2704             (       ../htol.as):00018                             beq       BranchTarget_01 ; branch if equal/zero to BranchTarget_01
+0018 C109             (       ../htol.as):00019                             cmpb      #9        ; compare B against immediate value 9
+001A 2632             (       ../htol.as):00020                             bne       BranchTarget_03 ; branch if not equal to BranchTarget_03
+001C 3341             (       ../htol.as):00021         BranchTarget_01     leau      1,u       ; compute effective address into U from 1,u
+001E 20F2             (       ../htol.as):00022                             bra       Loop_01   ; branch unconditionally to Loop_01
+0020 8604             (       ../htol.as):00023         Loop_02             lda       #4        ; load A from immediate value 4
+0022 6803             (       ../htol.as):00024         Loop_03             asl       3,x       ; shift indexed value 3,x left by one bit
+0024 6902             (       ../htol.as):00025                             rol       2,x       ; rotate indexed value 2,x left through carry
+0026 6901             (       ../htol.as):00026                             rol       1,x       ; rotate indexed value 1,x left through carry
+0028 6984             (       ../htol.as):00027                             rol       ,x        ; rotate memory pointed to by X left through carry
+002A 4A               (       ../htol.as):00028                             deca                ; decrement A
+002B 26F5             (       ../htol.as):00029                             bne       Loop_03   ; branch if not equal to Loop_03
+002D E6C0             (       ../htol.as):00030                             ldb       ,u+       ; load B from memory pointed to by U, then advance U
+002F C030             (       ../htol.as):00031                             subb      #$30      ; subtract immediate value $30 from B
+0031 C109             (       ../htol.as):00032                             cmpb      #9        ; compare B against immediate value 9
+0033 2F08             (       ../htol.as):00033                             ble       BranchTarget_02 ; branch if less or equal to BranchTarget_02
+0035 C007             (       ../htol.as):00034                             subb      #7        ; subtract immediate value 7 from B
+0037 C10F             (       ../htol.as):00035                             cmpb      #$0f      ; compare B against immediate value $0f
+0039 2F02             (       ../htol.as):00036                             ble       BranchTarget_02 ; branch if less or equal to BranchTarget_02
+003B C020             (       ../htol.as):00037                             subb      #$20      ; subtract immediate value $20 from B
+003D 1CFE             (       ../htol.as):00038         BranchTarget_02     andcc     #254      ; clear condition-code bits with mask #254
+003F 8603             (       ../htol.as):00039                             lda       #3        ; load A from immediate value 3
+0041 2002             (       ../htol.as):00040                             bra       Continue_01 ; branch unconditionally to Continue_01
+0043 C600             (       ../htol.as):00041         Loop_04             ldb       #0        ; load B from immediate value 0
+0045 E986             (       ../htol.as):00042         Continue_01         adcb      a,x       ; add indexed value a,x into B
+0047 E786             (       ../htol.as):00043                             stb       a,x       ; store B to indexed value a,x
+0049 4A               (       ../htol.as):00044                             deca                ; decrement A
+004A 2AF7             (       ../htol.as):00045                             bpl       Loop_04   ; branch if plus to Loop_04
+004C E6C4             (       ../htol.as):00046                             ldb       ,u        ; load B from memory pointed to by U
+004E E6A5             (       ../htol.as):00047         BranchTarget_03     ldb       b,y       ; load B from indexed value b,y
+0050 C440             (       ../htol.as):00048                             andb      #$40      ; AND B with immediate value $40
+0052 26CC             (       ../htol.as):00049                             bne       Loop_02   ; branch if not equal to Loop_02
+0054 35E0             (       ../htol.as):00050                             puls      y,u,pc    ; restore registers and return
+                      (       ../htol.as):00051         
+                      (       ../htol.as):00052                             endsect             ; end current section
+                      (       ../htol.as):00053         

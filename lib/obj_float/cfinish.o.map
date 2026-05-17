@@ -1,0 +1,3 @@
+Symbol: __exit (cfinish.o) = 0000
+Symbol: _exit (cfinish.o) = 0008
+Symbol: F_Exit (cfinish.o) = 0006

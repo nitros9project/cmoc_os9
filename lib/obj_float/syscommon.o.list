@@ -1,0 +1,36 @@
+                      (  ../syscommon.as):00001                             section   code      ; begin code section
+                      (  ../syscommon.as):00002         
+                      (  ../syscommon.as):00003         * global error entry point for _os_xxxx calls
+                      (  ../syscommon.as):00004         _oserr              EXPORT              ; export this symbol
+0000                  (  ../syscommon.as):00005         _oserr
+0000 4F               (  ../syscommon.as):00006                             clra                ; clear A
+                      (  ../syscommon.as):00007         _errno              EXTERNAL            ; import external symbol
+0001 EDA90000         (  ../syscommon.as):00008                             std       _errno,y  ; store D to indexed value _errno,y
+0005 39               (  ../syscommon.as):00009                             rts                 ; return to caller
+                      (  ../syscommon.as):00010         
+                      (  ../syscommon.as):00011         * global return entry point for _os_xxxx calls
+                      (  ../syscommon.as):00012         _osret              EXPORT              ; export this symbol
+0006                  (  ../syscommon.as):00013         _osret
+0006 25F8             (  ../syscommon.as):00014                             bcs       _oserr    ; branch if carry is set to _oserr
+0008 4F               (  ../syscommon.as):00015                             clra                ; clear A
+0009 5F               (  ../syscommon.as):00016                             clrb                ; clear B
+000A 39               (  ../syscommon.as):00017                             rts                 ; return to caller
+                      (  ../syscommon.as):00018         
+                      (  ../syscommon.as):00019         * global error entry point for traditional calls
+                      (  ../syscommon.as):00020         _os9err             EXPORT              ; export this symbol
+000B                  (  ../syscommon.as):00021         _os9err
+000B 4F               (  ../syscommon.as):00022                             clra                ; clear A
+000C EDA90000         (  ../syscommon.as):00023                             std       _errno,y  ; store D to indexed value _errno,y
+0010 CCFFFF           (  ../syscommon.as):00024                             ldd       #-1       ; load D from immediate value -1
+0013 39               (  ../syscommon.as):00025                             rts                 ; return to caller
+                      (  ../syscommon.as):00026         
+                      (  ../syscommon.as):00027         * global return entry point for traditional calls
+                      (  ../syscommon.as):00028         _sysret             EXPORT              ; export this symbol
+0014                  (  ../syscommon.as):00029         _sysret
+0014 25F5             (  ../syscommon.as):00030                             bcs       _os9err   ; branch if carry is set to _os9err
+0016 4F               (  ../syscommon.as):00031                             clra                ; clear A
+0017 5F               (  ../syscommon.as):00032                             clrb                ; clear B
+0018 39               (  ../syscommon.as):00033                             rts                 ; return to caller
+                      (  ../syscommon.as):00034         
+                      (  ../syscommon.as):00035                             endsect             ; end current section
+                      (  ../syscommon.as):00036         

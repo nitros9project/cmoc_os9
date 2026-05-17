@@ -1,0 +1,44 @@
+                      (  ../intercept.as):00001         * Adapted from cmoc_os9/lib/todo/intercept.as for the live cmoc_os9 ABI.
+                      (  ../intercept.as):00002         *
+                      (  ../intercept.as):00003         * 'signal' and 'intercept' are incompatible by design.  Both modules export
+                      (  ../intercept.as):00004         * _sigint so the linker reports an entry-name clash if a program tries to use
+                      (  ../intercept.as):00005         * both.
+                      (  ../intercept.as):00006         
+                      (  ../intercept.as):00007                             section   bss       ; begin bss section
+                      (  ../intercept.as):00008         
+0000                  (  ../intercept.as):00009         _intsave            rmb       2         ; place for C routine address
+                      (  ../intercept.as):00010         
+                      (  ../intercept.as):00011                             endsect             ; end current section
+                      (  ../intercept.as):00012         
+                      (  ../intercept.as):00013                             section   code      ; begin code section
+                      (  ../intercept.as):00014         
+                      (  ../intercept.as):00015         _sigint             EXPORT              ; export this symbol
+                      (  ../intercept.as):00016         _intercept          EXPORT              ; export this symbol
+                      (  ../intercept.as):00017         
+                      (  ../intercept.as):00018         _sysret             EXTERNAL            ; import external symbol
+                      (  ../intercept.as):00019         
+     0009             (  ../intercept.as):00020         F_Icpt              equ       $09       ; define constant as $09
+                      (  ../intercept.as):00021         
+0000                  (  ../intercept.as):00022         _sigint
+0000                  (  ../intercept.as):00023         _intercept
+0000 3440             (  ../intercept.as):00024                             pshs      u         ; save register variable
+0002 1F23             (  ../intercept.as):00025                             tfr       y,u       ; set data area pointer
+0004 AE64             (  ../intercept.as):00026                             ldx       4,s       ; get C function address
+0006 AFA90000         (  ../intercept.as):00027                             stx       _intsave,y ; save it for the receiver
+000A 308D0008         (  ../intercept.as):00028                             leax      receiver,pcr ; get the address for OS-9
+000E 103F09           (  ../intercept.as):00029                             os9       F_Icpt    ; call OS-9
+0011 3540             (  ../intercept.as):00030                             puls      u         ; restore register variable
+0013 160000           (  ../intercept.as):00031                             lbra      _sysret   ; long branch unconditionally to _sysret
+                      (  ../intercept.as):00032         
+                      (  ../intercept.as):00033         * This is where OS-9 will pass control when the process has been
+                      (  ../intercept.as):00034         * sent a signal. All that is needed is to run the intercept routine
+                      (  ../intercept.as):00035         * and execute 'rti'.
+0016                  (  ../intercept.as):00036         receiver
+0016 1F32             (  ../intercept.as):00037                             tfr       u,y       ; set the data pointer
+0018 4F               (  ../intercept.as):00038                             clra                ; clear the MSB
+0019 3406             (  ../intercept.as):00039                             pshs      d         ; stack the signal number
+001B ADB90000         (  ../intercept.as):00040                             jsr       [_intsave,y] ; go run the routine
+001F 3262             (  ../intercept.as):00041                             leas      2,s       ; reset the stack
+0021 3B               (  ../intercept.as):00042                             rti                 ; and return
+                      (  ../intercept.as):00043         
+                      (  ../intercept.as):00044                             endsect             ; end current section

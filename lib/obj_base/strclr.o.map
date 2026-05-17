@@ -1,0 +1,3 @@
+Symbol: _strclr (strclr.o) = 0000
+Symbol: BranchTarget_01 (strclr.o) = 000F
+Symbol: Loop_01 (strclr.o) = 0009

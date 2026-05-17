@@ -1,0 +1,16 @@
+                      (        ../abs.as):00001         * Compact assembly implementation of abs().
+                      (        ../abs.as):00002         
+                      (        ../abs.as):00003                             section   code      ; begin code section
+                      (        ../abs.as):00004         
+                      (        ../abs.as):00005         _abs                EXPORT              ; export this symbol
+                      (        ../abs.as):00006         
+0000                  (        ../abs.as):00007         _abs
+0000 EC62             (        ../abs.as):00008                             ldd       2,s       ; load D from stack-relative value 2,s
+0002 2A04             (        ../abs.as):00009                             bpl       L_abs_done ; branch if plus to L_abs_done
+0004 40               (        ../abs.as):00010                             nega                ; negate A
+0005 50               (        ../abs.as):00011                             negb                ; negate B
+0006 8200             (        ../abs.as):00012                             sbca      #0        ; subtract immediate value 0 from A
+0008                  (        ../abs.as):00013         L_abs_done
+0008 39               (        ../abs.as):00014                             rts                 ; return to caller
+                      (        ../abs.as):00015         
+                      (        ../abs.as):00016                             endsect             ; end current section

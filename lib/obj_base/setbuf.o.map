@@ -1,0 +1,6 @@
+Symbol: _setbuf (setbuf.o) = 0000
+Symbol: BranchTarget_01 (setbuf.o) = 0013
+Symbol: BranchTarget_02 (setbuf.o) = 0028
+Symbol: BranchTarget_03 (setbuf.o) = 0030
+Symbol: BranchTarget_04 (setbuf.o) = 003C
+Symbol: Continue_01 (setbuf.o) = 0034

@@ -1,0 +1,15 @@
+                      (      ../sleep.as):00001         __os9_sleep         EXPORT              ; export sleep wrapper
+                      (      ../sleep.as):00002         
+                      (      ../sleep.as):00003         _osret              EXTERNAL            ; common successful return helper
+                      (      ../sleep.as):00004         
+     000A             (      ../sleep.as):00005         F_Sleep             equ       $0A       ; OS-9 sleep system call
+                      (      ../sleep.as):00006         
+                      (      ../sleep.as):00007                             section   code      ; begin code section
+                      (      ../sleep.as):00008         
+0000                  (      ../sleep.as):00009         __os9_sleep
+0000 AEF802           (      ../sleep.as):00010                             ldx       [2,s]     ; load current tick count from caller's pointer
+0003 103F0A           (      ../sleep.as):00011                             os9       F_Sleep   ; sleep for the requested number of ticks
+0006 AFF802           (      ../sleep.as):00012                             stx       [2,s]     ; write back remaining ticks if sleep was interrupted
+0009 160000           (      ../sleep.as):00013                             lbra      _osret    ; return through common success path
+                      (      ../sleep.as):00014         
+                      (      ../sleep.as):00015                             endsect             ; end code section

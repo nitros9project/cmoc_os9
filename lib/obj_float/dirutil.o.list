@@ -1,0 +1,141 @@
+                      (    ../dirutil.as):00001         * Disassembly by Os9disasm of dirutil.r
+                      (    ../dirutil.as):00002         
+                      (    ../dirutil.as):00003         * class D external label equates
+                      (    ../dirutil.as):00004         
+     001D             (    ../dirutil.as):00005         D001d               equ       $001d     ; define constant as $001d
+     001E             (    ../dirutil.as):00006         D001e               equ       $001e     ; define constant as $001e
+                      (    ../dirutil.as):00007         
+                      (    ../dirutil.as):00008                             section   bss       ; begin bss section
+                      (    ../dirutil.as):00009         
+                      (    ../dirutil.as):00010         * Uninitialized data (class B)
+0000                  (    ../dirutil.as):00011         _B0000              rmb       4         ; reserve 4 bytes
+0004                  (    ../dirutil.as):00012         _B0004              rmb       30        ; reserve 30 bytes
+                      (    ../dirutil.as):00013         * Initialized Data (class G)
+                      (    ../dirutil.as):00014         
+                      (    ../dirutil.as):00015                             endsect             ; end current section
+                      (    ../dirutil.as):00016         
+                      (    ../dirutil.as):00017                             section   code      ; begin code section
+                      (    ../dirutil.as):00018         
+                      (    ../dirutil.as):00019         _closedir           EXPORT              ; export this symbol
+                      (    ../dirutil.as):00020         _opendir            EXPORT              ; export this symbol
+                      (    ../dirutil.as):00021         _readdir            EXPORT              ; export this symbol
+                      (    ../dirutil.as):00022         _seekdir            EXPORT              ; export this symbol
+                      (    ../dirutil.as):00023         _telldir            EXPORT              ; export this symbol
+                      (    ../dirutil.as):00024         
+                      (    ../dirutil.as):00025         _close              EXTERNAL            ; import external symbol
+                      (    ../dirutil.as):00026         _free               EXTERNAL            ; import external symbol
+                      (    ../dirutil.as):00027         _malloc             EXTERNAL            ; import external symbol
+                      (    ../dirutil.as):00028         _open               EXTERNAL            ; import external symbol
+                      (    ../dirutil.as):00029         _read               EXTERNAL            ; import external symbol
+                      (    ../dirutil.as):00030         _strhcpy            EXTERNAL            ; import external symbol
+                      (    ../dirutil.as):00031         _lseek              EXTERNAL            ; import external symbol
+                      (    ../dirutil.as):00032         
+                      (    ../dirutil.as):00033         * DIR layout used by this file:
+                      (    ../dirutil.as):00034         *   0..1  dd_fd   (path number)
+                      (    ../dirutil.as):00035         *   2..33 dd_buf  (32-byte directory sector entry buffer)
+                      (    ../dirutil.as):00036         *
+                      (    ../dirutil.as):00037         * DIRECT/static result layout:
+                      (    ../dirutil.as):00038         *   0..3  d_addr
+                      (    ../dirutil.as):00039         *   4..   d_name[30]
+                      (    ../dirutil.as):00040         
+0000 AE62             (    ../dirutil.as):00041         _closedir:          ldx       2,s       ; load X from stack-relative value 2,s
+0002 EC84             (    ../dirutil.as):00042                             ldd       ,x        ; load D from memory pointed to by X
+0004 3416             (    ../dirutil.as):00043                             pshs      d,x       ; save D,X on the hardware stack
+0006 170000           (    ../dirutil.as):00044                             lbsr      _close    ; long branch to subroutine to _close
+0009 3262             (    ../dirutil.as):00045                             leas      2,s       ; adjust S using 2,s
+000B 170000           (    ../dirutil.as):00046                             lbsr      _free     ; long branch to subroutine to _free
+000E 3590             (    ../dirutil.as):00047                             puls      x,pc      ; restore registers and return
+0010 3440             (    ../dirutil.as):00048         _opendir:           pshs      u         ; save U on the hardware stack
+0012 CC0022           (    ../dirutil.as):00049                             ldd       #$0022    ; load D from immediate value $0022
+0015 3406             (    ../dirutil.as):00050                             pshs      d         ; save D on the hardware stack
+0017 170000           (    ../dirutil.as):00051                             lbsr      _malloc   ; long branch to subroutine to _malloc
+001A EDE4             (    ../dirutil.as):00052                             std       ,s        ; store D to memory pointed to by S
+001C 271B             (    ../dirutil.as):00053                             beq       BranchTarget_01 ; branch if equal/zero to BranchTarget_01
+001E 8E0081           (    ../dirutil.as):00054                             ldx       #$0081    ; load X from immediate value $0081
+0021 EC66             (    ../dirutil.as):00055                             ldd       6,s       ; load D from stack-relative value 6,s
+                      (    ../dirutil.as):00056         * _open(path, mode): CMOC wrapper expects pathname first, mode second.
+                      (    ../dirutil.as):00057         * Here D = pathname pointer from caller, X = mode flags for directory open.
+                      (    ../dirutil.as):00058         * Push X first, then D, so _open sees:
+                      (    ../dirutil.as):00059         *   2,s = pathname
+                      (    ../dirutil.as):00060         *   4,s = mode
+0023 3410             (    ../dirutil.as):00061                             pshs      x         ; save X on the hardware stack
+0025 3406             (    ../dirutil.as):00062                             pshs      d         ; save D on the hardware stack
+0027 170000           (    ../dirutil.as):00063                             lbsr      _open     ; long branch to subroutine to _open
+002A 3264             (    ../dirutil.as):00064                             leas      4,s       ; adjust S using 4,s
+002C EDF4             (    ../dirutil.as):00065                             std       [,s]      ; store D to indirect address [,s]
+002E 2C09             (    ../dirutil.as):00066                             bge       BranchTarget_01 ; branch if greater or equal to BranchTarget_01
+0030 ECE4             (    ../dirutil.as):00067                             ldd       ,s        ; load D from memory pointed to by S
+0032 170000           (    ../dirutil.as):00068                             lbsr      _free     ; long branch to subroutine to _free
+0035 4F               (    ../dirutil.as):00069                             clra                ; clear A
+0036 5F               (    ../dirutil.as):00070                             clrb                ; clear B
+0037 EDE4             (    ../dirutil.as):00071                             std       ,s        ; store D to memory pointed to by S
+0039 35C6             (    ../dirutil.as):00072         BranchTarget_01     puls      d,u,pc    ; restore registers and return
+003B 3440             (    ../dirutil.as):00073         _readdir:           pshs      u         ; save U on the hardware stack
+003D EE64             (    ../dirutil.as):00074                             ldu       4,s       ; load U from stack-relative value 4,s
+003F 3342             (    ../dirutil.as):00075                             leau      2,u       ; compute effective address into U from 2,u
+0041 CC0020           (    ../dirutil.as):00076         Loop_01             ldd       #$0020    ; load D from immediate value $0020
+                      (    ../dirutil.as):00077         * _read(fd, buf, count) wants:
+                      (    ../dirutil.as):00078         *   2,s = fd
+                      (    ../dirutil.as):00079         *   4,s = buffer
+                      (    ../dirutil.as):00080         *   6,s = count
+                      (    ../dirutil.as):00081         * The path number lives at -2,u because U was advanced to dd_buf above.
+0044 3406             (    ../dirutil.as):00082                             pshs      d         ; save D on the hardware stack
+0046 3440             (    ../dirutil.as):00083                             pshs      u         ; save U on the hardware stack
+0048 EC5E             (    ../dirutil.as):00084                             ldd       -2,u      ; load D from indexed value -2,u
+004A 3406             (    ../dirutil.as):00085                             pshs      d         ; save D on the hardware stack
+004C 170000           (    ../dirutil.as):00086                             lbsr      _read     ; long branch to subroutine to _read
+004F 3266             (    ../dirutil.as):00087                             leas      6,s       ; adjust S using 6,s
+0051 ED7E             (    ../dirutil.as):00088                             std       -2,s      ; store D to stack-relative value -2,s
+0053 2E04             (    ../dirutil.as):00089                             bgt       BranchTarget_02 ; branch if greater than to BranchTarget_02
+0055 4F               (    ../dirutil.as):00090                             clra                ; clear A
+0056 5F               (    ../dirutil.as):00091                             clrb                ; clear B
+0057 35C0             (    ../dirutil.as):00092                             puls      u,pc      ; restore registers and return
+0059 E6C4             (    ../dirutil.as):00093         BranchTarget_02     ldb       ,u        ; load B from memory pointed to by U
+005B 27E4             (    ../dirutil.as):00094                             beq       Loop_01   ; branch if equal/zero to Loop_01
+005D 30A90000         (    ../dirutil.as):00095                             leax      _B0004,y  ; compute effective address into X from _B0004,y
+0061 3450             (    ../dirutil.as):00096                             pshs      x,u       ; save X,U on the hardware stack
+0063 170000           (    ../dirutil.as):00097                             lbsr      _strhcpy  ; long branch to subroutine to _strhcpy
+0066 3264             (    ../dirutil.as):00098                             leas      4,s       ; adjust S using 4,s
+0068 30A90000         (    ../dirutil.as):00099                             leax      _B0000,y  ; compute effective address into X from _B0000,y
+006C 4F               (    ../dirutil.as):00100                             clra                ; clear A
+006D E6C81D           (    ../dirutil.as):00101                             ldb       D001d,u   ; load B from indexed value D001d,u
+0070 ED84             (    ../dirutil.as):00102                             std       ,x        ; store D to memory pointed to by X
+0072 ECC81E           (    ../dirutil.as):00103                             ldd       D001e,u   ; load D from indexed value D001e,u
+0075 ED02             (    ../dirutil.as):00104                             std       2,x       ; store D to indexed value 2,x
+0077 1F10             (    ../dirutil.as):00105                             tfr       x,d       ; transfer X,D
+0079 35C0             (    ../dirutil.as):00106                             puls      u,pc      ; restore registers and return
+007B 4F               (    ../dirutil.as):00107         _seekdir:           clra                ; clear A
+007C 5F               (    ../dirutil.as):00108                             clrb                ; clear B
+                      (    ../dirutil.as):00109         * Build the CMOC long-return call frame for _lseek(fd, loc, SEEK_SET):
+                      (    ../dirutil.as):00110         *   2,s = hidden return buffer
+                      (    ../dirutil.as):00111         *   4,s = fd
+                      (    ../dirutil.as):00112         *   6,s = loc MSW
+                      (    ../dirutil.as):00113         *   8,s = loc LSW
+                      (    ../dirutil.as):00114         *   10,s = whence
+007D 3406             (    ../dirutil.as):00115                             pshs      d         ; save D on the hardware stack
+007F EC68             (    ../dirutil.as):00116                             ldd       8,s       ; load D from stack-relative value 8,s
+0081 3406             (    ../dirutil.as):00117                             pshs      d         ; save D on the hardware stack
+0083 EC68             (    ../dirutil.as):00118                             ldd       8,s       ; load D from stack-relative value 8,s
+0085 3406             (    ../dirutil.as):00119                             pshs      d         ; save D on the hardware stack
+0087 ECF808           (    ../dirutil.as):00120                             ldd       [8,s]     ; load D from indirect address [8,s]
+008A 3406             (    ../dirutil.as):00121                             pshs      d         ; save D on the hardware stack
+008C 30A90000         (    ../dirutil.as):00122                             leax      _B0000,y  ; compute effective address into X from _B0000,y
+0090 3410             (    ../dirutil.as):00123                             pshs      x         ; save X on the hardware stack
+0092 170000           (    ../dirutil.as):00124                             lbsr      _lseek    ; long branch to subroutine to _lseek
+0095 326A             (    ../dirutil.as):00125                             leas      10,s      ; adjust S using 10,s
+0097 39               (    ../dirutil.as):00126                             rts                 ; return to caller
+0098 CC0001           (    ../dirutil.as):00127         _telldir:           ldd       #1        ; load D from immediate value 1
+009B 3406             (    ../dirutil.as):00128                             pshs      d         ; save D on the hardware stack
+009D 4F               (    ../dirutil.as):00129                             clra                ; clear A
+009E 5F               (    ../dirutil.as):00130                             clrb                ; clear B
+009F 3406             (    ../dirutil.as):00131                             pshs      d         ; save D on the hardware stack
+00A1 3406             (    ../dirutil.as):00132                             pshs      d         ; save D on the hardware stack
+00A3 ECF80A           (    ../dirutil.as):00133                             ldd       [10,s]    ; load D from indirect address [10,s]
+00A6 3406             (    ../dirutil.as):00134                             pshs      d         ; save D on the hardware stack
+00A8 AE6A             (    ../dirutil.as):00135                             ldx       10,s      ; load X from stack-relative value 10,s
+00AA 3410             (    ../dirutil.as):00136                             pshs      x         ; save X on the hardware stack
+00AC 170000           (    ../dirutil.as):00137                             lbsr      _lseek    ; long branch to subroutine to _lseek
+00AF 326A             (    ../dirutil.as):00138                             leas      10,s      ; adjust S using 10,s
+00B1 39               (    ../dirutil.as):00139                             rts                 ; return to caller
+                      (    ../dirutil.as):00140         
+                      (    ../dirutil.as):00141                             endsect             ; end current section

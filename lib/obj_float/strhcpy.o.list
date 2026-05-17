@@ -1,0 +1,20 @@
+                      (    ../strhcpy.as):00001         * Adapted from Deek's KLibc strhcpy_a for the live cmoc_os9 ABI.
+                      (    ../strhcpy.as):00002         
+                      (    ../strhcpy.as):00003                             section   code      ; begin code section
+                      (    ../strhcpy.as):00004         
+                      (    ../strhcpy.as):00005         _strhcpy            EXPORT              ; export this symbol
+                      (    ../strhcpy.as):00006         
+0000                  (    ../strhcpy.as):00007         _strhcpy
+0000 3440             (    ../strhcpy.as):00008                             pshs      u         ; save U on the hardware stack
+0002 EE64             (    ../strhcpy.as):00009                             ldu       4,s       ; load U from stack-relative value 4,s
+0004 AE66             (    ../strhcpy.as):00010                             ldx       6,s       ; load X from stack-relative value 6,s
+0006 E680             (    ../strhcpy.as):00011         Loop_01             ldb       ,x+       ; load B from memory pointed to by X, then advance X
+0008 E7C0             (    ../strhcpy.as):00012                             stb       ,u+       ; store B to memory pointed to by U, then advance U
+000A 2AFA             (    ../strhcpy.as):00013                             bpl       Loop_01   ; branch if plus to Loop_01
+000C C47F             (    ../strhcpy.as):00014                             andb      #$7f      ; AND B with immediate value $7f
+000E E75F             (    ../strhcpy.as):00015                             stb       -1,u      ; store B to indexed value -1,u
+0010 6FC4             (    ../strhcpy.as):00016                             clr       ,u        ; clear memory pointed to by U
+0012 EC64             (    ../strhcpy.as):00017                             ldd       4,s       ; load D from stack-relative value 4,s
+0014 35C0             (    ../strhcpy.as):00018                             puls      u,pc      ; restore registers and return
+                      (    ../strhcpy.as):00019         
+                      (    ../strhcpy.as):00020                             endsect             ; end current section

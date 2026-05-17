@@ -1,0 +1,36 @@
+                      (       ../ibrk.as):00001         *
+                      (       ../ibrk.as):00002         * Make pointers within initial memory allocation
+                      (       ../ibrk.as):00003         * Adapted from cmoc_os9/lib/todo/ibrk.a for the live CMOC ABI.
+                      (       ../ibrk.as):00004         *
+                      (       ../ibrk.as):00005         
+                      (       ../ibrk.as):00006                             section   code      ; begin code section
+                      (       ../ibrk.as):00007         
+                      (       ../ibrk.as):00008         _ibrk               EXPORT              ; export this symbol
+                      (       ../ibrk.as):00009         
+                      (       ../ibrk.as):00010         __mtop              EXTERNAL            ; import external symbol
+                      (       ../ibrk.as):00011         __stbot             EXTERNAL            ; import external symbol
+                      (       ../ibrk.as):00012         _os9err             EXTERNAL            ; import external symbol
+                      (       ../ibrk.as):00013         
+0000 EC62             (       ../ibrk.as):00014         _ibrk               ldd       2,s       ; get the size required
+0002 E3A90000         (       ../ibrk.as):00015                             addd      __mtop,y  ; add current top
+0006 2521             (       ../ibrk.as):00016                             bcs       ibrk20    ; if it wraps, error
+0008 10A3A90000       (       ../ibrk.as):00017                             cmpd      __stbot,y ; overlap stack?
+000D 241A             (       ../ibrk.as):00018                             bhs       ibrk20    ; branch if higher or same to ibrk20
+000F 3406             (       ../ibrk.as):00019                             pshs      d         ; save new top
+0011 AEA90000         (       ../ibrk.as):00020                             ldx       __mtop,y  ; reset to bottom
+                      (       ../ibrk.as):00021         
+0015 4F               (       ../ibrk.as):00022                             clra                ; clear A
+0016 AC60             (       ../ibrk.as):00023         sbloop              cmpx      0,s       ; reached the end?
+0018 2404             (       ../ibrk.as):00024                             bhs       ibrk10    ; branch if higher or same to ibrk10
+001A A780             (       ../ibrk.as):00025                             sta       ,x+       ; store A to memory pointed to by X, then advance X
+001C 20F8             (       ../ibrk.as):00026                             bra       sbloop    ; branch unconditionally to sbloop
+                      (       ../ibrk.as):00027         
+001E ECA90000         (       ../ibrk.as):00028         ibrk10              ldd       __mtop,y  ; return old top
+0022 3510             (       ../ibrk.as):00029                             puls      x         ; restore new top
+0024 AFA90000         (       ../ibrk.as):00030                             stx       __mtop,y  ; save for next time
+0028 39               (       ../ibrk.as):00031                             rts                 ; return to caller
+                      (       ../ibrk.as):00032         
+0029 C6ED             (       ../ibrk.as):00033         ibrk20              ldb       #$ED      ; E$NoRAM
+002B 160000           (       ../ibrk.as):00034                             lbra      _os9err   ; long branch unconditionally to _os9err
+                      (       ../ibrk.as):00035         
+                      (       ../ibrk.as):00036                             endsect             ; end current section

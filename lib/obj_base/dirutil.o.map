@@ -1,0 +1,12 @@
+Symbol: _B0000 (dirutil.o) = 0000
+Symbol: _B0004 (dirutil.o) = 0004
+Symbol: _closedir (dirutil.o) = 0000
+Symbol: _opendir (dirutil.o) = 0010
+Symbol: _readdir (dirutil.o) = 003B
+Symbol: _seekdir (dirutil.o) = 007B
+Symbol: _telldir (dirutil.o) = 0098
+Symbol: BranchTarget_01 (dirutil.o) = 0039
+Symbol: BranchTarget_02 (dirutil.o) = 0059
+Symbol: D001d (dirutil.o) = 001D
+Symbol: D001e (dirutil.o) = 001E
+Symbol: Loop_01 (dirutil.o) = 0041

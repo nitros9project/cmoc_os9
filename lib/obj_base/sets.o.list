@@ -1,0 +1,142 @@
+                      (       ../sets.as):00001         * Adapted from cmoc_os9/lib/todo/sets.as
+                      (       ../sets.as):00002         
+                      (       ../sets.as):00003                             section   code      ; begin code section
+                      (       ../sets.as):00004         
+                      (       ../sets.as):00005         _allocset           EXPORT              ; export this symbol
+                      (       ../sets.as):00006         _addc2set           EXPORT              ; export this symbol
+                      (       ../sets.as):00007         _adds2set           EXPORT              ; export this symbol
+                      (       ../sets.as):00008         _rmfmset            EXPORT              ; export this symbol
+                      (       ../sets.as):00009         _smember            EXPORT              ; export this symbol
+                      (       ../sets.as):00010         _dupset             EXPORT              ; export this symbol
+                      (       ../sets.as):00011         _copyset            EXPORT              ; export this symbol
+                      (       ../sets.as):00012         _sunion             EXPORT              ; export this symbol
+                      (       ../sets.as):00013         _sintersect         EXPORT              ; export this symbol
+                      (       ../sets.as):00014         _sdifference        EXPORT              ; export this symbol
+                      (       ../sets.as):00015         
+                      (       ../sets.as):00016         _malloc             EXTERNAL            ; import external symbol
+                      (       ../sets.as):00017         
+0000                  (       ../sets.as):00018         _allocset
+0000 CC0020           (       ../sets.as):00019                             ldd       #$0020    ; load D from immediate value $0020
+0003 3406             (       ../sets.as):00020                             pshs      d         ; save D on the hardware stack
+0005 170000           (       ../sets.as):00021                             lbsr      _malloc   ; long branch to subroutine to _malloc
+0008 3590             (       ../sets.as):00022                             puls      x,pc      ; restore registers and return
+                      (       ../sets.as):00023         
+000A                  (       ../sets.as):00024         _addc2set
+000A 8D2E             (       ../sets.as):00025                             bsr       bitaddr   ; branch to subroutine to bitaddr
+000C EA86             (       ../sets.as):00026                             orb       a,x       ; OR B with indexed value a,x
+000E E786             (       ../sets.as):00027                             stb       a,x       ; store B to indexed value a,x
+0010 1F10             (       ../sets.as):00028                             tfr       x,d       ; transfer X,D
+0012 39               (       ../sets.as):00029                             rts                 ; return to caller
+                      (       ../sets.as):00030         
+0013                  (       ../sets.as):00031         _adds2set
+0013 3440             (       ../sets.as):00032                             pshs      u         ; save U on the hardware stack
+0015 EE66             (       ../sets.as):00033                             ldu       6,s       ; load U from stack-relative value 6,s
+0017 AE64             (       ../sets.as):00034                             ldx       4,s       ; load X from stack-relative value 4,s
+0019 2006             (       ../sets.as):00035                             bra       adds_loop_load ; branch unconditionally to adds_loop_load
+001B                  (       ../sets.as):00036         adds_loop
+001B 8D21             (       ../sets.as):00037                             bsr       bitmask   ; branch to subroutine to bitmask
+001D EA86             (       ../sets.as):00038                             orb       a,x       ; OR B with indexed value a,x
+001F E786             (       ../sets.as):00039                             stb       a,x       ; store B to indexed value a,x
+0021                  (       ../sets.as):00040         adds_loop_load
+0021 A6C0             (       ../sets.as):00041                             lda       ,u+       ; load A from memory pointed to by U, then advance U
+0023 26F6             (       ../sets.as):00042                             bne       adds_loop ; branch if not equal to adds_loop
+0025 EC64             (       ../sets.as):00043                             ldd       4,s       ; load D from stack-relative value 4,s
+0027 35C0             (       ../sets.as):00044                             puls      u,pc      ; restore registers and return
+                      (       ../sets.as):00045         
+0029                  (       ../sets.as):00046         _rmfmset
+0029 8D0F             (       ../sets.as):00047                             bsr       bitaddr   ; branch to subroutine to bitaddr
+002B 53               (       ../sets.as):00048                             comb
+002C E486             (       ../sets.as):00049                             andb      a,x       ; AND B with indexed value a,x
+002E E786             (       ../sets.as):00050                             stb       a,x       ; store B to indexed value a,x
+0030 5F               (       ../sets.as):00051                             clrb                ; clear B
+0031 1F10             (       ../sets.as):00052                             tfr       x,d       ; transfer X,D
+0033 39               (       ../sets.as):00053                             rts                 ; return to caller
+                      (       ../sets.as):00054         
+0034                  (       ../sets.as):00055         _smember
+0034 8D04             (       ../sets.as):00056                             bsr       bitaddr   ; branch to subroutine to bitaddr
+0036 E486             (       ../sets.as):00057                             andb      a,x       ; AND B with indexed value a,x
+0038 4F               (       ../sets.as):00058                             clra                ; clear A
+0039 39               (       ../sets.as):00059                             rts                 ; return to caller
+                      (       ../sets.as):00060         
+003A                  (       ../sets.as):00061         bitaddr
+003A AE64             (       ../sets.as):00062                             ldx       4,s       ; load X from stack-relative value 4,s
+003C A667             (       ../sets.as):00063                             lda       7,s       ; load A from stack-relative value 7,s
+003E                  (       ../sets.as):00064         bitmask
+003E 3402             (       ../sets.as):00065                             pshs      a         ; save A on the hardware stack
+0040 C601             (       ../sets.as):00066                             ldb       #1        ; load B from immediate value 1
+0042 8407             (       ../sets.as):00067                             anda      #7        ; AND A with immediate value 7
+0044 2704             (       ../sets.as):00068                             beq       bitmask_done ; branch if equal/zero to bitmask_done
+0046                  (       ../sets.as):00069         bitmask_shift
+0046 58               (       ../sets.as):00070                             lslb                ; shift B left by one bit
+0047 4A               (       ../sets.as):00071                             deca                ; decrement A
+0048 26FC             (       ../sets.as):00072                             bne       bitmask_shift ; branch if not equal to bitmask_shift
+004A                  (       ../sets.as):00073         bitmask_done
+004A 3502             (       ../sets.as):00074                             puls      a         ; restore A from the hardware stack
+004C 47               (       ../sets.as):00075                             asra                ; arithmetic shift A right by one bit
+004D 47               (       ../sets.as):00076                             asra                ; arithmetic shift A right by one bit
+004E 47               (       ../sets.as):00077                             asra                ; arithmetic shift A right by one bit
+004F 39               (       ../sets.as):00078                             rts                 ; return to caller
+                      (       ../sets.as):00079         
+0050                  (       ../sets.as):00080         _dupset
+0050 8DAE             (       ../sets.as):00081                             bsr       _allocset ; branch to subroutine to _allocset
+0052 AE62             (       ../sets.as):00082                             ldx       2,s       ; load X from stack-relative value 2,s
+0054 3416             (       ../sets.as):00083                             pshs      d,x       ; save D,X on the hardware stack
+0056 8D02             (       ../sets.as):00084                             bsr       _copyset  ; branch to subroutine to _copyset
+0058 3596             (       ../sets.as):00085                             puls      d,x,pc    ; restore registers and return
+                      (       ../sets.as):00086         
+005A                  (       ../sets.as):00087         _copyset
+005A 3440             (       ../sets.as):00088                             pshs      u         ; save U on the hardware stack
+005C AE64             (       ../sets.as):00089                             ldx       4,s       ; load X from stack-relative value 4,s
+005E EE66             (       ../sets.as):00090                             ldu       6,s       ; load U from stack-relative value 6,s
+0060 C620             (       ../sets.as):00091                             ldb       #$20      ; load B from immediate value $20
+0062                  (       ../sets.as):00092         copy_loop
+0062 A6C0             (       ../sets.as):00093                             lda       ,u+       ; load A from memory pointed to by U, then advance U
+0064 A780             (       ../sets.as):00094                             sta       ,x+       ; store A to memory pointed to by X, then advance X
+0066 5A               (       ../sets.as):00095                             decb                ; decrement B
+0067 26F9             (       ../sets.as):00096                             bne       copy_loop ; branch if not equal to copy_loop
+0069 EC64             (       ../sets.as):00097                             ldd       4,s       ; load D from stack-relative value 4,s
+006B 35C0             (       ../sets.as):00098                             puls      u,pc      ; restore registers and return
+                      (       ../sets.as):00099         
+006D                  (       ../sets.as):00100         _sunion
+006D 3440             (       ../sets.as):00101                             pshs      u         ; save U on the hardware stack
+006F EE64             (       ../sets.as):00102                             ldu       4,s       ; load U from stack-relative value 4,s
+0071 AE66             (       ../sets.as):00103                             ldx       6,s       ; load X from stack-relative value 6,s
+0073 C620             (       ../sets.as):00104                             ldb       #$20      ; load B from immediate value $20
+0075                  (       ../sets.as):00105         union_loop
+0075 A680             (       ../sets.as):00106                             lda       ,x+       ; load A from memory pointed to by X, then advance X
+0077 AAC4             (       ../sets.as):00107                             ora       ,u        ; OR A with memory pointed to by U
+0079 A7C0             (       ../sets.as):00108                             sta       ,u+       ; store A to memory pointed to by U, then advance U
+007B 5A               (       ../sets.as):00109                             decb                ; decrement B
+007C 26F7             (       ../sets.as):00110                             bne       union_loop ; branch if not equal to union_loop
+007E EC64             (       ../sets.as):00111                             ldd       4,s       ; load D from stack-relative value 4,s
+0080 35C0             (       ../sets.as):00112                             puls      u,pc      ; restore registers and return
+                      (       ../sets.as):00113         
+0082                  (       ../sets.as):00114         _sintersect
+0082 3440             (       ../sets.as):00115                             pshs      u         ; save U on the hardware stack
+0084 EE64             (       ../sets.as):00116                             ldu       4,s       ; load U from stack-relative value 4,s
+0086 AE66             (       ../sets.as):00117                             ldx       6,s       ; load X from stack-relative value 6,s
+0088 C620             (       ../sets.as):00118                             ldb       #$20      ; load B from immediate value $20
+008A                  (       ../sets.as):00119         intersect_loop
+008A A680             (       ../sets.as):00120                             lda       ,x+       ; load A from memory pointed to by X, then advance X
+008C A4C4             (       ../sets.as):00121                             anda      ,u        ; AND A with memory pointed to by U
+008E A7C0             (       ../sets.as):00122                             sta       ,u+       ; store A to memory pointed to by U, then advance U
+0090 5A               (       ../sets.as):00123                             decb                ; decrement B
+0091 26F7             (       ../sets.as):00124                             bne       intersect_loop ; branch if not equal to intersect_loop
+0093 EC64             (       ../sets.as):00125                             ldd       4,s       ; load D from stack-relative value 4,s
+0095 35C0             (       ../sets.as):00126                             puls      u,pc      ; restore registers and return
+                      (       ../sets.as):00127         
+0097                  (       ../sets.as):00128         _sdifference
+0097 3440             (       ../sets.as):00129                             pshs      u         ; save U on the hardware stack
+0099 EE64             (       ../sets.as):00130                             ldu       4,s       ; load U from stack-relative value 4,s
+009B AE66             (       ../sets.as):00131                             ldx       6,s       ; load X from stack-relative value 6,s
+009D C620             (       ../sets.as):00132                             ldb       #$20      ; load B from immediate value $20
+009F                  (       ../sets.as):00133         difference_loop
+009F A680             (       ../sets.as):00134                             lda       ,x+       ; load A from memory pointed to by X, then advance X
+00A1 A8C4             (       ../sets.as):00135                             eora      ,u        ; XOR A with memory pointed to by U
+00A3 A7C0             (       ../sets.as):00136                             sta       ,u+       ; store A to memory pointed to by U, then advance U
+00A5 5A               (       ../sets.as):00137                             decb                ; decrement B
+00A6 26F7             (       ../sets.as):00138                             bne       difference_loop ; branch if not equal to difference_loop
+00A8 EC64             (       ../sets.as):00139                             ldd       4,s       ; load D from stack-relative value 4,s
+00AA 35C0             (       ../sets.as):00140                             puls      u,pc      ; restore registers and return
+                      (       ../sets.as):00141         
+                      (       ../sets.as):00142                             endsect             ; end current section

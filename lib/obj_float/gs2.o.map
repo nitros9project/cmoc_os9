@@ -1,0 +1,9 @@
+Symbol: _gs_devn (gs2.o) = 001C
+Symbol: _gs_eof (gs2.o) = 000D
+Symbol: _gs_gfd (gs2.o) = 0032
+Symbol: _gs_opt (gs2.o) = 0011
+Symbol: _gs_rdy (gs2.o) = 0000
+Symbol: BranchTarget_01 (gs2.o) = 0042
+Symbol: Continue_01 (gs2.o) = 0015
+Symbol: I_GetStt (gs2.o) = 008D
+Symbol: Loop_01 (gs2.o) = 0027

@@ -1,0 +1,29 @@
+                      (   ../ltoc3tol.as):00001         * Adapted from cmoc_os9/lib/todo/ltoc3tol.a for the live cmoc_os9 ABI.
+                      (   ../ltoc3tol.as):00002         
+                      (   ../ltoc3tol.as):00003                             section   code      ; begin code section
+                      (   ../ltoc3tol.as):00004         
+                      (   ../ltoc3tol.as):00005         _c3tol              EXPORT              ; export this symbol
+                      (   ../ltoc3tol.as):00006         _ltoc3              EXPORT              ; export this symbol
+                      (   ../ltoc3tol.as):00007         
+0000                  (   ../ltoc3tol.as):00008         _c3tol
+0000 3440             (   ../ltoc3tol.as):00009                             pshs      u         ; save U on the hardware stack
+0002 EE64             (   ../ltoc3tol.as):00010                             ldu       4,s       ; load U from stack-relative value 4,s
+0004 AE66             (   ../ltoc3tol.as):00011                             ldx       6,s       ; load X from stack-relative value 6,s
+0006 4F               (   ../ltoc3tol.as):00012                             clra                ; clear A
+0007 E680             (   ../ltoc3tol.as):00013                             ldb       ,x+       ; load B from memory pointed to by X, then advance X
+0009 EDC1             (   ../ltoc3tol.as):00014                             std       ,u++      ; store D to memory pointed to by U+, then advance U+
+000B EC81             (   ../ltoc3tol.as):00015                             ldd       ,x++      ; load D from memory pointed to by X+, then advance X+
+000D EDC1             (   ../ltoc3tol.as):00016                             std       ,u++      ; store D to memory pointed to by U+, then advance U+
+000F 35C0             (   ../ltoc3tol.as):00017                             puls      u,pc      ; restore registers and return
+                      (   ../ltoc3tol.as):00018         
+0011                  (   ../ltoc3tol.as):00019         _ltoc3
+0011 3440             (   ../ltoc3tol.as):00020                             pshs      u         ; save U on the hardware stack
+0013 3367             (   ../ltoc3tol.as):00021                             leau      7,s       ; compute effective address into U from 7,s
+0015 AE64             (   ../ltoc3tol.as):00022                             ldx       4,s       ; load X from stack-relative value 4,s
+0017 A6C0             (   ../ltoc3tol.as):00023                             lda       ,u+       ; load A from memory pointed to by U, then advance U
+0019 A780             (   ../ltoc3tol.as):00024                             sta       ,x+       ; store A to memory pointed to by X, then advance X
+001B ECC1             (   ../ltoc3tol.as):00025                             ldd       ,u++      ; load D from memory pointed to by U+, then advance U+
+001D ED81             (   ../ltoc3tol.as):00026                             std       ,x++      ; store D to memory pointed to by X+, then advance X+
+001F 35C0             (   ../ltoc3tol.as):00027                             puls      u,pc      ; restore registers and return
+                      (   ../ltoc3tol.as):00028         
+                      (   ../ltoc3tol.as):00029                             endsect             ; end current section

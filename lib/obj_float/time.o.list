@@ -1,0 +1,21 @@
+                      (       ../time.as):00001         __os_getime         EXPORT              ; export get-system-time wrapper
+                      (       ../time.as):00002         __os_setime         EXPORT              ; export set-system-time wrapper
+                      (       ../time.as):00003         
+                      (       ../time.as):00004         _osret              EXTERNAL            ; common successful return helper
+                      (       ../time.as):00005         
+     0015             (       ../time.as):00006         F_Time              equ       $15       ; OS-9 read system time service
+     0016             (       ../time.as):00007         F_STime             equ       $16       ; OS-9 set system time service
+                      (       ../time.as):00008         
+                      (       ../time.as):00009                             section   code      ; begin code section
+                      (       ../time.as):00010         
+0000                  (       ../time.as):00011         __os_getime
+0000 AE62             (       ../time.as):00012                             ldx       2,s       ; load pointer to caller's time packet
+0002 103F15           (       ../time.as):00013                             os9       F_Time    ; fill packet with current OS-9 time values
+0005 160000           (       ../time.as):00014                             lbra      _osret    ; return through common success path
+                      (       ../time.as):00015         
+0008                  (       ../time.as):00016         __os_setime
+0008 AE62             (       ../time.as):00017                             ldx       2,s       ; load pointer to caller's time packet
+000A 103F16           (       ../time.as):00018                             os9       F_STime   ; set OS-9 clock from the supplied packet
+000D 160000           (       ../time.as):00019                             lbra      _osret    ; return through common success path
+                      (       ../time.as):00020         
+                      (       ../time.as):00021                             endsect             ; end code section

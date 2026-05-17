@@ -1,0 +1,5 @@
+Symbol: _memcmp (memcmp.o) = 0000
+Symbol: BranchTarget_01 (memcmp.o) = 0019
+Symbol: Continue_01 (memcmp.o) = 001F
+Symbol: Loop_01 (memcmp.o) = 000F
+Symbol: ReturnZero_01 (memcmp.o) = 001D

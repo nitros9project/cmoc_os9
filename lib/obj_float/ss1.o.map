@@ -1,0 +1,9 @@
+Symbol: _ss_opt (ss1.o) = 0008
+Symbol: _ss_pfd (ss1.o) = 000C
+Symbol: _ss_rel (ss1.o) = 0000
+Symbol: _ss_rest (ss1.o) = 0004
+Symbol: _ss_ssig (ss1.o) = 0010
+Symbol: _ss_tiks (ss1.o) = 0014
+Symbol: Continue_01 (ss1.o) = 0016
+Symbol: Continue_02 (ss1.o) = 0018
+Symbol: I_SetStt (ss1.o) = 008E

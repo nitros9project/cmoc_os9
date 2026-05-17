@@ -1,0 +1,133 @@
+                      (     ../cludiv.as):00001         * Adapted from cmoc_os9/lib/todo/cludiv.a for the live cmoc_os9 ABI.
+                      (     ../cludiv.as):00002         
+                      (     ../cludiv.as):00003                             section   bss       ; begin bss section
+                      (     ../cludiv.as):00004         
+0000                  (     ../cludiv.as):00005         B0000               rmb       1         ; reserve 1 bytes
+                      (     ../cludiv.as):00006         
+                      (     ../cludiv.as):00007                             endsect             ; end current section
+                      (     ../cludiv.as):00008         
+                      (     ../cludiv.as):00009                             section   code      ; begin code section
+                      (     ../cludiv.as):00010         
+                      (     ../cludiv.as):00011         _flacc              EXTERNAL            ; import external symbol
+                      (     ../cludiv.as):00012         _rpterr             EXTERNAL            ; import external symbol
+                      (     ../cludiv.as):00013         _lbexit             EXTERNAL            ; import external symbol
+                      (     ../cludiv.as):00014         
+                      (     ../cludiv.as):00015         _ludiv              EXPORT              ; export this symbol
+                      (     ../cludiv.as):00016         _lumod              EXPORT              ; export this symbol
+                      (     ../cludiv.as):00017         
+     002D             (     ../cludiv.as):00018         EDIVERR             equ       45        ; define constant as 45
+     0001             (     ../cludiv.as):00019         Carry               equ       %00000001 ; define constant as %00000001
+                      (     ../cludiv.as):00020         
+                      (     ../cludiv.as):00021         * entry *x = divisor
+                      (     ../cludiv.as):00022         *       *(2,s) = dividend
+                      (     ../cludiv.as):00023         *
+                      (     ../cludiv.as):00024         * exit  _flacc = quotient
+                      (     ../cludiv.as):00025         *       *x = remainder
+                      (     ../cludiv.as):00026         
+0000                  (     ../cludiv.as):00027         _ludiv
+0000 8D33             (     ../cludiv.as):00028                             bsr       _div1     ; branch to subroutine to _div1
+0002 3268             (     ../cludiv.as):00029                             leas      8,s       ; adjust S using 8,s
+0004 160000           (     ../cludiv.as):00030                             lbra      _lbexit   ; long branch unconditionally to _lbexit
+                      (     ../cludiv.as):00031         
+0007                  (     ../cludiv.as):00032         _lumod
+0007 A600             (     ../cludiv.as):00033                             lda       0,x       ; load A from indexed value 0,x
+0009 AA01             (     ../cludiv.as):00034                             ora       1,x       ; OR A with indexed value 1,x
+000B AA02             (     ../cludiv.as):00035                             ora       2,x       ; OR A with indexed value 2,x
+000D AA03             (     ../cludiv.as):00036                             ora       3,x       ; OR A with indexed value 3,x
+000F 2611             (     ../cludiv.as):00037                             bne       _lumod1   ; branch if not equal to _lumod1
+                      (     ../cludiv.as):00038         * zero divisor -- return dividend
+0011 EC00             (     ../cludiv.as):00039                             ldd       0,x       ; load D from indexed value 0,x
+0013 EDA90000         (     ../cludiv.as):00040                             std       _flacc,y  ; store D to indexed value _flacc,y
+0017 EC02             (     ../cludiv.as):00041                             ldd       2,x       ; load D from indexed value 2,x
+0019 30A90000         (     ../cludiv.as):00042                             leax      _flacc,y  ; compute effective address into X from _flacc,y
+001D ED02             (     ../cludiv.as):00043                             std       2,x       ; store D to indexed value 2,x
+001F 160000           (     ../cludiv.as):00044                             lbra      _lbexit   ; long branch unconditionally to _lbexit
+                      (     ../cludiv.as):00045         
+0022                  (     ../cludiv.as):00046         _lumod1
+0022 8D27             (     ../cludiv.as):00047                             bsr       div2      ; branch to subroutine to div2
+0024 EC6A             (     ../cludiv.as):00048                             ldd       10,s      ; load D from stack-relative value 10,s
+0026 30A90000         (     ../cludiv.as):00049                             leax      _flacc,y  ; compute effective address into X from _flacc,y
+002A ED00             (     ../cludiv.as):00050                             std       0,x       ; store D to indexed value 0,x
+002C EC6C             (     ../cludiv.as):00051                             ldd       12,s      ; load D from stack-relative value 12,s
+002E ED02             (     ../cludiv.as):00052                             std       2,x       ; store D to indexed value 2,x
+0030 3268             (     ../cludiv.as):00053                             leas      8,s       ; adjust S using 8,s
+0032 160000           (     ../cludiv.as):00054                             lbra      _lbexit   ; long branch unconditionally to _lbexit
+                      (     ../cludiv.as):00055         
+                      (     ../cludiv.as):00056         * check for zero divisor
+0035                  (     ../cludiv.as):00057         _div1
+0035 A600             (     ../cludiv.as):00058                             lda       0,x       ; load A from indexed value 0,x
+0037 AA01             (     ../cludiv.as):00059                             ora       1,x       ; OR A with indexed value 1,x
+0039 AA02             (     ../cludiv.as):00060                             ora       2,x       ; OR A with indexed value 2,x
+003B AA03             (     ../cludiv.as):00061                             ora       3,x       ; OR A with indexed value 3,x
+003D 260C             (     ../cludiv.as):00062                             bne       div2      ; branch if not equal to div2
+                      (     ../cludiv.as):00063         * divide by zero error
+003F EC62             (     ../cludiv.as):00064                             ldd       2,s       ; load D from stack-relative value 2,s
+0041 ED66             (     ../cludiv.as):00065                             std       6,s       ; store D to stack-relative value 6,s
+0043 3266             (     ../cludiv.as):00066                             leas      6,s       ; adjust S using 6,s
+0045 CC002D           (     ../cludiv.as):00067                             ldd       #EDIVERR  ; load D from immediate value EDIVERR
+0048 160000           (     ../cludiv.as):00068                             lbra      _rpterr   ; long branch unconditionally to _rpterr
+                      (     ../cludiv.as):00069         
+                      (     ../cludiv.as):00070         * set up our stack
+004B                  (     ../cludiv.as):00071         div2
+004B EC00             (     ../cludiv.as):00072                             ldd       0,x       ; load D from indexed value 0,x
+004D AE02             (     ../cludiv.as):00073                             ldx       2,x       ; load X from indexed value 2,x
+004F 3416             (     ../cludiv.as):00074                             pshs      d,x       ; save D,X on the hardware stack
+0051 CC0000           (     ../cludiv.as):00075                             ldd       #0        ; load D from immediate value 0
+0054 3406             (     ../cludiv.as):00076                             pshs      d         ; save D on the hardware stack
+0056 EDA90000         (     ../cludiv.as):00077                             std       _flacc,y  ; store D to indexed value _flacc,y
+005A EDA90000         (     ../cludiv.as):00078                             std       _flacc+2,y ; store D to indexed value _flacc+2,y
+005E 30A90000         (     ../cludiv.as):00079                             leax      _flacc,y  ; compute effective address into X from _flacc,y
+                      (     ../cludiv.as):00080         
+                      (     ../cludiv.as):00081         * shift the divisor left
+0062 4F               (     ../cludiv.as):00082                             clra                ; clear A
+0063 6D62             (     ../cludiv.as):00083                             tst       2,s       ; test stack-relative value 2,s and update condition codes
+0065 2B0B             (     ../cludiv.as):00084                             bmi       div51     ; branch if minus to div51
+0067                  (     ../cludiv.as):00085         div5
+0067 4C               (     ../cludiv.as):00086                             inca                ; increment A
+0068 6865             (     ../cludiv.as):00087                             asl       5,s       ; shift stack-relative value 5,s left by one bit
+006A 6964             (     ../cludiv.as):00088                             rol       4,s       ; rotate stack-relative value 4,s left through carry
+006C 6963             (     ../cludiv.as):00089                             rol       3,s       ; rotate stack-relative value 3,s left through carry
+006E 6962             (     ../cludiv.as):00090                             rol       2,s       ; rotate stack-relative value 2,s left through carry
+0070 2AF5             (     ../cludiv.as):00091                             bpl       div5      ; branch if plus to div5
+0072                  (     ../cludiv.as):00092         div51
+0072 A760             (     ../cludiv.as):00093                             sta       0,s       ; store A to stack-relative value 0,s
+0074 2036             (     ../cludiv.as):00094                             bra       check     ; branch unconditionally to check
+                      (     ../cludiv.as):00095         
+                      (     ../cludiv.as):00096         * subtract the divisor from the dividend
+0076                  (     ../cludiv.as):00097         div6
+0076 EC6C             (     ../cludiv.as):00098                             ldd       12,s      ; load D from stack-relative value 12,s
+0078 A364             (     ../cludiv.as):00099                             subd      4,s       ; subtract stack-relative value 4,s from D
+007A ED6C             (     ../cludiv.as):00100                             std       12,s      ; store D to stack-relative value 12,s
+007C EC6A             (     ../cludiv.as):00101                             ldd       10,s      ; load D from stack-relative value 10,s
+007E E263             (     ../cludiv.as):00102                             sbcb      3,s       ; subtract stack-relative value 3,s from B
+0080 A262             (     ../cludiv.as):00103                             sbca      2,s       ; subtract stack-relative value 2,s from A
+0082 ED6A             (     ../cludiv.as):00104                             std       10,s      ; store D to stack-relative value 10,s
+0084 2412             (     ../cludiv.as):00105                             bcc       div7      ; branch if carry is clear to div7
+0086 EC6C             (     ../cludiv.as):00106                             ldd       12,s      ; load D from stack-relative value 12,s
+0088 E364             (     ../cludiv.as):00107                             addd      4,s       ; add stack-relative value 4,s into D
+008A ED6C             (     ../cludiv.as):00108                             std       12,s      ; store D to stack-relative value 12,s
+008C EC6A             (     ../cludiv.as):00109                             ldd       10,s      ; load D from stack-relative value 10,s
+008E E963             (     ../cludiv.as):00110                             adcb      3,s       ; add stack-relative value 3,s into B
+0090 A962             (     ../cludiv.as):00111                             adca      2,s       ; add stack-relative value 2,s into A
+0092 ED6A             (     ../cludiv.as):00112                             std       10,s      ; store D to stack-relative value 10,s
+0094 1CFE             (     ../cludiv.as):00113                             andcc     #^Carry   ; clear condition-code bits with mask #^Carry
+0096 2002             (     ../cludiv.as):00114                             bra       div8      ; branch unconditionally to div8
+                      (     ../cludiv.as):00115         
+                      (     ../cludiv.as):00116         * rotate quotient and dividend
+0098                  (     ../cludiv.as):00117         div7
+0098 1A01             (     ../cludiv.as):00118                             orcc      #Carry    ; set condition-code bits with mask #Carry
+009A                  (     ../cludiv.as):00119         div8
+009A 6903             (     ../cludiv.as):00120                             rol       3,x       ; rotate indexed value 3,x left through carry
+009C 6902             (     ../cludiv.as):00121                             rol       2,x       ; rotate indexed value 2,x left through carry
+009E 6901             (     ../cludiv.as):00122                             rol       1,x       ; rotate indexed value 1,x left through carry
+00A0 6900             (     ../cludiv.as):00123                             rol       0,x       ; rotate indexed value 0,x left through carry
+00A2 6462             (     ../cludiv.as):00124                             lsr       2,s       ; logical shift stack-relative value 2,s right by one bit
+00A4 6663             (     ../cludiv.as):00125                             ror       3,s       ; rotate stack-relative value 3,s right through carry
+00A6 6664             (     ../cludiv.as):00126                             ror       4,s       ; rotate stack-relative value 4,s right through carry
+00A8 6665             (     ../cludiv.as):00127                             ror       5,s       ; rotate stack-relative value 5,s right through carry
+00AA 6A60             (     ../cludiv.as):00128                             dec       0,s       ; decrement stack-relative value 0,s
+00AC                  (     ../cludiv.as):00129         check
+00AC 2AC8             (     ../cludiv.as):00130                             bpl       div6      ; branch if plus to div6
+00AE 6EF806           (     ../cludiv.as):00131                             jmp       [6,s]     ; jump to [6,s]
+                      (     ../cludiv.as):00132         
+                      (     ../cludiv.as):00133                             endsect             ; end current section

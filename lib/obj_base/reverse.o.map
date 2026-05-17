@@ -1,0 +1,3 @@
+Symbol: _reverse (reverse.o) = 0000
+Symbol: L_reverse_check (reverse.o) = 001B
+Symbol: L_reverse_loop (reverse.o) = 0013

@@ -1,0 +1,49 @@
+                      (        ../mod.as):00001         __os_modlink        EXPORT              ; export module link wrapper
+                      (        ../mod.as):00002         __os_modload        EXPORT              ; export module load wrapper
+                      (        ../mod.as):00003         __os_modunlink      EXPORT              ; export module unlink wrapper
+                      (        ../mod.as):00004         
+                      (        ../mod.as):00005         _oserr              EXTERNAL            ; common OS-9 error return helper
+                      (        ../mod.as):00006         _osret              EXTERNAL            ; common successful return helper
+                      (        ../mod.as):00007         
+     0000             (        ../mod.as):00008         F_Link              equ       $00       ; OS-9 link existing module
+     0001             (        ../mod.as):00009         F_Load              equ       $01       ; OS-9 load module from disk
+     0002             (        ../mod.as):00010         F_UnLink            equ       $02       ; OS-9 release linked module
+                      (        ../mod.as):00011         
+                      (        ../mod.as):00012                             section   code      ; begin code section
+                      (        ../mod.as):00013         
+0000                  (        ../mod.as):00014         __os_modlink
+0000 3460             (        ../mod.as):00015                             pshs      y,u       ; preserve registers used by OS-9
+0002 AE66             (        ../mod.as):00016                             ldx       6,s       ; load module name pointer
+0004 A669             (        ../mod.as):00017                             lda       9,s       ; load module language nibble
+0006 48               (        ../mod.as):00018                             asla                ; shift language into high nibble
+0007 48               (        ../mod.as):00019                             asla                ; shift language into high nibble
+0008 48               (        ../mod.as):00020                             asla                ; shift language into high nibble
+0009 48               (        ../mod.as):00021                             asla                ; shift language into high nibble
+000A AA6B             (        ../mod.as):00022                             ora       11,s      ; merge in requested module type nibble
+000C 103F00           (        ../mod.as):00023                             os9       F_Link    ; ask OS-9 to link the named module
+000F 1F30             (        ../mod.as):00024         L000f               tfr       u,d       ; copy returned module address into D
+0011 3560             (        ../mod.as):00025                             puls      y,u       ; restore preserved registers
+0013 10250000         (        ../mod.as):00026                             lblo      _oserr    ; dispatch OS-9 carry-set failure path
+0017 EDF808           (        ../mod.as):00027                             std       [8,s]     ; store linked module address through output pointer
+001A 160000           (        ../mod.as):00028                             lbra      _osret    ; return success with cleared errno
+                      (        ../mod.as):00029         
+001D                  (        ../mod.as):00030         __os_modload
+001D 3460             (        ../mod.as):00031                             pshs      y,u       ; preserve registers used by OS-9
+001F AE66             (        ../mod.as):00032                             ldx       6,s       ; load module name pointer
+0021 A669             (        ../mod.as):00033                             lda       9,s       ; load module language nibble
+0023 48               (        ../mod.as):00034                             asla                ; shift language into high nibble
+0024 48               (        ../mod.as):00035                             asla                ; shift language into high nibble
+0025 48               (        ../mod.as):00036                             asla                ; shift language into high nibble
+0026 48               (        ../mod.as):00037                             asla                ; shift language into high nibble
+0027 AA6B             (        ../mod.as):00038                             ora       11,s      ; merge in requested module type nibble
+0029 103F01           (        ../mod.as):00039                             os9       F_Load    ; load and link the named module
+002C 20E1             (        ../mod.as):00040                             bra       L000f     ; share common post-call handling
+                      (        ../mod.as):00041         
+002E                  (        ../mod.as):00042         __os_modunlink
+002E 3440             (        ../mod.as):00043                             pshs      u         ; preserve caller's U register
+0030 EE64             (        ../mod.as):00044                             ldu       4,s       ; load module address to unlink
+0032 103F02           (        ../mod.as):00045                             os9       F_UnLink  ; release the linked module
+0035 3540             (        ../mod.as):00046                             puls      u         ; restore caller's U register
+0037 160000           (        ../mod.as):00047                             lbra      _osret    ; return through common success path
+                      (        ../mod.as):00048         
+                      (        ../mod.as):00049                             endsect             ; end code section

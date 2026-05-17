@@ -1,0 +1,4 @@
+Symbol: _strucmp (strucmp.o) = 0000
+Symbol: BranchTarget_01 (strucmp.o) = 002A
+Symbol: Continue_01 (strucmp.o) = 000C
+Symbol: Loop_01 (strucmp.o) = 0008

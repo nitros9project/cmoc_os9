@@ -1,0 +1,6 @@
+Symbol: _bsearch (bsearch.o) = 0000
+Symbol: BranchTarget_01 (bsearch.o) = 0041
+Symbol: Continue_01 (bsearch.o) = 0043
+Symbol: Loop_01 (bsearch.o) = 0006
+Symbol: Loop_02 (bsearch.o) = 000D
+Symbol: ReturnZero_01 (bsearch.o) = 003D

@@ -1,0 +1,398 @@
+                      (      drawfunc.as):00001         * Adapted from cmoc_os9/cgfx/todo/drawfunc.a for the live cmoc_os9 ABI.
+                      (      drawfunc.as):00002         
+                      (      drawfunc.as):00003                 section bss
+0000                  (      drawfunc.as):00004         _draw_x1                rmb     2 * reserve 2 bytes
+0002                  (      drawfunc.as):00005         _draw_y1                rmb     2 * reserve 2 bytes
+0004                  (      drawfunc.as):00006         _draw_x2                rmb     2 * reserve 2 bytes
+0006                  (      drawfunc.as):00007         _draw_y2                rmb     2 * reserve 2 bytes
+0008                  (      drawfunc.as):00008         _draw_angle             rmb     1 * reserve 1 bytes
+0009                  (      drawfunc.as):00009         _draw_scale             rmb     1 * reserve 1 bytes
+000A                  (      drawfunc.as):00010         _draw_strings           rmb     2 * reserve 2 bytes
+000C                  (      drawfunc.as):00011         _draw_path              rmb     1 * reserve 1 bytes
+000D                  (      drawfunc.as):00012         _draw_xoff              rmb     2 * reserve 2 bytes
+000F                  (      drawfunc.as):00013         _draw_yoff              rmb     2 * reserve 2 bytes
+0011                  (      drawfunc.as):00014         _draw_nomove            rmb     1 * reserve 1 bytes
+0012                  (      drawfunc.as):00015         _draw_blank             rmb     1 * reserve 1 bytes
+                      (      drawfunc.as):00016                 endsect * end current section
+                      (      drawfunc.as):00017         
+                      (      drawfunc.as):00018                 section code
+                      (      drawfunc.as):00019         
+                      (      drawfunc.as):00020         _Draw                   EXPORT * export this symbol
+                      (      drawfunc.as):00021         
+                      (      drawfunc.as):00022         _write                  EXTERNAL * import external symbol
+                      (      drawfunc.as):00023         
+0000                  (      drawfunc.as):00024         negd    macro
+                      (      drawfunc.as):00025                 nega * negate A
+                      (      drawfunc.as):00026                 negb * negate B
+                      (      drawfunc.as):00027                 sbca    #0 * subtract immediate value 0 from A
+                      (      drawfunc.as):00028                 endm
+                      (      drawfunc.as):00029         
+0000                  (      drawfunc.as):00030         _Draw
+0000 3440             (      drawfunc.as):00031                 pshs    u
+0002 A665             (      drawfunc.as):00032                 lda     5,s * load A from stack-relative value 5,s
+0004 A7A90000         (      drawfunc.as):00033                 sta     _draw_path,y * store A to indexed value _draw_path,y
+0008 3066             (      drawfunc.as):00034                 leax    6,s * compute effective address into X from 6,s
+000A AFA90000         (      drawfunc.as):00035                 stx     _draw_strings,y * store X to indexed value _draw_strings,y
+000E AE84             (      drawfunc.as):00036                 ldx     ,x * load X from memory pointed to by X
+0010 170002           (      drawfunc.as):00037                 lbsr    parse
+0013 35C0             (      drawfunc.as):00038                 puls    u,pc
+                      (      drawfunc.as):00039         
+0015 6FA90000         (      drawfunc.as):00040         parse   clr     _draw_nomove,y * clear indexed value _draw_nomove,y
+0019 6FA90000         (      drawfunc.as):00041                 clr     _draw_blank,y * clear indexed value _draw_blank,y
+                      (      drawfunc.as):00042         
+001D A680             (      drawfunc.as):00043         ploop   lda     ,x+ * load A from memory pointed to by X, then advance X
+001F 8120             (      drawfunc.as):00044                 cmpa    #$20 * compare A against immediate value $20
+0021 27FA             (      drawfunc.as):00045                 beq     ploop
+0023 813B             (      drawfunc.as):00046                 cmpa    #$3b * compare A against immediate value $3b
+0025 27EE             (      drawfunc.as):00047                 beq     parse
+0027 815F             (      drawfunc.as):00048                 cmpa    #$5f * compare A against immediate value $5f
+0029 2302             (      drawfunc.as):00049                 bls     p00
+002B 845F             (      drawfunc.as):00050                 anda    #$5f * AND A with immediate value $5f
+002D 8142             (      drawfunc.as):00051         p00     cmpa    #$42 * compare A against immediate value $42
+002F 2606             (      drawfunc.as):00052                 bne     p10
+0031 6CA90000         (      drawfunc.as):00053                 inc     _draw_blank,y * increment indexed value _draw_blank,y
+0035 20E6             (      drawfunc.as):00054                 bra     ploop
+                      (      drawfunc.as):00055         
+0037 814E             (      drawfunc.as):00056         p10     cmpa    #$4e * compare A against immediate value $4e
+0039 2606             (      drawfunc.as):00057                 bne     p20
+003B 6CA90000         (      drawfunc.as):00058                 inc     _draw_nomove,y * increment indexed value _draw_nomove,y
+003F 20DC             (      drawfunc.as):00059                 bra     ploop
+                      (      drawfunc.as):00060         
+0041 8143             (      drawfunc.as):00061         p20     cmpa    #$43 * compare A against immediate value $43
+0043 261C             (      drawfunc.as):00062                 bne     p30
+0045 17016B           (      drawfunc.as):00063                 lbsr    getnum
+0048 3414             (      drawfunc.as):00064                 pshs    b,x
+004A CC1B32           (      drawfunc.as):00065                 ldd     #$1b32 * load D from immediate value $1b32
+004D 3406             (      drawfunc.as):00066                 pshs    d
+004F 30E4             (      drawfunc.as):00067                 leax    ,s * compute effective address into X from ,s
+0051 CE0003           (      drawfunc.as):00068                 ldu     #3 * load U from immediate value 3
+0054 A6A90000         (      drawfunc.as):00069                 lda     _draw_path,y * load A from indexed value _draw_path,y
+0058 170000           (      drawfunc.as):00070                 lbsr    _write * long branch to subroutine to _write
+005B 3263             (      drawfunc.as):00071                 leas    3,s * adjust S using 3,s
+005D 3510             (      drawfunc.as):00072                 puls    x
+005F 20B4             (      drawfunc.as):00073                 bra     parse
+                      (      drawfunc.as):00074         
+0061 8141             (      drawfunc.as):00075         p30     cmpa    #$41 * compare A against immediate value $41
+0063 260B             (      drawfunc.as):00076                 bne     p40
+0065 17014B           (      drawfunc.as):00077                 lbsr    getnum
+0068 C403             (      drawfunc.as):00078                 andb    #3 * AND B with immediate value 3
+006A E7A90000         (      drawfunc.as):00079                 stb     _draw_angle,y * store B to indexed value _draw_angle,y
+006E 20A5             (      drawfunc.as):00080                 bra     parse
+                      (      drawfunc.as):00081         
+0070 8153             (      drawfunc.as):00082         p40     cmpa    #$53 * compare A against immediate value $53
+0072 2609             (      drawfunc.as):00083                 bne     p50
+0074 17013C           (      drawfunc.as):00084                 lbsr    getnum
+0077 E7A90000         (      drawfunc.as):00085                 stb     _draw_scale,y * store B to indexed value _draw_scale,y
+007B 2098             (      drawfunc.as):00086                 bra     parse
+                      (      drawfunc.as):00087         
+007D 814D             (      drawfunc.as):00088         p50     cmpa    #$4d * compare A against immediate value $4d
+007F 2658             (      drawfunc.as):00089                 bne     p60
+0081 A680             (      drawfunc.as):00090         p50a    lda     ,x+ * load A from memory pointed to by X, then advance X
+0083 8120             (      drawfunc.as):00091                 cmpa    #$20 * compare A against immediate value $20
+0085 27FA             (      drawfunc.as):00092                 beq     p50a
+0087 301F             (      drawfunc.as):00093                 leax    -1,x * compute effective address into X from -1,x
+0089 812B             (      drawfunc.as):00094                 cmpa    #$2b * compare A against immediate value $2b
+008B 272C             (      drawfunc.as):00095                 beq     p52
+008D 812D             (      drawfunc.as):00096                 cmpa    #$2d * compare A against immediate value $2d
+008F 2728             (      drawfunc.as):00097                 beq     p52
+0091 17011F           (      drawfunc.as):00098                 lbsr    getnum
+0094 58               (      drawfunc.as):00099                 lslb * shift B left by one bit
+0095 49               (      drawfunc.as):00100                 rola * rotate A left through carry
+0096 58               (      drawfunc.as):00101                 lslb * shift B left by one bit
+0097 49               (      drawfunc.as):00102                 rola * rotate A left through carry
+0098 EDA90000         (      drawfunc.as):00103                 std     _draw_x2,y * store D to indexed value _draw_x2,y
+009C A680             (      drawfunc.as):00104         p51     lda     ,x+ * load A from memory pointed to by X, then advance X
+009E 8120             (      drawfunc.as):00105                 cmpa    #$20 * compare A against immediate value $20
+00A0 27FA             (      drawfunc.as):00106                 beq     p51
+00A2 812C             (      drawfunc.as):00107                 cmpa    #$2c * compare A against immediate value $2c
+00A4 1026010A         (      drawfunc.as):00108                 lbne    prts
+00A8 170108           (      drawfunc.as):00109                 lbsr    getnum
+00AB 58               (      drawfunc.as):00110                 lslb * shift B left by one bit
+00AC 49               (      drawfunc.as):00111                 rola * rotate A left through carry
+00AD 58               (      drawfunc.as):00112                 lslb * shift B left by one bit
+00AE 49               (      drawfunc.as):00113                 rola * rotate A left through carry
+00AF EDA90000         (      drawfunc.as):00114                 std     _draw_y2,y * store D to indexed value _draw_y2,y
+00B3 170203           (      drawfunc.as):00115                 lbsr    moveto
+00B6 16FF5C           (      drawfunc.as):00116                 lbra    parse
+                      (      drawfunc.as):00117         
+00B9 1700F7           (      drawfunc.as):00118         p52     lbsr    getnum * long branch to subroutine to getnum
+00BC EDA90000         (      drawfunc.as):00119                 std     _draw_xoff,y * store D to indexed value _draw_xoff,y
+00C0 A680             (      drawfunc.as):00120         p53     lda     ,x+ * load A from memory pointed to by X, then advance X
+00C2 8120             (      drawfunc.as):00121                 cmpa    #$20 * compare A against immediate value $20
+00C4 27FA             (      drawfunc.as):00122                 beq     p53
+00C6 812C             (      drawfunc.as):00123                 cmpa    #$2c * compare A against immediate value $2c
+00C8 102600E6         (      drawfunc.as):00124                 lbne    prts
+00CC 1700E4           (      drawfunc.as):00125                 lbsr    getnum
+00CF EDA90000         (      drawfunc.as):00126                 std     _draw_yoff,y * store D to indexed value _draw_yoff,y
+00D3 170157           (      drawfunc.as):00127                 lbsr    move
+00D6 16FF3C           (      drawfunc.as):00128                 lbra    parse
+                      (      drawfunc.as):00129         
+00D9 8125             (      drawfunc.as):00130         p60     cmpa    #$25 * compare A against immediate value $25
+00DB 2620             (      drawfunc.as):00131                 bne     p70
+00DD A680             (      drawfunc.as):00132                 lda     ,x+ * load A from memory pointed to by X, then advance X
+00DF 845F             (      drawfunc.as):00133                 anda    #$5f * AND A with immediate value $5f
+00E1 8153             (      drawfunc.as):00134                 cmpa    #$53 * compare A against immediate value $53
+00E3 1026FF2E         (      drawfunc.as):00135                 lbne    parse
+00E7 3410             (      drawfunc.as):00136                 pshs    x
+00E9 AEA90000         (      drawfunc.as):00137                 ldx     _draw_strings,y * load X from indexed value _draw_strings,y
+00ED 3002             (      drawfunc.as):00138                 leax    2,x * compute effective address into X from 2,x
+00EF AFA90000         (      drawfunc.as):00139                 stx     _draw_strings,y * store X to indexed value _draw_strings,y
+00F3 AE84             (      drawfunc.as):00140                 ldx     ,x * load X from memory pointed to by X
+00F5 17FF25           (      drawfunc.as):00141                 lbsr    ploop
+00F8 3510             (      drawfunc.as):00142                 puls    x
+00FA 16FF20           (      drawfunc.as):00143                 lbra    ploop
+                      (      drawfunc.as):00144         
+00FD 8155             (      drawfunc.as):00145         p70     cmpa    #$55 * compare A against immediate value $55
+00FF 2615             (      drawfunc.as):00146                 bne     p71
+0101 1700AF           (      drawfunc.as):00147                 lbsr    getnum
+0104 1040             (      drawfunc.as):00148                 negd
+0106 EDA90000         (      drawfunc.as):00149                 std     _draw_yoff,y * store D to indexed value _draw_yoff,y
+010A 4F               (      drawfunc.as):00150                 clra * clear A
+010B 5F               (      drawfunc.as):00151                 clrb * clear B
+010C EDA90000         (      drawfunc.as):00152                 std     _draw_xoff,y * store D to indexed value _draw_xoff,y
+0110 17011A           (      drawfunc.as):00153                 lbsr    move
+0113 16FEFF           (      drawfunc.as):00154                 lbra    parse
+                      (      drawfunc.as):00155         
+0116 8144             (      drawfunc.as):00156         p71     cmpa    #$44 * compare A against immediate value $44
+0118 2613             (      drawfunc.as):00157                 bne     p72
+011A 170096           (      drawfunc.as):00158                 lbsr    getnum
+011D EDA90000         (      drawfunc.as):00159                 std     _draw_yoff,y * store D to indexed value _draw_yoff,y
+0121 4F               (      drawfunc.as):00160                 clra * clear A
+0122 5F               (      drawfunc.as):00161                 clrb * clear B
+0123 EDA90000         (      drawfunc.as):00162                 std     _draw_xoff,y * store D to indexed value _draw_xoff,y
+0127 170103           (      drawfunc.as):00163                 lbsr    move
+012A 16FEE8           (      drawfunc.as):00164                 lbra    parse
+                      (      drawfunc.as):00165         
+012D 814C             (      drawfunc.as):00166         p72     cmpa    #$4c * compare A against immediate value $4c
+012F 2615             (      drawfunc.as):00167                 bne     p73
+0131 17007F           (      drawfunc.as):00168                 lbsr    getnum
+0134 1040             (      drawfunc.as):00169                 negd
+0136 EDA90000         (      drawfunc.as):00170                 std     _draw_xoff,y * store D to indexed value _draw_xoff,y
+013A 4F               (      drawfunc.as):00171                 clra * clear A
+013B 5F               (      drawfunc.as):00172                 clrb * clear B
+013C EDA90000         (      drawfunc.as):00173                 std     _draw_yoff,y * store D to indexed value _draw_yoff,y
+0140 1700EA           (      drawfunc.as):00174                 lbsr    move
+0143 16FECF           (      drawfunc.as):00175                 lbra    parse
+                      (      drawfunc.as):00176         
+0146 8152             (      drawfunc.as):00177         p73     cmpa    #$52 * compare A against immediate value $52
+0148 2612             (      drawfunc.as):00178                 bne     p74
+014A 8D67             (      drawfunc.as):00179                 bsr     getnum
+014C EDA90000         (      drawfunc.as):00180                 std     _draw_xoff,y * store D to indexed value _draw_xoff,y
+0150 4F               (      drawfunc.as):00181                 clra * clear A
+0151 5F               (      drawfunc.as):00182                 clrb * clear B
+0152 EDA90000         (      drawfunc.as):00183                 std     _draw_yoff,y * store D to indexed value _draw_yoff,y
+0156 1700D4           (      drawfunc.as):00184                 lbsr    move
+0159 16FEB9           (      drawfunc.as):00185                 lbra    parse
+                      (      drawfunc.as):00186         
+015C 8145             (      drawfunc.as):00187         p74     cmpa    #$45 * compare A against immediate value $45
+015E 2612             (      drawfunc.as):00188                 bne     p75
+0160 8D51             (      drawfunc.as):00189                 bsr     getnum
+0162 EDA90000         (      drawfunc.as):00190                 std     _draw_xoff,y * store D to indexed value _draw_xoff,y
+0166 1040             (      drawfunc.as):00191                 negd
+0168 EDA90000         (      drawfunc.as):00192                 std     _draw_yoff,y * store D to indexed value _draw_yoff,y
+016C 1700BE           (      drawfunc.as):00193                 lbsr    move
+016F 16FEA3           (      drawfunc.as):00194                 lbra    parse
+                      (      drawfunc.as):00195         
+0172 8146             (      drawfunc.as):00196         p75     cmpa    #$46 * compare A against immediate value $46
+0174 2610             (      drawfunc.as):00197                 bne     p76
+0176 8D3B             (      drawfunc.as):00198                 bsr     getnum
+0178 EDA90000         (      drawfunc.as):00199                 std     _draw_yoff,y * store D to indexed value _draw_yoff,y
+017C EDA90000         (      drawfunc.as):00200                 std     _draw_xoff,y * store D to indexed value _draw_xoff,y
+0180 1700AA           (      drawfunc.as):00201                 lbsr    move
+0183 16FE8F           (      drawfunc.as):00202                 lbra    parse
+                      (      drawfunc.as):00203         
+0186 8147             (      drawfunc.as):00204         p76     cmpa    #$47 * compare A against immediate value $47
+0188 2612             (      drawfunc.as):00205                 bne     p77
+018A 8D27             (      drawfunc.as):00206                 bsr     getnum
+018C EDA90000         (      drawfunc.as):00207                 std     _draw_yoff,y * store D to indexed value _draw_yoff,y
+0190 1040             (      drawfunc.as):00208                 negd
+0192 EDA90000         (      drawfunc.as):00209                 std     _draw_xoff,y * store D to indexed value _draw_xoff,y
+0196 170094           (      drawfunc.as):00210                 lbsr    move
+0199 16FE79           (      drawfunc.as):00211                 lbra    parse
+                      (      drawfunc.as):00212         
+019C 8148             (      drawfunc.as):00213         p77     cmpa    #$48 * compare A against immediate value $48
+019E 2612             (      drawfunc.as):00214                 bne     prts
+01A0 8D11             (      drawfunc.as):00215                 bsr     getnum
+01A2 1040             (      drawfunc.as):00216                 negd
+01A4 EDA90000         (      drawfunc.as):00217                 std     _draw_yoff,y * store D to indexed value _draw_yoff,y
+01A8 EDA90000         (      drawfunc.as):00218                 std     _draw_xoff,y * store D to indexed value _draw_xoff,y
+01AC 17007E           (      drawfunc.as):00219                 lbsr    move
+01AF 16FE63           (      drawfunc.as):00220                 lbra    parse
+                      (      drawfunc.as):00221         
+01B2 39               (      drawfunc.as):00222         prts    rts * return to caller
+                      (      drawfunc.as):00223         
+01B3 A680             (      drawfunc.as):00224         getnum  lda     ,x+ * load A from memory pointed to by X, then advance X
+01B5 8120             (      drawfunc.as):00225                 cmpa    #$20 * compare A against immediate value $20
+01B7 27FA             (      drawfunc.as):00226                 beq     getnum
+01B9 8125             (      drawfunc.as):00227                 cmpa    #$25 * compare A against immediate value $25
+01BB 273D             (      drawfunc.as):00228                 beq     g10
+01BD 8139             (      drawfunc.as):00229                 cmpa    #$39 * compare A against immediate value $39
+01BF 220C             (      drawfunc.as):00230                 bhi     g02
+01C1 812B             (      drawfunc.as):00231                 cmpa    #$2b * compare A against immediate value $2b
+01C3 27EE             (      drawfunc.as):00232                 beq     getnum
+01C5 812D             (      drawfunc.as):00233                 cmpa    #$2d * compare A against immediate value $2d
+01C7 275F             (      drawfunc.as):00234                 beq     g20
+01C9 8130             (      drawfunc.as):00235                 cmpa    #$30 * compare A against immediate value $30
+01CB 2404             (      drawfunc.as):00236                 bhs     g00
+01CD CC0001           (      drawfunc.as):00237         g02     ldd     #1 * load D from immediate value 1
+01D0 39               (      drawfunc.as):00238                 rts * return to caller
+                      (      drawfunc.as):00239         
+01D1 8030             (      drawfunc.as):00240         g00     suba    #$30 * subtract immediate value $30 from A
+01D3 3402             (      drawfunc.as):00241                 pshs    a
+01D5 6FE2             (      drawfunc.as):00242                 clr     ,-s * clear memory pointed to by -S
+                      (      drawfunc.as):00243         
+01D7 E680             (      drawfunc.as):00244         gloop0  ldb     ,x+ * load B from memory pointed to by X, then advance X
+01D9 C130             (      drawfunc.as):00245                 cmpb    #$30 * compare B against immediate value $30
+01DB 2519             (      drawfunc.as):00246                 blo     gnext0
+01DD C139             (      drawfunc.as):00247                 cmpb    #$39 * compare B against immediate value $39
+01DF 2215             (      drawfunc.as):00248                 bhi     gnext0
+01E1 C030             (      drawfunc.as):00249                 subb    #$30 * subtract immediate value $30 from B
+01E3 4F               (      drawfunc.as):00250                 clra * clear A
+01E4 3406             (      drawfunc.as):00251                 pshs    d
+01E6 EC62             (      drawfunc.as):00252                 ldd     2,s * load D from stack-relative value 2,s
+01E8 58               (      drawfunc.as):00253                 lslb * shift B left by one bit
+01E9 49               (      drawfunc.as):00254                 rola * rotate A left through carry
+01EA 58               (      drawfunc.as):00255                 lslb * shift B left by one bit
+01EB 49               (      drawfunc.as):00256                 rola * rotate A left through carry
+01EC E362             (      drawfunc.as):00257                 addd    2,s * add stack-relative value 2,s into D
+01EE 58               (      drawfunc.as):00258                 lslb * shift B left by one bit
+01EF 49               (      drawfunc.as):00259                 rola * rotate A left through carry
+01F0 E3E1             (      drawfunc.as):00260                 addd    ,s++ * add memory pointed to by S+, then advance S+ into D
+01F2 EDE4             (      drawfunc.as):00261                 std     ,s * store D to memory pointed to by S
+01F4 20E1             (      drawfunc.as):00262                 bra     gloop0
+                      (      drawfunc.as):00263         
+01F6 301F             (      drawfunc.as):00264         gnext0  leax    -1,x * compute effective address into X from -1,x
+01F8 3586             (      drawfunc.as):00265                 puls    d,pc
+                      (      drawfunc.as):00266         
+01FA A680             (      drawfunc.as):00267         g10     lda     ,x+ * load A from memory pointed to by X, then advance X
+01FC 845F             (      drawfunc.as):00268                 anda    #$5f * AND A with immediate value $5f
+01FE 8144             (      drawfunc.as):00269                 cmpa    #$44 * compare A against immediate value $44
+0200 2610             (      drawfunc.as):00270                 bne     g11
+0202 3410             (      drawfunc.as):00271                 pshs    x
+0204 AEA90000         (      drawfunc.as):00272                 ldx     _draw_strings,y * load X from indexed value _draw_strings,y
+0208 3002             (      drawfunc.as):00273                 leax    2,x * compute effective address into X from 2,x
+020A AFA90000         (      drawfunc.as):00274                 stx     _draw_strings,y * store X to indexed value _draw_strings,y
+020E EC84             (      drawfunc.as):00275                 ldd     ,x * load D from memory pointed to by X
+0210 3590             (      drawfunc.as):00276                 puls    x,pc
+                      (      drawfunc.as):00277         
+0212 8153             (      drawfunc.as):00278         g11     cmpa    #$53 * compare A against immediate value $53
+0214 26B7             (      drawfunc.as):00279                 bne     g02
+0216 3410             (      drawfunc.as):00280                 pshs    x
+0218 AEA90000         (      drawfunc.as):00281                 ldx     _draw_strings,y * load X from indexed value _draw_strings,y
+021C 3002             (      drawfunc.as):00282                 leax    2,x * compute effective address into X from 2,x
+021E AFA90000         (      drawfunc.as):00283                 stx     _draw_strings,y * store X to indexed value _draw_strings,y
+0222 AE84             (      drawfunc.as):00284                 ldx     ,x * load X from memory pointed to by X
+0224 8D8D             (      drawfunc.as):00285                 bsr     getnum
+0226 3590             (      drawfunc.as):00286                 puls    x,pc
+                      (      drawfunc.as):00287         
+0228 8D89             (      drawfunc.as):00288         g20     bsr     getnum * branch to subroutine to getnum
+022A 1040             (      drawfunc.as):00289                 negd
+022C 39               (      drawfunc.as):00290                 rts * return to caller
+                      (      drawfunc.as):00291         
+022D A6A90000         (      drawfunc.as):00292         move    lda     _draw_angle,y * load A from indexed value _draw_angle,y
+0231 2742             (      drawfunc.as):00293                 beq     calcmove
+0233 4A               (      drawfunc.as):00294                 deca * decrement A
+0234 2614             (      drawfunc.as):00295                 bne     m00
+0236 ECA90000         (      drawfunc.as):00296                 ldd     _draw_xoff,y * load D from indexed value _draw_xoff,y
+023A 1040             (      drawfunc.as):00297                 negd
+023C EEA90000         (      drawfunc.as):00298                 ldu     _draw_yoff,y * load U from indexed value _draw_yoff,y
+0240 EFA90000         (      drawfunc.as):00299                 stu     _draw_xoff,y * store U to indexed value _draw_xoff,y
+0244 EDA90000         (      drawfunc.as):00300                 std     _draw_yoff,y * store D to indexed value _draw_yoff,y
+0248 202B             (      drawfunc.as):00301                 bra     calcmove
+                      (      drawfunc.as):00302         
+024A 4A               (      drawfunc.as):00303         m00     deca * decrement A
+024B 2616             (      drawfunc.as):00304                 bne     m10
+024D ECA90000         (      drawfunc.as):00305                 ldd     _draw_xoff,y * load D from indexed value _draw_xoff,y
+0251 1040             (      drawfunc.as):00306                 negd
+0253 EDA90000         (      drawfunc.as):00307                 std     _draw_xoff,y * store D to indexed value _draw_xoff,y
+0257 ECA90000         (      drawfunc.as):00308                 ldd     _draw_yoff,y * load D from indexed value _draw_yoff,y
+025B 1040             (      drawfunc.as):00309                 negd
+025D EDA90000         (      drawfunc.as):00310                 std     _draw_yoff,y * store D to indexed value _draw_yoff,y
+0261 2012             (      drawfunc.as):00311                 bra     calcmove
+                      (      drawfunc.as):00312         
+0263 ECA90000         (      drawfunc.as):00313         m10     ldd     _draw_yoff,y * load D from indexed value _draw_yoff,y
+0267 1040             (      drawfunc.as):00314                 negd
+0269 EEA90000         (      drawfunc.as):00315                 ldu     _draw_xoff,y * load U from indexed value _draw_xoff,y
+026D EDA90000         (      drawfunc.as):00316                 std     _draw_xoff,y * store D to indexed value _draw_xoff,y
+0271 EFA90000         (      drawfunc.as):00317                 stu     _draw_yoff,y * store U to indexed value _draw_yoff,y
+                      (      drawfunc.as):00318         
+0275                  (      drawfunc.as):00319         calcmove
+0275 A6A90000         (      drawfunc.as):00320                 lda     _draw_scale,y * load A from indexed value _draw_scale,y
+0279 E6A90000         (      drawfunc.as):00321                 ldb     _draw_xoff+1,y * load B from indexed value _draw_xoff+1,y
+027D 3D               (      drawfunc.as):00322                 mul * multiply A by B and leave the product in D
+027E 3406             (      drawfunc.as):00323                 pshs    d
+0280 A6A90000         (      drawfunc.as):00324                 lda     _draw_scale,y * load A from indexed value _draw_scale,y
+0284 E6A90000         (      drawfunc.as):00325                 ldb     _draw_xoff,y * load B from indexed value _draw_xoff,y
+0288 3D               (      drawfunc.as):00326                 mul * multiply A by B and leave the product in D
+0289 EBE4             (      drawfunc.as):00327                 addb    ,s * add memory pointed to by S into B
+028B E7E4             (      drawfunc.as):00328                 stb     ,s * store B to memory pointed to by S
+028D 3506             (      drawfunc.as):00329                 puls    d
+028F E3A90000         (      drawfunc.as):00330                 addd    _draw_x1,y * add indexed value _draw_x1,y into D
+0293 EDA90000         (      drawfunc.as):00331                 std     _draw_x2,y * store D to indexed value _draw_x2,y
+                      (      drawfunc.as):00332         
+0297 A6A90000         (      drawfunc.as):00333                 lda     _draw_scale,y * load A from indexed value _draw_scale,y
+029B E6A90000         (      drawfunc.as):00334                 ldb     _draw_yoff+1,y * load B from indexed value _draw_yoff+1,y
+029F 3D               (      drawfunc.as):00335                 mul * multiply A by B and leave the product in D
+02A0 3406             (      drawfunc.as):00336                 pshs    d
+02A2 A6A90000         (      drawfunc.as):00337                 lda     _draw_scale,y * load A from indexed value _draw_scale,y
+02A6 E6A90000         (      drawfunc.as):00338                 ldb     _draw_yoff,y * load B from indexed value _draw_yoff,y
+02AA 3D               (      drawfunc.as):00339                 mul * multiply A by B and leave the product in D
+02AB EBE4             (      drawfunc.as):00340                 addb    ,s * add memory pointed to by S into B
+02AD E7E4             (      drawfunc.as):00341                 stb     ,s * store B to memory pointed to by S
+02AF 3506             (      drawfunc.as):00342                 puls    d
+02B1 E3A90000         (      drawfunc.as):00343                 addd    _draw_y1,y * add indexed value _draw_y1,y into D
+02B5 EDA90000         (      drawfunc.as):00344                 std     _draw_y2,y * store D to indexed value _draw_y2,y
+                      (      drawfunc.as):00345         
+02B9 6DA90000         (      drawfunc.as):00346         moveto  tst     _draw_blank,y * test indexed value _draw_blank,y and update condition codes
+02BD 2652             (      drawfunc.as):00347                 bne     move00
+02BF 327A             (      drawfunc.as):00348                 leas    -6,s * adjust S using -6,s
+02C1 CC1B40           (      drawfunc.as):00349                 ldd     #$1b40 * load D from immediate value $1b40
+02C4 EDE4             (      drawfunc.as):00350                 std     ,s * store D to memory pointed to by S
+02C6 ECA90000         (      drawfunc.as):00351                 ldd     _draw_x1,y * load D from indexed value _draw_x1,y
+02CA 44               (      drawfunc.as):00352                 lsra * logical shift A right by one bit
+02CB 56               (      drawfunc.as):00353                 rorb * rotate B right through carry
+02CC 44               (      drawfunc.as):00354                 lsra * logical shift A right by one bit
+02CD 56               (      drawfunc.as):00355                 rorb * rotate B right through carry
+02CE ED62             (      drawfunc.as):00356                 std     2,s * store D to stack-relative value 2,s
+02D0 ECA90000         (      drawfunc.as):00357                 ldd     _draw_y1,y * load D from indexed value _draw_y1,y
+02D4 44               (      drawfunc.as):00358                 lsra * logical shift A right by one bit
+02D5 56               (      drawfunc.as):00359                 rorb * rotate B right through carry
+02D6 44               (      drawfunc.as):00360                 lsra * logical shift A right by one bit
+02D7 56               (      drawfunc.as):00361                 rorb * rotate B right through carry
+02D8 ED64             (      drawfunc.as):00362                 std     4,s * store D to stack-relative value 4,s
+02DA 3410             (      drawfunc.as):00363                 pshs    x
+02DC 3062             (      drawfunc.as):00364                 leax    2,s * compute effective address into X from 2,s
+02DE CE0006           (      drawfunc.as):00365                 ldu     #6 * load U from immediate value 6
+02E1 A6A90000         (      drawfunc.as):00366                 lda     _draw_path,y * load A from indexed value _draw_path,y
+02E5 170000           (      drawfunc.as):00367                 lbsr    _write * long branch to subroutine to _write
+02E8 CC1B44           (      drawfunc.as):00368                 ldd     #$1b44 * load D from immediate value $1b44
+02EB ED62             (      drawfunc.as):00369                 std     2,s * store D to stack-relative value 2,s
+02ED ECA90000         (      drawfunc.as):00370                 ldd     _draw_x2,y * load D from indexed value _draw_x2,y
+02F1 44               (      drawfunc.as):00371                 lsra * logical shift A right by one bit
+02F2 56               (      drawfunc.as):00372                 rorb * rotate B right through carry
+02F3 44               (      drawfunc.as):00373                 lsra * logical shift A right by one bit
+02F4 56               (      drawfunc.as):00374                 rorb * rotate B right through carry
+02F5 ED64             (      drawfunc.as):00375                 std     4,s * store D to stack-relative value 4,s
+02F7 ECA90000         (      drawfunc.as):00376                 ldd     _draw_y2,y * load D from indexed value _draw_y2,y
+02FB 44               (      drawfunc.as):00377                 lsra * logical shift A right by one bit
+02FC 56               (      drawfunc.as):00378                 rorb * rotate B right through carry
+02FD 44               (      drawfunc.as):00379                 lsra * logical shift A right by one bit
+02FE 56               (      drawfunc.as):00380                 rorb * rotate B right through carry
+02FF ED66             (      drawfunc.as):00381                 std     6,s * store D to stack-relative value 6,s
+0301 3062             (      drawfunc.as):00382                 leax    2,s * compute effective address into X from 2,s
+0303 CE0006           (      drawfunc.as):00383                 ldu     #6 * load U from immediate value 6
+0306 A6A90000         (      drawfunc.as):00384                 lda     _draw_path,y * load A from indexed value _draw_path,y
+030A 170000           (      drawfunc.as):00385                 lbsr    _write * long branch to subroutine to _write
+030D 3510             (      drawfunc.as):00386                 puls    x
+030F 3266             (      drawfunc.as):00387                 leas    6,s * adjust S using 6,s
+                      (      drawfunc.as):00388         
+0311 6DA90000         (      drawfunc.as):00389         move00  tst     _draw_nomove,y * test indexed value _draw_nomove,y and update condition codes
+0315 2610             (      drawfunc.as):00390                 bne     mrts
+0317 ECA90000         (      drawfunc.as):00391                 ldd     _draw_x2,y * load D from indexed value _draw_x2,y
+031B EDA90000         (      drawfunc.as):00392                 std     _draw_x1,y * store D to indexed value _draw_x1,y
+031F ECA90000         (      drawfunc.as):00393                 ldd     _draw_y2,y * load D from indexed value _draw_y2,y
+0323 EDA90000         (      drawfunc.as):00394                 std     _draw_y1,y * store D to indexed value _draw_y1,y
+                      (      drawfunc.as):00395         
+0327 39               (      drawfunc.as):00396         mrts    rts * return to caller
+                      (      drawfunc.as):00397         
+                      (      drawfunc.as):00398                 endsect * end current section

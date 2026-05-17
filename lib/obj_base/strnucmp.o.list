@@ -1,0 +1,40 @@
+                      (   ../strnucmp.as):00001         * Adapted from Deek's KLibc strnucmp_a for the live cmoc_os9 ABI.
+                      (   ../strnucmp.as):00002         
+                      (   ../strnucmp.as):00003                             section   code      ; begin code section
+                      (   ../strnucmp.as):00004         
+                      (   ../strnucmp.as):00005         _strnucmp           EXPORT              ; export this symbol
+                      (   ../strnucmp.as):00006         
+                      (   ../strnucmp.as):00007         toupper             EXTERN              ; import external symbol
+                      (   ../strnucmp.as):00008         
+0000                  (   ../strnucmp.as):00009         _strnucmp
+0000 3460             (   ../strnucmp.as):00010                             pshs      y,u       ; save Y,U on the hardware stack
+0002 EE68             (   ../strnucmp.as):00011                             ldu       8,s       ; load U from stack-relative value 8,s
+0004 EC6A             (   ../strnucmp.as):00012                             ldd       10,s      ; load D from stack-relative value 10,s
+0006 272F             (   ../strnucmp.as):00013                             beq       BranchTarget_01 ; branch if equal/zero to BranchTarget_01
+0008 200D             (   ../strnucmp.as):00014                             bra       Continue_01 ; branch unconditionally to Continue_01
+000A EC6A             (   ../strnucmp.as):00015         Loop_01             ldd       10,s      ; load D from stack-relative value 10,s
+000C 830001           (   ../strnucmp.as):00016                             subd      #1        ; subtract immediate value 1 from D
+000F ED6A             (   ../strnucmp.as):00017                             std       10,s      ; store D to stack-relative value 10,s
+0011 2722             (   ../strnucmp.as):00018                             beq       ReturnZero_01 ; branch if equal/zero to ReturnZero_01
+0013 E6C0             (   ../strnucmp.as):00019                             ldb       ,u+       ; load B from memory pointed to by U, then advance U
+0015 271E             (   ../strnucmp.as):00020                             beq       ReturnZero_01 ; branch if equal/zero to ReturnZero_01
+0017 E6C4             (   ../strnucmp.as):00021         Continue_01         ldb       ,u        ; load B from memory pointed to by U
+0019 4F               (   ../strnucmp.as):00022                             clra                ; clear A
+001A 3406             (   ../strnucmp.as):00023                             pshs      d         ; save D on the hardware stack
+001C 170000           (   ../strnucmp.as):00024                             lbsr      toupper   ; long branch to subroutine to toupper
+001F EDE4             (   ../strnucmp.as):00025                             std       ,s        ; store D to memory pointed to by S
+0021 AE68             (   ../strnucmp.as):00026                             ldx       8,s       ; load X from stack-relative value 8,s
+0023 E680             (   ../strnucmp.as):00027                             ldb       ,x+       ; load B from memory pointed to by X, then advance X
+0025 AF68             (   ../strnucmp.as):00028                             stx       8,s       ; store X to stack-relative value 8,s
+0027 4F               (   ../strnucmp.as):00029                             clra                ; clear A
+0028 3406             (   ../strnucmp.as):00030                             pshs      d         ; save D on the hardware stack
+002A 170000           (   ../strnucmp.as):00031                             lbsr      toupper   ; long branch to subroutine to toupper
+002D 3262             (   ../strnucmp.as):00032                             leas      2,s       ; adjust S using 2,s
+002F A3E1             (   ../strnucmp.as):00033                             subd      ,s++      ; subtract memory pointed to by S+, then advance S+ from D
+0031 27D7             (   ../strnucmp.as):00034                             beq       Loop_01   ; branch if equal/zero to Loop_01
+0033 2002             (   ../strnucmp.as):00035                             bra       BranchTarget_01 ; branch unconditionally to BranchTarget_01
+0035 4F               (   ../strnucmp.as):00036         ReturnZero_01       clra                ; clear A
+0036 5F               (   ../strnucmp.as):00037                             clrb                ; clear B
+0037 35E0             (   ../strnucmp.as):00038         BranchTarget_01     puls      y,u,pc    ; restore registers and return
+                      (   ../strnucmp.as):00039         
+                      (   ../strnucmp.as):00040                             endsect             ; end current section

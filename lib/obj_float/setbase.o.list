@@ -1,0 +1,87 @@
+                      (    ../setbase.as):00001         * Compact assembly implementation of setbase().
+                      (    ../setbase.as):00002         
+                      (    ../setbase.as):00003                             section   code      ; begin code section
+                      (    ../setbase.as):00004         
+                      (    ../setbase.as):00005         _setbase            EXPORT              ; export this symbol
+                      (    ../setbase.as):00006         
+                      (    ../setbase.as):00007         _ibrk               EXTERNAL            ; import external symbol
+                      (    ../setbase.as):00008         _getstat            EXTERNAL            ; import external symbol
+                      (    ../setbase.as):00009         
+     00C0             (    ../setbase.as):00010         DEVMASK             equ       $C0       ; define constant as $C0
+     0040             (    ../setbase.as):00011         SCF                 equ       $40       ; define constant as $40
+     0080             (    ../setbase.as):00012         RBF                 equ       $80       ; define constant as $80
+     0080             (    ../setbase.as):00013         INIT                equ       $80       ; define constant as $80
+     0008             (    ../setbase.as):00014         BIGBUF              equ       $08       ; define constant as $08
+     0004             (    ../setbase.as):00015         UNBUF               equ       $04       ; define constant as $04
+     0100             (    ../setbase.as):00016         BUFSIZ_C            equ       256       ; define constant as 256
+     0002             (    ../setbase.as):00017         SS_Size             equ       $02       ; define constant as $02
+                      (    ../setbase.as):00018         
+0000                  (    ../setbase.as):00019         _setbase
+0000 3440             (    ../setbase.as):00020                             pshs      u         ; save U on the hardware stack
+0002 EE64             (    ../setbase.as):00021                             ldu       4,s       ; load U from stack-relative value 4,s
+0004 E647             (    ../setbase.as):00022                             ldb       7,u       ; load B from indexed value 7,u
+0006 C5C0             (    ../setbase.as):00023                             bitb      #DEVMASK  ; test bits in B against immediate value DEVMASK
+0008 261F             (    ../setbase.as):00024                             bne       L_setbase_known ; branch if not equal to L_setbase_known
+000A 32E8E0           (    ../setbase.as):00025                             leas      -32,s     ; adjust S using -32,s
+000D 30E4             (    ../setbase.as):00026                             leax      ,s        ; compute effective address into X from ,s
+000F EC48             (    ../setbase.as):00027                             ldd       8,u       ; load D from indexed value 8,u
+0011 3416             (    ../setbase.as):00028                             pshs      d,x       ; save D,X on the hardware stack
+0013 4F               (    ../setbase.as):00029                             clra                ; clear A
+0014 5F               (    ../setbase.as):00030                             clrb                ; clear B
+0015 3406             (    ../setbase.as):00031                             pshs      d         ; save D on the hardware stack
+0017 170000           (    ../setbase.as):00032                             lbsr      _getstat  ; long branch to subroutine to _getstat
+001A C640             (    ../setbase.as):00033                             ldb       #SCF      ; load B from immediate value SCF
+001C A666             (    ../setbase.as):00034                             lda       6,s       ; load A from stack-relative value 6,s
+001E 2702             (    ../setbase.as):00035                             beq       L_setbase_merge ; branch if equal/zero to L_setbase_merge
+0020 C680             (    ../setbase.as):00036                             ldb       #RBF      ; load B from immediate value RBF
+0022                  (    ../setbase.as):00037         L_setbase_merge
+0022 32E826           (    ../setbase.as):00038                             leas      38,s      ; adjust S using 38,s
+0025 EA47             (    ../setbase.as):00039                             orb       7,u       ; OR B with indexed value 7,u
+0027 E747             (    ../setbase.as):00040                             stb       7,u       ; store B to indexed value 7,u
+0029                  (    ../setbase.as):00041         L_setbase_known
+0029 A646             (    ../setbase.as):00042                             lda       6,u       ; load A from indexed value 6,u
+002B 8A80             (    ../setbase.as):00043                             ora       #INIT     ; OR A with immediate value INIT
+002D A746             (    ../setbase.as):00044                             sta       6,u       ; store A to indexed value 6,u
+002F EC48             (    ../setbase.as):00045                             ldd       8,u       ; load D from indexed value 8,u
+0031 10830001         (    ../setbase.as):00046                             cmpd      #1        ; compare D against immediate value 1
+0035 2606             (    ../setbase.as):00047                             bne       L_setbase_check ; branch if not equal to L_setbase_check
+0037 E647             (    ../setbase.as):00048                             ldb       7,u       ; load B from indexed value 7,u
+0039 CA04             (    ../setbase.as):00049                             orb       #UNBUF    ; OR B with immediate value UNBUF
+003B E747             (    ../setbase.as):00050                             stb       7,u       ; store B to indexed value 7,u
+003D                  (    ../setbase.as):00051         L_setbase_check
+003D C40C             (    ../setbase.as):00052                             andb      #BIGBUF+UNBUF ; AND B with immediate value BIGBUF+UNBUF
+003F 2639             (    ../setbase.as):00053                             bne       L_setbase_done ; branch if not equal to L_setbase_done
+0041 EC4B             (    ../setbase.as):00054                             ldd       11,u      ; load D from indexed value 11,u
+0043 2605             (    ../setbase.as):00055                             bne       L_setbase_have_size ; branch if not equal to L_setbase_have_size
+0045 CC0100           (    ../setbase.as):00056                             ldd       #BUFSIZ_C ; load D from immediate value BUFSIZ_C
+0048 ED4B             (    ../setbase.as):00057                             std       11,u      ; store D to indexed value 11,u
+004A                  (    ../setbase.as):00058         L_setbase_have_size
+004A EC42             (    ../setbase.as):00059                             ldd       2,u       ; load D from indexed value 2,u
+004C 2611             (    ../setbase.as):00060                             bne       L_setbase_big ; branch if not equal to L_setbase_big
+004E EC4B             (    ../setbase.as):00061                             ldd       11,u      ; load D from indexed value 11,u
+0050 3406             (    ../setbase.as):00062                             pshs      d         ; save D on the hardware stack
+0052 170000           (    ../setbase.as):00063                             lbsr      _ibrk     ; long branch to subroutine to _ibrk
+0055 3262             (    ../setbase.as):00064                             leas      2,s       ; adjust S using 2,s
+0057 ED42             (    ../setbase.as):00065                             std       2,u       ; store D to indexed value 2,u
+0059 1083FFFF         (    ../setbase.as):00066                             cmpd      #-1       ; compare D against immediate value -1
+005D 2704             (    ../setbase.as):00067                             beq       L_setbase_unbuf ; branch if equal/zero to L_setbase_unbuf
+005F                  (    ../setbase.as):00068         L_setbase_big
+005F C608             (    ../setbase.as):00069                             ldb       #BIGBUF   ; load B from immediate value BIGBUF
+0061 200B             (    ../setbase.as):00070                             bra       L_setbase_flag ; branch unconditionally to L_setbase_flag
+0063                  (    ../setbase.as):00071         L_setbase_unbuf
+0063 304A             (    ../setbase.as):00072                             leax      10,u      ; compute effective address into X from 10,u
+0065 AF42             (    ../setbase.as):00073                             stx       2,u       ; store X to indexed value 2,u
+0067 CC0001           (    ../setbase.as):00074                             ldd       #1        ; load D from immediate value 1
+006A ED4B             (    ../setbase.as):00075                             std       11,u      ; store D to indexed value 11,u
+006C C604             (    ../setbase.as):00076                             ldb       #UNBUF    ; load B from immediate value UNBUF
+006E                  (    ../setbase.as):00077         L_setbase_flag
+006E EA47             (    ../setbase.as):00078                             orb       7,u       ; OR B with indexed value 7,u
+0070 E747             (    ../setbase.as):00079                             stb       7,u       ; store B to indexed value 7,u
+0072 EC42             (    ../setbase.as):00080                             ldd       2,u       ; load D from indexed value 2,u
+0074 E34B             (    ../setbase.as):00081                             addd      11,u      ; add indexed value 11,u into D
+0076 ED44             (    ../setbase.as):00082                             std       4,u       ; store D to indexed value 4,u
+0078 EDC4             (    ../setbase.as):00083                             std       ,u        ; store D to memory pointed to by U
+007A                  (    ../setbase.as):00084         L_setbase_done
+007A 35C0             (    ../setbase.as):00085                             puls      u,pc      ; restore registers and return
+                      (    ../setbase.as):00086         
+                      (    ../setbase.as):00087                             endsect             ; end current section

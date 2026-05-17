@@ -1,0 +1,75 @@
+                      (       ../attr.as):00001                             use       ../include/fcntl.d ; shared file-mode constants
+                      (./include/fcntl.d):00001         * Shared assembler-side file mode and access constants.
+                      (./include/fcntl.d):00002         
+     0001             (./include/fcntl.d):00003         S_IREAD             equ       $01       ; owner-read permission bit
+     0002             (./include/fcntl.d):00004         S_IWRITE            equ       $02       ; owner-write permission bit
+     0004             (./include/fcntl.d):00005         S_IEXEC             equ       $04       ; owner-execute permission bit
+     0008             (./include/fcntl.d):00006         S_IOREAD            equ       $08       ; public-read permission bit
+     0010             (./include/fcntl.d):00007         S_IOWRITE           equ       $10       ; public-write permission bit
+     0020             (./include/fcntl.d):00008         S_IOEXEC            equ       $20       ; public-execute permission bit
+     0040             (./include/fcntl.d):00009         S_SHARED            equ       $40       ; sharable file bit
+     0080             (./include/fcntl.d):00010         S_DIR               equ       $80       ; directory attribute bit
+                      (./include/fcntl.d):00011         
+     0001             (./include/fcntl.d):00012         FAM_READ            equ       S_IREAD   ; open for reading
+     0002             (./include/fcntl.d):00013         FAM_WRITE           equ       S_IWRITE  ; open for writing
+     0003             (./include/fcntl.d):00014         FAM_UPDATE          equ       S_IREAD|S_IWRITE ; open for read/write
+     0080             (./include/fcntl.d):00015         FAM_DIR             equ       S_DIR     ; operate on a directory path
+                      (       ../attr.as):00002         
+                      (       ../attr.as):00003         __os_ss_attr        EXPORT              ; export file-attribute SetStat helper
+                      (       ../attr.as):00004         
+                      (       ../attr.as):00005         _osret              EXTERNAL            ; common successful return helper
+                      (       ../attr.as):00006         
+     000F             (       ../attr.as):00007         SS_FD               equ       $0F       ; request file descriptor sector
+     000C             (       ../attr.as):00008         F_ID                equ       $0C       ; query current process identity
+     0084             (       ../attr.as):00009         I_Open              equ       $84       ; open an existing path
+     008D             (       ../attr.as):00010         I_GetStt            equ       $8D       ; GetStat system call
+     008E             (       ../attr.as):00011         I_SetStt            equ       $8E       ; SetStat system call
+     008F             (       ../attr.as):00012         I_Close             equ       $8F       ; close path descriptor
+     00D6             (       ../attr.as):00013         E_FNA               equ       $D6       ; file not accessible error code
+                      (       ../attr.as):00014         
+                      (       ../attr.as):00015                             section   code      ; begin code section
+                      (       ../attr.as):00016         
+0000                  (       ../attr.as):00017         __os_ss_attr
+0000 3460             (       ../attr.as):00018                             pshs      y,u       ; preserve registers across helper calls
+0002 3270             (       ../attr.as):00019                             leas      -16,s     ; reserve temporary file descriptor buffer
+0004 8602             (       ../attr.as):00020                             lda       #S_IWRITE ; first try opening as a regular writable file
+0006 8D35             (       ../attr.as):00021                             bsr       openfile  ; open the path and fetch its descriptor sector
+0008 2406             (       ../attr.as):00022                             bcc       openok    ; continue if the open/GetStat sequence succeeded
+000A 8682             (       ../attr.as):00023                             lda       #S_DIR|S_IWRITE ; retry as a writable directory path
+000C 8D2F             (       ../attr.as):00024                             bsr       openfile  ; attempt directory open/GetStat sequence
+000E 2525             (       ../attr.as):00025                             bcs       goexit    ; give up if both open attempts failed
+0010                  (       ../attr.as):00026         openok
+0010 3422             (       ../attr.as):00027                             pshs      a,y       ; save open path id and returned owner/group info
+0012 103F0C           (       ../attr.as):00028                             os9       F_ID      ; fetch current process user id for permission check
+0015 108C0000         (       ../attr.as):00029                             cmpy      #0        ; user 0 bypasses owner check
+0019 2709             (       ../attr.as):00030                             beq       userok    ; superuser may update attributes directly
+001B C6D6             (       ../attr.as):00031                             ldb       #E_FNA    ; preload permission-denied style error code
+001D 10AC01           (       ../attr.as):00032                             cmpy      1,x       ; compare process user id against file owner id
+0020 1A01             (       ../attr.as):00033                             orcc      #1        ; force carry set for mismatch/error return
+0022 2611             (       ../attr.as):00034                             bne       goexit    ; reject attribute change for non-owner
+0024 E6E81C           (       ../attr.as):00035         userok              ldb       28,s      ; load requested attribute byte from stack
+0027 E784             (       ../attr.as):00036                             stb       ,x        ; patch attribute field in descriptor buffer
+0029 3522             (       ../attr.as):00037                             puls      a,y       ; restore path id and saved Y value
+002B C60F             (       ../attr.as):00038                             ldb       #SS_FD    ; request descriptor-sector update
+002D 103F8E           (       ../attr.as):00039                             os9       I_SetStt  ; write the modified descriptor back to disk
+0030 2503             (       ../attr.as):00040                             bcs       goexit    ; return error if SetStat failed
+0032 103F8F           (       ../attr.as):00041                             os9       I_Close   ; close the temporary path descriptor
+0035                  (       ../attr.as):00042         goexit
+0035 32E810           (       ../attr.as):00043                             leas      16,s      ; discard temporary file descriptor buffer
+0038 3560             (       ../attr.as):00044                             puls      y,u       ; restore caller's registers
+003A 160000           (       ../attr.as):00045                             lbra      _osret    ; return through common status helper
+                      (       ../attr.as):00046         
+003D                  (       ../attr.as):00047         openfile
+003D AEE818           (       ../attr.as):00048                             ldx       24,s      ; load pathname pointer argument
+0040 103F84           (       ../attr.as):00049                             os9       I_Open    ; open the path using mode in A
+0043 2401             (       ../attr.as):00050                             bcc       getfd     ; fetch descriptor contents on success
+0045 39               (       ../attr.as):00051                             rts                 ; return with OS-9 carry/error status intact
+                      (       ../attr.as):00052         
+0046                  (       ../attr.as):00053         getfd
+0046 3062             (       ../attr.as):00054                             leax      2,s       ; point X at local descriptor-sector buffer
+0048 108E0010         (       ../attr.as):00055                             ldy       #16       ; request the 16-byte descriptor sector
+004C C60F             (       ../attr.as):00056                             ldb       #SS_FD    ; ask GetStat for descriptor contents
+004E 103F8D           (       ../attr.as):00057                             os9       I_GetStt  ; populate local descriptor buffer
+0051 39               (       ../attr.as):00058                             rts                 ; return with carry reflecting GetStat status
+                      (       ../attr.as):00059         
+                      (       ../attr.as):00060                             endsect             ; end code section

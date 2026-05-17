@@ -1,0 +1,9 @@
+Symbol: BranchTarget_01 (htol.o) = 001C
+Symbol: BranchTarget_02 (htol.o) = 003D
+Symbol: BranchTarget_03 (htol.o) = 004E
+Symbol: Continue_01 (htol.o) = 0045
+Symbol: htol (htol.o) = 0000
+Symbol: Loop_01 (htol.o) = 0012
+Symbol: Loop_02 (htol.o) = 0020
+Symbol: Loop_03 (htol.o) = 0022
+Symbol: Loop_04 (htol.o) = 0043

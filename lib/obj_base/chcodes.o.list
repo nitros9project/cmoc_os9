@@ -1,0 +1,141 @@
+                      (    ../chcodes.as):00001                             section   rodata    ; begin rodata section
+                      (    ../chcodes.as):00002         
+                      (    ../chcodes.as):00003         __chcodes           EXPORT              ; export this symbol
+                      (    ../chcodes.as):00004         _chcodes            EXPORT              ; export this symbol
+                      (    ../chcodes.as):00005         
+                      (    ../chcodes.as):00006         * Initialized Data (class G)
+                      (    ../chcodes.as):00007         * Each entry is a character-class flag byte indexed by the character code.
+                      (    ../chcodes.as):00008         * The trailing columns document decimal value, hex value, bit pattern, mnemonic,
+                      (    ../chcodes.as):00009         * and a human-readable description for the matching entry.
+0000                  (    ../chcodes.as):00010         __chcodes:
+0000                  (    ../chcodes.as):00011         _chcodes:
+0000 01               (    ../chcodes.as):00012                             fcb       $01       ; 0 00 00000000 NUL null
+0001 01               (    ../chcodes.as):00013                             fcb       $01       ; 1 01 00000001 SOH start of header
+0002 01               (    ../chcodes.as):00014                             fcb       $01       ; 2 02 00000010 STX start of text
+0003 01               (    ../chcodes.as):00015                             fcb       $01       ; 3 03 00000011 ETX end of text
+0004 01               (    ../chcodes.as):00016                             fcb       $01       ; 4 04 00000100 EOT end of transmission
+0005 01               (    ../chcodes.as):00017                             fcb       $01       ; 5 05 00000101 ENQ enquiry
+0006 01               (    ../chcodes.as):00018                             fcb       $01       ; 6 06 00000110 ACK acknowledge
+0007 01               (    ../chcodes.as):00019                             fcb       $01       ; 7 07 00000111 BEL bell
+0008 01               (    ../chcodes.as):00020                             fcb       $01       ; 8 08 00001000 BS backspace
+0009 11               (    ../chcodes.as):00021                             fcb       $11       ; 9 09 00001001 HT horizontal tab
+000A 11               (    ../chcodes.as):00022                             fcb       $11       ; 10 0A 00001010 LF line feed
+000B 11               (    ../chcodes.as):00023                             fcb       $11       ; 11 0B 00001011 VT vertical tab
+000C 11               (    ../chcodes.as):00024                             fcb       $11       ; 12 0C 00001100 FF form feed
+000D 11               (    ../chcodes.as):00025                             fcb       $11       ; 13 0D 00001101 CR enter / carriage return
+000E 01               (    ../chcodes.as):00026                             fcb       $01       ; 14 0E 00001110 SO shift out
+000F 01               (    ../chcodes.as):00027                             fcb       $01       ; 15 0F 00001111 SI shift in
+0010 01               (    ../chcodes.as):00028                             fcb       $01       ; 16 10 00010000 DLE data link escape
+0011 01               (    ../chcodes.as):00029                             fcb       $01       ; 17 11 00010001 DC1 device control 1
+0012 01               (    ../chcodes.as):00030                             fcb       $01       ; 18 12 00010010 DC2 device control 2
+0013 01               (    ../chcodes.as):00031                             fcb       $01       ; 19 13 00010011 DC3 device control 3
+0014 01               (    ../chcodes.as):00032                             fcb       $01       ; 20 14 00010100 DC4 device control 4
+0015 01               (    ../chcodes.as):00033                             fcb       $01       ; 21 15 00010101 NAK negative acknowledge
+0016 01               (    ../chcodes.as):00034                             fcb       $01       ; 22 16 00010110 SYN synchronize
+0017 01               (    ../chcodes.as):00035                             fcb       $01       ; 23 17 00010111 ETB end of trans. block
+0018 01               (    ../chcodes.as):00036                             fcb       $01       ; 24 18 00011000 CAN cancel
+0019 01               (    ../chcodes.as):00037                             fcb       $01       ; 25 19 00011001 EM end of medium
+001A 01               (    ../chcodes.as):00038                             fcb       $01       ; 26 1A 00011010 SUB substitute
+001B 01               (    ../chcodes.as):00039                             fcb       $01       ; 27 1B 00011011 ESC escape
+001C 01               (    ../chcodes.as):00040                             fcb       $01       ; 28 1C 00011100 FS file separator
+001D 01               (    ../chcodes.as):00041                             fcb       $01       ; 29 1D 00011101 GS group separator
+001E 01               (    ../chcodes.as):00042                             fcb       $01       ; 30 1E 00011110 RS record separator
+001F 01               (    ../chcodes.as):00043                             fcb       $01       ; 31 1F 00011111 US unit separator
+0020 30               (    ../chcodes.as):00044                             fcb       $30       ; 32 20 00100000 SP space
+0021 20               (    ../chcodes.as):00045                             fcb       $20       ; 33 21 00100001 ! exclamation mark
+0022 20               (    ../chcodes.as):00046                             fcb       $20       ; 34 22 00100010 " double quote
+0023 20               (    ../chcodes.as):00047                             fcb       $20       ; 35 23 00100011 # number
+0024 20               (    ../chcodes.as):00048                             fcb       $20       ; 36 24 00100100 $ dollar
+0025 20               (    ../chcodes.as):00049                             fcb       $20       ; 37 25 00100101 % percent
+0026 20               (    ../chcodes.as):00050                             fcb       $20       ; 38 26 00100110 & ampersand
+0027 20               (    ../chcodes.as):00051                             fcb       $20       ; 39 27 00100111 ' single quote
+0028 20               (    ../chcodes.as):00052                             fcb       $20       ; 40 28 00101000 ( left parenthesis
+0029 20               (    ../chcodes.as):00053                             fcb       $20       ; 41 29 00101001 ) right parenthesis
+002A 20               (    ../chcodes.as):00054                             fcb       $20       ; asterisk
+002B 20               (    ../chcodes.as):00055                             fcb       $20       ; 43 2B 00101011 + plus
+002C 20               (    ../chcodes.as):00056                             fcb       $20       ; 44 2C 00101100 , comma
+002D 20               (    ../chcodes.as):00057                             fcb       $20       ; 45 2D 00101101 - minus
+002E 20               (    ../chcodes.as):00058                             fcb       $20       ; 46 2E 00101110 . period
+002F 20               (    ../chcodes.as):00059                             fcb       $20       ; 47 2F 00101111 / slash
+0030 48               (    ../chcodes.as):00060                             fcb       $48       ; 48 30 00110000 0 zero
+0031 48               (    ../chcodes.as):00061                             fcb       $48       ; 49 31 00110001 1 one
+0032 48               (    ../chcodes.as):00062                             fcb       $48       ; 50 32 00110010 2 two
+0033 48               (    ../chcodes.as):00063                             fcb       $48       ; 51 33 00110011 3 three
+0034 48               (    ../chcodes.as):00064                             fcb       $48       ; 52 34 00110100 4 four
+0035 48               (    ../chcodes.as):00065                             fcb       $48       ; 53 35 00110101 5 five
+0036 48               (    ../chcodes.as):00066                             fcb       $48       ; 54 36 00110110 6 six
+0037 48               (    ../chcodes.as):00067                             fcb       $48       ; 55 37 00110111 7 seven
+0038 48               (    ../chcodes.as):00068                             fcb       $48       ; 56 38 00111000 8 eight
+0039 48               (    ../chcodes.as):00069                             fcb       $48       ; 57 39 00111001 9 nine
+003A 20               (    ../chcodes.as):00070                             fcb       $20       ; 58 3A 00111010 : colon
+003B 20               (    ../chcodes.as):00071                             fcb       $20       ; semicolon
+003C 20               (    ../chcodes.as):00072                             fcb       $20       ; 60 3C 00111100 < less than
+003D 20               (    ../chcodes.as):00073                             fcb       $20       ; 61 3D 00111101 = equality sign
+003E 20               (    ../chcodes.as):00074                             fcb       $20       ; 62 3E 00111110 > greater than
+003F 20               (    ../chcodes.as):00075                             fcb       $20       ; 63 3F 00111111 ? question mark
+0040 20               (    ../chcodes.as):00076                             fcb       $20       ; 64 40 01000000 @ at sign
+0041 42               (    ../chcodes.as):00077                             fcb       $42       ; 65 41 01000001 A
+0042 42               (    ../chcodes.as):00078                             fcb       $42       ; 66 42 01000010 B
+0043 42               (    ../chcodes.as):00079                             fcb       $42       ; 67 43 01000011 C
+0044 42               (    ../chcodes.as):00080                             fcb       $42       ; 68 44 01000100 D
+0045 42               (    ../chcodes.as):00081                             fcb       $42       ; 69 45 01000101 E
+0046 42               (    ../chcodes.as):00082                             fcb       $42       ; 70 46 01000110 F
+0047 02               (    ../chcodes.as):00083                             fcb       $02       ; 71 47 01000111 G
+0048 02               (    ../chcodes.as):00084                             fcb       $02       ; 72 48 01001000 H
+0049 02               (    ../chcodes.as):00085                             fcb       $02       ; 73 49 01001001 I
+004A 02               (    ../chcodes.as):00086                             fcb       $02       ; 74 4A 01001010 J
+004B 02               (    ../chcodes.as):00087                             fcb       $02       ; 75 4B 01001011 K
+004C 02               (    ../chcodes.as):00088                             fcb       $02       ; 76 4C 01001100 L
+004D 02               (    ../chcodes.as):00089                             fcb       $02       ; 77 4D 01001101 M
+004E 02               (    ../chcodes.as):00090                             fcb       $02       ; 78 4E 01001110 N
+004F 02               (    ../chcodes.as):00091                             fcb       $02       ; 79 4F 01001111 O
+0050 02               (    ../chcodes.as):00092                             fcb       $02       ; 80 50 01010000 P
+0051 02               (    ../chcodes.as):00093                             fcb       $02       ; 81 51 01010001 Q
+0052 02               (    ../chcodes.as):00094                             fcb       $02       ; 82 52 01010010 R
+0053 02               (    ../chcodes.as):00095                             fcb       $02       ; 83 53 01010011 S
+0054 02               (    ../chcodes.as):00096                             fcb       $02       ; 84 54 01010100 T
+0055 02               (    ../chcodes.as):00097                             fcb       $02       ; 85 55 01010101 U
+0056 02               (    ../chcodes.as):00098                             fcb       $02       ; 86 56 01010110 V
+0057 02               (    ../chcodes.as):00099                             fcb       $02       ; 87 57 01010111 W
+0058 02               (    ../chcodes.as):00100                             fcb       $02       ; 88 58 01011000 X
+0059 02               (    ../chcodes.as):00101                             fcb       $02       ; 89 59 01011001 Y
+005A 02               (    ../chcodes.as):00102                             fcb       $02       ; 90 5A 01011010 Z
+005B 20               (    ../chcodes.as):00103                             fcb       $20       ; 91 5B 01011011 [ left square bracket
+005C 20               (    ../chcodes.as):00104                             fcb       $20       ; 92 5C 01011100 \ backslash
+005D 20               (    ../chcodes.as):00105                             fcb       $20       ; 93 5D 01011101 ] right square bracket
+005E 20               (    ../chcodes.as):00106                             fcb       $20       ; 94 5E 01011110 ^ caret / circumflex
+005F 20               (    ../chcodes.as):00107                             fcb       $20       ; 95 5F 01011111 _ underscore
+0060 20               (    ../chcodes.as):00108                             fcb       $20       ; 96 60 01100000 ` grave / accent
+0061 44               (    ../chcodes.as):00109                             fcb       $44       ; 97 61 01100001 a
+0062 44               (    ../chcodes.as):00110                             fcb       $44       ; 98 62 01100010 b
+0063 44               (    ../chcodes.as):00111                             fcb       $44       ; 99 63 01100011 c
+0064 44               (    ../chcodes.as):00112                             fcb       $44       ; 100 64 01100100 d
+0065 44               (    ../chcodes.as):00113                             fcb       $44       ; 101 65 01100101 e
+0066 44               (    ../chcodes.as):00114                             fcb       $44       ; 102 66 01100110 f
+0067 04               (    ../chcodes.as):00115                             fcb       $04       ; 103 67 01100111 g
+0068 04               (    ../chcodes.as):00116                             fcb       $04       ; 104 68 01101000 h
+0069 04               (    ../chcodes.as):00117                             fcb       $04       ; 105 69 01101001 i
+006A 04               (    ../chcodes.as):00118                             fcb       $04       ; 106 6A 01101010 j
+006B 04               (    ../chcodes.as):00119                             fcb       $04       ; 107 6B 01101011 k
+006C 04               (    ../chcodes.as):00120                             fcb       $04       ; 108 6C 01101100 l
+006D 04               (    ../chcodes.as):00121                             fcb       $04       ; 109 6D 01101101 m
+006E 04               (    ../chcodes.as):00122                             fcb       $04       ; 110 6E 01101110 n
+006F 04               (    ../chcodes.as):00123                             fcb       $04       ; 111 6F 01101111 o
+0070 04               (    ../chcodes.as):00124                             fcb       $04       ; 112 70 01110000 p
+0071 04               (    ../chcodes.as):00125                             fcb       $04       ; 113 71 01110001 q
+0072 04               (    ../chcodes.as):00126                             fcb       $04       ; 114 72 01110010 r
+0073 04               (    ../chcodes.as):00127                             fcb       $04       ; 115 73 01110011 s
+0074 04               (    ../chcodes.as):00128                             fcb       $04       ; 116 74 01110100 t
+0075 04               (    ../chcodes.as):00129                             fcb       $04       ; 117 75 01110101 u
+0076 04               (    ../chcodes.as):00130                             fcb       $04       ; 118 76 01110110 v
+0077 04               (    ../chcodes.as):00131                             fcb       $04       ; 119 77 01110111 w
+0078 04               (    ../chcodes.as):00132                             fcb       $04       ; 120 78 01111000 x
+0079 04               (    ../chcodes.as):00133                             fcb       $04       ; 121 79 01111001 y
+007A 04               (    ../chcodes.as):00134                             fcb       $04       ; 122 7A 01111010 z
+007B 20               (    ../chcodes.as):00135                             fcb       $20       ; 123 7B 01111011 { left curly bracket
+007C 20               (    ../chcodes.as):00136                             fcb       $20       ; 124 7C 01111100 | vertical bar
+007D 20               (    ../chcodes.as):00137                             fcb       $20       ; 125 7D 01111101 } right curly bracket
+007E 20               (    ../chcodes.as):00138                             fcb       $20       ; 126 7E 01111110 ~ tilde
+007F 01               (    ../chcodes.as):00139                             fcb       $01       ; 127 7F 01111111 DEL delete
+                      (    ../chcodes.as):00140         
+                      (    ../chcodes.as):00141                             endsect             ; end current section

@@ -1,0 +1,33 @@
+                      (    ../reverse.as):00001         * Compact assembly implementation of reverse().
+                      (    ../reverse.as):00002         
+                      (    ../reverse.as):00003                             section   code      ; begin code section
+                      (    ../reverse.as):00004         
+                      (    ../reverse.as):00005         _reverse            EXPORT              ; export this symbol
+                      (    ../reverse.as):00006         
+                      (    ../reverse.as):00007         _strlen             EXTERNAL            ; import external symbol
+                      (    ../reverse.as):00008         
+0000                  (    ../reverse.as):00009         _reverse
+0000 3440             (    ../reverse.as):00010                             pshs      u         ; save U on the hardware stack
+0002 EE64             (    ../reverse.as):00011                             ldu       4,s       ; load U from stack-relative value 4,s
+0004 3440             (    ../reverse.as):00012                             pshs      u         ; save U on the hardware stack
+0006 3440             (    ../reverse.as):00013                             pshs      u         ; save U on the hardware stack
+0008 170000           (    ../reverse.as):00014                             lbsr      _strlen   ; long branch to subroutine to _strlen
+000B 3262             (    ../reverse.as):00015                             leas      2,s       ; adjust S using 2,s
+000D E3E1             (    ../reverse.as):00016                             addd      ,s++      ; add memory pointed to by S+, then advance S+ into D
+000F 1F01             (    ../reverse.as):00017                             tfr       d,x       ; transfer D,X
+0011 2008             (    ../reverse.as):00018                             bra       L_reverse_check ; branch unconditionally to L_reverse_check
+                      (    ../reverse.as):00019         
+0013                  (    ../reverse.as):00020         L_reverse_loop
+0013 E6C4             (    ../reverse.as):00021                             ldb       ,u        ; load B from memory pointed to by U
+0015 A682             (    ../reverse.as):00022                             lda       ,-x       ; load A from memory pointed to by -X
+0017 A7C0             (    ../reverse.as):00023                             sta       ,u+       ; store A to memory pointed to by U, then advance U
+0019 E784             (    ../reverse.as):00024                             stb       ,x        ; store B to memory pointed to by X
+                      (    ../reverse.as):00025         
+001B                  (    ../reverse.as):00026         L_reverse_check
+001B 3410             (    ../reverse.as):00027                             pshs      x         ; save X on the hardware stack
+001D 11A3E1           (    ../reverse.as):00028                             cmpu      ,s++      ; compare U against memory pointed to by S+, then advance S+
+0020 25F1             (    ../reverse.as):00029                             blo       L_reverse_loop ; branch if lower to L_reverse_loop
+0022 EC64             (    ../reverse.as):00030                             ldd       4,s       ; load D from stack-relative value 4,s
+0024 35C0             (    ../reverse.as):00031                             puls      u,pc      ; restore registers and return
+                      (    ../reverse.as):00032         
+                      (    ../reverse.as):00033                             endsect             ; end current section

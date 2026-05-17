@@ -1,0 +1,24 @@
+                      (   ../clincdec.as):00001                             section   code      ; begin code section
+                      (   ../clincdec.as):00002         
+                      (   ../clincdec.as):00003         _linc               EXPORT              ; export this symbol
+                      (   ../clincdec.as):00004         _ldec               EXPORT              ; export this symbol
+                      (   ../clincdec.as):00005         
+0000 CC0001           (   ../clincdec.as):00006         _linc:              ldd       #1        ; load D from immediate value 1
+0003 E302             (   ../clincdec.as):00007                             addd      2,x       ; add indexed value 2,x into D
+0005 ED02             (   ../clincdec.as):00008                             std       2,x       ; store D to indexed value 2,x
+0007 EC84             (   ../clincdec.as):00009                             ldd       ,x        ; load D from memory pointed to by X
+0009 C900             (   ../clincdec.as):00010                             adcb      #0        ; add immediate value 0 into B
+000B 8900             (   ../clincdec.as):00011                             adca      #0        ; add immediate value 0 into A
+000D ED84             (   ../clincdec.as):00012                             std       ,x        ; store D to memory pointed to by X
+000F 39               (   ../clincdec.as):00013                             rts                 ; return to caller
+0010 EC02             (   ../clincdec.as):00014         _ldec:              ldd       2,x       ; load D from indexed value 2,x
+0012 830001           (   ../clincdec.as):00015                             subd      #1        ; subtract immediate value 1 from D
+0015 ED02             (   ../clincdec.as):00016                             std       2,x       ; store D to indexed value 2,x
+0017 EC84             (   ../clincdec.as):00017                             ldd       ,x        ; load D from memory pointed to by X
+0019 C200             (   ../clincdec.as):00018                             sbcb      #0        ; subtract immediate value 0 from B
+001B 8200             (   ../clincdec.as):00019                             sbca      #0        ; subtract immediate value 0 from A
+001D ED84             (   ../clincdec.as):00020                             std       ,x        ; store D to memory pointed to by X
+001F 39               (   ../clincdec.as):00021                             rts                 ; return to caller
+                      (   ../clincdec.as):00022         
+                      (   ../clincdec.as):00023                             endsect             ; end current section
+                      (   ../clincdec.as):00024         

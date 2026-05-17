@@ -1,0 +1,72 @@
+                      (    ../process.as):00001         __os_send           EXPORT              ; export signal-send wrapper
+                      (    ../process.as):00002         __os_wait           EXPORT              ; export wait wrapper
+                      (    ../process.as):00003         __os_setpr          EXPORT              ; export set-priority wrapper
+                      (    ../process.as):00004         __os_chain          EXPORT              ; export chain wrapper
+                      (    ../process.as):00005         __os_fork           EXPORT              ; export fork wrapper
+                      (    ../process.as):00006         
+                      (    ../process.as):00007         _oserr              EXTERNAL            ; common OS-9 error-return helper
+                      (    ../process.as):00008         _osret              EXTERNAL            ; common OS-9 success-return helper
+                      (    ../process.as):00009         
+     0004             (    ../process.as):00010         F_Wait              equ       $04       ; OS-9 wait system call
+     0005             (    ../process.as):00011         F_Chain             equ       $05       ; OS-9 chain system call
+     0006             (    ../process.as):00012         F_Exit              equ       $06       ; OS-9 exit system call
+     000D             (    ../process.as):00013         F_SPrior            equ       $0D       ; OS-9 set-priority system call
+     0003             (    ../process.as):00014         F_Fork              equ       $03       ; OS-9 fork system call
+     0008             (    ../process.as):00015         F_Send              equ       $08       ; OS-9 send-signal system call
+                      (    ../process.as):00016         
+                      (    ../process.as):00017                             section   code      ; begin code section
+                      (    ../process.as):00018         
+0000                  (    ../process.as):00019         __os_send
+0000 A663             (    ../process.as):00020                             lda       3,s       ; load target process id byte
+0002 E665             (    ../process.as):00021                             ldb       5,s       ; load signal number byte
+0004 103F08           (    ../process.as):00022                             os9       F_Send    ; deliver signal directly through OS-9
+0007 160000           (    ../process.as):00023                             lbra      _osret    ; return 0 on success or errno on failure
+                      (    ../process.as):00024         
+000A                  (    ../process.as):00025         __os_wait
+000A 4F               (    ../process.as):00026                             clra                ; clear high byte before wait call
+000B 5F               (    ../process.as):00027                             clrb                ; clear low byte before wait call
+000C 103F04           (    ../process.as):00028                             os9       F_Wait    ; wait for any child process to terminate
+000F 10250000         (    ../process.as):00029                             lblo      _oserr    ; return errno-style error when no child or failure
+0013 AE62             (    ../process.as):00030                             ldx       2,s       ; load caller's status pointer
+0015 2704             (    ../process.as):00031                             beq       L001b     ; skip status writeback when pointer is NULL
+0017 E701             (    ../process.as):00032                             stb       1,x       ; store child exit status in low byte
+0019 6F84             (    ../process.as):00033                             clr       ,x        ; clear high byte of stored status word
+001B 1F89             (    ../process.as):00034         L001b               tfr       a,b       ; move child pid byte into low byte of return value
+001D 4F               (    ../process.as):00035                             clra                ; clear high byte of returned pid
+001E 39               (    ../process.as):00036                             rts                 ; return child pid in D
+                      (    ../process.as):00037         
+001F                  (    ../process.as):00038         __os_setpr
+001F A663             (    ../process.as):00039                             lda       3,s       ; load process id byte
+0021 E665             (    ../process.as):00040                             ldb       5,s       ; load requested priority byte
+0023 103F0D           (    ../process.as):00041                             os9       F_SPrior  ; update process priority
+0026 160000           (    ../process.as):00042                             lbra      _osret    ; return 0 on success or errno on failure
+                      (    ../process.as):00043         
+0029                  (    ../process.as):00044         __os_chain
+0029 33E4             (    ../process.as):00045                             leau      ,s        ; capture original argument frame in U
+002B 32A900FF         (    ../process.as):00046                             leas      255,y     ; move stack out of the way before chaining
+002F AE42             (    ../process.as):00047                             ldx       2,u       ; load module name pointer
+0031 10AE44           (    ../process.as):00048                             ldy       4,u       ; load parameter size in pages
+0034 A649             (    ../process.as):00049                             lda       9,u       ; load language byte
+0036 AA4B             (    ../process.as):00050                             ora       11,u      ; merge requested module type byte
+0038 E64D             (    ../process.as):00051                             ldb       13,u      ; load requested data size in pages
+003A EE46             (    ../process.as):00052                             ldu       6,u       ; load parameter address
+003C 103F05           (    ../process.as):00053                             os9       F_Chain   ; replace current process image with target module
+003F 103F06           (    ../process.as):00054                             os9       F_Exit    ; terminate if chain unexpectedly returns
+                      (    ../process.as):00055         
+0042                  (    ../process.as):00056         __os_fork
+0042 3460             (    ../process.as):00057                             pshs      y,u       ; preserve caller's Y and U registers
+0044 AE66             (    ../process.as):00058                             ldx       6,s       ; load module name pointer
+0046 10AE68           (    ../process.as):00059                             ldy       8,s       ; load parameter size in pages
+0049 EE6A             (    ../process.as):00060                             ldu       10,s      ; load parameter address
+004B A66D             (    ../process.as):00061                             lda       13,s      ; load language byte
+004D AA6F             (    ../process.as):00062                             ora       15,s      ; merge requested module type byte
+004F E6E811           (    ../process.as):00063                             ldb       17,s      ; load requested data size in pages
+0052 103F03           (    ../process.as):00064                             os9       F_Fork    ; create child process
+0055 3560             (    ../process.as):00065                             puls      y,u       ; restore caller's Y and U registers
+0057 10250000         (    ../process.as):00066                             lblo      _oserr    ; return errno-style error on fork failure
+005B 1F89             (    ../process.as):00067                             tfr       a,b       ; normalize returned child pid into D
+005D 4F               (    ../process.as):00068                             clra                ; clear high byte of returned pid
+005E EDF80E           (    ../process.as):00069                             std       [14,s]    ; store child pid through caller's output pointer
+0061 160000           (    ../process.as):00070                             lbra      _osret    ; return 0 on success or errno on failure
+                      (    ../process.as):00071         
+                      (    ../process.as):00072                             endsect             ; end code section

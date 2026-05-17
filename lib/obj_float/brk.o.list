@@ -1,0 +1,31 @@
+                      (        ../brk.as):00001         * Adapted from cmoc_os9/lib/todo/brk.a for the live cmoc_os9 ABI.
+                      (        ../brk.as):00002         
+                      (        ../brk.as):00003                             section   code      ; begin code section
+                      (        ../brk.as):00004         
+     0007             (        ../brk.as):00005         F_Mem               equ       $07       ; define constant as $07
+                      (        ../brk.as):00006         
+                      (        ../brk.as):00007         _brk                EXPORT              ; export this symbol
+                      (        ../brk.as):00008         _unbrk              EXPORT              ; export this symbol
+                      (        ../brk.as):00009         
+                      (        ../brk.as):00010         _os9err             EXTERNAL            ; import external symbol
+                      (        ../brk.as):00011         __memend            EXTERNAL            ; import external symbol
+                      (        ../brk.as):00012         _spare              EXTERNAL            ; import external symbol
+                      (        ../brk.as):00013         
+                      (        ../brk.as):00014         *   brk(pnt)  set memory size to pnt, allocating or deallocating
+0000                  (        ../brk.as):00015         _brk
+0000                  (        ../brk.as):00016         _unbrk
+0000 EC62             (        ../brk.as):00017                             ldd       2,s       ; get new end / decrease amount
+0002 3420             (        ../brk.as):00018                             pshs      y         ; save Y on the hardware stack
+0004 103F07           (        ../brk.as):00019                             os9       F_Mem     ; set new end
+0007 2405             (        ../brk.as):00020                             bcc       BranchTarget_01 ; branch if carry is clear to BranchTarget_01
+0009 3520             (        ../brk.as):00021                             puls      y         ; restore Y from the hardware stack
+000B 160000           (        ../brk.as):00022                             lbra      _os9err   ; long branch unconditionally to _os9err
+                      (        ../brk.as):00023         
+000E 1F20             (        ../brk.as):00024         BranchTarget_01     tfr       y,d       ; copy new top
+0010 3520             (        ../brk.as):00025                             puls      y         ; recover base
+0012 EDA90000         (        ../brk.as):00026                             std       __memend,y ; store D to indexed value __memend,y
+0016 A362             (        ../brk.as):00027                             subd      2,s       ; subtract what we asked for
+0018 EDA90000         (        ../brk.as):00028                             std       _spare,y  ; save the difference
+001C 39               (        ../brk.as):00029                             rts                 ; return to caller
+                      (        ../brk.as):00030         
+                      (        ../brk.as):00031                             endsect             ; end current section

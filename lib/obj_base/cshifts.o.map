@@ -1,0 +1,7 @@
+Symbol: BranchTarget_01 (cshifts.o) = 0022
+Symbol: ccasl (cshifts.o) = 0018
+Symbol: ccasr (cshifts.o) = 0000
+Symbol: cclsr (cshifts.o) = 000C
+Symbol: Loop_01 (cshifts.o) = 0003
+Symbol: Loop_02 (cshifts.o) = 000F
+Symbol: Loop_03 (cshifts.o) = 001B

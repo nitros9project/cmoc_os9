@@ -1,0 +1,239 @@
+                      (       ../putc.as):00001         _putc               EXPORT              ; export buffered/unbuffered character output
+                      (       ../putc.as):00002         _putw               EXPORT              ; export 16-bit word output helper
+                      (       ../putc.as):00003         _fclose             EXPORT              ; export stream close helper
+                      (       ../putc.as):00004         _fflush             EXPORT              ; export stream flush helper
+                      (       ../putc.as):00005         
+                      (       ../putc.as):00006         __os_write          EXTERNAL            ; low-level write wrapper
+                      (       ../putc.as):00007         __os_writeln        EXTERNAL            ; low-level writeln wrapper
+                      (       ../putc.as):00008         __os_close          EXTERNAL            ; low-level close wrapper
+                      (       ../putc.as):00009         _setbase            EXTERNAL            ; stdio buffer initializer
+                      (       ../putc.as):00010         _ftell              EXTERNAL            ; buffered current-position helper
+                      (       ../putc.as):00011         _lseek              EXTERNAL            ; long seek helper
+                      (       ../putc.as):00012         __iob               EXTERNAL            ; stdio FILE table base
+                      (       ../putc.as):00013         
+     0002             (       ../putc.as):00014         _WRITE              equ       $02       ; FILE open-for-write flag
+     0004             (       ../putc.as):00015         _UNBUF              equ       $04       ; FILE unbuffered flag
+     0020             (       ../putc.as):00016         _ERR                equ       $20       ; FILE error flag
+     0040             (       ../putc.as):00017         _SCF                equ       $40       ; sequential character file-manager flag
+     0010             (       ../putc.as):00018         _NFILE              equ       $10       ; number of FILE entries in _iob
+                      (       ../putc.as):00019         
+                      (       ../putc.as):00020                             section   code      ; begin code section
+                      (       ../putc.as):00021         
+0000                  (       ../putc.as):00022         _putc
+0000 3440             (       ../putc.as):00023                             pshs      u         ; preserve caller's U register
+0002 EE66             (       ../putc.as):00024                             ldu       6,s       ; load FILE pointer
+0004 EC46             (       ../putc.as):00025                             ldd       6,u       ; load FILE flags word
+0006 8480             (       ../putc.as):00026                             anda      #$80      ; isolate initialized bit in high byte
+0008 C422             (       ../putc.as):00027                             andb      #_ERR|_WRITE ; keep only error/write bits
+000A C102             (       ../putc.as):00028                             cmpb      #_WRITE   ; require writable stream with no error set
+000C 263C             (       ../putc.as):00029                             bne       badexit   ; fail if stream is not writable
+000E 8180             (       ../putc.as):00030                             cmpa      #$80      ; test whether stream buffers are initialized
+0010 2707             (       ../putc.as):00031                             beq       inited    ; skip initialization if already set up
+0012 3440             (       ../putc.as):00032                             pshs      u         ; pass FILE pointer to setbase
+0014 170000           (       ../putc.as):00033                             lbsr      _setbase  ; allocate/setup stream buffering state
+0017 3262             (       ../putc.as):00034                             leas      2,s       ; discard pushed FILE pointer
+0019 EC46             (       ../putc.as):00035         inited              ldd       6,u       ; reload FILE flags after possible initialization
+001B C404             (       ../putc.as):00036                             andb      #_UNBUF   ; test whether this stream is unbuffered
+001D 2730             (       ../putc.as):00037                             beq       buffered  ; branch if buffered output is allowed
+001F CC0001           (       ../putc.as):00038                             ldd       #1        ; write exactly one byte for unbuffered stream
+0022 3406             (       ../putc.as):00039                             pshs      d         ; push count value
+0024 30E4             (       ../putc.as):00040                             leax      ,s        ; point X at count slot for low-level API
+0026 3410             (       ../putc.as):00041                             pshs      x         ; push pointer to count
+0028 3069             (       ../putc.as):00042                             leax      9,s       ; point X at the character argument byte
+002A EC48             (       ../putc.as):00043                             ldd       8,u       ; load underlying path number
+002C 3416             (       ../putc.as):00044                             pshs      d,x       ; push path and data pointer
+002E E647             (       ../putc.as):00045                             ldb       7,u       ; load low byte of FILE flags
+0030 C440             (       ../putc.as):00046                             andb      #_SCF     ; test whether device is SCF
+0032 2705             (       ../putc.as):00047                             beq       L0035     ; plain block write for non-SCF devices
+0034 170000           (       ../putc.as):00048                             lbsr      __os_writeln ; SCF output wants line semantics
+0037 2003             (       ../putc.as):00049                             bra       L0038     ; share post-write result handling
+0039 170000           (       ../putc.as):00050         L0035               lbsr      __os_write ; perform raw byte write
+003C 3268             (       ../putc.as):00051         L0038               leas      8,s       ; discard stacked write arguments
+003E 10830000         (       ../putc.as):00052                             cmpd      #0        ; low-level wrappers return zero on success
+0042 273B             (       ../putc.as):00053                             beq       L0079     ; return written character on success
+0044 E647             (       ../putc.as):00054                             ldb       7,u       ; reload low byte of FILE flags
+0046 CA20             (       ../putc.as):00055                             orb       #_ERR     ; mark stream as having encountered an error
+0048 E747             (       ../putc.as):00056                             stb       7,u       ; save updated error flag
+004A CCFFFF           (       ../putc.as):00057         badexit             ldd       #-1       ; return EOF on failure
+004D 35C0             (       ../putc.as):00058                             puls      u,pc      ; restore U and return
+                      (       ../putc.as):00059         
+004F 8401             (       ../putc.as):00060         buffered            anda      #$01      ; test _WRITTEN state in high-byte flag bit
+0051 2609             (       ../putc.as):00061                             bne       L0058     ; skip initial flush if already in write mode
+0053 3440             (       ../putc.as):00062                             pshs      u         ; pass FILE pointer to flush helper
+0055 1700B5           (       ../putc.as):00063                             lbsr      _flush    ; synchronize buffer for first write after reading
+0058 EDE1             (       ../putc.as):00064                             std       ,s++      ; discard helper argument and capture return code
+005A 26EE             (       ../putc.as):00065                             bne       badexit   ; fail if the flush/setup did not succeed
+005C AEC4             (       ../putc.as):00066         L0058               ldx       ,u        ; load current buffer pointer
+005E E665             (       ../putc.as):00067                             ldb       5,s       ; load character argument
+0060 E780             (       ../putc.as):00068                             stb       ,x+       ; store character and advance pointer
+0062 AFC4             (       ../putc.as):00069                             stx       ,u        ; save updated buffer pointer
+0064 AC44             (       ../putc.as):00070                             cmpx      4,u       ; compare against buffer end pointer
+0066 240E             (       ../putc.as):00071                             bcc       L0070     ; flush once the buffer reaches its limit
+0068 E647             (       ../putc.as):00072                             ldb       7,u       ; load low byte of FILE flags
+006A C440             (       ../putc.as):00073                             andb      #_SCF     ; only SCF streams flush on newline
+006C 2711             (       ../putc.as):00074                             beq       L0079     ; buffered RBF devices can delay the write
+006E E665             (       ../putc.as):00075                             ldb       5,s       ; reload character argument
+0070 C10A             (       ../putc.as):00076                             cmpb      #$0A      ; test for line-feed terminator
+0072 260B             (       ../putc.as):00077                             bne       L0079     ; keep buffering until newline or full buffer
+0074 C60D             (       ../putc.as):00078                             ldb       #$0D      ; convert pending line terminator to carriage return
+0076 3440             (       ../putc.as):00079         L0070               pshs      u         ; pass FILE pointer to flush helper
+0078 170092           (       ../putc.as):00080                             lbsr      _flush    ; write buffered data to the underlying path
+007B EDE1             (       ../putc.as):00081                             std       ,s++      ; discard helper argument and capture return code
+007D 26CB             (       ../putc.as):00082                             bne       badexit   ; fail if the flush did not succeed
+007F EC64             (       ../putc.as):00083         L0079               ldd       4,s       ; return original character argument
+0081 35C0             (       ../putc.as):00084                             puls      u,pc      ; restore U and return
+                      (       ../putc.as):00085         
+0083 3440             (       ../putc.as):00086         _putw               pshs      u         ; preserve caller's U register
+0085 EE66             (       ../putc.as):00087                             ldu       6,s       ; load FILE pointer
+0087 E664             (       ../putc.as):00088                             ldb       4,s       ; load high byte of word argument
+0089 3446             (       ../putc.as):00089                             pshs      d,u       ; stage first character and FILE pointer for putc
+008B 17FF72           (       ../putc.as):00090                             lbsr      _putc     ; write high byte first
+008E E669             (       ../putc.as):00091                             ldb       9,s       ; load low byte of original word argument
+0090 E761             (       ../putc.as):00092                             stb       1,s       ; replace staged character with low byte
+0092 17FF6B           (       ../putc.as):00093                             lbsr      _putc     ; write low byte second
+0095 3264             (       ../putc.as):00094                             leas      4,s       ; discard staged arguments
+0097 1083FFFF         (       ../putc.as):00095                             cmpd      #-1       ; propagate EOF if either byte write failed
+009B 2702             (       ../putc.as):00096                             beq       putwbye   ; leave failure code intact
+009D 4F               (       ../putc.as):00097                             clra                ; return zero on success
+009E 5F               (       ../putc.as):00098                             clrb                ; return zero on success
+009F 35C0             (       ../putc.as):00099         putwbye             puls      u,pc      ; restore U and return
+                      (       ../putc.as):00100         
+00A1 3440             (       ../putc.as):00101         _tidyup             pshs      u         ; preserve caller's U register
+00A3 30A90000         (       ../putc.as):00102                             leax      __iob,y   ; point at the first FILE entry
+00A7 C610             (       ../putc.as):00103                             ldb       #_NFILE   ; load number of entries to close
+00A9 3404             (       ../putc.as):00104                             pshs      b         ; keep countdown on the stack
+00AB 3410             (       ../putc.as):00105         L009d               pshs      x         ; stage current FILE pointer for fclose
+00AD 17000A           (       ../putc.as):00106                             lbsr      _fclose   ; attempt to close this stream
+00B0 3510             (       ../putc.as):00107                             puls      x         ; recover FILE pointer for iteration
+00B2 300D             (       ../putc.as):00108                             leax      13,x      ; advance to next FILE structure
+00B4 6AE4             (       ../putc.as):00109                             dec       ,s        ; count one stream down
+00B6 26F3             (       ../putc.as):00110                             bne       L009d     ; continue until all FILE entries were visited
+00B8 35C4             (       ../putc.as):00111                             puls      b,u,pc    ; discard counter, restore U, and return
+                      (       ../putc.as):00112         
+00BA 3440             (       ../putc.as):00113         _fclose             pshs      u         ; preserve caller's U register
+00BC EE64             (       ../putc.as):00114                             ldu       4,s       ; load FILE pointer
+00BE 1027FF88         (       ../putc.as):00115                             lbeq      badexit   ; reject null stream pointers
+00C2 EC46             (       ../putc.as):00116                             ldd       6,u       ; load FILE flags word
+00C4 1027FF82         (       ../putc.as):00117                             lbeq      badexit   ; reject unopened streams
+00C8 C402             (       ../putc.as):00118                             andb      #_WRITE   ; check whether stream is writable
+00CA 2709             (       ../putc.as):00119                             beq       L00c5     ; skip flush for read-only streams
+00CC 3440             (       ../putc.as):00120                             pshs      u         ; pass FILE pointer to fflush
+00CE 170017           (       ../putc.as):00121                             lbsr      _fflush   ; flush pending buffered output
+00D1 3262             (       ../putc.as):00122                             leas      2,s       ; discard staged FILE pointer
+00D3 2002             (       ../putc.as):00123                             bra       L00c7     ; continue with close regardless of flush result
+00D5 4F               (       ../putc.as):00124         L00c5               clra                ; synthesize zero status for read-only streams
+00D6 5F               (       ../putc.as):00125                             clrb                ; synthesize zero status for read-only streams
+00D7 3406             (       ../putc.as):00126         L00c7               pshs      d         ; preserve flush status across low-level close
+00D9 EC48             (       ../putc.as):00127                             ldd       8,u       ; load underlying path number
+00DB 3406             (       ../putc.as):00128                             pshs      d         ; stage path number for __os_close
+00DD 170000           (       ../putc.as):00129                             lbsr      __os_close ; close the underlying OS-9 path
+00E0 3262             (       ../putc.as):00130                             leas      2,s       ; discard staged path number
+00E2 4F               (       ../putc.as):00131                             clra                ; clear high byte for zero flag word
+00E3 5F               (       ../putc.as):00132                             clrb                ; clear low byte for zero flag word
+00E4 ED46             (       ../putc.as):00133                             std       6,u       ; mark FILE entry as unused
+00E6 35C6             (       ../putc.as):00134                             puls      d,u,pc    ; restore flush status and caller's U, then return
+                      (       ../putc.as):00135         
+00E8 3440             (       ../putc.as):00136         _fflush             pshs      u         ; preserve caller's U register
+00EA EE64             (       ../putc.as):00137                             ldu       4,s       ; load FILE pointer
+00EC 1027FF5A         (       ../putc.as):00138                             lbeq      badexit   ; reject null stream pointers
+00F0 EC46             (       ../putc.as):00139                             ldd       6,u       ; load FILE flags word
+00F2 C422             (       ../putc.as):00140                             andb      #_ERR|_WRITE ; require writable stream with no error set
+00F4 C102             (       ../putc.as):00141                             cmpb      #_WRITE   ; compare against clean writable state
+00F6 1026FF50         (       ../putc.as):00142                             lbne      badexit   ; reject streams that cannot be flushed
+00FA 8480             (       ../putc.as):00143                             anda      #$80      ; test initialized bit in high byte
+00FC 2607             (       ../putc.as):00144                             bne       finited   ; skip setup if buffering is already initialized
+00FE 3440             (       ../putc.as):00145                             pshs      u         ; pass FILE pointer to setbase
+0100 170000           (       ../putc.as):00146                             lbsr      _setbase  ; allocate/setup stream buffering state
+0103 3262             (       ../putc.as):00147                             leas      2,s       ; discard staged FILE pointer
+0105 3440             (       ../putc.as):00148         finited             pshs      u         ; pass FILE pointer to internal flush helper
+0107 8D04             (       ../putc.as):00149                             bsr       _flush    ; write any buffered output and reset pointers
+0109 3262             (       ../putc.as):00150                             leas      2,s       ; discard staged FILE pointer
+010B 35C0             (       ../putc.as):00151                             puls      u,pc      ; restore U and return helper status
+                      (       ../putc.as):00152         
+010D 3440             (       ../putc.as):00153         _flush              pshs      u         ; preserve caller's U register
+010F EE64             (       ../putc.as):00154                             ldu       4,s       ; load FILE pointer
+0111 327C             (       ../putc.as):00155                             leas      -4,s      ; reserve local word/count scratch space
+0113 A646             (       ../putc.as):00156                             lda       6,u       ; load high byte of FILE flags
+0115 8401             (       ../putc.as):00157                             anda      #1        ; test _WRITTEN bit
+0117 2623             (       ../putc.as):00158                             bne       L012c     ; skip seek correction once stream is in write mode
+0119 ECC4             (       ../putc.as):00159                             ldd       ,u        ; load current buffer pointer
+011B 10A344           (       ../putc.as):00160                             cmpd      4,u       ; compare against buffer end pointer
+011E 271C             (       ../putc.as):00161                             beq       L012c     ; no correction needed when buffer is already full
+0120 4F               (       ../putc.as):00162                             clra                ; build zero offset for ftell/seek correction
+0121 5F               (       ../putc.as):00163                             clrb                ; build zero offset for ftell/seek correction
+0122 3406             (       ../putc.as):00164                             pshs      d         ; stage zero long low word
+0124 3440             (       ../putc.as):00165                             pshs      u         ; stage FILE pointer for ftell
+0126 170000           (       ../putc.as):00166                             lbsr      _ftell    ; compute current buffered file position
+0129 3262             (       ../putc.as):00167                             leas      2,s       ; discard staged FILE pointer
+012B EC02             (       ../putc.as):00168                             ldd       2,x       ; fetch low word of current file position
+012D 3406             (       ../putc.as):00169                             pshs      d         ; stage low word for lseek
+012F EC84             (       ../putc.as):00170                             ldd       ,x        ; fetch high word of current file position
+0131 3406             (       ../putc.as):00171                             pshs      d         ; stage high word for lseek
+0133 EC48             (       ../putc.as):00172                             ldd       8,u       ; load underlying path number
+0135 3406             (       ../putc.as):00173                             pshs      d         ; stage path number for lseek
+0137 170000           (       ../putc.as):00174                             lbsr      _lseek    ; synchronize OS-9 file position with buffer state
+013A 3268             (       ../putc.as):00175                             leas      8,s       ; discard staged lseek arguments
+013C ECC4             (       ../putc.as):00176         L012c               ldd       ,u        ; load current buffer pointer
+013E A342             (       ../putc.as):00177                             subd      2,u       ; compute buffered byte count as ptr-base
+0140 ED62             (       ../putc.as):00178                             std       2,s       ; save pending-byte count in local scratch
+0142 10270061         (       ../putc.as):00179                             lbeq      L0194     ; nothing to flush if the buffer is empty
+0146 EC46             (       ../putc.as):00180                             ldd       6,u       ; reload FILE flags word
+0148 8401             (       ../putc.as):00181                             anda      #1        ; test _WRITTEN bit
+014A 10270059         (       ../putc.as):00182                             lbeq      L0194     ; do not flush if buffer only contains read data
+014E C440             (       ../putc.as):00183                             andb      #_SCF     ; test whether device is SCF
+0150 2731             (       ../putc.as):00184                             beq       _flushrbf ; block-write path for non-SCF devices
+0152 EC42             (       ../putc.as):00185                             ldd       2,u       ; start SCF writes from the buffer base
+0154 2025             (       ../putc.as):00186                             bra       _flush3   ; share pointer update logic
+0156 3410             (       ../putc.as):00187         _flush2             pshs      x         ; preserve X while staging write arguments
+0158 3406             (       ../putc.as):00188                             pshs      d         ; stage remaining byte count
+015A 30E4             (       ../putc.as):00189                             leax      ,s        ; point X at count slot
+015C 3410             (       ../putc.as):00190                             pshs      x         ; pass pointer-to-count
+015E ECC4             (       ../putc.as):00191                             ldd       ,u        ; load current buffer pointer
+0160 3406             (       ../putc.as):00192                             pshs      d         ; pass data pointer
+0162 EC48             (       ../putc.as):00193                             ldd       8,u       ; load underlying path number
+0164 3406             (       ../putc.as):00194                             pshs      d         ; pass path number
+0166 170000           (       ../putc.as):00195                             lbsr      __os_writeln ; write buffered data to SCF device
+0169 326A             (       ../putc.as):00196                             leas      10,s      ; discard staged arguments and preserved X
+016B 10830000         (       ../putc.as):00197                             cmpd      #0        ; low-level wrappers return zero on success
+016F 2627             (       ../putc.as):00198                             bne       L0185     ; branch if the device write failed
+0171 EC62             (       ../putc.as):00199                             ldd       2,s       ; fetch pending-byte count
+0173 A37C             (       ../putc.as):00200                             subd      -4,s      ; subtract amount written this iteration
+0175 ED62             (       ../putc.as):00201                             std       2,s       ; update pending-byte count
+0177 ECC4             (       ../putc.as):00202                             ldd       ,u        ; reload current buffer pointer
+0179 E37C             (       ../putc.as):00203                             addd      -4,s      ; advance by amount written this iteration
+017B EDC4             (       ../putc.as):00204         _flush3             std       ,u        ; save updated current buffer pointer
+017D EC62             (       ../putc.as):00205                             ldd       2,s       ; fetch remaining byte count
+017F 26D5             (       ../putc.as):00206                             bne       _flush2   ; loop until all SCF bytes are written
+0181 2024             (       ../putc.as):00207                             bra       L0194     ; finalize successful flush
+                      (       ../putc.as):00208         
+0183 3062             (       ../putc.as):00209         _flushrbf           leax      2,s       ; point X at pending-byte count
+0185 3410             (       ../putc.as):00210                             pshs      x         ; pass pointer-to-count
+0187 EC42             (       ../putc.as):00211                             ldd       2,u       ; load buffer base pointer
+0189 3406             (       ../putc.as):00212                             pshs      d         ; pass data pointer
+018B EC48             (       ../putc.as):00213                             ldd       8,u       ; load underlying path number
+018D 3406             (       ../putc.as):00214                             pshs      d         ; pass path number
+018F 170000           (       ../putc.as):00215                             lbsr      __os_write ; write buffered block to non-SCF device
+0192 3266             (       ../putc.as):00216                             leas      6,s       ; discard staged write arguments
+0194 2602             (       ../putc.as):00217                             bne       L0185     ; branch if the block write failed
+0196 200F             (       ../putc.as):00218                             bra       L0194     ; finalize successful flush
+0198 E647             (       ../putc.as):00219         L0185               ldb       7,u       ; load low byte of FILE flags
+019A CA20             (       ../putc.as):00220                             orb       #_ERR     ; mark stream as having encountered an error
+019C E747             (       ../putc.as):00221                             stb       7,u       ; save updated error flag
+019E EC44             (       ../putc.as):00222                             ldd       4,u       ; load buffer end pointer
+01A0 EDC4             (       ../putc.as):00223                             std       ,u        ; move current pointer to end to prevent reuse
+01A2 CCFFFF           (       ../putc.as):00224                             ldd       #-1       ; return EOF on flush failure
+01A5 2010             (       ../putc.as):00225                             bra       L01a4     ; share final stack teardown
+                      (       ../putc.as):00226         
+01A7 A646             (       ../putc.as):00227         L0194               lda       6,u       ; load high byte of FILE flags
+01A9 8A01             (       ../putc.as):00228                             ora       #1        ; mark stream as being in written/update state
+01AB A746             (       ../putc.as):00229                             sta       6,u       ; save updated write-state flag
+01AD EC42             (       ../putc.as):00230                             ldd       2,u       ; load buffer base pointer
+01AF EDC4             (       ../putc.as):00231                             std       ,u        ; reset current pointer back to buffer base
+01B1 E34B             (       ../putc.as):00232                             addd      11,u      ; compute buffer end as base + buffer size
+01B3 ED44             (       ../putc.as):00233                             std       4,u       ; save refreshed buffer end pointer
+01B5 4F               (       ../putc.as):00234                             clra                ; return zero on successful flush
+01B6 5F               (       ../putc.as):00235                             clrb                ; return zero on successful flush
+01B7 3264             (       ../putc.as):00236         L01a4               leas      4,s       ; discard local scratch space
+01B9 35C0             (       ../putc.as):00237                             puls      u,pc      ; restore U and return
+                      (       ../putc.as):00238         
+                      (       ../putc.as):00239                             endsect             ; end code section

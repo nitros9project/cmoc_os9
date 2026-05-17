@@ -1,0 +1,5 @@
+Symbol: _rand (rand.o) = 0000
+Symbol: _srand (rand.o) = 0030
+Symbol: L_acon (rand.o) = 0041
+Symbol: L_mcon (rand.o) = 003D
+Symbol: L_next (rand.o) = 0000

@@ -1,0 +1,68 @@
+                      (       ../atol.as):00001         _atol               EXPORT              ; export atol entry point
+                      (       ../atol.as):00002         
+                      (       ../atol.as):00003         _lmul               EXTERNAL            ; long multiply helper
+                      (       ../atol.as):00004         _lneg               EXTERNAL            ; long negate helper
+                      (       ../atol.as):00005         _flacc              EXTERNAL            ; shared long return accumulator
+                      (       ../atol.as):00006         _lmove              EXTERNAL            ; long move helper
+                      (       ../atol.as):00007         _chcodes            EXTERNAL            ; character classification table
+                      (       ../atol.as):00008         
+                      (       ../atol.as):00009                             section   code      ; begin code section
+                      (       ../atol.as):00010         
+0000                  (       ../atol.as):00011         _atol
+0000 3440             (       ../atol.as):00012                             pshs      u         ; preserve caller's U register
+0002 EE64             (       ../atol.as):00013                             ldu       4,s       ; load source string pointer
+0004 4F               (       ../atol.as):00014                             clra                ; clear high byte of initial accumulator
+0005 5F               (       ../atol.as):00015                             clrb                ; clear low byte of initial accumulator
+0006 3404             (       ../atol.as):00016                             pshs      b         ; reserve sign flag byte initialized to zero
+0008 3406             (       ../atol.as):00017                             pshs      d         ; reserve high word of 32-bit result
+000A 3406             (       ../atol.as):00018                             pshs      d         ; reserve low word of 32-bit result
+000C                  (       ../atol.as):00019         charloop
+000C E6C0             (       ../atol.as):00020                             ldb       ,u+       ; fetch next input character and advance
+000E C120             (       ../atol.as):00021                             cmpb      #' '      ; test for leading space
+0010 27FA             (       ../atol.as):00022                             beq       charloop  ; skip spaces before the number
+0012 C109             (       ../atol.as):00023                             cmpb      #9        ; test for leading tab
+0014 27F6             (       ../atol.as):00024                             beq       charloop  ; skip tabs before the number
+0016 C12D             (       ../atol.as):00025                             cmpb      #'-'      ; check for explicit minus sign
+0018 2604             (       ../atol.as):00026                             bne       L001e     ; branch if this is not a minus sign
+001A E764             (       ../atol.as):00027                             stb       4,s       ; remember that the final value is negative
+001C 2027             (       ../atol.as):00028                             bra       L0045     ; consume the sign and continue scanning
+001E C12B             (       ../atol.as):00029         L001e               cmpb      #'+'      ; check for explicit plus sign
+0020 2625             (       ../atol.as):00030                             bne       L0047     ; branch if parsing should begin immediately
+0022 2021             (       ../atol.as):00031                             bra       L0045     ; consume the plus sign and continue
+0024 EC62             (       ../atol.as):00032         L0024               ldd       2,s       ; load current low word of accumulated value
+0026 3406             (       ../atol.as):00033                             pshs      d         ; pass low word to long multiply helper
+0028 EC62             (       ../atol.as):00034                             ldd       2,s       ; reload current high word of accumulated value
+002A 3406             (       ../atol.as):00035                             pshs      d         ; pass high word to long multiply helper
+002C 308D003C         (       ../atol.as):00036                             leax      L006c,pcr ; point at 32-bit constant 10
+0030 170000           (       ../atol.as):00037                             lbsr      _lmul     ; multiply accumulated value by 10
+0033 E65F             (       ../atol.as):00038                             ldb       -1,u      ; reload the digit character just consumed
+0035 4F               (       ../atol.as):00039                             clra                ; extend digit to 16 bits
+0036 C030             (       ../atol.as):00040                             subb      #$30      ; convert ASCII digit to numeric value
+0038 E302             (       ../atol.as):00041                             addd      2,x       ; add digit into low word of product
+003A ED62             (       ../atol.as):00042                             std       2,s       ; store updated low word
+003C CC0000           (       ../atol.as):00043                             ldd       #0        ; prepare zero for carry propagation
+003F E901             (       ../atol.as):00044                             adcb      1,x       ; add carry into high-word low byte
+0041 A984             (       ../atol.as):00045                             adca      ,x        ; add carry into high-word high byte
+0043 EDE4             (       ../atol.as):00046                             std       ,s        ; store updated high word
+0045 E6C0             (       ../atol.as):00047         L0045               ldb       ,u+       ; fetch next character after optional sign/digit
+0047 4F               (       ../atol.as):00048         L0047               clra                ; clear high byte for table indexing
+0048 30A90000         (       ../atol.as):00049                             leax      _chcodes,y ; point at character classification table
+004C E68B             (       ../atol.as):00050                             ldb       d,x       ; load classification flags for this character
+004E C408             (       ../atol.as):00051                             andb      #8        ; isolate the decimal-digit bit
+0050 26D2             (       ../atol.as):00052                             bne       L0024     ; keep accumulating while character is a digit
+0052 6D64             (       ../atol.as):00053                             tst       4,s       ; check whether a minus sign was recorded
+0054 2707             (       ../atol.as):00054                             beq       L005d     ; skip negation if the value is positive
+0056 30E4             (       ../atol.as):00055                             leax      ,s        ; point X at temporary 32-bit result
+0058 170000           (       ../atol.as):00056                             lbsr      _lneg     ; negate the accumulated long value
+005B 2002             (       ../atol.as):00057                             bra       L005f     ; continue with result copy
+005D 30E4             (       ../atol.as):00058         L005d               leax      ,s        ; point X at the positive temporary result
+005F 33A90000         (       ../atol.as):00059         L005f               leau      _flacc,y  ; point U at the shared long return buffer
+0063 3440             (       ../atol.as):00060                             pshs      u         ; pass destination pointer to long move helper
+0065 170000           (       ../atol.as):00061                             lbsr      _lmove    ; copy parsed value into the return buffer
+0068 3265             (       ../atol.as):00062                             leas      5,s       ; discard temporary sign/result workspace
+006A 35C0             (       ../atol.as):00063                             puls      u,pc      ; restore U and return with X pointing at result
+                      (       ../atol.as):00064         
+006C 070000           (       ../atol.as):00065         L006c               fcb       $07,$00,$00 ; high 24 bits of 32-bit constant 10
+006F 07000A           (       ../atol.as):00066                             fcb       $07,$00,$0A ; low byte of 32-bit constant 10
+                      (       ../atol.as):00067         
+                      (       ../atol.as):00068                             endsect             ; end code section

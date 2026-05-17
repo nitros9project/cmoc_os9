@@ -1,0 +1,14 @@
+Symbol: _ldiv (cldiv.o) = 0000
+Symbol: _lmod (cldiv.o) = 000E
+Symbol: B0000 (cldiv.o) = 0000
+Symbol: BranchTarget_01 (cldiv.o) = 0009
+Symbol: BranchTarget_02 (cldiv.o) = 0029
+Symbol: BranchTarget_03 (cldiv.o) = 007C
+Symbol: BranchTarget_04 (cldiv.o) = 0087
+Symbol: BranchTarget_05 (cldiv.o) = 00BC
+Symbol: Continue_01 (cldiv.o) = 00BE
+Symbol: Loop_01 (cldiv.o) = 0006
+Symbol: Loop_02 (cldiv.o) = 008D
+Symbol: Loop_03 (cldiv.o) = 009A
+Symbol: Subroutine_01 (cldiv.o) = 0048
+Symbol: Subroutine_02 (cldiv.o) = 005E

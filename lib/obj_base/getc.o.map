@@ -1,0 +1,16 @@
+Symbol: _getc (getc.o) = 0000
+Symbol: _getw (getc.o) = 0037
+Symbol: _ungetc (getc.o) = 0019
+Symbol: BranchTarget_01 (getc.o) = 0051
+Symbol: BranchTarget_02 (getc.o) = 0064
+Symbol: BranchTarget_03 (getc.o) = 0079
+Symbol: BranchTarget_04 (getc.o) = 0095
+Symbol: BranchTarget_05 (getc.o) = 00B0
+Symbol: BranchTarget_06 (getc.o) = 00BD
+Symbol: Continue_01 (getc.o) = 005B
+Symbol: Continue_02 (getc.o) = 00C0
+Symbol: Loop_01 (getc.o) = 0012
+Symbol: Loop_02 (getc.o) = 0014
+Symbol: Loop_03 (getc.o) = 0055
+Symbol: Loop_04 (getc.o) = 0059
+Symbol: Loop_05 (getc.o) = 005F

@@ -1,0 +1,5 @@
+Symbol: _strcspn (strspn.o) = 0015
+Symbol: _strspn (strspn.o) = 0000
+Symbol: BranchTarget_01 (strspn.o) = 0028
+Symbol: Loop_01 (strspn.o) = 0008
+Symbol: Loop_02 (strspn.o) = 001D

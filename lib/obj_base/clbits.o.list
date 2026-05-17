@@ -1,0 +1,50 @@
+                      (     ../clbits.as):00001                             section   code      ; begin code section
+                      (     ../clbits.as):00002         
+                      (     ../clbits.as):00003         _flacc              EXTERNAL            ; import external symbol
+                      (     ../clbits.as):00004         _lbexit             EXTERNAL            ; import external symbol
+                      (     ../clbits.as):00005         
+                      (     ../clbits.as):00006         _land               EXPORT              ; export this symbol
+                      (     ../clbits.as):00007         _lor                EXPORT              ; export this symbol
+                      (     ../clbits.as):00008         _lxor               EXPORT              ; export this symbol
+                      (     ../clbits.as):00009         _lnot               EXPORT              ; export this symbol
+                      (     ../clbits.as):00010         
+0000 EC62             (     ../clbits.as):00011         _land:              ldd       2,s       ; load D from stack-relative value 2,s
+0002 A484             (     ../clbits.as):00012                             anda      ,x        ; AND A with memory pointed to by X
+0004 E401             (     ../clbits.as):00013                             andb      1,x       ; AND B with indexed value 1,x
+0006 EDA90000         (     ../clbits.as):00014                             std       _flacc,y  ; store D to indexed value _flacc,y
+000A EC64             (     ../clbits.as):00015                             ldd       4,s       ; load D from stack-relative value 4,s
+000C A402             (     ../clbits.as):00016                             anda      2,x       ; AND A with indexed value 2,x
+000E E403             (     ../clbits.as):00017                             andb      3,x       ; AND B with indexed value 3,x
+0010 EDA90000         (     ../clbits.as):00018                             std       _flacc+2,y ; store D to indexed value _flacc+2,y
+0014 160000           (     ../clbits.as):00019                             lbra      _lbexit   ; long branch unconditionally to _lbexit
+0017 EC62             (     ../clbits.as):00020         _lor:               ldd       2,s       ; load D from stack-relative value 2,s
+0019 AA84             (     ../clbits.as):00021                             ora       ,x        ; OR A with memory pointed to by X
+001B EA01             (     ../clbits.as):00022                             orb       1,x       ; OR B with indexed value 1,x
+001D EDA90000         (     ../clbits.as):00023                             std       _flacc,y  ; store D to indexed value _flacc,y
+0021 EC64             (     ../clbits.as):00024                             ldd       4,s       ; load D from stack-relative value 4,s
+0023 AA02             (     ../clbits.as):00025                             ora       2,x       ; OR A with indexed value 2,x
+0025 EA03             (     ../clbits.as):00026                             orb       3,x       ; OR B with indexed value 3,x
+0027 EDA90000         (     ../clbits.as):00027                             std       _flacc+2,y ; store D to indexed value _flacc+2,y
+002B 160000           (     ../clbits.as):00028                             lbra      _lbexit   ; long branch unconditionally to _lbexit
+002E EC62             (     ../clbits.as):00029         _lxor:              ldd       2,s       ; load D from stack-relative value 2,s
+0030 A884             (     ../clbits.as):00030                             eora      ,x        ; XOR A with memory pointed to by X
+0032 E801             (     ../clbits.as):00031                             eorb      1,x       ; XOR B with indexed value 1,x
+0034 EDA90000         (     ../clbits.as):00032                             std       _flacc,y  ; store D to indexed value _flacc,y
+0038 EC64             (     ../clbits.as):00033                             ldd       4,s       ; load D from stack-relative value 4,s
+003A A802             (     ../clbits.as):00034                             eora      2,x       ; XOR A with indexed value 2,x
+003C E803             (     ../clbits.as):00035                             eorb      3,x       ; XOR B with indexed value 3,x
+003E EDA90000         (     ../clbits.as):00036                             std       _flacc+2,y ; store D to indexed value _flacc+2,y
+0042 160000           (     ../clbits.as):00037                             lbra      _lbexit   ; long branch unconditionally to _lbexit
+0045 A684             (     ../clbits.as):00038         _lnot:              lda       ,x        ; load A from memory pointed to by X
+0047 AA01             (     ../clbits.as):00039                             ora       1,x       ; OR A with indexed value 1,x
+0049 AA02             (     ../clbits.as):00040                             ora       2,x       ; OR A with indexed value 2,x
+004B AA03             (     ../clbits.as):00041                             ora       3,x       ; OR A with indexed value 3,x
+004D 2703             (     ../clbits.as):00042                             beq       BranchTarget_01 ; branch if equal/zero to BranchTarget_01
+004F 5F               (     ../clbits.as):00043                             clrb                ; clear B
+0050 4F               (     ../clbits.as):00044                             clra                ; clear A
+0051 39               (     ../clbits.as):00045                             rts                 ; return to caller
+0052 CC0001           (     ../clbits.as):00046         BranchTarget_01     ldd       #1        ; load D from immediate value 1
+0055 39               (     ../clbits.as):00047                             rts                 ; return to caller
+                      (     ../clbits.as):00048         
+                      (     ../clbits.as):00049                             endsect             ; end current section
+                      (     ../clbits.as):00050         

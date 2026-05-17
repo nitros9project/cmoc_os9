@@ -1,0 +1,46 @@
+                      (      ../index.as):00001         * Compact assembly implementation of strchr/strrchr and index/rindex aliases.
+                      (      ../index.as):00002         
+                      (      ../index.as):00003                             section   code      ; begin code section
+                      (      ../index.as):00004         
+                      (      ../index.as):00005         _strchr             EXPORT              ; export this symbol
+                      (      ../index.as):00006         _index              EXPORT              ; export this symbol
+                      (      ../index.as):00007         _strrchr            EXPORT              ; export this symbol
+                      (      ../index.as):00008         _rindex             EXPORT              ; export this symbol
+                      (      ../index.as):00009         
+0000                  (      ../index.as):00010         _strchr
+0000                  (      ../index.as):00011         _index
+0000 AE62             (      ../index.as):00012                             ldx       2,s       ; load X from stack-relative value 2,s
+0002                  (      ../index.as):00013         L_strchr_loop
+0002 E680             (      ../index.as):00014                             ldb       ,x+       ; load B from memory pointed to by X, then advance X
+0004 2708             (      ../index.as):00015                             beq       L_strchr_not_found ; branch if equal/zero to L_strchr_not_found
+0006 E165             (      ../index.as):00016                             cmpb      5,s       ; compare B against stack-relative value 5,s
+0008 26F8             (      ../index.as):00017                             bne       L_strchr_loop ; branch if not equal to L_strchr_loop
+000A 1F10             (      ../index.as):00018                             tfr       x,d       ; transfer X,D
+000C 2017             (      ../index.as):00019                             bra       L_strrchr_done ; branch unconditionally to L_strrchr_done
+                      (      ../index.as):00020         
+000E                  (      ../index.as):00021         L_strchr_not_found
+000E 4F               (      ../index.as):00022                             clra                ; clear A
+000F 39               (      ../index.as):00023                             rts                 ; return to caller
+                      (      ../index.as):00024         
+0010                  (      ../index.as):00025         _strrchr
+0010                  (      ../index.as):00026         _rindex
+0010 AE62             (      ../index.as):00027                             ldx       2,s       ; load X from stack-relative value 2,s
+0012 CC0001           (      ../index.as):00028                             ldd       #1        ; load D from immediate value 1
+0015 3406             (      ../index.as):00029                             pshs      d         ; save D on the hardware stack
+0017 2006             (      ../index.as):00030                             bra       L_strrchr_scan ; branch unconditionally to L_strrchr_scan
+                      (      ../index.as):00031         
+0019                  (      ../index.as):00032         L_strrchr_match
+0019 E167             (      ../index.as):00033                             cmpb      7,s       ; compare B against stack-relative value 7,s
+001B 2602             (      ../index.as):00034                             bne       L_strrchr_scan ; branch if not equal to L_strrchr_scan
+001D AFE4             (      ../index.as):00035                             stx       ,s        ; store X to memory pointed to by S
+                      (      ../index.as):00036         
+001F                  (      ../index.as):00037         L_strrchr_scan
+001F E680             (      ../index.as):00038                             ldb       ,x+       ; load B from memory pointed to by X, then advance X
+0021 26F6             (      ../index.as):00039                             bne       L_strrchr_match ; branch if not equal to L_strrchr_match
+0023 3506             (      ../index.as):00040                             puls      d         ; restore D from the hardware stack
+                      (      ../index.as):00041         
+0025                  (      ../index.as):00042         L_strrchr_done
+0025 830001           (      ../index.as):00043                             subd      #1        ; subtract immediate value 1 from D
+0028 39               (      ../index.as):00044                             rts                 ; return to caller
+                      (      ../index.as):00045         
+                      (      ../index.as):00046                             endsect             ; end current section

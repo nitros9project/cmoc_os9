@@ -1,0 +1,29 @@
+                      (       ../skip.as):00001         * Adapted from cmoc_os9/lib/todo/skip.as for the live cmoc_os9 ABI.
+                      (       ../skip.as):00002         
+                      (       ../skip.as):00003                             section   code      ; begin code section
+                      (       ../skip.as):00004         
+                      (       ../skip.as):00005         _skipbl             EXPORT              ; export this symbol
+                      (       ../skip.as):00006         _skipwd             EXPORT              ; export this symbol
+                      (       ../skip.as):00007         
+0000                  (       ../skip.as):00008         _skipbl
+0000 AE62             (       ../skip.as):00009                             ldx       2,s       ; load X from stack-relative value 2,s
+0002 E680             (       ../skip.as):00010         Loop_01             ldb       ,x+       ; load B from memory pointed to by X, then advance X
+0004 C120             (       ../skip.as):00011                             cmpb      #$20      ; compare B against immediate value $20
+0006 27FA             (       ../skip.as):00012                             beq       Loop_01   ; branch if equal/zero to Loop_01
+0008 C109             (       ../skip.as):00013                             cmpb      #9        ; compare B against immediate value 9
+000A 27F6             (       ../skip.as):00014                             beq       Loop_01   ; branch if equal/zero to Loop_01
+000C 200E             (       ../skip.as):00015                             bra       BranchTarget_01 ; branch unconditionally to BranchTarget_01
+                      (       ../skip.as):00016         
+000E                  (       ../skip.as):00017         _skipwd
+000E AE62             (       ../skip.as):00018                             ldx       2,s       ; load X from stack-relative value 2,s
+0010 E680             (       ../skip.as):00019         Loop_02             ldb       ,x+       ; load B from memory pointed to by X, then advance X
+0012 2708             (       ../skip.as):00020                             beq       BranchTarget_01 ; branch if equal/zero to BranchTarget_01
+0014 C120             (       ../skip.as):00021                             cmpb      #$20      ; compare B against immediate value $20
+0016 2704             (       ../skip.as):00022                             beq       BranchTarget_01 ; branch if equal/zero to BranchTarget_01
+0018 C109             (       ../skip.as):00023                             cmpb      #9        ; compare B against immediate value 9
+001A 26F4             (       ../skip.as):00024                             bne       Loop_02   ; branch if not equal to Loop_02
+001C 301F             (       ../skip.as):00025         BranchTarget_01     leax      -1,x      ; compute effective address into X from -1,x
+001E 1F10             (       ../skip.as):00026                             tfr       x,d       ; transfer X,D
+0020 39               (       ../skip.as):00027                             rts                 ; return to caller
+                      (       ../skip.as):00028         
+                      (       ../skip.as):00029                             endsect             ; end current section

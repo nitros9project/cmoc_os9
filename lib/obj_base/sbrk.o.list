@@ -1,0 +1,57 @@
+                      (       ../sbrk.as):00001         *
+                      (       ../sbrk.as):00002         * Request memory from OS
+                      (       ../sbrk.as):00003         * Adapted from cmoc_os9/lib/todo/sbrk.a for the live CMOC ABI.
+                      (       ../sbrk.as):00004         *
+                      (       ../sbrk.as):00005         
+                      (       ../sbrk.as):00006                             section   code      ; begin code section
+                      (       ../sbrk.as):00007         
+                      (       ../sbrk.as):00008         _sbrk               EXPORT              ; export this symbol
+                      (       ../sbrk.as):00009         
+                      (       ../sbrk.as):00010         __memend            EXTERNAL            ; import external symbol
+                      (       ../sbrk.as):00011         _spare              EXTERNAL            ; import external symbol
+                      (       ../sbrk.as):00012         _os9err             EXTERNAL            ; import external symbol
+                      (       ../sbrk.as):00013         
+0000 ECA90000         (       ../sbrk.as):00014         _sbrk               ldd       __memend,y ; get hi bound
+0004 3406             (       ../sbrk.as):00015                             pshs      d         ; save it
+0006 EC64             (       ../sbrk.as):00016                             ldd       4,s       ; get requested size
+0008 10A3A90000       (       ../sbrk.as):00017                             cmpd      _spare,y  ; any spare left?
+000D 2527             (       ../sbrk.as):00018                             blo       sbrk20    ; branch if lower to sbrk20
+                      (       ../sbrk.as):00019         
+                      (       ../sbrk.as):00020         * have to get some from the system
+000F 3420             (       ../sbrk.as):00021                             pshs      y         ; save data pointer
+0011 4F               (       ../sbrk.as):00022                             clra                ; clear A
+0012 5F               (       ../sbrk.as):00023                             clrb                ; clear B
+0013 103F07           (       ../sbrk.as):00024                             os9       $07       ; get current size/end
+0016 E366             (       ../sbrk.as):00025                             addd      6,s       ; add requested increase
+0018 103F07           (       ../sbrk.as):00026                             os9       $07       ; re-size memory
+001B 1F20             (       ../sbrk.as):00027                             tfr       y,d       ; save high bound
+001D 3520             (       ../sbrk.as):00028                             puls      y         ; restore data pointer
+001F 2407             (       ../sbrk.as):00029                             bcc       sbrk10    ; branch if carry is clear to sbrk10
+0021 3262             (       ../sbrk.as):00030                             leas      2,s       ; junk scratch
+0023 C6CF             (       ../sbrk.as):00031                             ldb       #$CF      ; load B from immediate value $CF
+0025 160000           (       ../sbrk.as):00032                             lbra      _os9err   ; long branch unconditionally to _os9err
+                      (       ../sbrk.as):00033         
+0028 EDA90000         (       ../sbrk.as):00034         sbrk10              std       __memend,y ; save new memory address
+002C E3A90000         (       ../sbrk.as):00035                             addd      _spare,y  ; add in spare bytes
+0030 A3E4             (       ../sbrk.as):00036                             subd      ,s        ; less old base
+0032 EDA90000         (       ../sbrk.as):00037                             std       _spare,y  ; is new spare value
+                      (       ../sbrk.as):00038         
+                      (       ../sbrk.as):00039         * now spare is big enough
+0036 3262             (       ../sbrk.as):00040         sbrk20              leas      2,s       ; junk scratch
+0038 ECA90000         (       ../sbrk.as):00041                             ldd       _spare,y  ; get spare count
+003C 3406             (       ../sbrk.as):00042                             pshs      d         ; save D on the hardware stack
+003E A364             (       ../sbrk.as):00043                             subd      4,s       ; less size
+0040 EDA90000         (       ../sbrk.as):00044                             std       _spare,y  ; updated value
+0044 ECA90000         (       ../sbrk.as):00045                             ldd       __memend,y ; get hi bound
+0048 A3E1             (       ../sbrk.as):00046                             subd      ,s++      ; base of free memory
+004A 3406             (       ../sbrk.as):00047                             pshs      d         ; save
+                      (       ../sbrk.as):00048         
+004C 4F               (       ../sbrk.as):00049                             clra                ; clear A
+004D AE60             (       ../sbrk.as):00050                             ldx       0,s       ; load X from stack-relative value 0,s
+004F A780             (       ../sbrk.as):00051         sbrk30              sta       ,x+       ; clear new memory
+0051 ACA90000         (       ../sbrk.as):00052                             cmpx      __memend,y ; compare X against indexed value __memend,y
+0055 25F8             (       ../sbrk.as):00053                             blo       sbrk30    ; branch if lower to sbrk30
+                      (       ../sbrk.as):00054         
+0057 3586             (       ../sbrk.as):00055                             puls      d,pc      ; restore registers and return
+                      (       ../sbrk.as):00056         
+                      (       ../sbrk.as):00057                             endsect             ; end current section

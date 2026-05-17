@@ -1,0 +1,49 @@
+                      (        shadow.as):00001                 section code
+                      (        shadow.as):00002         
+                      (        shadow.as):00003         _cgfx_shadow            EXPORT * export this symbol
+                      (        shadow.as):00004         
+                      (        shadow.as):00005         _errno                  EXTERNAL * import external symbol
+                      (        shadow.as):00006         _Flush                  EXTERNAL * import external symbol
+                      (        shadow.as):00007         _write                  EXTERNAL * import external symbol
+                      (        shadow.as):00008         
+                      (        shadow.as):00009         * Create a centered overlay shadow box: _cgfx_shadow(path,width,length,fg,bg)
+0000                  (        shadow.as):00010         _cgfx_shadow
+0000 3420             (        shadow.as):00011                 pshs    y
+0002 170000           (        shadow.as):00012                 lbsr    _Flush * long branch to subroutine to _Flush
+0005 3277             (        shadow.as):00013                 leas    -9,s * adjust S using -9,s
+0007 A66E             (        shadow.as):00014                 lda     14,s * load A from stack-relative value 14,s
+0009 C626             (        shadow.as):00015                 ldb     #$26 * load B from immediate value $26
+000B 103F8D           (        shadow.as):00016                 os9     $8D * invoke OS-9 system call $8D
+000E 1F10             (        shadow.as):00017                 tfr     x,d
+0010 A36F             (        shadow.as):00018                 subd    15,s * subtract stack-relative value 15,s from D
+0012 54               (        shadow.as):00019                 lsrb * logical shift B right by one bit
+0013 E763             (        shadow.as):00020                 stb     3,s * store B to stack-relative value 3,s
+0015 1F20             (        shadow.as):00021                 tfr     y,d
+0017 A3E811           (        shadow.as):00022                 subd    17,s * subtract stack-relative value 17,s from D
+001A 54               (        shadow.as):00023                 lsrb * logical shift B right by one bit
+001B E764             (        shadow.as):00024                 stb     4,s * store B to stack-relative value 4,s
+001D A6E810           (        shadow.as):00025                 lda     16,s * load A from stack-relative value 16,s
+0020 E6E812           (        shadow.as):00026                 ldb     18,s * load B from stack-relative value 18,s
+0023 ED65             (        shadow.as):00027                 std     5,s * store D to stack-relative value 5,s
+0025 A6E814           (        shadow.as):00028                 lda     20,s * load A from stack-relative value 20,s
+0028 E6E816           (        shadow.as):00029                 ldb     22,s * load B from stack-relative value 22,s
+002B ED67             (        shadow.as):00030                 std     7,s * store D to stack-relative value 7,s
+002D CC1B22           (        shadow.as):00031                 ldd     #$1b22 * load D from immediate value $1b22
+0030 EDE4             (        shadow.as):00032                 std     ,s * store D to memory pointed to by S
+0032 8601             (        shadow.as):00033                 lda     #1 * load A from immediate value 1
+0034 A762             (        shadow.as):00034                 sta     2,s * store A to stack-relative value 2,s
+0036 30E4             (        shadow.as):00035                 leax    ,s * compute effective address into X from ,s
+0038 CE0009           (        shadow.as):00036                 ldu     #9 * load U from immediate value 9
+003B A66E             (        shadow.as):00037                 lda     14,s * load A from stack-relative value 14,s
+003D 170000           (        shadow.as):00038                 lbsr    _write * long branch to subroutine to _write
+0040 240A             (        shadow.as):00039                 bcc     noerror
+0042 4F               (        shadow.as):00040                 clra * clear A
+0043 EDA90000         (        shadow.as):00041                 std     _errno,y * store D to indexed value _errno,y
+0047 CCFFFF           (        shadow.as):00042                 ldd     #-1 * load D from immediate value -1
+004A 2002             (        shadow.as):00043                 bra     srts
+004C 4F               (        shadow.as):00044         noerror clra * clear A
+004D 5F               (        shadow.as):00045                 clrb * clear B
+004E 3269             (        shadow.as):00046         srts    leas    9,s * adjust S using 9,s
+0050 35C0             (        shadow.as):00047                 puls    u,pc
+                      (        shadow.as):00048         
+                      (        shadow.as):00049                 endsect * end current section

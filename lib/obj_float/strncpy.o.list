@@ -1,0 +1,25 @@
+                      (    ../strncpy.as):00001         * Adapted from Deek's KLibc strncpy.a for the live cmoc_os9 ABI.
+                      (    ../strncpy.as):00002         
+                      (    ../strncpy.as):00003                             section   code      ; begin code section
+                      (    ../strncpy.as):00004         
+                      (    ../strncpy.as):00005         _strncpy            EXPORT              ; export this symbol
+                      (    ../strncpy.as):00006         
+0000                  (    ../strncpy.as):00007         _strncpy
+0000 3460             (    ../strncpy.as):00008                             pshs      y,u       ; save Y,U on the hardware stack
+0002 EE68             (    ../strncpy.as):00009                             ldu       8,s       ; load U from stack-relative value 8,s
+0004 AE66             (    ../strncpy.as):00010                             ldx       6,s       ; load X from stack-relative value 6,s
+0006 10AE6A           (    ../strncpy.as):00011                             ldy       10,s      ; load Y from stack-relative value 10,s
+0009 2711             (    ../strncpy.as):00012                             beq       BranchTarget_01 ; branch if equal/zero to BranchTarget_01
+000B E6C0             (    ../strncpy.as):00013         Loop_01             ldb       ,u+       ; load B from memory pointed to by U, then advance U
+000D E780             (    ../strncpy.as):00014                             stb       ,x+       ; store B to memory pointed to by X, then advance X
+000F 313F             (    ../strncpy.as):00015                             leay      -1,y      ; compute effective address into Y from -1,y
+0011 2709             (    ../strncpy.as):00016                             beq       BranchTarget_01 ; branch if equal/zero to BranchTarget_01
+0013 5D               (    ../strncpy.as):00017                             tstb                ; test B and update condition codes
+0014 26F5             (    ../strncpy.as):00018                             bne       Loop_01   ; branch if not equal to Loop_01
+0016 6F80             (    ../strncpy.as):00019         Loop_02             clr       ,x+       ; clear memory pointed to by X, then advance X
+0018 313F             (    ../strncpy.as):00020                             leay      -1,y      ; compute effective address into Y from -1,y
+001A 26FA             (    ../strncpy.as):00021                             bne       Loop_02   ; branch if not equal to Loop_02
+001C EC66             (    ../strncpy.as):00022         BranchTarget_01     ldd       6,s       ; load D from stack-relative value 6,s
+001E 35E0             (    ../strncpy.as):00023                             puls      y,u,pc    ; restore registers and return
+                      (    ../strncpy.as):00024         
+                      (    ../strncpy.as):00025                             endsect             ; end current section

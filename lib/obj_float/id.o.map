@@ -1,0 +1,9 @@
+Symbol: _os_asetuid (id.o) = 0025
+Symbol: _os_getpid (id.o) = 0000
+Symbol: _os_getuid (id.o) = 000F
+Symbol: _os_setuid (id.o) = 0029
+Symbol: BranchTarget_01 (id.o) = 0022
+Symbol: BranchTarget_02 (id.o) = 003B
+Symbol: BranchTarget_03 (id.o) = 004F
+Symbol: Loop_01 (id.o) = 0036
+Symbol: ReturnZero_01 (id.o) = 000B

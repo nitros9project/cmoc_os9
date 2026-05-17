@@ -1,0 +1,41 @@
+                      (     ../setbuf.as):00001         * Adapted from cmoc_os9/lib/ported/setbuf.as for the live cmoc_os9 ABI.
+                      (     ../setbuf.as):00002         
+                      (     ../setbuf.as):00003                             section   code      ; begin code section
+                      (     ../setbuf.as):00004         
+                      (     ../setbuf.as):00005         _setbuf             EXPORT              ; export this symbol
+                      (     ../setbuf.as):00006         
+                      (     ../setbuf.as):00007         _fflush             EXTERN              ; import external symbol
+                      (     ../setbuf.as):00008         
+0000                  (     ../setbuf.as):00009         _setbuf
+0000 3440             (     ../setbuf.as):00010                             pshs      u         ; save U on the hardware stack
+0002 EE64             (     ../setbuf.as):00011                             ldu       4,s       ; load U from stack-relative value 4,s
+0004 2736             (     ../setbuf.as):00012                             beq       BranchTarget_04 ; branch if equal/zero to BranchTarget_04
+0006 A646             (     ../setbuf.as):00013                             lda       6,u       ; load A from indexed value 6,u
+0008 8401             (     ../setbuf.as):00014                             anda      #1        ; AND A with immediate value 1
+000A 2707             (     ../setbuf.as):00015                             beq       BranchTarget_01 ; branch if equal/zero to BranchTarget_01
+000C 3440             (     ../setbuf.as):00016                             pshs      u         ; save U on the hardware stack
+000E 170000           (     ../setbuf.as):00017                             lbsr      _fflush   ; long branch to subroutine to _fflush
+0011 3262             (     ../setbuf.as):00018                             leas      2,s       ; adjust S using 2,s
+0013 EC46             (     ../setbuf.as):00019         BranchTarget_01     ldd       6,u       ; load D from indexed value 6,u
+0015 84FE             (     ../setbuf.as):00020                             anda      #^1       ; AND A with immediate value ^1
+0017 C4F3             (     ../setbuf.as):00021                             andb      #$f3      ; AND B with immediate value $f3
+0019 ED46             (     ../setbuf.as):00022                             std       6,u       ; store D to indexed value 6,u
+001B AE66             (     ../setbuf.as):00023                             ldx       6,s       ; load X from stack-relative value 6,s
+001D 2711             (     ../setbuf.as):00024                             beq       BranchTarget_03 ; branch if equal/zero to BranchTarget_03
+001F EC4B             (     ../setbuf.as):00025                             ldd       11,u      ; load D from indexed value 11,u
+0021 2605             (     ../setbuf.as):00026                             bne       BranchTarget_02 ; branch if not equal to BranchTarget_02
+0023 CC0100           (     ../setbuf.as):00027                             ldd       #$0100    ; load D from immediate value $0100
+0026 ED4B             (     ../setbuf.as):00028                             std       11,u      ; store D to indexed value 11,u
+0028 AF42             (     ../setbuf.as):00029         BranchTarget_02     stx       2,u       ; store X to indexed value 2,u
+002A 308B             (     ../setbuf.as):00030                             leax      d,x       ; compute effective address into X from d,x
+002C C608             (     ../setbuf.as):00031                             ldb       #8        ; load B from immediate value 8
+002E 2004             (     ../setbuf.as):00032                             bra       Continue_01 ; branch unconditionally to Continue_01
+0030 304B             (     ../setbuf.as):00033         BranchTarget_03     leax      11,u      ; compute effective address into X from 11,u
+0032 C604             (     ../setbuf.as):00034                             ldb       #4        ; load B from immediate value 4
+0034 EA47             (     ../setbuf.as):00035         Continue_01         orb       7,u       ; OR B with indexed value 7,u
+0036 E747             (     ../setbuf.as):00036                             stb       7,u       ; store B to indexed value 7,u
+0038 AF44             (     ../setbuf.as):00037                             stx       4,u       ; store X to indexed value 4,u
+003A AFC4             (     ../setbuf.as):00038                             stx       ,u        ; store X to memory pointed to by U
+003C 35C0             (     ../setbuf.as):00039         BranchTarget_04     puls      u,pc      ; restore registers and return
+                      (     ../setbuf.as):00040         
+                      (     ../setbuf.as):00041                             endsect             ; end current section

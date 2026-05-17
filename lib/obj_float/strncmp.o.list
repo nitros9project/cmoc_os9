@@ -1,0 +1,28 @@
+                      (    ../strncmp.as):00001         * Adapted from Deek's KLibc strncmp.a for the live cmoc_os9 ABI.
+                      (    ../strncmp.as):00002         
+                      (    ../strncmp.as):00003                             section   code      ; begin code section
+                      (    ../strncmp.as):00004         
+                      (    ../strncmp.as):00005         _strncmp            EXPORT              ; export this symbol
+                      (    ../strncmp.as):00006         
+0000                  (    ../strncmp.as):00007         _strncmp
+0000 3460             (    ../strncmp.as):00008                             pshs      y,u       ; save Y,U on the hardware stack
+0002 AE66             (    ../strncmp.as):00009                             ldx       6,s       ; load X from stack-relative value 6,s
+0004 EE68             (    ../strncmp.as):00010                             ldu       8,s       ; load U from stack-relative value 8,s
+0006 10AE6A           (    ../strncmp.as):00011                             ldy       10,s      ; load Y from stack-relative value 10,s
+0009 2714             (    ../strncmp.as):00012                             beq       ReturnZero_01 ; branch if equal/zero to ReturnZero_01
+000B 2008             (    ../strncmp.as):00013                             bra       Continue_01 ; branch unconditionally to Continue_01
+000D 313F             (    ../strncmp.as):00014         Loop_01             leay      -1,y      ; compute effective address into Y from -1,y
+000F 270E             (    ../strncmp.as):00015                             beq       ReturnZero_01 ; branch if equal/zero to ReturnZero_01
+0011 E6C0             (    ../strncmp.as):00016                             ldb       ,u+       ; load B from memory pointed to by U, then advance U
+0013 270A             (    ../strncmp.as):00017                             beq       ReturnZero_01 ; branch if equal/zero to ReturnZero_01
+0015 E6C4             (    ../strncmp.as):00018         Continue_01         ldb       ,u        ; load B from memory pointed to by U
+0017 E080             (    ../strncmp.as):00019                             subb      ,x+       ; subtract memory pointed to by X, then advance X from B
+0019 27F2             (    ../strncmp.as):00020                             beq       Loop_01   ; branch if equal/zero to Loop_01
+001B 50               (    ../strncmp.as):00021                             negb                ; negate B
+001C 1D               (    ../strncmp.as):00022                             sex                 ; sign-extend B into A to form D
+001D 2002             (    ../strncmp.as):00023                             bra       Continue_02 ; branch unconditionally to Continue_02
+001F 4F               (    ../strncmp.as):00024         ReturnZero_01       clra                ; clear A
+0020 5F               (    ../strncmp.as):00025                             clrb                ; clear B
+0021 35E0             (    ../strncmp.as):00026         Continue_02         puls      y,u,pc    ; restore registers and return
+                      (    ../strncmp.as):00027         
+                      (    ../strncmp.as):00028                             endsect             ; end current section

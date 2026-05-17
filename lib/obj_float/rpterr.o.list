@@ -1,0 +1,19 @@
+                      (     ../rpterr.as):00001                             section   code      ; begin code section
+                      (     ../rpterr.as):00002         
+                      (     ../rpterr.as):00003         * OS-9 system function equates
+                      (     ../rpterr.as):00004         
+                      (     ../rpterr.as):00005         _errno              EXTERNAL            ; import external symbol
+                      (     ../rpterr.as):00006         
+     0008             (     ../rpterr.as):00007         F$Send              equ       $08       ; define constant as $08
+     000C             (     ../rpterr.as):00008         F$ID                equ       $0c       ; define constant as $0c
+                      (     ../rpterr.as):00009         
+                      (     ../rpterr.as):00010         _rpterr             EXPORT              ; export this symbol
+0000 EDA90000         (     ../rpterr.as):00011         _rpterr:            std       _errno,y  ; store D to indexed value _errno,y
+0004 3424             (     ../rpterr.as):00012                             pshs      b,y       ; save B,Y on the hardware stack
+0006 103F0C           (     ../rpterr.as):00013                             os9       $0C       ; F$ID
+0009 3524             (     ../rpterr.as):00014                             puls      b,y       ; restore B,Y from the hardware stack
+000B 103F08           (     ../rpterr.as):00015                             os9       $08       ; F$Send
+000E 39               (     ../rpterr.as):00016                             rts                 ; return to caller
+                      (     ../rpterr.as):00017         
+                      (     ../rpterr.as):00018                             endsect             ; end current section
+                      (     ../rpterr.as):00019         

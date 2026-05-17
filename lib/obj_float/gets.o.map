@@ -1,0 +1,5 @@
+Symbol: _gets (gets.o) = 0000
+Symbol: L_gets_done (gets.o) = 0021
+Symbol: L_gets_exit (gets.o) = 0025
+Symbol: L_gets_read (gets.o) = 0008
+Symbol: L_gets_store (gets.o) = 0006

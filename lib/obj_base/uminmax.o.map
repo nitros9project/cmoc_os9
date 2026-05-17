@@ -1,0 +1,4 @@
+Symbol: _umax (uminmax.o) = 000A
+Symbol: _umin (uminmax.o) = 0000
+Symbol: Return_01 (uminmax.o) = 0009
+Symbol: Return_02 (uminmax.o) = 0013

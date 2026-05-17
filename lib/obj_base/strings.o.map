@@ -1,0 +1,5 @@
+Symbol: _strcat (strings.o) = 0000
+Symbol: _strcpy (strings.o) = 000C
+Symbol: _strend (strings.o) = 001C
+Symbol: Loop_01 (strings.o) = 0012
+Symbol: Subroutine_01 (strings.o) = 001E

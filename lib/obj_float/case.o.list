@@ -1,0 +1,39 @@
+                      (       ../case.as):00001         * These are assembly implementations of these functions
+                      (       ../case.as):00002         * The C versions are macros in ctype.h
+                      (       ../case.as):00003         * char toupper(char c)
+                      (       ../case.as):00004         
+                      (       ../case.as):00005                             section   code      ; begin code section
+                      (       ../case.as):00006         
+                      (       ../case.as):00007         toupper             EXPORT              ; export this symbol
+                      (       ../case.as):00008         _chcodes            EXTERNAL            ; import external symbol
+                      (       ../case.as):00009         
+0000 4F               (       ../case.as):00010         toupper:            clra                ; clear A
+0001 E663             (       ../case.as):00011                             ldb       3,s       ; load B from stack-relative value 3,s
+0003 308D0000         (       ../case.as):00012                             leax      _chcodes,pcr ; compute effective address into X from _chcodes,pcr
+0007 A68B             (       ../case.as):00013                             lda       d,x       ; load A from indexed value d,x
+0009 8404             (       ../case.as):00014                             anda      #4        ; AND A with immediate value 4
+000B 2713             (       ../case.as):00015                             beq       returnit  ; beq   L0022
+000D C4DF             (       ../case.as):00016                             andb      #$df      ; AND B with immediate value $df
+000F 200F             (       ../case.as):00017                             bra       returnit  ; branch unconditionally to returnit
+                      (       ../case.as):00018                             *         clra
+                      (       ../case.as):00019                             *         rts
+                      (       ../case.as):00020         
+                      (       ../case.as):00021         * char tolower(char c)
+                      (       ../case.as):00022         
+                      (       ../case.as):00023         tolower             EXPORT              ; export this symbol
+                      (       ../case.as):00024         _chcodes            EXTERNAL            ; import external symbol
+                      (       ../case.as):00025         
+0011 4F               (       ../case.as):00026         tolower:            clra                ; clear A
+0012 E663             (       ../case.as):00027                             ldb       3,s       ; load B from stack-relative value 3,s
+0014 308D0000         (       ../case.as):00028                             leax      _chcodes,pcr ; compute effective address into X from _chcodes,pcr
+0018 A68B             (       ../case.as):00029                             lda       d,x       ; load A from indexed value d,x
+001A 8402             (       ../case.as):00030                             anda      #2        ; AND A with immediate value 2
+001C 2702             (       ../case.as):00031                             beq       returnit  ; beq   L0022
+001E CA20             (       ../case.as):00032                             orb       #$20      ; OR B with immediate value $20
+0020                  (       ../case.as):00033         returnit
+0020 4F               (       ../case.as):00034                             clra                ; clear A
+0021 39               (       ../case.as):00035                             rts                 ; return to caller
+                      (       ../case.as):00036         * L0022 ldd   2,s
+                      (       ../case.as):00037         *  rts
+                      (       ../case.as):00038         
+                      (       ../case.as):00039                             endsect             ; end current section

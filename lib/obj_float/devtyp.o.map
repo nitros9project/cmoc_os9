@@ -1,0 +1,3 @@
+Symbol: _devtyp (devtyp.o) = 000E
+Symbol: _isatty (devtyp.o) = 0000
+Symbol: tty_yes (devtyp.o) = 000C

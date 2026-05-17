@@ -1,0 +1,13 @@
+Symbol: _CBuffer (cbuffer.o) = 0000
+Symbol: _CGFXBuf (cbuffer.o) = 002E
+Symbol: _CPath (cbuffer.o) = 0102
+Symbol: _CUsed (cbuffer.o) = 0100
+Symbol: _Flush (cbuffer.o) = 0000
+Symbol: _write (cbuffer.o) = 002F
+Symbol: bloop (cbuffer.o) = 007C
+Symbol: bufferit (cbuffer.o) = 006E
+Symbol: noerror1 (cbuffer.o) = 0026
+Symbol: noerror2 (cbuffer.o) = 006B
+Symbol: noflush1 (cbuffer.o) = 003F
+Symbol: noflush2 (cbuffer.o) = 004D
+Symbol: return (cbuffer.o) = 006A

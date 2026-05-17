@@ -1,0 +1,29 @@
+                      (     ../setjmp.as):00001                             section   code      ; begin code section
+                      (     ../setjmp.as):00002         
+                      (     ../setjmp.as):00003         _setjmp             EXPORT              ; export this symbol
+                      (     ../setjmp.as):00004         _longjmp            EXPORT              ; export this symbol
+                      (     ../setjmp.as):00005         
+0000                  (     ../setjmp.as):00006         _setjmp
+0000 AE62             (     ../setjmp.as):00007                             ldx       2,s       ; load X from stack-relative value 2,s
+0002 ECE4             (     ../setjmp.as):00008                             ldd       ,s        ; load D from memory pointed to by S
+0004 ED02             (     ../setjmp.as):00009                             std       2,x       ; store D to indexed value 2,x
+0006 10AF06           (     ../setjmp.as):00010                             sty       6,x       ; store Y to indexed value 6,x
+0009 EF04             (     ../setjmp.as):00011                             stu       4,x       ; store U to indexed value 4,x
+000B 10EF84           (     ../setjmp.as):00012                             sts       ,x        ; store S to memory pointed to by X
+000E 4F               (     ../setjmp.as):00013                             clra                ; clear A
+000F 5F               (     ../setjmp.as):00014                             clrb                ; clear B
+0010 39               (     ../setjmp.as):00015                             rts                 ; return to caller
+                      (     ../setjmp.as):00016         
+0011                  (     ../setjmp.as):00017         _longjmp
+0011 AE62             (     ../setjmp.as):00018                             ldx       2,s       ; load X from stack-relative value 2,s
+0013 10AE06           (     ../setjmp.as):00019                             ldy       6,x       ; load Y from indexed value 6,x
+0016 EE04             (     ../setjmp.as):00020                             ldu       4,x       ; load U from indexed value 4,x
+0018 EC64             (     ../setjmp.as):00021                             ldd       4,s       ; load D from stack-relative value 4,s
+001A 2602             (     ../setjmp.as):00022                             bne       longjmp1  ; branch if not equal to longjmp1
+001C C601             (     ../setjmp.as):00023                             ldb       #1        ; load B from immediate value 1
+001E                  (     ../setjmp.as):00024         longjmp1
+001E 10EE84           (     ../setjmp.as):00025                             lds       ,x        ; load S from memory pointed to by X
+0021 3262             (     ../setjmp.as):00026                             leas      2,s       ; adjust S using 2,s
+0023 6E9802           (     ../setjmp.as):00027                             jmp       [2,x]     ; jump to [2,x]
+                      (     ../setjmp.as):00028         
+                      (     ../setjmp.as):00029                             endsect             ; end current section

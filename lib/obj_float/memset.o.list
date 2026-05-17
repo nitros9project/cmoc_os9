@@ -1,0 +1,19 @@
+                      (     ../memset.as):00001         * Adapted from Deek's KLibc memset.a for the live cmoc_os9 ABI.
+                      (     ../memset.as):00002         
+                      (     ../memset.as):00003                             section   code      ; begin code section
+                      (     ../memset.as):00004         
+                      (     ../memset.as):00005         _memset             EXPORT              ; export this symbol
+                      (     ../memset.as):00006         
+0000                  (     ../memset.as):00007         _memset
+0000 3440             (     ../memset.as):00008                             pshs      u         ; save U on the hardware stack
+0002 EE64             (     ../memset.as):00009                             ldu       4,s       ; load U from stack-relative value 4,s
+0004 AE68             (     ../memset.as):00010                             ldx       8,s       ; load X from stack-relative value 8,s
+0006 2708             (     ../memset.as):00011                             beq       BranchTarget_01 ; branch if equal/zero to BranchTarget_01
+0008 E667             (     ../memset.as):00012                             ldb       7,s       ; load B from stack-relative value 7,s
+000A E7C0             (     ../memset.as):00013         Loop_01             stb       ,u+       ; store B to memory pointed to by U, then advance U
+000C 301F             (     ../memset.as):00014                             leax      -1,x      ; compute effective address into X from -1,x
+000E 26FA             (     ../memset.as):00015                             bne       Loop_01   ; branch if not equal to Loop_01
+0010 EC64             (     ../memset.as):00016         BranchTarget_01     ldd       4,s       ; load D from stack-relative value 4,s
+0012 35C0             (     ../memset.as):00017                             puls      u,pc      ; restore registers and return
+                      (     ../memset.as):00018         
+                      (     ../memset.as):00019                             endsect             ; end current section

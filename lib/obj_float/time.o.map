@@ -1,0 +1,4 @@
+Symbol: __os_getime (time.o) = 0000
+Symbol: __os_setime (time.o) = 0008
+Symbol: F_STime (time.o) = 0016
+Symbol: F_Time (time.o) = 0015

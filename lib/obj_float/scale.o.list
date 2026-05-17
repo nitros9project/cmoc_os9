@@ -1,0 +1,192 @@
+                      (      ../scale.as):00001                             section   rodata    ; begin rodata section
+                      (      ../scale.as):00002         
+                      (      ../scale.as):00003         * Initialized Data (class G)
+0000 00               (      ../scale.as):00004         atoftbl:            fcb       $00       ; define byte data $00
+0001 00               (      ../scale.as):00005                             fcb       $00       ; define byte data $00
+0002 00               (      ../scale.as):00006                             fcb       $00       ; define byte data $00
+0003 00               (      ../scale.as):00007                             fcb       $00       ; define byte data $00
+0004 00               (      ../scale.as):00008                             fcb       $00       ; define byte data $00
+0005 00               (      ../scale.as):00009                             fcb       $00       ; define byte data $00
+0006 00               (      ../scale.as):00010                             fcb       $00       ; define byte data $00
+0007 80               (      ../scale.as):00011                             fcb       $80       ; define byte data $80
+0008 20               (      ../scale.as):00012                             fcb       $20       ; define byte data $20
+0009 00               (      ../scale.as):00013                             fcb       $00       ; define byte data $00
+000A 00               (      ../scale.as):00014                             fcb       $00       ; define byte data $00
+000B 00               (      ../scale.as):00015                             fcb       $00       ; define byte data $00
+000C 00               (      ../scale.as):00016                             fcb       $00       ; define byte data $00
+000D 00               (      ../scale.as):00017                             fcb       $00       ; define byte data $00
+000E 00               (      ../scale.as):00018                             fcb       $00       ; define byte data $00
+000F 84               (      ../scale.as):00019                             fcb       $84       ; define byte data $84
+0010 48               (      ../scale.as):00020                             fcb       $48       ; define byte data $48
+0011 00               (      ../scale.as):00021                             fcb       $00       ; define byte data $00
+0012 00               (      ../scale.as):00022                             fcb       $00       ; define byte data $00
+0013 00               (      ../scale.as):00023                             fcb       $00       ; define byte data $00
+0014 00               (      ../scale.as):00024                             fcb       $00       ; define byte data $00
+0015 00               (      ../scale.as):00025                             fcb       $00       ; define byte data $00
+0016 00               (      ../scale.as):00026                             fcb       $00       ; define byte data $00
+0017 87               (      ../scale.as):00027                             fcb       $87       ; define byte data $87
+0018 7A               (      ../scale.as):00028                             fcb       $7a       ; define byte data $7a
+0019 00               (      ../scale.as):00029                             fcb       $00       ; define byte data $00
+001A 00               (      ../scale.as):00030                             fcb       $00       ; define byte data $00
+001B 00               (      ../scale.as):00031                             fcb       $00       ; define byte data $00
+001C 00               (      ../scale.as):00032                             fcb       $00       ; define byte data $00
+001D 00               (      ../scale.as):00033                             fcb       $00       ; define byte data $00
+001E 00               (      ../scale.as):00034                             fcb       $00       ; define byte data $00
+001F 8A               (      ../scale.as):00035                             fcb       $8a       ; define byte data $8a
+0020 1C               (      ../scale.as):00036                             fcb       $1c       ; define byte data $1c
+0021 40               (      ../scale.as):00037                             fcb       $40       ; define byte data $40
+0022 00               (      ../scale.as):00038                             fcb       $00       ; define byte data $00
+0023 00               (      ../scale.as):00039                             fcb       $00       ; define byte data $00
+0024 00               (      ../scale.as):00040                             fcb       $00       ; define byte data $00
+0025 00               (      ../scale.as):00041                             fcb       $00       ; define byte data $00
+0026 00               (      ../scale.as):00042                             fcb       $00       ; define byte data $00
+0027 8E               (      ../scale.as):00043                             fcb       $8e       ; define byte data $8e
+0028 43               (      ../scale.as):00044                             fcb       $43       ; define byte data $43
+0029 50               (      ../scale.as):00045                             fcb       $50       ; define byte data $50
+002A 00               (      ../scale.as):00046                             fcb       $00       ; define byte data $00
+002B 00               (      ../scale.as):00047                             fcb       $00       ; define byte data $00
+002C 00               (      ../scale.as):00048                             fcb       $00       ; define byte data $00
+002D 00               (      ../scale.as):00049                             fcb       $00       ; define byte data $00
+002E 00               (      ../scale.as):00050                             fcb       $00       ; define byte data $00
+002F 91               (      ../scale.as):00051                             fcb       $91       ; define byte data $91
+0030 74               (      ../scale.as):00052                             fcb       $74       ; define byte data $74
+0031 24               (      ../scale.as):00053                             fcb       $24       ; define byte data $24
+0032 00               (      ../scale.as):00054                             fcb       $00       ; define byte data $00
+0033 00               (      ../scale.as):00055                             fcb       $00       ; define byte data $00
+0034 00               (      ../scale.as):00056                             fcb       $00       ; define byte data $00
+0035 00               (      ../scale.as):00057                             fcb       $00       ; define byte data $00
+0036 00               (      ../scale.as):00058                             fcb       $00       ; define byte data $00
+0037 94               (      ../scale.as):00059                             fcb       $94       ; define byte data $94
+0038 18               (      ../scale.as):00060                             fcb       $18       ; define byte data $18
+0039 96               (      ../scale.as):00061                             fcb       $96       ; define byte data $96
+003A 80               (      ../scale.as):00062                             fcb       $80       ; define byte data $80
+003B 00               (      ../scale.as):00063                             fcb       $00       ; define byte data $00
+003C 00               (      ../scale.as):00064                             fcb       $00       ; define byte data $00
+003D 00               (      ../scale.as):00065                             fcb       $00       ; define byte data $00
+003E 00               (      ../scale.as):00066                             fcb       $00       ; define byte data $00
+003F 98               (      ../scale.as):00067                             fcb       $98       ; define byte data $98
+0040 3E               (      ../scale.as):00068                             fcb       $3e       ; define byte data $3e
+0041 BC               (      ../scale.as):00069                             fcb       $bc       ; define byte data $bc
+0042 20               (      ../scale.as):00070                             fcb       $20       ; define byte data $20
+0043 00               (      ../scale.as):00071                             fcb       $00       ; define byte data $00
+0044 00               (      ../scale.as):00072                             fcb       $00       ; define byte data $00
+0045 00               (      ../scale.as):00073                             fcb       $00       ; define byte data $00
+0046 00               (      ../scale.as):00074                             fcb       $00       ; define byte data $00
+0047 9B               (      ../scale.as):00075                             fcb       $9b       ; define byte data $9b
+0048 6E               (      ../scale.as):00076                             fcb       $6e       ; define byte data $6e
+0049 6B               (      ../scale.as):00077                             fcb       $6b       ; define byte data $6b
+004A 28               (      ../scale.as):00078                             fcb       $28       ; define byte data $28
+004B 00               (      ../scale.as):00079                             fcb       $00       ; define byte data $00
+004C 00               (      ../scale.as):00080                             fcb       $00       ; define byte data $00
+004D 00               (      ../scale.as):00081                             fcb       $00       ; define byte data $00
+004E 00               (      ../scale.as):00082                             fcb       $00       ; define byte data $00
+004F 9E               (      ../scale.as):00083                             fcb       $9e       ; define byte data $9e
+0050 15               (      ../scale.as):00084                             fcb       $15       ; define byte data $15
+0051 02               (      ../scale.as):00085                             fcb       $02       ; define byte data $02
+0052 F9               (      ../scale.as):00086                             fcb       $f9       ; define byte data $f9
+0053 00               (      ../scale.as):00087                             fcb       $00       ; define byte data $00
+0054 00               (      ../scale.as):00088                             fcb       $00       ; define byte data $00
+0055 00               (      ../scale.as):00089                             fcb       $00       ; define byte data $00
+0056 00               (      ../scale.as):00090                             fcb       $00       ; define byte data $00
+0057 A2               (      ../scale.as):00091                             fcb       $a2       ; define byte data $a2
+0058 2D               (      ../scale.as):00092                             fcb       $2d       ; define byte data $2d
+0059 78               (      ../scale.as):00093                             fcb       $78       ; define byte data $78
+005A EB               (      ../scale.as):00094                             fcb       $eb       ; define byte data $eb
+005B C5               (      ../scale.as):00095                             fcb       $c5       ; define byte data $c5
+005C AC               (      ../scale.as):00096                             fcb       $ac       ; define byte data $ac
+005D 62               (      ../scale.as):00097                             fcb       $62       ; define byte data $62
+005E 00               (      ../scale.as):00098                             fcb       $00       ; define byte data $00
+005F C3               (      ../scale.as):00099                             fcb       $c3       ; define byte data $c3
+0060 49               (      ../scale.as):00100                             fcb       $49       ; define byte data $49
+0061 F2               (      ../scale.as):00101                             fcb       $f2       ; define byte data $f2
+0062 C9               (      ../scale.as):00102                             fcb       $c9       ; define byte data $c9
+0063 CD               (      ../scale.as):00103                             fcb       $cd       ; define byte data $cd
+0064 04               (      ../scale.as):00104                             fcb       $04       ; define byte data $04
+0065 67               (      ../scale.as):00105                             fcb       $67       ; define byte data $67
+0066 4F               (      ../scale.as):00106                             fcb       $4f       ; define byte data $4f
+0067 E4               (      ../scale.as):00107                             fcb       $e4       ; define byte data $e4
+                      (      ../scale.as):00108         
+                      (      ../scale.as):00109                             endsect             ; end current section
+                      (      ../scale.as):00110         
+                      (      ../scale.as):00111                             section   code      ; begin code section
+                      (      ../scale.as):00112         
+                      (      ../scale.as):00113         _scale              EXPORT              ; export this symbol
+                      (      ../scale.as):00114         
+                      (      ../scale.as):00115         _dmul               EXTERNAL            ; import external symbol
+                      (      ../scale.as):00116         _ddiv               EXTERNAL            ; import external symbol
+                      (      ../scale.as):00117         _dmove              EXTERNAL            ; import external symbol
+                      (      ../scale.as):00118         _dstack             EXTERNAL            ; import external symbol
+                      (      ../scale.as):00119         ccdiv               EXTERNAL            ; import external symbol
+                      (      ../scale.as):00120         ccmod               EXTERNAL            ; import external symbol
+                      (      ../scale.as):00121         _flacc              EXTERNAL            ; import external symbol
+                      (      ../scale.as):00122         
+0000 3440             (      ../scale.as):00123         Subroutine_01       pshs      u         ; save U on the hardware stack
+0002 EC6C             (      ../scale.as):00124                             ldd       12,s      ; load D from stack-relative value 12,s
+0004 2736             (      ../scale.as):00125                             beq       BranchTarget_02 ; branch if equal/zero to BranchTarget_02
+0006 EC6E             (      ../scale.as):00126                             ldd       14,s      ; load D from stack-relative value 14,s
+0008 2719             (      ../scale.as):00127                             beq       BranchTarget_01 ; branch if equal/zero to BranchTarget_01
+000A 3064             (      ../scale.as):00128                             leax      4,s       ; compute effective address into X from 4,s
+000C 170000           (      ../scale.as):00129                             lbsr      _dstack   ; long branch to subroutine to _dstack
+000F ECE814           (      ../scale.as):00130                             ldd       20,s      ; load D from stack-relative value 20,s
+0012 58               (      ../scale.as):00131                             lslb                ; shift B left by one bit
+0013 49               (      ../scale.as):00132                             rola                ; rotate A left through carry
+0014 58               (      ../scale.as):00133                             lslb                ; shift B left by one bit
+0015 49               (      ../scale.as):00134                             rola                ; rotate A left through carry
+0016 58               (      ../scale.as):00135                             lslb                ; shift B left by one bit
+0017 49               (      ../scale.as):00136                             rola                ; rotate A left through carry
+0018 308D0000         (      ../scale.as):00137                             leax      atoftbl,pcr ; compute effective address into X from atoftbl,pcr
+001C 308B             (      ../scale.as):00138                             leax      d,x       ; compute effective address into X from d,x
+001E 170000           (      ../scale.as):00139                             lbsr      _dmul     ; long branch to subroutine to _dmul
+0021 201B             (      ../scale.as):00140                             bra       Continue_01 ; branch unconditionally to Continue_01
+0023 3064             (      ../scale.as):00141         BranchTarget_01     leax      4,s       ; compute effective address into X from 4,s
+0025 170000           (      ../scale.as):00142                             lbsr      _dstack   ; long branch to subroutine to _dstack
+0028 ECE814           (      ../scale.as):00143                             ldd       20,s      ; load D from stack-relative value 20,s
+002B 58               (      ../scale.as):00144                             lslb                ; shift B left by one bit
+002C 49               (      ../scale.as):00145                             rola                ; rotate A left through carry
+002D 58               (      ../scale.as):00146                             lslb                ; shift B left by one bit
+002E 49               (      ../scale.as):00147                             rola                ; rotate A left through carry
+002F 58               (      ../scale.as):00148                             lslb                ; shift B left by one bit
+0030 49               (      ../scale.as):00149                             rola                ; rotate A left through carry
+0031 30A90000         (      ../scale.as):00150                             leax      atoftbl,y ; compute effective address into X from atoftbl,y
+0035 308B             (      ../scale.as):00151                             leax      d,x       ; compute effective address into X from d,x
+0037 170000           (      ../scale.as):00152                             lbsr      _ddiv     ; long branch to subroutine to _ddiv
+003A 2002             (      ../scale.as):00153                             bra       Continue_01 ; branch unconditionally to Continue_01
+003C 3064             (      ../scale.as):00154         BranchTarget_02     leax      4,s       ; compute effective address into X from 4,s
+003E 33A90000         (      ../scale.as):00155         Continue_01         leau      _flacc,y  ; compute effective address into U from _flacc,y
+0042 3440             (      ../scale.as):00156                             pshs      u         ; save U on the hardware stack
+0044 170000           (      ../scale.as):00157                             lbsr      _dmove    ; long branch to subroutine to _dmove
+0047 35C0             (      ../scale.as):00158                             puls      u,pc      ; restore registers and return
+0049 3440             (      ../scale.as):00159         _scale:             pshs      u         ; save U on the hardware stack
+004B EC6C             (      ../scale.as):00160                             ldd       12,s      ; load D from stack-relative value 12,s
+004D 10830009         (      ../scale.as):00161                             cmpd      #9        ; compare D against immediate value 9
+0051 2F26             (      ../scale.as):00162                             ble       BranchTarget_03 ; branch if less or equal to BranchTarget_03
+0053 3064             (      ../scale.as):00163                             leax      4,s       ; compute effective address into X from 4,s
+0055 3410             (      ../scale.as):00164                             pshs      x         ; save X on the hardware stack
+0057 ECE810           (      ../scale.as):00165                             ldd       16,s      ; load D from stack-relative value 16,s
+005A 3406             (      ../scale.as):00166                             pshs      d         ; save D on the hardware stack
+005C ECE810           (      ../scale.as):00167                             ldd       16,s      ; load D from stack-relative value 16,s
+005F 3406             (      ../scale.as):00168                             pshs      d         ; save D on the hardware stack
+0061 CC000A           (      ../scale.as):00169                             ldd       #$000a    ; load D from immediate value $000a
+0064 170000           (      ../scale.as):00170                             lbsr      ccdiv     ; long branch to subroutine to ccdiv
+0067 C30009           (      ../scale.as):00171                             addd      #9        ; add immediate value 9 into D
+006A 3406             (      ../scale.as):00172                             pshs      d         ; save D on the hardware stack
+006C 306A             (      ../scale.as):00173                             leax      10,s      ; compute effective address into X from 10,s
+006E 170000           (      ../scale.as):00174                             lbsr      _dstack   ; long branch to subroutine to _dstack
+0071 17FF8C           (      ../scale.as):00175                             lbsr      Subroutine_01 ; long branch to subroutine to Subroutine_01
+0074 326C             (      ../scale.as):00176                             leas      12,s      ; adjust S using 12,s
+0076 170000           (      ../scale.as):00177                             lbsr      _dmove    ; long branch to subroutine to _dmove
+0079 EC6E             (      ../scale.as):00178         BranchTarget_03     ldd       14,s      ; load D from stack-relative value 14,s
+007B 3406             (      ../scale.as):00179                             pshs      d         ; save D on the hardware stack
+007D EC6E             (      ../scale.as):00180                             ldd       14,s      ; load D from stack-relative value 14,s
+007F 3406             (      ../scale.as):00181                             pshs      d         ; save D on the hardware stack
+0081 CC000A           (      ../scale.as):00182                             ldd       #$000a    ; load D from immediate value $000a
+0084 170000           (      ../scale.as):00183                             lbsr      ccmod     ; long branch to subroutine to ccmod
+0087 3406             (      ../scale.as):00184                             pshs      d         ; save D on the hardware stack
+0089 3068             (      ../scale.as):00185                             leax      8,s       ; compute effective address into X from 8,s
+008B 170000           (      ../scale.as):00186                             lbsr      _dstack   ; long branch to subroutine to _dstack
+008E 17FF6F           (      ../scale.as):00187                             lbsr      Subroutine_01 ; long branch to subroutine to Subroutine_01
+0091 326C             (      ../scale.as):00188                             leas      12,s      ; adjust S using 12,s
+0093 35C0             (      ../scale.as):00189                             puls      u,pc      ; restore registers and return
+                      (      ../scale.as):00190         
+                      (      ../scale.as):00191                             endsect             ; end current section
+                      (      ../scale.as):00192         

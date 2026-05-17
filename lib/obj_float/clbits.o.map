@@ -1,0 +1,5 @@
+Symbol: _land (clbits.o) = 0000
+Symbol: _lnot (clbits.o) = 0045
+Symbol: _lor (clbits.o) = 0017
+Symbol: _lxor (clbits.o) = 002E
+Symbol: BranchTarget_01 (clbits.o) = 0052

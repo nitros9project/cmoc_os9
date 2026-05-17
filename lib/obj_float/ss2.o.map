@@ -1,0 +1,6 @@
+Symbol: _ss_attr (ss2.o) = 0006
+Symbol: _ss_lock (ss2.o) = 0000
+Symbol: _ss_size (ss2.o) = 000C
+Symbol: Continue_01 (ss2.o) = 0010
+Symbol: Continue_02 (ss2.o) = 0012
+Symbol: I_SetStt (ss2.o) = 008E

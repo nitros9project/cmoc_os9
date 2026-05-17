@@ -2,12 +2,28 @@ CC = cmoc
 OS9FLAGS = --os9 -nodefaultlibs
 OPT = -O0
 LFLAGS = -I../include -I../cgfx/include $(OS9FLAGS)
+CMOC_BIN ?= $(shell command -v cmoc)
+CMOC_FLOAT_LIB_DIR ?= $(abspath $(dir $(CMOC_BIN))../share/cmoc/lib)
 
 %: %.c
 	$(CC) $(LFLAGS) $^ $(OBJS) -L../lib -lc -L../cgfx -lcgfx
 
+hello: hello.c
+	$(CC) -I../include -I../cgfx/include --os9 -nodefaultlibs --add-os9-stack-space=512 \
+		$^ $(OBJS) -L../lib -lc -L../cgfx -lcgfx
 
-TESTS	= timetest fiotest iotest osiotest syscalltest memtest wintest forktest printtest maze utimetest ctype string
+floattest: floattest.c
+	$(CC) -I../include -I../cgfx/include --os9 --mc6839 -nodefaultlibs \
+		$^ $(OBJS) -L../lib -lcf -L../cgfx -lcgfx \
+		-L$(CMOC_FLOAT_LIB_DIR) -lcmoc-float-mc6839_os9 -L../lib -lcf
+
+floatfmttest: floatfmttest.c
+	$(CC) -I../include -I../cgfx/include --os9 --mc6839 -nodefaultlibs \
+		$^ $(OBJS) -L../lib -lcf -L../cgfx -lcgfx \
+		-L$(CMOC_FLOAT_LIB_DIR) -lcmoc-float-mc6839_os9 -L../lib -lcf
+
+
+TESTS	= hello noop timetest fiotest iotest osiotest osopenerrtest syscalltest memtest wintest forktest forkhellotest forknowaittest forknooptest printtest maze utimetest ctype string floattest floatfmttest getopttest popentest pwenttest defdrivetest pwcryptest errmsgtest stdlibtest streamiotest searchtest stringexttest filelayout setjmptest systemtest setstest dirtest compat3test signaltest intercepttest dirapitest misctest datmodstest attrwraptest abortchild aborttest
 
 all:	$(TESTS)
 

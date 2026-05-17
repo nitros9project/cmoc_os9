@@ -1,0 +1,107 @@
+                      (       ../ltoa.as):00001         *
+                      (       ../ltoa.as):00002         * Compact standalone assembly implementation for the live cmoc_os9 ABI.
+                      (       ../ltoa.as):00003         * Writes digits into the caller's buffer in reverse order, then calls
+                      (       ../ltoa.as):00004         * reverse() once at the end, which keeps the stack footprint small.
+                      (       ../ltoa.as):00005         *
+                      (       ../ltoa.as):00006         
+                      (       ../ltoa.as):00007                             section   code      ; begin code section
+                      (       ../ltoa.as):00008         
+                      (       ../ltoa.as):00009         _ltoa               EXPORT              ; export this symbol
+                      (       ../ltoa.as):00010         
+                      (       ../ltoa.as):00011         _lnegx              EXTERNAL            ; import external symbol
+                      (       ../ltoa.as):00012         _reverse            EXTERNAL            ; import external symbol
+                      (       ../ltoa.as):00013         divDWordDWord       EXTERNAL            ; import external symbol
+                      (       ../ltoa.as):00014         isDWordZero         EXTERNAL            ; import external symbol
+                      (       ../ltoa.as):00015         modDWordDWord       EXTERNAL            ; import external symbol
+                      (       ../ltoa.as):00016         
+0000                  (       ../ltoa.as):00017         _ltoa
+0000 3440             (       ../ltoa.as):00018                             pshs      u         ; save U on the hardware stack
+0002 33E4             (       ../ltoa.as):00019                             leau      ,s        ; compute effective address into U from ,s
+0004 3275             (       ../ltoa.as):00020                             leas      -11,s     ; adjust S using -11,s
+                      (       ../ltoa.as):00021         
+                      (       ../ltoa.as):00022         * locals relative to U:
+                      (       ../ltoa.as):00023         *  -11,u  sign flag
+                      (       ../ltoa.as):00024         *  -10,u  orig buffer pointer
+                      (       ../ltoa.as):00025         *   -8,u  current absolute value (dword)
+                      (       ../ltoa.as):00026         *   -4,u  remainder scratch (dword)
+                      (       ../ltoa.as):00027         
+                      (       ../ltoa.as):00028         * orig = buffer;
+0006 AE48             (       ../ltoa.as):00029                             ldx       8,u       ; load X from indexed value 8,u
+0008 AF56             (       ../ltoa.as):00030                             stx       -10,u     ; store X to indexed value -10,u
+                      (       ../ltoa.as):00031         
+                      (       ../ltoa.as):00032         * current = value;
+000A EC44             (       ../ltoa.as):00033                             ldd       4,u       ; load D from indexed value 4,u
+000C ED58             (       ../ltoa.as):00034                             std       -8,u      ; store D to indexed value -8,u
+000E EC46             (       ../ltoa.as):00035                             ldd       6,u       ; load D from indexed value 6,u
+0010 ED5A             (       ../ltoa.as):00036                             std       -6,u      ; store D to indexed value -6,u
+                      (       ../ltoa.as):00037         
+                      (       ../ltoa.as):00038         * sign = 0;
+0012 6F55             (       ../ltoa.as):00039                             clr       -11,u     ; clear indexed value -11,u
+                      (       ../ltoa.as):00040         
+                      (       ../ltoa.as):00041         * if (value < 0) { sign = 1; current = -current; }
+0014 6D44             (       ../ltoa.as):00042                             tst       4,u       ; test indexed value 4,u and update condition codes
+0016 2A07             (       ../ltoa.as):00043                             bpl       L_pos     ; branch if plus to L_pos
+0018 6C55             (       ../ltoa.as):00044                             inc       -11,u     ; increment indexed value -11,u
+001A 3058             (       ../ltoa.as):00045                             leax      -8,u      ; compute effective address into X from -8,u
+001C 170000           (       ../ltoa.as):00046                             lbsr      _lnegx    ; long branch to subroutine to _lnegx
+                      (       ../ltoa.as):00047         
+001F                  (       ../ltoa.as):00048         L_pos
+                      (       ../ltoa.as):00049         * do {
+001F                  (       ../ltoa.as):00050         L_loop
+                      (       ../ltoa.as):00051         *     rem = current % 10;
+001F 308D004E         (       ../ltoa.as):00052                             leax      D_ten,pcr ; compute effective address into X from D_ten,pcr
+0023 3410             (       ../ltoa.as):00053                             pshs      x         ; save X on the hardware stack
+0025 3058             (       ../ltoa.as):00054                             leax      -8,u      ; compute effective address into X from -8,u
+0027 3410             (       ../ltoa.as):00055                             pshs      x         ; save X on the hardware stack
+0029 305C             (       ../ltoa.as):00056                             leax      -4,u      ; compute effective address into X from -4,u
+002B 170000           (       ../ltoa.as):00057                             lbsr      modDWordDWord ; long branch to subroutine to modDWordDWord
+002E 3264             (       ../ltoa.as):00058                             leas      4,s       ; adjust S using 4,s
+                      (       ../ltoa.as):00059         
+                      (       ../ltoa.as):00060         *     *buffer++ = rem + '0';
+0030 AE48             (       ../ltoa.as):00061                             ldx       8,u       ; load X from indexed value 8,u
+0032 E65F             (       ../ltoa.as):00062                             ldb       -1,u      ; load B from indexed value -1,u
+0034 CB30             (       ../ltoa.as):00063                             addb      #$30      ; add immediate value $30 into B
+0036 E780             (       ../ltoa.as):00064                             stb       ,x+       ; store B to memory pointed to by X, then advance X
+0038 AF48             (       ../ltoa.as):00065                             stx       8,u       ; store X to indexed value 8,u
+                      (       ../ltoa.as):00066         
+                      (       ../ltoa.as):00067         *     current /= 10;
+003A 308D0033         (       ../ltoa.as):00068                             leax      D_ten,pcr ; compute effective address into X from D_ten,pcr
+003E 3410             (       ../ltoa.as):00069                             pshs      x         ; save X on the hardware stack
+0040 3058             (       ../ltoa.as):00070                             leax      -8,u      ; compute effective address into X from -8,u
+0042 3410             (       ../ltoa.as):00071                             pshs      x         ; save X on the hardware stack
+0044 3058             (       ../ltoa.as):00072                             leax      -8,u      ; compute effective address into X from -8,u
+0046 170000           (       ../ltoa.as):00073                             lbsr      divDWordDWord ; long branch to subroutine to divDWordDWord
+0049 3264             (       ../ltoa.as):00074                             leas      4,s       ; adjust S using 4,s
+                      (       ../ltoa.as):00075         
+                      (       ../ltoa.as):00076         * } while (current != 0);
+004B 3058             (       ../ltoa.as):00077                             leax      -8,u      ; compute effective address into X from -8,u
+004D 170000           (       ../ltoa.as):00078                             lbsr      isDWordZero ; long branch to subroutine to isDWordZero
+0050 26CD             (       ../ltoa.as):00079                             bne       L_loop    ; branch if not equal to L_loop
+                      (       ../ltoa.as):00080         
+                      (       ../ltoa.as):00081         * if (sign) *buffer++ = '-';
+0052 6D55             (       ../ltoa.as):00082                             tst       -11,u     ; test indexed value -11,u and update condition codes
+0054 2708             (       ../ltoa.as):00083                             beq       L_term    ; branch if equal/zero to L_term
+0056 AE48             (       ../ltoa.as):00084                             ldx       8,u       ; load X from indexed value 8,u
+0058 C62D             (       ../ltoa.as):00085                             ldb       #$2d      ; load B from immediate value $2d
+005A E780             (       ../ltoa.as):00086                             stb       ,x+       ; store B to memory pointed to by X, then advance X
+005C AF48             (       ../ltoa.as):00087                             stx       8,u       ; store X to indexed value 8,u
+                      (       ../ltoa.as):00088         
+005E                  (       ../ltoa.as):00089         L_term
+                      (       ../ltoa.as):00090         * *buffer = '\0';
+005E AE48             (       ../ltoa.as):00091                             ldx       8,u       ; load X from indexed value 8,u
+0060 6F84             (       ../ltoa.as):00092                             clr       ,x        ; clear memory pointed to by X
+                      (       ../ltoa.as):00093         
+                      (       ../ltoa.as):00094         * reverse(orig);
+0062 EC56             (       ../ltoa.as):00095                             ldd       -10,u     ; load D from indexed value -10,u
+0064 3406             (       ../ltoa.as):00096                             pshs      d         ; save D on the hardware stack
+0066 170000           (       ../ltoa.as):00097                             lbsr      _reverse  ; long branch to subroutine to _reverse
+0069 3262             (       ../ltoa.as):00098                             leas      2,s       ; adjust S using 2,s
+                      (       ../ltoa.as):00099         
+                      (       ../ltoa.as):00100         * return orig;
+006B EC56             (       ../ltoa.as):00101                             ldd       -10,u     ; load D from indexed value -10,u
+006D 32C4             (       ../ltoa.as):00102                             leas      ,u        ; adjust S using ,u
+006F 35C0             (       ../ltoa.as):00103                             puls      u,pc      ; restore registers and return
+                      (       ../ltoa.as):00104         
+0071 0000000A         (       ../ltoa.as):00105         D_ten               fcb       $00,$00,$00,$0a ; define byte data $00,$00,$00,$0a
+                      (       ../ltoa.as):00106         
+                      (       ../ltoa.as):00107                             endsect             ; end current section

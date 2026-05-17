@@ -1,0 +1,3 @@
+Symbol: returnit (case.o) = 0020
+Symbol: tolower (case.o) = 0011
+Symbol: toupper (case.o) = 0000

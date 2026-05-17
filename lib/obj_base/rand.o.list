@@ -1,0 +1,50 @@
+                      (       ../rand.as):00001         * Adapted from Deek's KLibc rand.a for the live cmoc_os9 ABI.
+                      (       ../rand.as):00002         
+                      (       ../rand.as):00003                             section   code      ; begin code section
+                      (       ../rand.as):00004         
+                      (       ../rand.as):00005         _rand               EXPORT              ; export this symbol
+                      (       ../rand.as):00006         _srand              EXPORT              ; export this symbol
+                      (       ../rand.as):00007         
+                      (       ../rand.as):00008         _lmul               EXTERN              ; import external symbol
+                      (       ../rand.as):00009         _ladd               EXTERN              ; import external symbol
+                      (       ../rand.as):00010         
+                      (       ../rand.as):00011                             section   bss       ; begin bss section
+0000                  (       ../rand.as):00012         L_next              rmb       4         ; reserve 4 bytes
+                      (       ../rand.as):00013                             endsect             ; end current section
+                      (       ../rand.as):00014         
+                      (       ../rand.as):00015                             section   code      ; begin code section
+                      (       ../rand.as):00016         
+0000                  (       ../rand.as):00017         _rand
+0000 3440             (       ../rand.as):00018                             pshs      u         ; save U on the hardware stack
+0002 30A90000         (       ../rand.as):00019                             leax      L_next,y  ; compute effective address into X from L_next,y
+0006 EC84             (       ../rand.as):00020                             ldd       ,x        ; load D from memory pointed to by X
+0008 EE02             (       ../rand.as):00021                             ldu       2,x       ; load U from indexed value 2,x
+000A 3446             (       ../rand.as):00022                             pshs      d,u       ; save D,U on the hardware stack
+000C 308D002D         (       ../rand.as):00023                             leax      L_mcon,pcr ; compute effective address into X from L_mcon,pcr
+0010 170000           (       ../rand.as):00024                             lbsr      _lmul     ; long branch to subroutine to _lmul
+0013 EC84             (       ../rand.as):00025                             ldd       ,x        ; load D from memory pointed to by X
+0015 EE02             (       ../rand.as):00026                             ldu       2,x       ; load U from indexed value 2,x
+0017 3446             (       ../rand.as):00027                             pshs      d,u       ; save D,U on the hardware stack
+0019 308D0024         (       ../rand.as):00028                             leax      L_acon,pcr ; compute effective address into X from L_acon,pcr
+001D 170000           (       ../rand.as):00029                             lbsr      _ladd     ; long branch to subroutine to _ladd
+0020 33A90000         (       ../rand.as):00030                             leau      L_next,y  ; compute effective address into U from L_next,y
+0024 EC84             (       ../rand.as):00031                             ldd       ,x        ; load D from memory pointed to by X
+0026 AE02             (       ../rand.as):00032                             ldx       2,x       ; load X from indexed value 2,x
+0028 EDC4             (       ../rand.as):00033                             std       ,u        ; store D to memory pointed to by U
+002A AF42             (       ../rand.as):00034                             stx       2,u       ; store X to indexed value 2,u
+002C 847F             (       ../rand.as):00035                             anda      #$7f      ; AND A with immediate value $7f
+002E 35C0             (       ../rand.as):00036                             puls      u,pc      ; restore registers and return
+                      (       ../rand.as):00037         
+0030                  (       ../rand.as):00038         _srand
+0030 30A90000         (       ../rand.as):00039                             leax      L_next,y  ; compute effective address into X from L_next,y
+0034 EC62             (       ../rand.as):00040                             ldd       2,s       ; load D from stack-relative value 2,s
+0036 ED02             (       ../rand.as):00041                             std       2,x       ; store D to indexed value 2,x
+0038 4F               (       ../rand.as):00042                             clra                ; clear A
+0039 5F               (       ../rand.as):00043                             clrb                ; clear B
+003A ED84             (       ../rand.as):00044                             std       ,x        ; store D to memory pointed to by X
+003C 39               (       ../rand.as):00045                             rts                 ; return to caller
+                      (       ../rand.as):00046         
+003D 41C64E6D         (       ../rand.as):00047         L_mcon              fdb       16838,20077 ; define word data 16838,20077
+0041 00003039         (       ../rand.as):00048         L_acon              fdb       0,12345   ; define word data 0,12345
+                      (       ../rand.as):00049         
+                      (       ../rand.as):00050                             endsect             ; end current section

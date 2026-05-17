@@ -1,0 +1,17 @@
+                      (      ../abort.as):00001         * Adapted from cmoc_os9/lib/todo/abort.as for the live cmoc_os9 ABI.
+                      (      ../abort.as):00002         *
+                      (      ../abort.as):00003         * The original Kreider abort path tried to dump process memory through
+                      (      ../abort.as):00004         * startup-module symbols. The live CMOC runtime does not use that startup
+                      (      ../abort.as):00005         * model, so the practical libc contract here is simply: do not return.
+                      (      ../abort.as):00006         
+                      (      ../abort.as):00007                             section   code      ; begin code section
+                      (      ../abort.as):00008         
+                      (      ../abort.as):00009         _abort              EXPORT              ; export this symbol
+                      (      ../abort.as):00010         
+     0006             (      ../abort.as):00011         F_Exit              equ       $06       ; define constant as $06
+                      (      ../abort.as):00012         
+0000                  (      ../abort.as):00013         _abort
+0000 CC00FF           (      ../abort.as):00014                             ldd       #255      ; conventional abnormal exit status
+0003 103F06           (      ../abort.as):00015                             os9       F_Exit    ; invoke OS-9 system call F_Exit
+                      (      ../abort.as):00016         
+                      (      ../abort.as):00017                             endsect             ; end current section

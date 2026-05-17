@@ -1,0 +1,66 @@
+                      (     ../access.as):00001         * Compact assembly implementation of access-related syscalls.
+                      (     ../access.as):00002         
+                      (     ../access.as):00003                             use       ../include/fcntl.d ; shared file-mode constants
+                      (./include/fcntl.d):00001         * Shared assembler-side file mode and access constants.
+                      (./include/fcntl.d):00002         
+     0001             (./include/fcntl.d):00003         S_IREAD             equ       $01       ; owner-read permission bit
+     0002             (./include/fcntl.d):00004         S_IWRITE            equ       $02       ; owner-write permission bit
+     0004             (./include/fcntl.d):00005         S_IEXEC             equ       $04       ; owner-execute permission bit
+     0008             (./include/fcntl.d):00006         S_IOREAD            equ       $08       ; public-read permission bit
+     0010             (./include/fcntl.d):00007         S_IOWRITE           equ       $10       ; public-write permission bit
+     0020             (./include/fcntl.d):00008         S_IOEXEC            equ       $20       ; public-execute permission bit
+     0040             (./include/fcntl.d):00009         S_SHARED            equ       $40       ; sharable file bit
+     0080             (./include/fcntl.d):00010         S_DIR               equ       $80       ; directory attribute bit
+                      (./include/fcntl.d):00011         
+     0001             (./include/fcntl.d):00012         FAM_READ            equ       S_IREAD   ; open for reading
+     0002             (./include/fcntl.d):00013         FAM_WRITE           equ       S_IWRITE  ; open for writing
+     0003             (./include/fcntl.d):00014         FAM_UPDATE          equ       S_IREAD|S_IWRITE ; open for read/write
+     0080             (./include/fcntl.d):00015         FAM_DIR             equ       S_DIR     ; operate on a directory path
+                      (     ../access.as):00004         
+                      (     ../access.as):00005                             section   code      ; begin code section
+                      (     ../access.as):00006         
+                      (     ../access.as):00007         _access             EXPORT              ; export this symbol
+                      (     ../access.as):00008         _mknod              EXPORT              ; export this symbol
+                      (     ../access.as):00009         _unlinkx            EXPORT              ; export this symbol
+                      (     ../access.as):00010         _unlink             EXPORT              ; export this symbol
+                      (     ../access.as):00011         _dup                EXPORT              ; export this symbol
+                      (     ../access.as):00012         
+                      (     ../access.as):00013         _sysret             EXTERNAL            ; import external symbol
+                      (     ../access.as):00014         _os9err             EXTERNAL            ; import external symbol
+                      (     ../access.as):00015         
+0000                  (     ../access.as):00016         _access
+0000 AE62             (     ../access.as):00017                             ldx       2,s       ; load X from stack-relative value 2,s
+0002 A665             (     ../access.as):00018                             lda       5,s       ; load A from stack-relative value 5,s
+0004 103F84           (     ../access.as):00019                             os9       $84       ; invoke OS-9 system call $84
+0007 2503             (     ../access.as):00020                             bcs       L_access_done ; branch if carry is set to L_access_done
+0009 103F8F           (     ../access.as):00021                             os9       $8F       ; invoke OS-9 system call $8F
+000C                  (     ../access.as):00022         L_access_done
+000C 160000           (     ../access.as):00023                             lbra      _sysret   ; long branch unconditionally to _sysret
+                      (     ../access.as):00024         
+000F                  (     ../access.as):00025         _mknod
+000F AE62             (     ../access.as):00026                             ldx       2,s       ; load X from stack-relative value 2,s
+0011 E665             (     ../access.as):00027                             ldb       5,s       ; load B from stack-relative value 5,s
+0013 103F85           (     ../access.as):00028                             os9       $85       ; invoke OS-9 system call $85
+0016 160000           (     ../access.as):00029                             lbra      _sysret   ; long branch unconditionally to _sysret
+                      (     ../access.as):00030         
+0019                  (     ../access.as):00031         _unlinkx
+0019 A665             (     ../access.as):00032                             lda       5,s       ; load A from stack-relative value 5,s
+001B AE62             (     ../access.as):00033                             ldx       2,s       ; load X from stack-relative value 2,s
+001D 2004             (     ../access.as):00034                             bra       L_unlink_do ; branch unconditionally to L_unlink_do
+                      (     ../access.as):00035         
+001F                  (     ../access.as):00036         _unlink
+001F AE62             (     ../access.as):00037                             ldx       2,s       ; load X from stack-relative value 2,s
+0021 8602             (     ../access.as):00038                             lda       #FAM_WRITE ; load A from immediate value FAM_WRITE
+0023                  (     ../access.as):00039         L_unlink_do
+0023 103F90           (     ../access.as):00040                             os9       $90       ; invoke OS-9 system call $90
+0026 160000           (     ../access.as):00041                             lbra      _sysret   ; long branch unconditionally to _sysret
+                      (     ../access.as):00042         
+0029                  (     ../access.as):00043         _dup
+0029 A663             (     ../access.as):00044                             lda       3,s       ; load A from stack-relative value 3,s
+002B 103F82           (     ../access.as):00045                             os9       $82       ; invoke OS-9 system call $82
+002E 10250000         (     ../access.as):00046                             lbcs      _os9err   ; long branch if carry is set to _os9err
+0032 1F89             (     ../access.as):00047                             tfr       a,b       ; transfer A,B
+0034 4F               (     ../access.as):00048                             clra                ; clear A
+0035 39               (     ../access.as):00049                             rts                 ; return to caller
+                      (     ../access.as):00050         
+                      (     ../access.as):00051                             endsect             ; end current section

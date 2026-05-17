@@ -1,0 +1,46 @@
+                      (    ../cshifts.as):00001         * Adapted from cmoc_os9/lib/todo/cshifts.as for the live cmoc_os9 ABI.
+                      (    ../cshifts.as):00002         *
+                      (    ../cshifts.as):00003         * These are codegen helper entry points, not ordinary C-callable functions.
+                      (    ../cshifts.as):00004         * Keep their historical unprefixed names so existing assembly callers can
+                      (    ../cshifts.as):00005         * branch to them directly.
+                      (    ../cshifts.as):00006         
+                      (    ../cshifts.as):00007                             section   code      ; begin code section
+                      (    ../cshifts.as):00008         
+                      (    ../cshifts.as):00009         ccasr               EXPORT              ; export this symbol
+                      (    ../cshifts.as):00010         cclsr               EXPORT              ; export this symbol
+                      (    ../cshifts.as):00011         ccasl               EXPORT              ; export this symbol
+                      (    ../cshifts.as):00012         
+0000                  (    ../cshifts.as):00013         ccasr
+0000 5D               (    ../cshifts.as):00014                             tstb                ; test B and update condition codes
+0001 271F             (    ../cshifts.as):00015                             beq       BranchTarget_01 ; branch if equal/zero to BranchTarget_01
+0003 6762             (    ../cshifts.as):00016         Loop_01             asr       2,s       ; arithmetic shift stack-relative value 2,s right by one bit
+0005 6663             (    ../cshifts.as):00017                             ror       3,s       ; rotate stack-relative value 3,s right through carry
+0007 5A               (    ../cshifts.as):00018                             decb                ; decrement B
+0008 26F9             (    ../cshifts.as):00019                             bne       Loop_01   ; branch if not equal to Loop_01
+000A 2016             (    ../cshifts.as):00020                             bra       BranchTarget_01 ; branch unconditionally to BranchTarget_01
+                      (    ../cshifts.as):00021         
+000C                  (    ../cshifts.as):00022         cclsr
+000C 5D               (    ../cshifts.as):00023                             tstb                ; test B and update condition codes
+000D 2713             (    ../cshifts.as):00024                             beq       BranchTarget_01 ; branch if equal/zero to BranchTarget_01
+000F 6462             (    ../cshifts.as):00025         Loop_02             lsr       2,s       ; logical shift stack-relative value 2,s right by one bit
+0011 6663             (    ../cshifts.as):00026                             ror       3,s       ; rotate stack-relative value 3,s right through carry
+0013 5A               (    ../cshifts.as):00027                             decb                ; decrement B
+0014 26F9             (    ../cshifts.as):00028                             bne       Loop_02   ; branch if not equal to Loop_02
+0016 200A             (    ../cshifts.as):00029                             bra       BranchTarget_01 ; branch unconditionally to BranchTarget_01
+                      (    ../cshifts.as):00030         
+0018                  (    ../cshifts.as):00031         ccasl
+0018 5D               (    ../cshifts.as):00032                             tstb                ; test B and update condition codes
+0019 2707             (    ../cshifts.as):00033                             beq       BranchTarget_01 ; branch if equal/zero to BranchTarget_01
+001B 6863             (    ../cshifts.as):00034         Loop_03             asl       3,s       ; shift stack-relative value 3,s left by one bit
+001D 6962             (    ../cshifts.as):00035                             rol       2,s       ; rotate stack-relative value 2,s left through carry
+001F 5A               (    ../cshifts.as):00036                             decb                ; decrement B
+0020 26F9             (    ../cshifts.as):00037                             bne       Loop_03   ; branch if not equal to Loop_03
+0022 EC62             (    ../cshifts.as):00038         BranchTarget_01     ldd       2,s       ; load D from stack-relative value 2,s
+0024 3406             (    ../cshifts.as):00039                             pshs      d         ; save D on the hardware stack
+0026 EC62             (    ../cshifts.as):00040                             ldd       2,s       ; load D from stack-relative value 2,s
+0028 ED64             (    ../cshifts.as):00041                             std       4,s       ; store D to stack-relative value 4,s
+002A ECE4             (    ../cshifts.as):00042                             ldd       ,s        ; load D from memory pointed to by S
+002C 3264             (    ../cshifts.as):00043                             leas      4,s       ; adjust S using 4,s
+002E 39               (    ../cshifts.as):00044                             rts                 ; return to caller
+                      (    ../cshifts.as):00045         
+                      (    ../cshifts.as):00046                             endsect             ; end current section

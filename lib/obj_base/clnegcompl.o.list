@@ -1,0 +1,31 @@
+                      ( ../clnegcompl.as):00001                             section   code      ; begin code section
+                      ( ../clnegcompl.as):00002         
+                      ( ../clnegcompl.as):00003         _flacc              EXTERNAL            ; import external symbol
+                      ( ../clnegcompl.as):00004         _ltoacc             EXTERNAL            ; import external symbol
+                      ( ../clnegcompl.as):00005         
+                      ( ../clnegcompl.as):00006         _lneg               EXPORT              ; export this symbol
+                      ( ../clnegcompl.as):00007         _lnegx              EXPORT              ; export this symbol
+                      ( ../clnegcompl.as):00008         _lcompl             EXPORT              ; export this symbol
+                      ( ../clnegcompl.as):00009         
+0000 170000           ( ../clnegcompl.as):00010         _lneg:              lbsr      _ltoacc   ; long branch to subroutine to _ltoacc
+0003 CC0000           ( ../clnegcompl.as):00011         _lnegx:             ldd       #0        ; load D from immediate value 0
+0006 A302             ( ../clnegcompl.as):00012                             subd      2,x       ; subtract indexed value 2,x from D
+0008 ED02             ( ../clnegcompl.as):00013                             std       2,x       ; store D to indexed value 2,x
+000A CC0000           ( ../clnegcompl.as):00014                             ldd       #0        ; load D from immediate value 0
+000D E201             ( ../clnegcompl.as):00015                             sbcb      1,x       ; subtract indexed value 1,x from B
+000F A284             ( ../clnegcompl.as):00016                             sbca      ,x        ; subtract memory pointed to by X from A
+0011 ED84             ( ../clnegcompl.as):00017                             std       ,x        ; store D to memory pointed to by X
+0013 39               ( ../clnegcompl.as):00018                             rts                 ; return to caller
+0014 EC84             ( ../clnegcompl.as):00019         _lcompl:            ldd       ,x        ; load D from memory pointed to by X
+0016 43               ( ../clnegcompl.as):00020                             coma
+0017 53               ( ../clnegcompl.as):00021                             comb
+0018 EDA90000         ( ../clnegcompl.as):00022                             std       _flacc,y  ; store D to indexed value _flacc,y
+001C EC02             ( ../clnegcompl.as):00023                             ldd       2,x       ; load D from indexed value 2,x
+001E 43               ( ../clnegcompl.as):00024                             coma
+001F 53               ( ../clnegcompl.as):00025                             comb
+0020 30A90000         ( ../clnegcompl.as):00026                             leax      _flacc,y  ; compute effective address into X from _flacc,y
+0024 ED02             ( ../clnegcompl.as):00027                             std       2,x       ; store D to indexed value 2,x
+0026 39               ( ../clnegcompl.as):00028                             rts                 ; return to caller
+                      ( ../clnegcompl.as):00029         
+                      ( ../clnegcompl.as):00030                             endsect             ; end current section
+                      ( ../clnegcompl.as):00031         

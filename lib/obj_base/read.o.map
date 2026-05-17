@@ -1,0 +1,5 @@
+Symbol: _read (read.o) = 0000
+Symbol: _readln (read.o) = 001F
+Symbol: L_read_common (read.o) = 000C
+Symbol: L_read_error (read.o) = 0016
+Symbol: L_read_exit (read.o) = 001B

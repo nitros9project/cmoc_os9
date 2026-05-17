@@ -1,0 +1,154 @@
+                      (     ../memory.as):00001         _malloc             EXPORT              ; export allocator entry point
+                      (     ../memory.as):00002         _free               EXPORT              ; export free entry point
+                      (     ../memory.as):00003         
+                      (     ../memory.as):00004         _sbrk               EXTERNAL            ; heap-growth helper
+                      (     ../memory.as):00005         
+                      (     ../memory.as):00006                             section   bss       ; begin uninitialized data section
+                      (     ../memory.as):00007         
+0000                  (     ../memory.as):00008         _base               rmb       4         ; sentinel block header: next pointer + block size
+0004                  (     ../memory.as):00009         _allocp             rmb       2         ; current search position in free list
+                      (     ../memory.as):00010         
+                      (     ../memory.as):00011                             endsect             ; end uninitialized data section
+                      (     ../memory.as):00012         
+                      (     ../memory.as):00013                             section   code      ; begin code section
+                      (     ../memory.as):00014         
+0000                  (     ../memory.as):00015         _malloc
+0000 3446             (     ../memory.as):00016                             pshs      d,u       ; reserve one word of local storage and preserve U
+0002 EC66             (     ../memory.as):00017                             ldd       6,s       ; load requested allocation size in bytes
+0004 C30003           (     ../memory.as):00018                             addd      #3        ; round up for header alignment before dividing by 4
+0007 44               (     ../memory.as):00019                             lsra                ; divide byte count by header size high bit step 1
+0008 56               (     ../memory.as):00020                             rorb                ; divide byte count by header size low bit step 1
+0009 44               (     ../memory.as):00021                             lsra                ; divide byte count by header size high bit step 2
+000A 56               (     ../memory.as):00022                             rorb                ; divide byte count by header size low bit step 2
+000B C30001           (     ../memory.as):00023                             addd      #1        ; add one header unit for the block header itself
+000E EDE4             (     ../memory.as):00024                             std       ,s        ; save required unit count on the stack
+0010 AEA90000         (     ../memory.as):00025                             ldx       _allocp,y ; load current free-list search pointer
+0014 2612             (     ../memory.as):00026                             bne       malloc1   ; skip initialization once the free list exists
+0016 30A90000         (     ../memory.as):00027                             leax      _base,y   ; point X at the sentinel header
+001A AFA90000         (     ../memory.as):00028                             stx       _allocp,y ; initialize allocp to the sentinel header
+001E AFA90000         (     ../memory.as):00029                             stx       _base,y   ; make sentinel next pointer refer to itself
+0022 4F               (     ../memory.as):00030                             clra                ; clear high byte for zero-sized sentinel block
+0023 5F               (     ../memory.as):00031                             clrb                ; clear low byte for zero-sized sentinel block
+0024 EDA90000         (     ../memory.as):00032                             std       _base+2,y ; set sentinel block size to zero
+                      (     ../memory.as):00033         
+0028 EE84             (     ../memory.as):00034         malloc1             ldu       ,x        ; load candidate block pointer from q->ptr
+002A 2004             (     ../memory.as):00035                             bra       malloc3   ; enter common size-check path
+                      (     ../memory.as):00036         
+002C 1F31             (     ../memory.as):00037         malloc2             tfr       u,x       ; advance q to the previous candidate block
+002E EEC4             (     ../memory.as):00038                             ldu       ,u        ; advance p to the next free block
+0030 EC42             (     ../memory.as):00039         malloc3             ldd       2,u       ; load candidate block size in header units
+0032 10A3E4           (     ../memory.as):00040                             cmpd      ,s        ; compare candidate size against requested units
+0035 2522             (     ../memory.as):00041                             blo       malloc6   ; keep searching when the block is too small
+0037 2606             (     ../memory.as):00042                             bne       malloc4   ; split the block when it is larger than requested
+0039 ECC4             (     ../memory.as):00043                             ldd       ,u        ; exact fit: load p->ptr
+003B ED84             (     ../memory.as):00044                             std       ,x        ; unlink p by storing q->ptr = p->ptr
+003D 2010             (     ../memory.as):00045                             bra       malloc5   ; finish exact-fit allocation
+                      (     ../memory.as):00046         
+003F EC42             (     ../memory.as):00047         malloc4             ldd       2,u       ; load candidate block size
+0041 A3E4             (     ../memory.as):00048                             subd      ,s        ; subtract requested units from the free block
+0043 ED42             (     ../memory.as):00049                             std       2,u       ; store reduced free-block size
+0045 58               (     ../memory.as):00050                             aslb                ; scale remaining units to bytes low step 1
+0046 49               (     ../memory.as):00051                             rola                ; scale remaining units to bytes high step 1
+0047 58               (     ../memory.as):00052                             aslb                ; scale remaining units to bytes low step 2
+0048 49               (     ../memory.as):00053                             rola                ; scale remaining units to bytes high step 2
+0049 33CB             (     ../memory.as):00054                             leau      d,u       ; move U to the tail fragment that will be returned
+004B ECE4             (     ../memory.as):00055                             ldd       ,s        ; reload requested unit count
+004D ED42             (     ../memory.as):00056                             std       2,u       ; store requested size into the allocated header
+004F AFA90000         (     ../memory.as):00057         malloc5             stx       _allocp,y ; remember where the next free-list scan should start
+0053 3344             (     ../memory.as):00058                             leau      4,u       ; return pointer to payload just past the header
+0055 1F30             (     ../memory.as):00059                             tfr       u,d       ; place payload pointer in D for the caller
+0057 200E             (     ../memory.as):00060                             bra       malloc7   ; share common success return path
+0059 11A3A90000       (     ../memory.as):00061         malloc6             cmpu      _allocp,y ; test whether the scan wrapped back to allocp
+005E 26CC             (     ../memory.as):00062                             bne       malloc2   ; continue scanning free blocks until the list wraps
+0060 170077           (     ../memory.as):00063                             lbsr      morecore  ; ask the system for more heap space
+0063 26C7             (     ../memory.as):00064                             bne       malloc2   ; retry allocation if morecore returned a new block
+0065 4F               (     ../memory.as):00065                             clra                ; return NULL when the heap could not grow
+0066 5F               (     ../memory.as):00066                             clrb                ; return NULL when the heap could not grow
+0067 3262             (     ../memory.as):00067         malloc7             leas      2,s       ; discard local requested-unit storage
+0069 35C0             (     ../memory.as):00068                             puls      u,pc      ; restore U and return pointer or NULL
+                      (     ../memory.as):00069         
+006B                  (     ../memory.as):00070         _free
+006B 3446             (     ../memory.as):00071                             pshs      d,u       ; reserve one word of local storage and preserve U
+006D EE66             (     ../memory.as):00072                             ldu       6,s       ; load payload pointer supplied by the caller
+006F 335C             (     ../memory.as):00073                             leau      -4,u      ; back up to the block header
+0071 AEA90000         (     ../memory.as):00074                             ldx       _allocp,y ; start scanning from the current free-list position
+0075 2010             (     ../memory.as):00075                             bra       free3     ; enter the insertion-search loop
+0077 AC84             (     ../memory.as):00076         free1               cmpx      ,x        ; test whether q >= q->ptr, which marks list wrap
+0079 250A             (     ../memory.as):00077                             blo       free2     ; continue normally when no wrap occurs here
+007B 11A3E4           (     ../memory.as):00078                             cmpu      ,s        ; test whether freed block is above q in wrapped list
+007E 2213             (     ../memory.as):00079                             bhi       free4     ; insert here when p lies above the upper segment
+0080 11A384           (     ../memory.as):00080                             cmpu      ,x        ; test whether freed block is below q->ptr
+0083 250E             (     ../memory.as):00081                             blo       free4     ; insert here when p lies below the lower segment
+0085 AE84             (     ../memory.as):00082         free2               ldx       ,x        ; advance q to q->ptr
+0087 AFE4             (     ../memory.as):00083         free3               stx       ,s        ; keep q in local storage for wrap comparisons
+0089 11A3E4           (     ../memory.as):00084                             cmpu      ,s        ; test whether p is still at or before q
+008C 23E9             (     ../memory.as):00085                             bls       free1     ; keep searching until p is greater than q
+008E 11A384           (     ../memory.as):00086                             cmpu      ,x        ; test whether p is beyond q->ptr
+0091 24E4             (     ../memory.as):00087                             bhs       free1     ; keep searching until p falls before q->ptr
+                      (     ../memory.as):00088         
+0093 3440             (     ../memory.as):00089         free4               pshs      u         ; keep p on the stack while computing p + p->size
+0095 EC42             (     ../memory.as):00090                             ldd       2,u       ; load size of block being freed
+0097 58               (     ../memory.as):00091                             aslb                ; scale block size to bytes low step 1
+0098 49               (     ../memory.as):00092                             rola                ; scale block size to bytes high step 1
+0099 58               (     ../memory.as):00093                             aslb                ; scale block size to bytes low step 2
+009A 49               (     ../memory.as):00094                             rola                ; scale block size to bytes high step 2
+009B E3E1             (     ../memory.as):00095                             addd      ,s++      ; compute address just past freed block
+009D 10A384           (     ../memory.as):00096                             cmpd      ,x        ; test whether freed block touches q->ptr
+00A0 2610             (     ../memory.as):00097                             bne       free5     ; skip forward coalescing when blocks are separate
+00A2 3410             (     ../memory.as):00098                             pshs      x         ; preserve q while chasing q->ptr
+00A4 AE84             (     ../memory.as):00099                             ldx       ,x        ; load q->ptr
+00A6 EC02             (     ../memory.as):00100                             ldd       2,x       ; load size of block after p
+00A8 3510             (     ../memory.as):00101                             puls      x         ; restore q
+00AA E342             (     ../memory.as):00102                             addd      2,u       ; grow freed block by successor block size
+00AC ED42             (     ../memory.as):00103                             std       2,u       ; store merged size in p
+00AE EC94             (     ../memory.as):00104                             ldd       [,x]      ; load successor's next pointer
+00B0 2002             (     ../memory.as):00105                             bra       free6     ; share next-pointer store path
+                      (     ../memory.as):00106         
+00B2 EC84             (     ../memory.as):00107         free5               ldd       ,x        ; load q->ptr when no forward merge occurs
+00B4 EDC4             (     ../memory.as):00108         free6               std       ,u        ; store p->ptr
+00B6 EC02             (     ../memory.as):00109                             ldd       2,x       ; load size of predecessor block q
+00B8 58               (     ../memory.as):00110                             aslb                ; scale q size to bytes low step 1
+00B9 49               (     ../memory.as):00111                             rola                ; scale q size to bytes high step 1
+00BA 58               (     ../memory.as):00112                             aslb                ; scale q size to bytes low step 2
+00BB 49               (     ../memory.as):00113                             rola                ; scale q size to bytes high step 2
+00BC E3E4             (     ../memory.as):00114                             addd      ,s        ; compute address just past q
+00BE 3406             (     ../memory.as):00115                             pshs      d         ; keep q + q->size for adjacency test
+00C0 11A3E1           (     ../memory.as):00116                             cmpu      ,s++      ; test whether q ends exactly where p begins
+00C3 260C             (     ../memory.as):00117                             bne       free7     ; skip backward coalescing when blocks are separate
+00C5 EC02             (     ../memory.as):00118                             ldd       2,x       ; load q block size
+00C7 E342             (     ../memory.as):00119                             addd      2,u       ; extend q by size of p
+00C9 ED02             (     ../memory.as):00120                             std       2,x       ; store merged size back into q
+00CB ECC4             (     ../memory.as):00121                             ldd       ,u        ; load p->ptr
+00CD ED84             (     ../memory.as):00122                             std       ,x        ; link q directly to p->ptr
+00CF 2002             (     ../memory.as):00123                             bra       free8     ; finish with merged predecessor block
+                      (     ../memory.as):00124         
+00D1 EF84             (     ../memory.as):00125         free7               stu       ,x        ; insert p directly after q
+00D3 AFA90000         (     ../memory.as):00126         free8               stx       _allocp,y ; restart future searches from q
+00D7 16FF8D           (     ../memory.as):00127                             lbra      malloc7   ; reuse common epilogue to restore stack and return
+                      (     ../memory.as):00128         
+00DA                  (     ../memory.as):00129         morecore
+00DA EC62             (     ../memory.as):00130                             ldd       2,s       ; load requested unit count
+00DC C300FF           (     ../memory.as):00131                             addd      #255      ; round up to the next 256-unit boundary
+00DF 5F               (     ../memory.as):00132                             clrb                ; low byte zero completes the round-up divide
+00E0 3406             (     ../memory.as):00133                             pshs      d         ; save rounded unit count
+00E2 58               (     ../memory.as):00134                             aslb                ; scale rounded units to bytes low step 1
+00E3 49               (     ../memory.as):00135                             rola                ; scale rounded units to bytes high step 1
+00E4 58               (     ../memory.as):00136                             aslb                ; scale rounded units to bytes low step 2
+00E5 49               (     ../memory.as):00137                             rola                ; scale rounded units to bytes high step 2
+00E6 3406             (     ../memory.as):00138                             pshs      d         ; pass byte count to sbrk
+00E8 170000           (     ../memory.as):00139                             lbsr      _sbrk     ; request more heap memory from the system
+00EB 3262             (     ../memory.as):00140                             leas      2,s       ; discard byte-count argument
+00ED 3540             (     ../memory.as):00141                             puls      u         ; recover rounded unit count into U
+00EF 1083FFFF         (     ../memory.as):00142                             cmpd      #-1       ; test for sbrk failure
+00F3 2711             (     ../memory.as):00143                             beq       an_rts    ; return failure marker unchanged when heap growth failed
+                      (     ../memory.as):00144         
+00F5 1E03             (     ../memory.as):00145                             exg       d,u       ; swap new block address into U and unit count into D
+00F7 ED42             (     ../memory.as):00146                             std       2,u       ; store rounded unit count in the new block header
+00F9 3344             (     ../memory.as):00147                             leau      4,u       ; point U at payload just past the new header
+00FB 3440             (     ../memory.as):00148                             pshs      u         ; stage payload pointer as argument to free
+00FD 17FF6B           (     ../memory.as):00149                             lbsr      _free     ; insert the new block into the free list
+0100 3540             (     ../memory.as):00150                             puls      u         ; discard staged payload pointer
+0102 EEA90000         (     ../memory.as):00151                             ldu       _allocp,y ; load allocp so caller can see nonzero success
+0106 39               (     ../memory.as):00152         an_rts              rts                 ; return with U/D describing success or failure
+                      (     ../memory.as):00153         
+                      (     ../memory.as):00154                             endsect             ; end code section

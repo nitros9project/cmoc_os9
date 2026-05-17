@@ -1,0 +1,5 @@
+Symbol: _gs_pos (gs1.o) = 0004
+Symbol: _gs_size (gs1.o) = 0000
+Symbol: BranchTarget_01 (gs1.o) = 0019
+Symbol: Continue_01 (gs1.o) = 0006
+Symbol: I_GetStt (gs1.o) = 008D

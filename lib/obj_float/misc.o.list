@@ -1,0 +1,52 @@
+                      (       ../misc.as):00001         * Adapted from cmoc_os9/lib/todo/misc.as for the live cmoc_os9 ABI.
+                      (       ../misc.as):00002         
+                      (       ../misc.as):00003                             section   code      ; begin code section
+                      (       ../misc.as):00004         
+                      (       ../misc.as):00005         _lock               EXPORT              ; export this symbol
+                      (       ../misc.as):00006         _pause              EXPORT              ; export this symbol
+                      (       ../misc.as):00007         _sync               EXPORT              ; export this symbol
+                      (       ../misc.as):00008         _crc                EXPORT              ; export this symbol
+                      (       ../misc.as):00009         _prerr              EXPORT              ; export this symbol
+                      (       ../misc.as):00010         _tsleep             EXPORT              ; export this symbol
+                      (       ../misc.as):00011         
+                      (       ../misc.as):00012         _os9err             EXTERNAL            ; import external symbol
+                      (       ../misc.as):00013         
+     000A             (       ../misc.as):00014         F_Sleep             equ       $0A       ; define constant as $0A
+     000F             (       ../misc.as):00015         F_PErr              equ       $0F       ; define constant as $0F
+     0017             (       ../misc.as):00016         F_CRC               equ       $17       ; define constant as $17
+                      (       ../misc.as):00017         
+0000                  (       ../misc.as):00018         _lock
+0000 39               (       ../misc.as):00019                             rts                 ; return to caller
+                      (       ../misc.as):00020         
+0001                  (       ../misc.as):00021         _pause
+0001 8E0000           (       ../misc.as):00022                             ldx       #0        ; load X from immediate value 0
+0004 5F               (       ../misc.as):00023                             clrb                ; clear B
+0005 103F0A           (       ../misc.as):00024                             os9       F_Sleep   ; invoke OS-9 system call F_Sleep
+0008 160000           (       ../misc.as):00025                             lbra      _os9err   ; long branch unconditionally to _os9err
+                      (       ../misc.as):00026         
+000B                  (       ../misc.as):00027         _sync
+000B 39               (       ../misc.as):00028                             rts                 ; return to caller
+                      (       ../misc.as):00029         
+000C                  (       ../misc.as):00030         _crc
+000C 3460             (       ../misc.as):00031                             pshs      y,u       ; save Y,U on the hardware stack
+000E AE66             (       ../misc.as):00032                             ldx       6,s       ; load X from stack-relative value 6,s
+0010 10AE68           (       ../misc.as):00033                             ldy       8,s       ; load Y from stack-relative value 8,s
+0013 EE6A             (       ../misc.as):00034                             ldu       10,s      ; load U from stack-relative value 10,s
+0015 103F17           (       ../misc.as):00035                             os9       F_CRC     ; invoke OS-9 system call F_CRC
+0018 35E0             (       ../misc.as):00036                             puls      y,u,pc    ; restore registers and return
+                      (       ../misc.as):00037         
+001A                  (       ../misc.as):00038         _prerr
+001A A663             (       ../misc.as):00039                             lda       3,s       ; load A from stack-relative value 3,s
+001C E665             (       ../misc.as):00040                             ldb       5,s       ; load B from stack-relative value 5,s
+001E 103F0F           (       ../misc.as):00041                             os9       F_PErr    ; invoke OS-9 system call F_PErr
+0021 10250000         (       ../misc.as):00042                             lblo      _os9err   ; long branch if lower to _os9err
+0025 39               (       ../misc.as):00043                             rts                 ; return to caller
+                      (       ../misc.as):00044         
+0026                  (       ../misc.as):00045         _tsleep
+0026 AE62             (       ../misc.as):00046                             ldx       2,s       ; load X from stack-relative value 2,s
+0028 103F0A           (       ../misc.as):00047                             os9       F_Sleep   ; invoke OS-9 system call F_Sleep
+002B 10250000         (       ../misc.as):00048                             lblo      _os9err   ; long branch if lower to _os9err
+002F 1F10             (       ../misc.as):00049                             tfr       x,d       ; transfer X,D
+0031 39               (       ../misc.as):00050                             rts                 ; return to caller
+                      (       ../misc.as):00051         
+                      (       ../misc.as):00052                             endsect             ; end current section

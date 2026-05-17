@@ -1,0 +1,3 @@
+Symbol: _lcompl (clnegcompl.o) = 0014
+Symbol: _lneg (clnegcompl.o) = 0000
+Symbol: _lnegx (clnegcompl.o) = 0003

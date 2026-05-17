@@ -1,0 +1,20 @@
+                      (    ../cfinish.as):00001         __exit              EXPORT              ; export exit wrapper with cleanup
+                      (    ../cfinish.as):00002         _exit               EXPORT              ; export raw process-exit entry point
+                      (    ../cfinish.as):00003         
+                      (    ../cfinish.as):00004         __dumprof           EXTERNAL            ; profile dump hook
+                      (    ../cfinish.as):00005         __tidyup            EXTERNAL            ; stdio/runtime cleanup hook
+                      (    ../cfinish.as):00006         
+     0006             (    ../cfinish.as):00007         F_Exit              equ       $06       ; OS-9 terminate-process service
+                      (    ../cfinish.as):00008         
+                      (    ../cfinish.as):00009                             section   code      ; begin code section
+                      (    ../cfinish.as):00010         
+0000                  (    ../cfinish.as):00011         __exit
+0000 170000           (    ../cfinish.as):00012                             lbsr      __dumprof ; flush profiling data before exit
+0003 170000           (    ../cfinish.as):00013                             lbsr      __tidyup  ; flush and close runtime-managed resources
+0006 2000             (    ../cfinish.as):00014                             bra       _exit     ; tail into the raw exit path
+                      (    ../cfinish.as):00015         
+0008                  (    ../cfinish.as):00016         _exit
+0008 EC62             (    ../cfinish.as):00017                             ldd       2,s       ; load caller-supplied exit status
+000A 103F06           (    ../cfinish.as):00018                             os9       F_Exit    ; terminate the current process
+                      (    ../cfinish.as):00019         
+                      (    ../cfinish.as):00020                             endsect             ; end code section

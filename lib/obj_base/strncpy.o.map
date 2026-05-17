@@ -1,0 +1,4 @@
+Symbol: _strncpy (strncpy.o) = 0000
+Symbol: BranchTarget_01 (strncpy.o) = 001C
+Symbol: Loop_01 (strncpy.o) = 000B
+Symbol: Loop_02 (strncpy.o) = 0016

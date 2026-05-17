@@ -1,0 +1,5 @@
+Symbol: _skipbl (skip.o) = 0000
+Symbol: _skipwd (skip.o) = 000E
+Symbol: BranchTarget_01 (skip.o) = 001C
+Symbol: Loop_01 (skip.o) = 0002
+Symbol: Loop_02 (skip.o) = 0010

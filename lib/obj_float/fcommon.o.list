@@ -1,0 +1,6 @@
+                      (    ../fcommon.as):00001                             section   bss       ; begin bss section
+                      (    ../fcommon.as):00002         
+                      (    ../fcommon.as):00003         _flacc              EXPORT              ; export this symbol
+0000                  (    ../fcommon.as):00004         _flacc:             rmb       8         ; reserve 8 bytes for the shared floating-point and long accumulator
+                      (    ../fcommon.as):00005         
+                      (    ../fcommon.as):00006                             endsect             ; end current section

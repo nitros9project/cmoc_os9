@@ -14,7 +14,7 @@ char buf1[10];
 int dectbl[4]= {10000,1000,100,10};
 
 __norts__ asm int
-printf(char *fmt, ...)
+printf(const char *fmt, ...)
 {
     asm
     {
@@ -38,7 +38,7 @@ __iob		EXTERNAL
 }
 
 __norts__ asm int
-fprintf(FILE *fp, char *fmt, ...)
+fprintf(FILE *fp, const char *fmt, ...)
 {
     asm
     {
@@ -59,7 +59,7 @@ printf1		stx   _fpmp,y					save FILE ptr to static
  
  
 __norts__ asm int
-sprintf(char *str, char *fmt, ...)
+sprintf(char *str, const char *fmt, ...)
 {
     asm
     {
@@ -168,7 +168,7 @@ switch 	cmpb    #'c'            char
 		cmpb    #'s'            string 
 		beq     case_s 
 		cmpb    #'d'            decimal 
-		beq     case_d 
+		lbeq    case_d 
 		cmpb    #'o'            octal 
 		lbeq    case_o 
 		cmpb    #'x'            hex 
@@ -176,26 +176,30 @@ switch 	cmpb    #'c'            char
 		cmpb    #'X'            hex 
 		lbeq    case_h 
 		cmpb    #'u'            unsigned 
-		beq     case_u 
+		lbeq    case_u 
 		puls    u               get format string
-		bra     L0047           default -- just print
+		lbra    L0047           default -- just print
 
 * print a float
 case_f 	ldd     fldsiz+2,s 
-		pshs    d               stack field width
-		leax    prtvar+4,s 
-		ldd     fraccnt+4,s 
-		tst     fracflg+4,s 
+		leax    prtvar+2,s 
+		ldd     fraccnt+2,s 
+		tst     fracflg+2,s 
 		bne     case_f1 
 		ldd     #6 
-case_f1 pshs    d,x             stack precision & *variable
-		ldd     #$7d00 
-		std     fraccnt+8,s     wipe old value
+case_f1 pshs    x               stack *variable
+		pshs    d               stack precision
 		ldb     -1,u 
 		clra   
 		pshs    d 
 		lbsr    _pffloat
-		leas    8,s 
+		leas    6,s 
+		tfr     d,x
+		clrb
+		lda     #$7D
+		std     fraccnt+2,s
+		tfr     x,d
+		tfr     d,u
 		lbra    case_x8 
 
 * print a long

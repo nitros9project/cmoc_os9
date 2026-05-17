@@ -1,0 +1,4 @@
+Symbol: _mktemp (mktemp.o) = 0000
+Symbol: L_mktemp_done (mktemp.o) = 0024
+Symbol: L_mktemp_scan (mktemp.o) = 0004
+Symbol: L_mktemp_zero (mktemp.o) = 0013

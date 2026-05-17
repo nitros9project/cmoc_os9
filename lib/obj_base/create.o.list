@@ -1,0 +1,75 @@
+                      (     ../create.as):00001         * Compact assembly implementation of creat/create/ocreat().
+                      (     ../create.as):00002         
+                      (     ../create.as):00003                             section   code      ; begin code section
+                      (     ../create.as):00004         
+                      (     ../create.as):00005         _creat              EXPORT              ; export this symbol
+                      (     ../create.as):00006         _create             EXPORT              ; export this symbol
+                      (     ../create.as):00007         _ocreat             EXPORT              ; export this symbol
+                      (     ../create.as):00008         
+                      (     ../create.as):00009         _os9err             EXTERNAL            ; import external symbol
+                      (     ../create.as):00010         
+0000                  (     ../create.as):00011         _creat
+0000 3440             (     ../create.as):00012                             pshs      u         ; save U on the hardware stack
+0002 AE64             (     ../create.as):00013                             ldx       4,s       ; load X from stack-relative value 4,s
+0004 A667             (     ../create.as):00014                             lda       7,s       ; load A from stack-relative value 7,s
+0006 1F89             (     ../create.as):00015                             tfr       a,b       ; transfer A,B
+0008 C424             (     ../create.as):00016                             andb      #$24      ; AND B with immediate value $24
+000A CA0B             (     ../create.as):00017                             orb       #$0B      ; OR B with immediate value $0B
+000C 103F83           (     ../create.as):00018                             os9       $83       ; invoke OS-9 system call $83
+000F 245A             (     ../create.as):00019                             bcc       L_creat_ret ; branch if carry is clear to L_creat_ret
+0011 C1DA             (     ../create.as):00020                             cmpb      #$DA      ; compare B against immediate value $DA
+0013 2626             (     ../create.as):00021                             bne       L_create_err ; branch if not equal to L_create_err
+0015 A667             (     ../create.as):00022                             lda       7,s       ; load A from stack-relative value 7,s
+0017 8580             (     ../create.as):00023                             bita      #$80      ; test bits in A against immediate value $80
+0019 2620             (     ../create.as):00024                             bne       L_create_err ; branch if not equal to L_create_err
+001B 8407             (     ../create.as):00025                             anda      #7        ; AND A with immediate value 7
+001D AE64             (     ../create.as):00026                             ldx       4,s       ; load X from stack-relative value 4,s
+001F 103F84           (     ../create.as):00027                             os9       $84       ; invoke OS-9 system call $84
+0022 2517             (     ../create.as):00028                             bcs       L_create_err ; branch if carry is set to L_create_err
+0024 3442             (     ../create.as):00029                             pshs      a,u       ; save A,U on the hardware stack
+0026 8E0000           (     ../create.as):00030                             ldx       #0        ; load X from immediate value 0
+0029 3384             (     ../create.as):00031                             leau      ,x        ; compute effective address into U from ,x
+002B C602             (     ../create.as):00032                             ldb       #$02      ; load B from immediate value $02
+002D 103F8E           (     ../create.as):00033                             os9       $8E       ; invoke OS-9 system call $8E
+0030 3542             (     ../create.as):00034                             puls      a,u       ; restore A,U from the hardware stack
+0032 2437             (     ../create.as):00035                             bcc       L_creat_ret ; branch if carry is clear to L_creat_ret
+0034 3404             (     ../create.as):00036                             pshs      b         ; save B on the hardware stack
+0036 103F8F           (     ../create.as):00037                             os9       $8F       ; invoke OS-9 system call $8F
+0039 3504             (     ../create.as):00038                             puls      b         ; restore B from the hardware stack
+003B                  (     ../create.as):00039         L_create_err
+003B 3262             (     ../create.as):00040                             leas      2,s       ; adjust S using 2,s
+003D 160000           (     ../create.as):00041                             lbra      _os9err   ; long branch unconditionally to _os9err
+                      (     ../create.as):00042         
+0040                  (     ../create.as):00043         _create
+0040 3440             (     ../create.as):00044                             pshs      u         ; save U on the hardware stack
+0042 AE64             (     ../create.as):00045                             ldx       4,s       ; load X from stack-relative value 4,s
+0044 A667             (     ../create.as):00046                             lda       7,s       ; load A from stack-relative value 7,s
+0046 E669             (     ../create.as):00047                             ldb       9,s       ; load B from stack-relative value 9,s
+0048 103F83           (     ../create.as):00048                             os9       $83       ; invoke OS-9 system call $83
+004B 2502             (     ../create.as):00049                             bcs       L_ocreat_retry ; branch if carry is set to L_ocreat_retry
+004D 201C             (     ../create.as):00050                             bra       L_creat_ret ; branch unconditionally to L_creat_ret
+                      (     ../create.as):00051         
+004F                  (     ../create.as):00052         L_ocreat_retry
+004F C1DA             (     ../create.as):00053                             cmpb      #$DA      ; compare B against immediate value $DA
+0051 26E8             (     ../create.as):00054                             bne       L_create_err ; branch if not equal to L_create_err
+0053 AE64             (     ../create.as):00055                             ldx       4,s       ; load X from stack-relative value 4,s
+0055 103F87           (     ../create.as):00056                             os9       $87       ; invoke OS-9 system call $87
+0058 25E1             (     ../create.as):00057                             bcs       L_create_err ; branch if carry is set to L_create_err
+005A 3540             (     ../create.as):00058                             puls      u         ; restore U from the hardware stack
+005C 2000             (     ../create.as):00059                             bra       _ocreat   ; branch unconditionally to _ocreat
+                      (     ../create.as):00060         
+005E                  (     ../create.as):00061         _ocreat
+005E 3440             (     ../create.as):00062                             pshs      u         ; save U on the hardware stack
+0060 AE64             (     ../create.as):00063                             ldx       4,s       ; load X from stack-relative value 4,s
+0062 A667             (     ../create.as):00064                             lda       7,s       ; load A from stack-relative value 7,s
+0064 E669             (     ../create.as):00065                             ldb       9,s       ; load B from stack-relative value 9,s
+0066 103F83           (     ../create.as):00066                             os9       $83       ; invoke OS-9 system call $83
+0069 25E4             (     ../create.as):00067                             bcs       L_ocreat_retry ; branch if carry is set to L_ocreat_retry
+                      (     ../create.as):00068         
+006B                  (     ../create.as):00069         L_creat_ret
+006B 3262             (     ../create.as):00070                             leas      2,s       ; adjust S using 2,s
+006D 1F89             (     ../create.as):00071                             tfr       a,b       ; transfer A,B
+006F 4F               (     ../create.as):00072                             clra                ; clear A
+0070 39               (     ../create.as):00073                             rts                 ; return to caller
+                      (     ../create.as):00074         
+                      (     ../create.as):00075                             endsect             ; end current section

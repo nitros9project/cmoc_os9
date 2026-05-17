@@ -1,0 +1,3 @@
+echo * CMOC OS-9 float test disk *
+link shell
+load utilpak1

@@ -1,0 +1,5 @@
+Symbol: _strncmp (strncmp.o) = 0000
+Symbol: Continue_01 (strncmp.o) = 0015
+Symbol: Continue_02 (strncmp.o) = 0021
+Symbol: Loop_01 (strncmp.o) = 000D
+Symbol: ReturnZero_01 (strncmp.o) = 001F

@@ -1,0 +1,530 @@
+                      (      ../utime.as):00001         * Disassembly by Os9disasm of utime.r
+                      (      ../utime.as):00002         
+                      (      ../utime.as):00003         
+                      (      ../utime.as):00004         __os_getime         EXTERNAL            ; import external symbol
+                      (      ../utime.as):00005         _flacc              EXTERNAL            ; import external symbol
+                      (      ../utime.as):00006         _sprintf            EXTERNAL            ; import external symbol
+                      (      ../utime.as):00007         _DEBUG              EXTERNAL            ; import external symbol
+                      (      ../utime.as):00008         
+                      (      ../utime.as):00009         _time               EXPORT              ; export this symbol
+                      (      ../utime.as):00010         _o2utime            EXPORT              ; export this symbol
+                      (      ../utime.as):00011         _u2otime            EXPORT              ; export this symbol
+                      (      ../utime.as):00012         
+                      (      ../utime.as):00013                             section   bss       ; begin bss section
+                      (      ../utime.as):00014         
+                      (      ../utime.as):00015         * Uninitialized data (class B)
+0000                  (      ../utime.as):00016         _tm                 rmb       16        ; reserve 16 bytes
+0010                  (      ../utime.as):00017         _datebuf            rmb       26        ; reserve 26 bytes
+                      (      ../utime.as):00018         
+                      (      ../utime.as):00019                             endsection           ; end current section
+                      (      ../utime.as):00020         
+                      (      ../utime.as):00021                             section   rwdata    ; begin rwdata section
+                      (      ../utime.as):00022         
+                      (      ../utime.as):00023         *
+                      (      ../utime.as):00024         * static int   monsiz[] = {31,28,31,30,31,30,31,31,30,31,30,31};
+0000                  (      ../utime.as):00025         monsiz
+0000 001F001C001F001E (      ../utime.as):00026                             fdb       31,28,31,30,31,30,31,31,30,31,30,31 ; define word data 31,28,31,30,31,30,31,31,30,31,30,31
+     001F001E001F001F
+     001E001F001E001F
+                      (      ../utime.as):00027         
+                      (      ../utime.as):00028                             endsect             ; end current section
+                      (      ../utime.as):00029         
+                      (      ../utime.as):00030                             section   code      ; begin code section
+                      (      ../utime.as):00031         
+                      (      ../utime.as):00032         * long
+                      (      ../utime.as):00033         * time(arg)
+                      (      ../utime.as):00034         * long  *arg;
+                      (      ../utime.as):00035         *    {
+                      (      ../utime.as):00036         *    _os_time tbuf;
+                      (      ../utime.as):00037         *    long  result, o2utime();
+                      (      ../utime.as):00038         *
+                      (      ../utime.as):00039         *    getime(tbuf);
+                      (      ../utime.as):00040         *    result = o2utime(tbuf);
+                      (      ../utime.as):00041         *    if (arg)
+                      (      ../utime.as):00042         *       *arg = result;
+                      (      ../utime.as):00043         *    return (result);
+                      (      ../utime.as):00044         *    }
+                      (      ../utime.as):00045         
+                      (      ../utime.as):00046         * CMOC adds an hidden argument
+                      (      ../utime.as):00047         * long time(long *return, long *arg)
+                      (      ../utime.as):00048         *
+                      (      ../utime.as):00049         * _os_getime
+                      (      ../utime.as):00050         * |    _o2utime
+                      (      ../utime.as):00051         * V    s    hidden long * to _o2utime
+                      (      ../utime.as):00052         * s    s+2  &tbuf - arg to os_getime and o2utime
+                      (      ../utime.as):00053         * s+2  s+4  _os_time tbuf
+                      (      ../utime.as):00054         * s+8  s+10 saved U
+                      (      ../utime.as):00055         * s+10 s+12 return addr
+                      (      ../utime.as):00056         * s+12 s+14 hidden long * to _time
+                      (      ../utime.as):00057         * s+14 s+16 long *arg
+                      (      ../utime.as):00058         
+0000                  (      ../utime.as):00059         _time
+0000 3440             (      ../utime.as):00060                             pshs      u         ; save U on the hardware stack
+0002 327A             (      ../utime.as):00061                             leas      -6,s      ; tbuf
+0004 33E4             (      ../utime.as):00062                             leau      ,s        ; address of tbuf
+0006 3440             (      ../utime.as):00063                             pshs      u         ; save U on the hardware stack
+0008 170000           (      ../utime.as):00064                             lbsr      __os_getime ; get system time
+000B EFE4             (      ../utime.as):00065                             stu       ,s        ; still &tbuf
+000D AE6C             (      ../utime.as):00066                             ldx       12,s      ; argument to time
+000F 3410             (      ../utime.as):00067                             pshs      x         ; argument to o2utime
+0011 8D11             (      ../utime.as):00068                             bsr       _o2utime  ; convert unix style
+0013 EEE810           (      ../utime.as):00069                             ldu       16,s      ; check arg
+0016 2708             (      ../utime.as):00070                             beq       noarg     ; branch if equal/zero to noarg
+0018 EC84             (      ../utime.as):00071                             ldd       ,x        ; so copy over
+001A EDC4             (      ../utime.as):00072                             std       ,u        ; store D to memory pointed to by U
+001C EC02             (      ../utime.as):00073                             ldd       2,x       ; load D from indexed value 2,x
+001E ED42             (      ../utime.as):00074                             std       2,u       ; store D to indexed value 2,u
+0020 326A             (      ../utime.as):00075         noarg               leas      10,s      ; adjust S using 10,s
+0022 35C0             (      ../utime.as):00076                             puls      u,pc      ; restore registers and return
+                      (      ../utime.as):00077         
+                      (      ../utime.as):00078         
+                      (      ../utime.as):00079         * long
+                      (      ../utime.as):00080         * o2utime(tp)
+                      (      ../utime.as):00081         * _os_time  *tp;
+                      (      ../utime.as):00082         *    {
+                      (      ../utime.as):00083         *    int   j, leap;
+                      (      ../utime.as):00084         *    long  accum = 0;
+                      (      ../utime.as):00085         *
+                      (      ../utime.as):00086         * CMOC adds an extra parameter
+                      (      ../utime.as):00087         * long o2utime(long *return, _os_time *tp)
+0024                  (      ../utime.as):00088         _o2utime
+0024 3446             (      ../utime.as):00089                             pshs      D,U       ; save D,U on the hardware stack
+0026 EE68             (      ../utime.as):00090                             ldu       8,s       ; get tp
+0028 4F               (      ../utime.as):00091                             clra                ; clear A
+0029 5F               (      ../utime.as):00092                             clrb                ; clear B
+002A 3406             (      ../utime.as):00093                             pshs      d         ; save D on the hardware stack
+002C 3406             (      ../utime.as):00094                             pshs      d         ; save D on the hardware stack
+                      (      ../utime.as):00095         
+                      (      ../utime.as):00096         *    for (j = 70; j < *tp; ++j)         /* total up days in years past */
+                      (      ../utime.as):00097         *       accum += ((j & 3) ? 365 : 366);     /* don't forget leap years */
+002E C645             (      ../utime.as):00098                             ldb       #70-1     ; load B from immediate value 70-1
+0030 8E0000           (      ../utime.as):00099                             ldx       #0        ; load X from immediate value 0
+0033 200A             (      ../utime.as):00100                             bra       o2ut2     ; branch unconditionally to o2ut2
+                      (      ../utime.as):00101         
+0035 3089016D         (      ../utime.as):00102         o2ut1               leax      365,x     ; compute effective address into X from 365,x
+0039 C503             (      ../utime.as):00103                             bitb      #3        ; test bits in B against immediate value 3
+003B 2602             (      ../utime.as):00104                             bne       o2ut2     ; branch if not equal to o2ut2
+003D 3001             (      ../utime.as):00105                             leax      1,x       ; compute effective address into X from 1,x
+003F 5C               (      ../utime.as):00106         o2ut2               incb                ; increment B
+0040 E1C4             (      ../utime.as):00107                             cmpb      ,u        ; year
+0042 2DF1             (      ../utime.as):00108                             blt       o2ut1     ; branch if less than to o2ut1
+0044 AF62             (      ../utime.as):00109                             stx       2,s       ; store X to stack-relative value 2,s
+                      (      ../utime.as):00110         *
+                      (      ../utime.as):00111         *    monsiz[1] = (*tp++ & 3) ? 28 : 29;           /* fix for leap year */
+0046 30A90000         (      ../utime.as):00112                             leax      monsiz,y  ; compute effective address into X from monsiz,y
+004A 861D             (      ../utime.as):00113                             lda       #29       ; assume leap year
+004C E6C0             (      ../utime.as):00114                             ldb       ,u+       ; load B from memory pointed to by U, then advance U
+004E C403             (      ../utime.as):00115                             andb      #3        ; AND B with immediate value 3
+0050 2702             (      ../utime.as):00116                             beq       o2ut3     ; it is a leap year
+0052 861C             (      ../utime.as):00117                             lda       #28       ; load A from immediate value 28
+0054 A703             (      ../utime.as):00118         o2ut3               sta       3,x       ; fix up February in table
+                      (      ../utime.as):00119         
+                      (      ../utime.as):00120         *
+                      (      ../utime.as):00121         *    for (j = 0; j < *tp; ++j)             /* add day1 for months past */
+                      (      ../utime.as):00122         *       accum += monsiz[j];
+0056 C601             (      ../utime.as):00123                             ldb       #1        ; load B from immediate value 1
+0058 2009             (      ../utime.as):00124                             bra       o2ut5     ; branch unconditionally to o2ut5
+                      (      ../utime.as):00125         
+005A EC81             (      ../utime.as):00126         o2ut4               ldd       ,x++      ; load D from memory pointed to by X+, then advance X+
+005C E362             (      ../utime.as):00127                             addd      2,s       ; add stack-relative value 2,s into D
+005E ED62             (      ../utime.as):00128                             std       2,s       ; store D to stack-relative value 2,s
+                      (      ../utime.as):00129         
+0060 E664             (      ../utime.as):00130                             ldb       4,s       ; load B from stack-relative value 4,s
+0062 5C               (      ../utime.as):00131                             incb                ; increment B
+0063 E764             (      ../utime.as):00132         o2ut5               stb       4,s       ; store B to stack-relative value 4,s
+0065 E1C4             (      ../utime.as):00133                             cmpb      ,u        ; compare B against memory pointed to by U
+0067 2DF1             (      ../utime.as):00134                             blt       o2ut4     ; branch if less than to o2ut4
+                      (      ../utime.as):00135         
+                      (      ../utime.as):00136         *
+                      (      ../utime.as):00137         *    ++tp;
+0069 3341             (      ../utime.as):00138                             leau      1,u       ; compute effective address into U from 1,u
+                      (      ../utime.as):00139         
+                      (      ../utime.as):00140         *    accum += (*tp++ - 1);                      /* add days this month */
+006B E6C0             (      ../utime.as):00141                             ldb       ,u+       ; load B from memory pointed to by U, then advance U
+006D 5A               (      ../utime.as):00142                             decb                ; decrement B
+006E 4F               (      ../utime.as):00143                             clra                ; clear A
+006F E362             (      ../utime.as):00144                             addd      2,s       ; add stack-relative value 2,s into D
+0071 ED62             (      ../utime.as):00145                             std       2,s       ; store D to stack-relative value 2,s
+                      (      ../utime.as):00146         
+                      (      ../utime.as):00147         *    accum *= 24;                                  /* convert to hours */
+0073 58               (      ../utime.as):00148                             lslb                ; shift B left by one bit
+0074 49               (      ../utime.as):00149                             rola                ; rotate A left through carry
+0075 E362             (      ../utime.as):00150                             addd      2,s       ; 3
+0077 58               (      ../utime.as):00151                             lslb                ; shift B left by one bit
+0078 49               (      ../utime.as):00152                             rola                ; rotate A left through carry
+0079 6961             (      ../utime.as):00153                             rol       1,s       ; 6
+007B 58               (      ../utime.as):00154                             lslb                ; shift B left by one bit
+007C 49               (      ../utime.as):00155                             rola                ; rotate A left through carry
+007D 6961             (      ../utime.as):00156                             rol       1,s       ; 12
+007F 58               (      ../utime.as):00157                             lslb                ; shift B left by one bit
+0080 49               (      ../utime.as):00158                             rola                ; rotate A left through carry
+0081 6961             (      ../utime.as):00159                             rol       1,s       ; 24
+0083 ED62             (      ../utime.as):00160                             std       2,s       ; store D to stack-relative value 2,s
+                      (      ../utime.as):00161         
+                      (      ../utime.as):00162         *
+                      (      ../utime.as):00163         *    accum += *tp++;                                /* add hours today */
+0085 E6C0             (      ../utime.as):00164                             ldb       ,u+       ; load B from memory pointed to by U, then advance U
+0087 4F               (      ../utime.as):00165                             clra                ; clear A
+0088 E362             (      ../utime.as):00166                             addd      2,s       ; add stack-relative value 2,s into D
+008A ED62             (      ../utime.as):00167                             std       2,s       ; store D to stack-relative value 2,s
+008C E661             (      ../utime.as):00168                             ldb       1,s       ; load B from stack-relative value 1,s
+008E C900             (      ../utime.as):00169                             adcb      #0        ; add immediate value 0 into B
+0090 E761             (      ../utime.as):00170                             stb       1,s       ; store B to stack-relative value 1,s
+                      (      ../utime.as):00171         
+                      (      ../utime.as):00172         *    accum *= 60;                                /* convert to minutes */
+0092 8D30             (      ../utime.as):00173                             bsr       mul60     ; branch to subroutine to mul60
+                      (      ../utime.as):00174         *
+                      (      ../utime.as):00175         *    accum += *tp++;                              /* add minutes today */
+0094 E6C0             (      ../utime.as):00176                             ldb       ,u+       ; load B from memory pointed to by U, then advance U
+0096 4F               (      ../utime.as):00177                             clra                ; clear A
+0097 E362             (      ../utime.as):00178                             addd      2,s       ; add stack-relative value 2,s into D
+0099 ED62             (      ../utime.as):00179                             std       2,s       ; store D to stack-relative value 2,s
+009B ECE4             (      ../utime.as):00180                             ldd       ,s        ; load D from memory pointed to by S
+009D C900             (      ../utime.as):00181                             adcb      #0        ; add immediate value 0 into B
+009F 8900             (      ../utime.as):00182                             adca      #0        ; add immediate value 0 into A
+00A1 EDE4             (      ../utime.as):00183                             std       ,s        ; store D to memory pointed to by S
+                      (      ../utime.as):00184         
+                      (      ../utime.as):00185         *    accum *= 60;                                /* convert to seconds */
+00A3 8D1F             (      ../utime.as):00186                             bsr       mul60     ; branch to subroutine to mul60
+                      (      ../utime.as):00187         
+                      (      ../utime.as):00188         *
+                      (      ../utime.as):00189         *    accum += *tp;                                /* add seconds today */
+00A5 E6C0             (      ../utime.as):00190                             ldb       ,u+       ; load B from memory pointed to by U, then advance U
+00A7 4F               (      ../utime.as):00191                             clra                ; clear A
+00A8 E362             (      ../utime.as):00192                             addd      2,s       ; add stack-relative value 2,s into D
+00AA ED62             (      ../utime.as):00193                             std       2,s       ; store D to stack-relative value 2,s
+00AC ECE4             (      ../utime.as):00194                             ldd       ,s        ; load D from memory pointed to by S
+00AE C900             (      ../utime.as):00195                             adcb      #0        ; add immediate value 0 into B
+00B0 8900             (      ../utime.as):00196                             adca      #0        ; add immediate value 0 into A
+00B2 EDE4             (      ../utime.as):00197                             std       ,s        ; store D to memory pointed to by S
+                      (      ../utime.as):00198         
+                      (      ../utime.as):00199         *
+                      (      ../utime.as):00200         * return (accum);
+00B4 33E4             (      ../utime.as):00201                             leau      ,s        ; compute effective address into U from ,s
+00B6 AE6A             (      ../utime.as):00202                             ldx       10,s      ; leax  _flacc,y
+00B8 ECC4             (      ../utime.as):00203                             ldd       ,u        ; load D from memory pointed to by U
+00BA ED84             (      ../utime.as):00204                             std       ,x        ; store D to memory pointed to by X
+00BC EC42             (      ../utime.as):00205                             ldd       2,u       ; load D from indexed value 2,u
+00BE ED02             (      ../utime.as):00206                             std       2,x       ; store D to indexed value 2,x
+00C0 3266             (      ../utime.as):00207                             leas      6,s       ; adjust S using 6,s
+00C2 35C0             (      ../utime.as):00208                             puls      u,pc      ; restore registers and return
+                      (      ../utime.as):00209         
+                      (      ../utime.as):00210         *    }
+00C4 AE62             (      ../utime.as):00211         mul60               ldx       2,s       ; load X from stack-relative value 2,s
+00C6 EC64             (      ../utime.as):00212                             ldd       4,s       ; load D from stack-relative value 4,s
+00C8 8D25             (      ../utime.as):00213                             bsr       shift16   ; branch to subroutine to shift16
+00CA 8D23             (      ../utime.as):00214                             bsr       shift16   ; branch to subroutine to shift16
+00CC E364             (      ../utime.as):00215                             addd      4,s       ; add stack-relative value 4,s into D
+00CE 1E01             (      ../utime.as):00216                             exg       d,x       ; exchange D,X
+00D0 E963             (      ../utime.as):00217                             adcb      3,s       ; add stack-relative value 3,s into B
+00D2 A962             (      ../utime.as):00218                             adca      2,s       ; add stack-relative value 2,s into A
+00D4 1E01             (      ../utime.as):00219                             exg       d,x       ; exchange D,X
+00D6 AF62             (      ../utime.as):00220                             stx       2,s       ; store X to stack-relative value 2,s
+00D8 ED64             (      ../utime.as):00221                             std       4,s       ; store D to stack-relative value 4,s
+00DA 8D13             (      ../utime.as):00222                             bsr       shift16   ; branch to subroutine to shift16
+00DC E364             (      ../utime.as):00223                             addd      4,s       ; add stack-relative value 4,s into D
+00DE 1E01             (      ../utime.as):00224                             exg       d,x       ; exchange D,X
+00E0 E963             (      ../utime.as):00225                             adcb      3,s       ; add stack-relative value 3,s into B
+00E2 A962             (      ../utime.as):00226                             adca      2,s       ; add stack-relative value 2,s into A
+00E4 1E01             (      ../utime.as):00227                             exg       d,x       ; exchange D,X
+00E6 8D07             (      ../utime.as):00228                             bsr       shift16   ; branch to subroutine to shift16
+00E8 8D05             (      ../utime.as):00229                             bsr       shift16   ; branch to subroutine to shift16
+00EA AF62             (      ../utime.as):00230                             stx       2,s       ; store X to stack-relative value 2,s
+00EC ED64             (      ../utime.as):00231                             std       4,s       ; store D to stack-relative value 4,s
+00EE 39               (      ../utime.as):00232                             rts                 ; return to caller
+                      (      ../utime.as):00233         
+00EF 58               (      ../utime.as):00234         shift16             lslb                ; shift B left by one bit
+00F0 49               (      ../utime.as):00235                             rola                ; rotate A left through carry
+00F1 1E01             (      ../utime.as):00236                             exg       d,x       ; exchange D,X
+00F3 59               (      ../utime.as):00237                             rolb                ; rotate B left through carry
+00F4 49               (      ../utime.as):00238                             rola                ; rotate A left through carry
+00F5 1E01             (      ../utime.as):00239                             exg       d,x       ; exchange D,X
+00F7 39               (      ../utime.as):00240                             rts                 ; return to caller
+                      (      ../utime.as):00241         
+                      (      ../utime.as):00242         * /*
+                      (      ../utime.as):00243         * ** function to convert a 'tm' style time to os9 time
+                      (      ../utime.as):00244         * */
+                      (      ../utime.as):00245         *
+                      (      ../utime.as):00246         * u2otime(otime, tmp)
+                      (      ../utime.as):00247         * char        *otime
+                      (      ../utime.as):00248         * struct tm   *tmp;
+                      (      ../utime.as):00249         *    {
+                      (      ../utime.as):00250         *    otime->t_year = tmp->tm_year;
+                      (      ../utime.as):00251         *    otime->t_month = tmp->tm_mon;
+                      (      ../utime.as):00252         *    otime->t_day   = tmp->tm_mday;
+                      (      ../utime.as):00253         *    otime->t_hour  = tmp->tm_hour;
+                      (      ../utime.as):00254         *    otime->t_minute = tmp->tm_min;
+                      (      ../utime.as):00255         *    otime->t_second = tmp->tm_sec;
+                      (      ../utime.as):00256         *    }
+00F8                  (      ../utime.as):00257         _u2otime
+00F8 3440             (      ../utime.as):00258                             pshs      u         ; save U on the hardware stack
+00FA EE66             (      ../utime.as):00259                             ldu       6,s       ; tmp
+00FC AE64             (      ../utime.as):00260                             ldx       4,s       ; otime
+00FE 3006             (      ../utime.as):00261                             leax      6,x       ; get to end
+0100 8606             (      ../utime.as):00262                             lda       #6        ; bytes to copy
+0102 E6C0             (      ../utime.as):00263         u2o1                ldb       ,u+       ; dummy
+0104 E6C0             (      ../utime.as):00264                             ldb       ,u+       ; get data
+0106 E782             (      ../utime.as):00265                             stb       ,-x       ; stash away
+0108 4A               (      ../utime.as):00266                             deca                ; decrement A
+0109 26F7             (      ../utime.as):00267                             bne       u2o1      ; branch if not equal to u2o1
+010B 35C0             (      ../utime.as):00268                             puls      u,pc      ; restore registers and return
+                      (      ../utime.as):00269         
+010D 0000             (      ../utime.as):00270         daylight            fdb       0         ; define word data 0
+010F 00000000         (      ../utime.as):00271         timezone            fdb       0,0       ; define word data 0,0
+                      (      ../utime.as):00272         *
+                      (      ../utime.as):00273         * struct tm *
+                      (      ../utime.as):00274         * localtime(utime)
+                      (      ../utime.as):00275         * long  *utime;
+                      (      ../utime.as):00276         *    {
+                      (      ../utime.as):00277         *    register struct tm *tmp = &_tm;
+                      (      ../utime.as):00278         *    long  ticks = *utime;
+                      (      ../utime.as):00279         *    int   days;
+                      (      ../utime.as):00280         *    int   fac;
+                      (      ../utime.as):00281         *
+0113                  (      ../utime.as):00282         old_localtime
+0113 3446             (      ../utime.as):00283                             pshs      d,u       ; save U and allocate some scratch
+0115 33A90000         (      ../utime.as):00284                             leau      _tm,y     ; compute effective address into U from _tm,y
+                      (      ../utime.as):00285         
+                      (      ../utime.as):00286         *    tmp->tm_sec = ticks % 60;                      /* split out seconds */
+                      (      ../utime.as):00287         *    ticks /= 60;
+0119 AE66             (      ../utime.as):00288                             ldx       6,s       ; point to utime
+011B EC02             (      ../utime.as):00289                             ldd       2,x       ; copy to local storage
+011D 3406             (      ../utime.as):00290                             pshs      d         ; save D on the hardware stack
+011F EC84             (      ../utime.as):00291                             ldd       ,x        ; load D from memory pointed to by X
+0121 3406             (      ../utime.as):00292                             pshs      d         ; save D on the hardware stack
+0123 30E4             (      ../utime.as):00293                             leax      ,s        ; point to our copy
+0125 CC003C           (      ../utime.as):00294                             ldd       #60       ; load D from immediate value 60
+0128 8D72             (      ../utime.as):00295                             bsr       div32     ; branch to subroutine to div32
+012A EDC4             (      ../utime.as):00296                             std       ,u        ; seconds
+                      (      ../utime.as):00297         *
+                      (      ../utime.as):00298         *    tmp->tm_min = ticks % 60;                      /* split out minutes */
+                      (      ../utime.as):00299         *    ticks /= 60;
+012C CC003C           (      ../utime.as):00300                             ldd       #60       ; load D from immediate value 60
+012F 8D6B             (      ../utime.as):00301                             bsr       div32     ; branch to subroutine to div32
+0131 ED42             (      ../utime.as):00302                             std       2,u       ; minutes
+                      (      ../utime.as):00303         *
+                      (      ../utime.as):00304         *    tmp->tm_hr = ticks %24;                          /* split out hours */
+                      (      ../utime.as):00305         *    days = ticks / 24;
+0133 CC0018           (      ../utime.as):00306                             ldd       #24       ; load D from immediate value 24
+0136 8D64             (      ../utime.as):00307                             bsr       div32     ; branch to subroutine to div32
+0138 ED44             (      ../utime.as):00308                             std       4,u       ; hours
+013A EC02             (      ../utime.as):00309                             ldd       2,x       ; get days total
+013C ED64             (      ../utime.as):00310                             std       4,s       ; save days for later
+                      (      ../utime.as):00311         *
+                      (      ../utime.as):00312         *    for (tmp->tm_yr = 70; days >= 0; ++tmp->tm_yr)
+                      (      ../utime.as):00313         *       days -= (fac = ((tmp->tm_yr & 3) ? 365 : 366));
+                      (      ../utime.as):00314         *    tmp->tm_yr -= 1;
+                      (      ../utime.as):00315         *    tmp->tm_yday = (days += fac);               /* adjust for overshoot */
+013E CC0046           (      ../utime.as):00316                             ldd       #70       ; load D from immediate value 70
+0141 ED4A             (      ../utime.as):00317                             std       10,u      ; iniz the year
+0143 308D0000         (      ../utime.as):00318         lt1                 leax      yrsiz,pcr ; compute effective address into X from yrsiz,pcr
+0147 E64B             (      ../utime.as):00319                             ldb       11,u      ; get current year
+0149 C403             (      ../utime.as):00320                             andb      #3        ; AND B with immediate value 3
+014B 2602             (      ../utime.as):00321                             bne       lt2       ; branch if not equal to lt2
+014D 3002             (      ../utime.as):00322                             leax      2,x       ; use leap size
+014F EC64             (      ../utime.as):00323         lt2                 ldd       4,s       ; get saved days
+0151 A384             (      ../utime.as):00324                             subd      ,x        ; one year worth of days
+0153 6C4B             (      ../utime.as):00325                             inc       11,u      ; bump year
+0155 ED64             (      ../utime.as):00326                             std       4,s       ; save remainder
+0157 24EA             (      ../utime.as):00327                             bcc       lt1       ; branch if carry is clear to lt1
+0159 E384             (      ../utime.as):00328                             addd      ,x        ; fix up days left
+015B ED64             (      ../utime.as):00329                             std       4,s       ; store D to stack-relative value 4,s
+015D 6A4B             (      ../utime.as):00330                             dec       11,u      ; unbump year
+015F ED4E             (      ../utime.as):00331                             std       14,u      ; day of year
+                      (      ../utime.as):00332         *
+                      (      ../utime.as):00333         *    monsiz[2] = (tmp->tm_yr & 3) ? 28 : 29;
+0161 E64B             (      ../utime.as):00334                             ldb       11,u      ; load B from indexed value 11,u
+0163 30A90000         (      ../utime.as):00335                             leax      monsiz,y  ; compute effective address into X from monsiz,y
+0167 861D             (      ../utime.as):00336                             lda       #29       ; assume leap year
+0169 C403             (      ../utime.as):00337                             andb      #3        ; AND B with immediate value 3
+016B 2702             (      ../utime.as):00338                             beq       lt3       ; branch if equal/zero to lt3
+016D 861C             (      ../utime.as):00339                             lda       #28       ; load A from immediate value 28
+016F A703             (      ../utime.as):00340         lt3                 sta       3,x       ; store A to indexed value 3,x
+                      (      ../utime.as):00341         
+                      (      ../utime.as):00342         *    for (tmp->tm_mon = 1; days >= monsiz[tmp->tm_mon]; ++tmp->tm_mon)
+                      (      ../utime.as):00343         *       days -= monsiz[tmp->tm_mon];
+0171 4F               (      ../utime.as):00344                             clra                ; clear A
+0172 5F               (      ../utime.as):00345                             clrb                ; clear B
+                      (      ../utime.as):00346                             *         ldd
+0173 ED48             (      ../utime.as):00347                             std       8,u       ; store D to indexed value 8,u
+0175 EC64             (      ../utime.as):00348                             ldd       4,s       ; load D from stack-relative value 4,s
+0177 6C49             (      ../utime.as):00349         lt4                 inc       9,u       ; increment indexed value 9,u
+0179 A381             (      ../utime.as):00350                             subd      ,x++      ; subtract memory pointed to by X+, then advance X+ from D
+017B 24FA             (      ../utime.as):00351                             bcc       lt4       ; branch if carry is clear to lt4
+017D E31E             (      ../utime.as):00352                             addd      -2,x      ; add indexed value -2,x into D
+017F C30001           (      ../utime.as):00353                             addd      #1        ; add immediate value 1 into D
+0182 ED46             (      ../utime.as):00354                             std       6,u       ; store D to indexed value 6,u
+                      (      ../utime.as):00355         
+                      (      ../utime.as):00356         *    tmp->tm_wday = (days + 4) % 7;           /* extract the day of week */
+0184 30E4             (      ../utime.as):00357                             leax      ,s        ; point to utime again
+0186 EC02             (      ../utime.as):00358                             ldd       2,x       ; load D from indexed value 2,x
+0188 C30004           (      ../utime.as):00359                             addd      #4        ; add immediate value 4 into D
+018B ED02             (      ../utime.as):00360                             std       2,x       ; store D to indexed value 2,x
+018D CC0007           (      ../utime.as):00361                             ldd       #7        ; load D from immediate value 7
+0190 8D0A             (      ../utime.as):00362                             bsr       div32     ; branch to subroutine to div32
+0192 ED4C             (      ../utime.as):00363                             std       12,u      ; day of week
+                      (      ../utime.as):00364         *
+                      (      ../utime.as):00365         *    return (tmp);
+0194 1F30             (      ../utime.as):00366                             tfr       u,d       ; transfer U,D
+0196 3266             (      ../utime.as):00367                             leas      6,s       ; adjust S using 6,s
+0198 EF64             (      ../utime.as):00368                             stu       4,s       ; store U to stack-relative value 4,s
+019A 35C0             (      ../utime.as):00369                             puls      u,pc      ; restore registers and return
+                      (      ../utime.as):00370         * }
+                      (      ../utime.as):00371         
+019C                  (      ../utime.as):00372         div32
+019C 6FE2             (      ../utime.as):00373                             clr       ,-s       ; set up remainder
+019E 6FE2             (      ../utime.as):00374                             clr       ,-s       ; and clear carry
+01A0 3406             (      ../utime.as):00375                             pshs      d         ; dave dsor
+01A2 C621             (      ../utime.as):00376                             ldb       #33       ; loop count
+01A4 3404             (      ../utime.as):00377                             pshs      b         ; save B on the hardware stack
+01A6 2008             (      ../utime.as):00378                             bra       div32b    ; branch unconditionally to div32b
+01A8 EC63             (      ../utime.as):00379         div32a              ldd       3,s       ; load D from stack-relative value 3,s
+01AA A361             (      ../utime.as):00380                             subd      1,s       ; subtract dsor
+01AC 2502             (      ../utime.as):00381                             bcs       div32b    ; underflow
+01AE ED63             (      ../utime.as):00382                             std       3,s       ; update remainder
+01B0 6903             (      ../utime.as):00383         div32b              rol       3,x       ; shoft ddend
+01B2 6902             (      ../utime.as):00384                             rol       2,x       ; rotate indexed value 2,x left through carry
+01B4 6901             (      ../utime.as):00385                             rol       1,x       ; rotate indexed value 1,x left through carry
+01B6 6984             (      ../utime.as):00386                             rol       ,x        ; rotate memory pointed to by X left through carry
+01B8 6964             (      ../utime.as):00387                             rol       4,s       ; shift remainder
+01BA 6963             (      ../utime.as):00388                             rol       3,s       ; rotate stack-relative value 3,s left through carry
+01BC 6AE4             (      ../utime.as):00389                             dec       ,s        ; count off
+01BE 26E8             (      ../utime.as):00390                             bne       div32a    ; branch if not equal to div32a
+01C0 6303             (      ../utime.as):00391                             com       3,x       ; fix up dsor
+01C2 6302             (      ../utime.as):00392                             com       2,x
+01C4 6301             (      ../utime.as):00393                             com       1,x
+01C6 6384             (      ../utime.as):00394                             com       ,x
+01C8 6463             (      ../utime.as):00395                             lsr       3,s       ; fix up remainder
+01CA 6664             (      ../utime.as):00396                             ror       4,s       ; rotate stack-relative value 4,s right through carry
+01CC 3263             (      ../utime.as):00397                             leas      3,s       ; clean off counter and dsor
+01CE 3586             (      ../utime.as):00398                             puls      d,pc      ; get remainder and return
+                      (      ../utime.as):00399         
+                      (      ../utime.as):00400         *
+                      (      ../utime.as):00401         *
+                      (      ../utime.as):00402         * char   *
+                      (      ../utime.as):00403         * asctime(tmp)
+                      (      ../utime.as):00404         * struct tm *tmp;
+                      (      ../utime.as):00405         *    {
+                      (      ../utime.as):00406         *    sprintf(xx, "%s %s %2d %02d:%02d:%02d %04d\n",
+                      (      ../utime.as):00407         *       days[tmp->tm_wday], months[tmp->tm_mon - 1], tmp->tm_day,
+                      (      ../utime.as):00408         *       tmp->tm_hr, tmp->tm_min, tmp->tm_sec, tmp->tm_yr+1900);
+                      (      ../utime.as):00409         *    return (xx);
+                      (      ../utime.as):00410         *    }
+                      (      ../utime.as):00411         
+01D0 3440             (      ../utime.as):00412         old_asctime         pshs      u         ; save U on the hardware stack
+01D2 EE64             (      ../utime.as):00413                             ldu       4,s       ; load U from stack-relative value 4,s
+01D4 EC4A             (      ../utime.as):00414                             ldd       10,u      ; tm_yr
+01D6 C3076C           (      ../utime.as):00415                             addd      #1900     ; add immediate value 1900 into D
+01D9 3406             (      ../utime.as):00416                             pshs      d         ; save D on the hardware stack
+01DB ECC4             (      ../utime.as):00417                             ldd       ,u        ; tm_sec
+01DD 3406             (      ../utime.as):00418                             pshs      d         ; save D on the hardware stack
+01DF EC42             (      ../utime.as):00419                             ldd       2,u       ; tm_min
+01E1 3406             (      ../utime.as):00420                             pshs      d         ; save D on the hardware stack
+01E3 EC44             (      ../utime.as):00421                             ldd       4,u       ; tm_hr
+01E5 3406             (      ../utime.as):00422                             pshs      d         ; save D on the hardware stack
+01E7 EC46             (      ../utime.as):00423                             ldd       6,u       ; tm_day
+01E9 3406             (      ../utime.as):00424                             pshs      d         ; save D on the hardware stack
+01EB EC48             (      ../utime.as):00425                             ldd       8,u       ; tm_mon
+                      (      ../utime.as):00426         * subd #1 fix the basing *+crk+ this needed fixed too
+01ED 830001           (      ../utime.as):00427                             subd      #1        ; subtract immediate value 1 from D
+01F0 58               (      ../utime.as):00428                             lslb                ; shift B left by one bit
+01F1 49               (      ../utime.as):00429                             rola                ; rotate A left through carry
+01F2 58               (      ../utime.as):00430                             lslb                ; shift B left by one bit
+01F3 49               (      ../utime.as):00431                             rola                ; rotate A left through carry
+01F4 308D0000         (      ../utime.as):00432                             leax      >months,pcr ; compute effective address into X from >months,pcr
+01F8 308B             (      ../utime.as):00433                             leax      d,x       ; compute effective address into X from d,x
+01FA 3410             (      ../utime.as):00434                             pshs      x         ; month string
+01FC EC4C             (      ../utime.as):00435                             ldd       12,u      ; tm_wday
+01FE 58               (      ../utime.as):00436                             lslb                ; shift B left by one bit
+01FF 49               (      ../utime.as):00437                             rola                ; rotate A left through carry
+0200 58               (      ../utime.as):00438                             lslb                ; shift B left by one bit
+0201 49               (      ../utime.as):00439                             rola                ; rotate A left through carry
+0202 308D0000         (      ../utime.as):00440                             leax      >days,pcr ; compute effective address into X from >days,pcr
+0206 308B             (      ../utime.as):00441                             leax      d,x       ; compute effective address into X from d,x
+0208 3410             (      ../utime.as):00442                             pshs      x         ; day of week string
+020A 308D0000         (      ../utime.as):00443                             leax      >datefmt,pcr ; compute effective address into X from >datefmt,pcr
+020E 3410             (      ../utime.as):00444                             pshs      x         ; sprintf string spec
+0210 30A90000         (      ../utime.as):00445                             leax      _datebuf,y ; compute effective address into X from _datebuf,y
+0214 3410             (      ../utime.as):00446                             pshs      x         ; dest buffer
+0216 170000           (      ../utime.as):00447                             lbsr      _sprintf  ; long branch to subroutine to _sprintf
+0219 32E812           (      ../utime.as):00448                             leas      18,s      ; adjust S using 18,s
+021C 30A90000         (      ../utime.as):00449                             leax      _datebuf,y ; compute effective address into X from _datebuf,y
+0220 1F10             (      ../utime.as):00450                             tfr       x,d       ; transfer X,D
+0222 35C0             (      ../utime.as):00451                             puls      u,pc      ; restore registers and return
+                      (      ../utime.as):00452         
+                      (      ../utime.as):00453         *
+                      (      ../utime.as):00454         *
+                      (      ../utime.as):00455         * char  *
+                      (      ../utime.as):00456         * ctime(ticks)
+                      (      ../utime.as):00457         * long   *ticks;
+                      (      ../utime.as):00458         *    {
+                      (      ../utime.as):00459         *    struct tm *tmp;
+                      (      ../utime.as):00460         *
+                      (      ../utime.as):00461         *    return (asctime(localtime(ticks)));
+                      (      ../utime.as):00462         *    }
+                      (      ../utime.as):00463         
+0224                  (      ../utime.as):00464         old_ctime
+0224 EC62             (      ../utime.as):00465                             ldd       2,s       ; load D from stack-relative value 2,s
+0226 3406             (      ../utime.as):00466                             pshs      d         ; save D on the hardware stack
+0228 17FEE8           (      ../utime.as):00467                             lbsr      old_localtime ; long branch to subroutine to old_localtime
+022B EDE4             (      ../utime.as):00468                             std       ,s        ; store D to memory pointed to by S
+022D 17FFA0           (      ../utime.as):00469                             lbsr      old_asctime ; long branch to subroutine to old_asctime
+0230 3590             (      ../utime.as):00470                             puls      x,pc      ; restore registers and return
+                      (      ../utime.as):00471         
+                      (      ../utime.as):00472                             endsect             ; end current section
+                      (      ../utime.as):00473         
+                      (      ../utime.as):00474                             section   rodata    ; begin rodata section
+                      (      ../utime.as):00475         
+0000                  (      ../utime.as):00476         yrsiz
+0000 016D016E         (      ../utime.as):00477                             fdb       365,366   ; define word data 365,366
+                      (      ../utime.as):00478         
+0004                  (      ../utime.as):00479         days
+0004 53756E           (      ../utime.as):00480                             fcc       /Sun/     ; define string data /Sun/
+0007 00               (      ../utime.as):00481                             fcb       $00       ; define byte data $00
+0008 4D6F6E           (      ../utime.as):00482                             fcc       /Mon/     ; define string data /Mon/
+000B 00               (      ../utime.as):00483                             fcb       $00       ; define byte data $00
+000C 547565           (      ../utime.as):00484                             fcc       /Tue/     ; define string data /Tue/
+000F 00               (      ../utime.as):00485                             fcb       $00       ; define byte data $00
+0010 576564           (      ../utime.as):00486                             fcc       /Wed/     ; define string data /Wed/
+0013 00               (      ../utime.as):00487                             fcb       $00       ; define byte data $00
+0014 546875           (      ../utime.as):00488                             fcc       /Thu/     ; define string data /Thu/
+0017 00               (      ../utime.as):00489                             fcb       $00       ; define byte data $00
+0018 467269           (      ../utime.as):00490                             fcc       /Fri/     ; define string data /Fri/
+001B 00               (      ../utime.as):00491                             fcb       $00       ; define byte data $00
+001C 536174           (      ../utime.as):00492                             fcc       /Sat/     ; define string data /Sat/
+001F 00               (      ../utime.as):00493                             fcb       $00       ; define byte data $00
+0020                  (      ../utime.as):00494         months
+0020 4A616E           (      ../utime.as):00495                             fcc       /Jan/     ; define string data /Jan/
+0023 00               (      ../utime.as):00496                             fcb       $00       ; define byte data $00
+0024 466562           (      ../utime.as):00497                             fcc       /Feb/     ; define string data /Feb/
+0027 00               (      ../utime.as):00498                             fcb       $00       ; define byte data $00
+0028 4D6172           (      ../utime.as):00499                             fcc       /Mar/     ; define string data /Mar/
+002B 00               (      ../utime.as):00500                             fcb       $00       ; define byte data $00
+002C 417072           (      ../utime.as):00501                             fcc       /Apr/     ; define string data /Apr/
+002F 00               (      ../utime.as):00502                             fcb       $00       ; define byte data $00
+0030 4D6179           (      ../utime.as):00503                             fcc       /May/     ; define string data /May/
+0033 00               (      ../utime.as):00504                             fcb       $00       ; define byte data $00
+0034 4A756E           (      ../utime.as):00505                             fcc       /Jun/     ; define string data /Jun/
+0037 00               (      ../utime.as):00506                             fcb       $00       ; define byte data $00
+0038 4A756C           (      ../utime.as):00507                             fcc       /Jul/     ; define string data /Jul/
+003B 00               (      ../utime.as):00508                             fcb       $00       ; define byte data $00
+003C 417567           (      ../utime.as):00509                             fcc       /Aug/     ; define string data /Aug/
+003F 00               (      ../utime.as):00510                             fcb       $00       ; define byte data $00
+0040 536570           (      ../utime.as):00511                             fcc       /Sep/     ; define string data /Sep/
+0043 00               (      ../utime.as):00512                             fcb       $00       ; define byte data $00
+0044 4F6374           (      ../utime.as):00513                             fcc       /Oct/     ; define string data /Oct/
+0047 00               (      ../utime.as):00514                             fcb       $00       ; define byte data $00
+0048 4E6F76           (      ../utime.as):00515                             fcc       /Nov/     ; define string data /Nov/
+004B 00               (      ../utime.as):00516                             fcb       $00       ; define byte data $00
+004C 446563           (      ../utime.as):00517                             fcc       /Dec/     ; define string data /Dec/
+004F 00               (      ../utime.as):00518                             fcb       $00       ; define byte data $00
+                      (      ../utime.as):00519         
+0050                  (      ../utime.as):00520         datefmt
+0050 2573202020202020 (      ../utime.as):00521                             fcc       /%s       ; %s %2d %02d:%02d:%02d %04d/
+     203B202573202532
+     6420253032643A25
+     3032643A25303264
+     2025303464
+0075 00               (      ../utime.as):00522                             fcb       $00       ; define byte data $00
+                      (      ../utime.as):00523         
+                      (      ../utime.as):00524                             endsect             ; end current section

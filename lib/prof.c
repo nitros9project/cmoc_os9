@@ -13,7 +13,7 @@
 
 typedef struct profstr {
       int   (*func)();
-      char  *fname;
+      const char  *fname;
       long  count;
       } prof;
 
@@ -22,7 +22,7 @@ static prof *pfree = pfs;
 static prof *pmax = &pfs[MAXFUNC];
 
 
-void _prof(int (*afunc)(), char *name)
+void _prof(int (*afunc)(), const char *name)
    {
    register prof *p;
 
@@ -54,7 +54,9 @@ void _dumprof()
    {
    register prof *p;
 
+#if defined(_CMOC_MC6839_) || defined(_CMOC_NATIVE_FLOAT_)
    pflinit();
+#endif
    fflush(stdout);                             /* flush stdout first */
    for (p = pfs; p < pfree; ++p)            /* dump names and counts */
       fprintf(stderr, " %8s() %ld\n", p->fname, p->count);

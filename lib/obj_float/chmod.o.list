@@ -1,0 +1,73 @@
+                      (      ../chmod.as):00001         *
+                      (      ../chmod.as):00002         * Adapted from cmoc_os9/lib/todo/chmod.a for the live CMOC ABI.
+                      (      ../chmod.as):00003         *
+                      (      ../chmod.as):00004         
+                      (      ../chmod.as):00005                             use       ../include/fcntl.d ; shared file-mode constants
+                      (./include/fcntl.d):00001         * Shared assembler-side file mode and access constants.
+                      (./include/fcntl.d):00002         
+     0001             (./include/fcntl.d):00003         S_IREAD             equ       $01       ; owner-read permission bit
+     0002             (./include/fcntl.d):00004         S_IWRITE            equ       $02       ; owner-write permission bit
+     0004             (./include/fcntl.d):00005         S_IEXEC             equ       $04       ; owner-execute permission bit
+     0008             (./include/fcntl.d):00006         S_IOREAD            equ       $08       ; public-read permission bit
+     0010             (./include/fcntl.d):00007         S_IOWRITE           equ       $10       ; public-write permission bit
+     0020             (./include/fcntl.d):00008         S_IOEXEC            equ       $20       ; public-execute permission bit
+     0040             (./include/fcntl.d):00009         S_SHARED            equ       $40       ; sharable file bit
+     0080             (./include/fcntl.d):00010         S_DIR               equ       $80       ; directory attribute bit
+                      (./include/fcntl.d):00011         
+     0001             (./include/fcntl.d):00012         FAM_READ            equ       S_IREAD   ; open for reading
+     0002             (./include/fcntl.d):00013         FAM_WRITE           equ       S_IWRITE  ; open for writing
+     0003             (./include/fcntl.d):00014         FAM_UPDATE          equ       S_IREAD|S_IWRITE ; open for read/write
+     0080             (./include/fcntl.d):00015         FAM_DIR             equ       S_DIR     ; operate on a directory path
+                      (      ../chmod.as):00006         
+                      (      ../chmod.as):00007                             section   code      ; begin code section
+                      (      ../chmod.as):00008         
+                      (      ../chmod.as):00009         _chmod              EXPORT              ; export this symbol
+                      (      ../chmod.as):00010         
+                      (      ../chmod.as):00011         _sysret             EXTERNAL            ; import external symbol
+                      (      ../chmod.as):00012         
+     0000             (      ../chmod.as):00013         FD_Att              equ       0         ; define constant as 0
+     0001             (      ../chmod.as):00014         FD_Own              equ       1         ; define constant as 1
+     0010             (      ../chmod.as):00015         Bufsize             equ       16        ; define constant as 16
+     000F             (      ../chmod.as):00016         SS_FD               equ       $0f       ; define constant as $0f
+                      (      ../chmod.as):00017         
+0000 3460             (      ../chmod.as):00018         _chmod              pshs      y,u       ; save Y,U on the hardware stack
+0002 3270             (      ../chmod.as):00019                             leas      -Bufsize,s ; adjust S using -Bufsize,s
+                      (      ../chmod.as):00020         
+0004 8D2F             (      ../chmod.as):00021                             bsr       openfile  ; branch to subroutine to openfile
+0006 2525             (      ../chmod.as):00022                             bcs       chexit    ; branch if carry is set to chexit
+                      (      ../chmod.as):00023         
+0008 3422             (      ../chmod.as):00024                             pshs      a,y       ; save A,Y on the hardware stack
+000A 103F0C           (      ../chmod.as):00025                             os9       $0c       ; invoke OS-9 system call $0c
+000D 108C0000         (      ../chmod.as):00026                             cmpy      #0        ; compare Y against immediate value 0
+0011 2709             (      ../chmod.as):00027                             beq       chmod10   ; branch if equal/zero to chmod10
+0013 C6D6             (      ../chmod.as):00028                             ldb       #$d6      ; load B from immediate value $d6
+0015 10AC01           (      ../chmod.as):00029                             cmpy      FD_Own,x  ; compare Y against indexed value FD_Own,x
+0018 1A01             (      ../chmod.as):00030                             orcc      #1        ; set condition-code bits with mask #1
+001A 2611             (      ../chmod.as):00031                             bne       chexit    ; branch if not equal to chexit
+                      (      ../chmod.as):00032         
+001C E6E81C           (      ../chmod.as):00033         chmod10             ldb       Bufsize+12,s ; load B from stack-relative value Bufsize+12,s
+001F E784             (      ../chmod.as):00034                             stb       FD_Att,x  ; store B to indexed value FD_Att,x
+0021 3522             (      ../chmod.as):00035                             puls      a,y       ; restore A,Y from the hardware stack
+0023 C60F             (      ../chmod.as):00036                             ldb       #SS_FD    ; load B from immediate value SS_FD
+0025 103F8E           (      ../chmod.as):00037                             os9       $8e       ; invoke OS-9 system call $8e
+0028 2503             (      ../chmod.as):00038                             bcs       chexit    ; branch if carry is set to chexit
+002A 103F8F           (      ../chmod.as):00039                             os9       $8f       ; invoke OS-9 system call $8f
+                      (      ../chmod.as):00040         
+002D 32E810           (      ../chmod.as):00041         chexit              leas      Bufsize,s ; adjust S using Bufsize,s
+0030 3560             (      ../chmod.as):00042                             puls      y,u       ; restore Y,U from the hardware stack
+0032 160000           (      ../chmod.as):00043                             lbra      _sysret   ; long branch unconditionally to _sysret
+                      (      ../chmod.as):00044         
+0035                  (      ../chmod.as):00045         openfile
+0035 8602             (      ../chmod.as):00046                             lda       #FAM_WRITE ; load A from immediate value FAM_WRITE
+0037 AEE818           (      ../chmod.as):00047                             ldx       Bufsize+8,s ; load X from stack-relative value Bufsize+8,s
+003A 103F84           (      ../chmod.as):00048                             os9       $84       ; invoke OS-9 system call $84
+003D 2401             (      ../chmod.as):00049                             bcc       openf10   ; branch if carry is clear to openf10
+003F 39               (      ../chmod.as):00050                             rts                 ; return to caller
+                      (      ../chmod.as):00051         
+0040 3062             (      ../chmod.as):00052         openf10             leax      2,s       ; compute effective address into X from 2,s
+0042 108E0010         (      ../chmod.as):00053                             ldy       #Bufsize  ; load Y from immediate value Bufsize
+0046 C60F             (      ../chmod.as):00054                             ldb       #SS_FD    ; load B from immediate value SS_FD
+0048 103F8D           (      ../chmod.as):00055                             os9       $8d       ; invoke OS-9 system call $8d
+004B 39               (      ../chmod.as):00056                             rts                 ; return to caller
+                      (      ../chmod.as):00057         
+                      (      ../chmod.as):00058                             endsect             ; end current section

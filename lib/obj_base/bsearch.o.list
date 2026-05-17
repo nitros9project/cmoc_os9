@@ -1,0 +1,47 @@
+                      (    ../bsearch.as):00001         * Adapted from cmoc_os9/lib/todo/bsearch.as for the live cmoc_os9 ABI.
+                      (    ../bsearch.as):00002         
+                      (    ../bsearch.as):00003                             section   code      ; begin code section
+                      (    ../bsearch.as):00004         
+                      (    ../bsearch.as):00005         _bsearch            EXPORT              ; export this symbol
+                      (    ../bsearch.as):00006         
+                      (    ../bsearch.as):00007         ccmult              EXTERNAL            ; import external symbol
+                      (    ../bsearch.as):00008         
+0000                  (    ../bsearch.as):00009         _bsearch
+0000 3476             (    ../bsearch.as):00010                             pshs      d,x,y,u   ; save D,X,Y,U on the hardware stack
+0002 EE6A             (    ../bsearch.as):00011                             ldu       10,s      ; load U from stack-relative value 10,s
+0004 4F               (    ../bsearch.as):00012                             clra                ; clear A
+0005 5F               (    ../bsearch.as):00013                             clrb                ; clear B
+0006 C30001           (    ../bsearch.as):00014         Loop_01             addd      #1        ; add immediate value 1 into D
+0009 ED62             (    ../bsearch.as):00015                             std       2,s       ; store D to stack-relative value 2,s
+000B EC6E             (    ../bsearch.as):00016                             ldd       14,s      ; load D from stack-relative value 14,s
+000D A362             (    ../bsearch.as):00017         Loop_02             subd      2,s       ; subtract stack-relative value 2,s from D
+000F 2B2C             (    ../bsearch.as):00018                             bmi       ReturnZero_01 ; branch if minus to ReturnZero_01
+0011 EC6E             (    ../bsearch.as):00019                             ldd       14,s      ; load D from stack-relative value 14,s
+0013 E362             (    ../bsearch.as):00020                             addd      2,s       ; add stack-relative value 2,s into D
+0015 44               (    ../bsearch.as):00021                             lsra                ; logical shift A right by one bit
+0016 56               (    ../bsearch.as):00022                             rorb                ; rotate B right through carry
+0017 ED64             (    ../bsearch.as):00023                             std       4,s       ; store D to stack-relative value 4,s
+0019 C3FFFF           (    ../bsearch.as):00024                             addd      #-1       ; add immediate value -1 into D
+001C 3406             (    ../bsearch.as):00025                             pshs      d         ; save D on the hardware stack
+001E ECE812           (    ../bsearch.as):00026                             ldd       18,s      ; load D from stack-relative value 18,s
+0021 170000           (    ../bsearch.as):00027                             lbsr      ccmult    ; long branch to subroutine to ccmult
+0024 E36C             (    ../bsearch.as):00028                             addd      12,s      ; add stack-relative value 12,s into D
+0026 EDE4             (    ../bsearch.as):00029                             std       ,s        ; store D to memory pointed to by S
+0028 3440             (    ../bsearch.as):00030                             pshs      u         ; save U on the hardware stack
+002A ADF814           (    ../bsearch.as):00031                             jsr       [20,s]    ; call subroutine at [20,s]
+002D EDE1             (    ../bsearch.as):00032                             std       ,s++      ; store D to memory pointed to by S+, then advance S+
+002F 2710             (    ../bsearch.as):00033                             beq       BranchTarget_01 ; branch if equal/zero to BranchTarget_01
+0031 48               (    ../bsearch.as):00034                             asla                ; shift A left by one bit
+0032 EC64             (    ../bsearch.as):00035                             ldd       4,s       ; load D from stack-relative value 4,s
+0034 24D0             (    ../bsearch.as):00036                             bcc       Loop_01   ; branch if carry is clear to Loop_01
+0036 C3FFFF           (    ../bsearch.as):00037                             addd      #-1       ; add immediate value -1 into D
+0039 ED6E             (    ../bsearch.as):00038                             std       14,s      ; store D to stack-relative value 14,s
+003B 20D0             (    ../bsearch.as):00039                             bra       Loop_02   ; branch unconditionally to Loop_02
+003D 4F               (    ../bsearch.as):00040         ReturnZero_01       clra                ; clear A
+003E 5F               (    ../bsearch.as):00041                             clrb                ; clear B
+003F 2002             (    ../bsearch.as):00042                             bra       Continue_01 ; branch unconditionally to Continue_01
+0041 ECE4             (    ../bsearch.as):00043         BranchTarget_01     ldd       ,s        ; load D from memory pointed to by S
+0043 3266             (    ../bsearch.as):00044         Continue_01         leas      6,s       ; adjust S using 6,s
+0045 35C0             (    ../bsearch.as):00045                             puls      u,pc      ; restore registers and return
+                      (    ../bsearch.as):00046         
+                      (    ../bsearch.as):00047                             endsect             ; end current section

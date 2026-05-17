@@ -1,0 +1,22 @@
+                      (        ../ss3.as):00001         * Adapted from cmoc_os9/lib/todo/ss3.as for the live cmoc_os9 ABI.
+                      (        ../ss3.as):00002         
+                      (        ../ss3.as):00003                             section   code      ; begin code section
+                      (        ../ss3.as):00004         
+                      (        ../ss3.as):00005         _ss_wtrk            EXPORT              ; export this symbol
+                      (        ../ss3.as):00006         
+                      (        ../ss3.as):00007         _sysret             EXTERNAL            ; import external symbol
+                      (        ../ss3.as):00008         
+     008E             (        ../ss3.as):00009         I_SetStt            equ       $8e       ; define constant as $8e
+                      (        ../ss3.as):00010         
+0000                  (        ../ss3.as):00011         _ss_wtrk
+0000 3460             (        ../ss3.as):00012                             pshs      y,u       ; save Y,U on the hardware stack
+0002 C604             (        ../ss3.as):00013                             ldb       #4        ; load B from immediate value 4
+0004 10AE6A           (        ../ss3.as):00014                             ldy       10,s      ; load Y from stack-relative value 10,s
+0007 EE68             (        ../ss3.as):00015                             ldu       8,s       ; load U from stack-relative value 8,s
+0009 AE6E             (        ../ss3.as):00016                             ldx       14,s      ; load X from stack-relative value 14,s
+000B A667             (        ../ss3.as):00017                             lda       7,s       ; load A from stack-relative value 7,s
+000D 103F8E           (        ../ss3.as):00018                             os9       I_SetStt  ; invoke OS-9 system call I_SetStt
+0010 3560             (        ../ss3.as):00019                             puls      y,u       ; restore Y,U from the hardware stack
+0012 160000           (        ../ss3.as):00020                             lbra      _sysret   ; long branch unconditionally to _sysret
+                      (        ../ss3.as):00021         
+                      (        ../ss3.as):00022                             endsect             ; end current section

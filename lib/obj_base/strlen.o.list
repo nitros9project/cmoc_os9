@@ -1,0 +1,17 @@
+                      (     ../strlen.as):00001         * Adapted from Deek's KLibc strlen.a for the live cmoc_os9 ABI.
+                      (     ../strlen.as):00002         
+                      (     ../strlen.as):00003                             section   code      ; begin code section
+                      (     ../strlen.as):00004         
+                      (     ../strlen.as):00005         _strlen             EXPORT              ; export this symbol
+                      (     ../strlen.as):00006         
+0000                  (     ../strlen.as):00007         _strlen
+0000 3440             (     ../strlen.as):00008                             pshs      u         ; save U on the hardware stack
+0002 EE64             (     ../strlen.as):00009                             ldu       4,s       ; load U from stack-relative value 4,s
+0004 E6C0             (     ../strlen.as):00010         Loop_01             ldb       ,u+       ; load B from memory pointed to by U, then advance U
+0006 26FC             (     ../strlen.as):00011                             bne       Loop_01   ; branch if not equal to Loop_01
+0008 335F             (     ../strlen.as):00012                             leau      -1,u      ; compute effective address into U from -1,u
+000A 1F30             (     ../strlen.as):00013                             tfr       u,d       ; transfer U,D
+000C A364             (     ../strlen.as):00014                             subd      4,s       ; subtract stack-relative value 4,s from D
+000E 35C0             (     ../strlen.as):00015                             puls      u,pc      ; restore registers and return
+                      (     ../strlen.as):00016         
+                      (     ../strlen.as):00017                             endsect             ; end current section

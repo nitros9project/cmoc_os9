@@ -1,0 +1,9 @@
+Symbol: _cread (crw.o) = 0000
+Symbol: _creadln (crw.o) = 0027
+Symbol: _cwrite (crw.o) = 004B
+Symbol: _cwriteln (crw.o) = 0078
+Symbol: cread_null (crw.o) = 0021
+Symbol: cwrite_len_ok (crw.o) = 005D
+Symbol: cwriteln_len_ok (crw.o) = 008D
+Symbol: os9err (crw.o) = 0040
+Symbol: os9err2 (crw.o) = 006C

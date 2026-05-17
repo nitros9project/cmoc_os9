@@ -1,0 +1,20 @@
+                      (    ../MUL168.asm):00001                 SECTION code
+                      (    ../MUL168.asm):00002         
+                      (    ../MUL168.asm):00003         MUL168  EXPORT * export this symbol
+                      (    ../MUL168.asm):00004         
+                      (    ../MUL168.asm):00005         
+                      (    ../MUL168.asm):00006         * Multiply B by X, unsigned; return result in D; preserve X.
+0000 3416             (    ../MUL168.asm):00007         MUL168  PSHS    X,B,A           acc A pushed to create temp byte at ,S
+0002 A662             (    ../MUL168.asm):00008                 LDA     2,S             high byte of X
+0004 3D               (    ../MUL168.asm):00009                 MUL                     multiply by B
+0005 E7E4             (    ../MUL168.asm):00010                 STB     ,S              keep intermediate result
+0007 E661             (    ../MUL168.asm):00011                 LDB     1,S             original B
+0009 A663             (    ../MUL168.asm):00012                 LDA     3,S             low byte of X
+000B 3D               (    ../MUL168.asm):00013                 MUL * multiply A by B and leave the product in D
+000C ABE4             (    ../MUL168.asm):00014                 ADDA    ,S * add memory pointed to by S into A
+000E 3264             (    ../MUL168.asm):00015                 LEAS    4,S * adjust S using 4,S
+0010 39               (    ../MUL168.asm):00016                 RTS * return to caller
+                      (    ../MUL168.asm):00017         
+                      (    ../MUL168.asm):00018         
+                      (    ../MUL168.asm):00019         
+                      (    ../MUL168.asm):00020                 ENDSECTION * end current section

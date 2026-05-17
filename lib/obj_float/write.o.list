@@ -1,0 +1,34 @@
+                      (      ../write.as):00001         * Compact assembly implementation of write()/writeln().
+                      (      ../write.as):00002         
+                      (      ../write.as):00003                             section   code      ; begin code section
+                      (      ../write.as):00004         
+                      (      ../write.as):00005         _write              EXPORT              ; export this symbol
+                      (      ../write.as):00006         _writeln            EXPORT              ; export this symbol
+                      (      ../write.as):00007         
+                      (      ../write.as):00008         _os9err             EXTERNAL            ; import external symbol
+                      (      ../write.as):00009         
+0000                  (      ../write.as):00010         _write
+0000 3420             (      ../write.as):00011                             pshs      y         ; save Y on the hardware stack
+0002 10AE68           (      ../write.as):00012                             ldy       8,s       ; load Y from stack-relative value 8,s
+0005 270E             (      ../write.as):00013                             beq       L_write_exit ; branch if equal/zero to L_write_exit
+0007 A665             (      ../write.as):00014                             lda       5,s       ; load A from stack-relative value 5,s
+0009 AE66             (      ../write.as):00015                             ldx       6,s       ; load X from stack-relative value 6,s
+000B 103F8A           (      ../write.as):00016                             os9       $8A       ; invoke OS-9 system call $8A
+000E                  (      ../write.as):00017         L_write_common
+000E 2405             (      ../write.as):00018                             bcc       L_write_exit ; branch if carry is clear to L_write_exit
+0010 3520             (      ../write.as):00019                             puls      y         ; restore Y from the hardware stack
+0012 160000           (      ../write.as):00020                             lbra      _os9err   ; long branch unconditionally to _os9err
+0015                  (      ../write.as):00021         L_write_exit
+0015 1F20             (      ../write.as):00022                             tfr       y,d       ; transfer Y,D
+0017 35A0             (      ../write.as):00023                             puls      y,pc      ; restore registers and return
+                      (      ../write.as):00024         
+0019                  (      ../write.as):00025         _writeln
+0019 3420             (      ../write.as):00026                             pshs      y         ; save Y on the hardware stack
+001B 10AE68           (      ../write.as):00027                             ldy       8,s       ; load Y from stack-relative value 8,s
+001E 27F5             (      ../write.as):00028                             beq       L_write_exit ; branch if equal/zero to L_write_exit
+0020 A665             (      ../write.as):00029                             lda       5,s       ; load A from stack-relative value 5,s
+0022 AE66             (      ../write.as):00030                             ldx       6,s       ; load X from stack-relative value 6,s
+0024 103F8C           (      ../write.as):00031                             os9       $8C       ; invoke OS-9 system call $8C
+0027 20E5             (      ../write.as):00032                             bra       L_write_common ; branch unconditionally to L_write_common
+                      (      ../write.as):00033         
+                      (      ../write.as):00034                             endsect             ; end current section

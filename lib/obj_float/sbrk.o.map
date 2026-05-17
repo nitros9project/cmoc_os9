@@ -1,0 +1,4 @@
+Symbol: _sbrk (sbrk.o) = 0000
+Symbol: sbrk10 (sbrk.o) = 0028
+Symbol: sbrk20 (sbrk.o) = 0036
+Symbol: sbrk30 (sbrk.o) = 004F

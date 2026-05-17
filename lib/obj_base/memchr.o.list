@@ -1,0 +1,24 @@
+                      (     ../memchr.as):00001         * Adapted from Deek's KLibc memchr.a for the live cmoc_os9 ABI.
+                      (     ../memchr.as):00002         
+                      (     ../memchr.as):00003                             section   code      ; begin code section
+                      (     ../memchr.as):00004         
+                      (     ../memchr.as):00005         _memchr             EXPORT              ; export this symbol
+                      (     ../memchr.as):00006         
+0000                  (     ../memchr.as):00007         _memchr
+0000 3450             (     ../memchr.as):00008                             pshs      x,u       ; save X,U on the hardware stack
+0002 EE66             (     ../memchr.as):00009                             ldu       6,s       ; load U from stack-relative value 6,s
+0004 AE6A             (     ../memchr.as):00010                             ldx       10,s      ; load X from stack-relative value 10,s
+0006 2710             (     ../memchr.as):00011                             beq       ReturnZero_01 ; branch if equal/zero to ReturnZero_01
+0008 A6C0             (     ../memchr.as):00012         Loop_01             lda       ,u+       ; load A from memory pointed to by U, then advance U
+000A A169             (     ../memchr.as):00013                             cmpa      9,s       ; compare A against stack-relative value 9,s
+000C 2606             (     ../memchr.as):00014                             bne       BranchTarget_01 ; branch if not equal to BranchTarget_01
+000E 335F             (     ../memchr.as):00015                             leau      -1,u      ; compute effective address into U from -1,u
+0010 1F30             (     ../memchr.as):00016                             tfr       u,d       ; transfer U,D
+0012 2006             (     ../memchr.as):00017                             bra       Continue_01 ; branch unconditionally to Continue_01
+0014 301F             (     ../memchr.as):00018         BranchTarget_01     leax      -1,x      ; compute effective address into X from -1,x
+0016 26F0             (     ../memchr.as):00019                             bne       Loop_01   ; branch if not equal to Loop_01
+0018 4F               (     ../memchr.as):00020         ReturnZero_01       clra                ; clear A
+0019 5F               (     ../memchr.as):00021                             clrb                ; clear B
+001A 35D0             (     ../memchr.as):00022         Continue_01         puls      x,u,pc    ; restore registers and return
+                      (     ../memchr.as):00023         
+                      (     ../memchr.as):00024                             endsect             ; end current section

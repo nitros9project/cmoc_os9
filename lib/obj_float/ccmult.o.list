@@ -1,0 +1,51 @@
+                      (     ../ccmult.as):00001                             section   code      ; begin code section
+                      (     ../ccmult.as):00002         
+                      (     ../ccmult.as):00003         ccmult              EXPORT              ; export this symbol
+                      (     ../ccmult.as):00004         
+0000 4D               (     ../ccmult.as):00005         ccmult:             tsta                ; test A and update condition codes
+0001 2612             (     ../ccmult.as):00006                             bne       BranchTarget_01 ; branch if not equal to BranchTarget_01
+0003 6D62             (     ../ccmult.as):00007                             tst       2,s       ; test stack-relative value 2,s and update condition codes
+0005 260E             (     ../ccmult.as):00008                             bne       BranchTarget_01 ; branch if not equal to BranchTarget_01
+0007 A663             (     ../ccmult.as):00009                             lda       3,s       ; load A from stack-relative value 3,s
+0009 3D               (     ../ccmult.as):00010                             mul                 ; multiply A by B and leave the product in D
+000A AEE4             (     ../ccmult.as):00011                             ldx       ,s        ; load X from memory pointed to by S
+000C AF62             (     ../ccmult.as):00012                             stx       2,s       ; store X to stack-relative value 2,s
+000E 8E0000           (     ../ccmult.as):00013                             ldx       #0        ; load X from immediate value 0
+0011 EDE4             (     ../ccmult.as):00014                             std       ,s        ; store D to memory pointed to by S
+0013 3586             (     ../ccmult.as):00015                             puls      d,pc      ; restore registers and return
+0015 3406             (     ../ccmult.as):00016         BranchTarget_01     pshs      d         ; save D on the hardware stack
+0017 CC0000           (     ../ccmult.as):00017                             ldd       #0        ; load D from immediate value 0
+001A 3406             (     ../ccmult.as):00018                             pshs      d         ; save D on the hardware stack
+001C 3406             (     ../ccmult.as):00019                             pshs      d         ; save D on the hardware stack
+001E A665             (     ../ccmult.as):00020                             lda       5,s       ; load A from stack-relative value 5,s
+0020 E669             (     ../ccmult.as):00021                             ldb       9,s       ; load B from stack-relative value 9,s
+0022 3D               (     ../ccmult.as):00022                             mul                 ; multiply A by B and leave the product in D
+0023 ED62             (     ../ccmult.as):00023                             std       2,s       ; store D to stack-relative value 2,s
+0025 A665             (     ../ccmult.as):00024                             lda       5,s       ; load A from stack-relative value 5,s
+0027 E668             (     ../ccmult.as):00025                             ldb       8,s       ; load B from stack-relative value 8,s
+0029 3D               (     ../ccmult.as):00026                             mul                 ; multiply A by B and leave the product in D
+002A E361             (     ../ccmult.as):00027                             addd      1,s       ; add stack-relative value 1,s into D
+002C ED61             (     ../ccmult.as):00028                             std       1,s       ; store D to stack-relative value 1,s
+002E 2402             (     ../ccmult.as):00029                             bcc       BranchTarget_02 ; branch if carry is clear to BranchTarget_02
+0030 6CE4             (     ../ccmult.as):00030                             inc       ,s        ; increment memory pointed to by S
+0032 A664             (     ../ccmult.as):00031         BranchTarget_02     lda       4,s       ; load A from stack-relative value 4,s
+0034 E669             (     ../ccmult.as):00032                             ldb       9,s       ; load B from stack-relative value 9,s
+0036 3D               (     ../ccmult.as):00033                             mul                 ; multiply A by B and leave the product in D
+0037 E361             (     ../ccmult.as):00034                             addd      1,s       ; add stack-relative value 1,s into D
+0039 ED61             (     ../ccmult.as):00035                             std       1,s       ; store D to stack-relative value 1,s
+003B 2402             (     ../ccmult.as):00036                             bcc       BranchTarget_03 ; branch if carry is clear to BranchTarget_03
+003D 6CE4             (     ../ccmult.as):00037                             inc       ,s        ; increment memory pointed to by S
+003F A664             (     ../ccmult.as):00038         BranchTarget_03     lda       4,s       ; load A from stack-relative value 4,s
+0041 E668             (     ../ccmult.as):00039                             ldb       8,s       ; load B from stack-relative value 8,s
+0043 3D               (     ../ccmult.as):00040                             mul                 ; multiply A by B and leave the product in D
+0044 E3E4             (     ../ccmult.as):00041                             addd      ,s        ; add memory pointed to by S into D
+0046 EDE4             (     ../ccmult.as):00042                             std       ,s        ; store D to memory pointed to by S
+0048 AE66             (     ../ccmult.as):00043                             ldx       6,s       ; load X from stack-relative value 6,s
+004A AF68             (     ../ccmult.as):00044                             stx       8,s       ; store X to stack-relative value 8,s
+004C AEE4             (     ../ccmult.as):00045                             ldx       ,s        ; load X from memory pointed to by S
+004E EC62             (     ../ccmult.as):00046                             ldd       2,s       ; load D from stack-relative value 2,s
+0050 3268             (     ../ccmult.as):00047                             leas      8,s       ; adjust S using 8,s
+0052 39               (     ../ccmult.as):00048                             rts                 ; return to caller
+                      (     ../ccmult.as):00049         
+                      (     ../ccmult.as):00050                             endsect             ; end current section
+                      (     ../ccmult.as):00051         

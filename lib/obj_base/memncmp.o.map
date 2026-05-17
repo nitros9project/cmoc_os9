@@ -1,0 +1,5 @@
+Symbol: _memncmp (memncmp.o) = 0000
+Symbol: L000d (memncmp.o) = 000D
+Symbol: L0015 (memncmp.o) = 0013
+Symbol: L001f (memncmp.o) = 001D
+Symbol: L0021 (memncmp.o) = 001F

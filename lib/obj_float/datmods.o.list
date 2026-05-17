@@ -1,0 +1,83 @@
+                      (    ../datmods.as):00001         * Adapted from cmoc_os9/lib/todo/datmods.as for the live cmoc_os9 ABI.
+                      (    ../datmods.as):00002         
+                      (    ../datmods.as):00003                             section   code      ; begin code section
+                      (    ../datmods.as):00004         
+                      (    ../datmods.as):00005         _lockdata           EXPORT              ; export this symbol
+                      (    ../datmods.as):00006         _unlkdata           EXPORT              ; export this symbol
+                      (    ../datmods.as):00007         _datlink            EXPORT              ; export this symbol
+                      (    ../datmods.as):00008         _dunlink            EXPORT              ; export this symbol
+                      (    ../datmods.as):00009         
+                      (    ../datmods.as):00010         _os9err             EXTERNAL            ; import external symbol
+                      (    ../datmods.as):00011         _sysret             EXTERNAL            ; import external symbol
+                      (    ../datmods.as):00012         
+     0000             (    ../datmods.as):00013         F_Link              equ       $00       ; define constant as $00
+     0001             (    ../datmods.as):00014         F_Load              equ       $01       ; define constant as $01
+     0002             (    ../datmods.as):00015         F_UnLink            equ       $02       ; define constant as $02
+                      (    ../datmods.as):00016         
+0000                  (    ../datmods.as):00017         _lockdata
+0000 AE62             (    ../datmods.as):00018                             ldx       2,s       ; load X from stack-relative value 2,s
+0002 3401             (    ../datmods.as):00019                             pshs      cc        ; save CC on the hardware stack
+0004 1A10             (    ../datmods.as):00020                             orcc      #$10      ; set condition-code bits with mask #$10
+0006 6C84             (    ../datmods.as):00021                             inc       ,x        ; increment memory pointed to by X
+0008 2713             (    ../datmods.as):00022                             beq       ReturnZero_01 ; branch if equal/zero to ReturnZero_01
+000A E684             (    ../datmods.as):00023                             ldb       ,x        ; load B from memory pointed to by X
+000C 6A84             (    ../datmods.as):00024                             dec       ,x        ; decrement memory pointed to by X
+000E 1D               (    ../datmods.as):00025         Loop_01             sex                 ; sign-extend B into A to form D
+000F 3581             (    ../datmods.as):00026                             puls      cc,pc     ; restore registers and return
+                      (    ../datmods.as):00027         
+0011                  (    ../datmods.as):00028         _unlkdata
+0011 AE62             (    ../datmods.as):00029                             ldx       2,s       ; load X from stack-relative value 2,s
+0013 3401             (    ../datmods.as):00030                             pshs      cc        ; save CC on the hardware stack
+0015 1A10             (    ../datmods.as):00031                             orcc      #$10      ; set condition-code bits with mask #$10
+0017 E684             (    ../datmods.as):00032                             ldb       ,x        ; load B from memory pointed to by X
+0019 26F3             (    ../datmods.as):00033                             bne       Loop_01   ; branch if not equal to Loop_01
+001B 6A84             (    ../datmods.as):00034                             dec       ,x        ; decrement memory pointed to by X
+001D 4F               (    ../datmods.as):00035         ReturnZero_01       clra                ; clear A
+001E 5F               (    ../datmods.as):00036                             clrb                ; clear B
+001F 3581             (    ../datmods.as):00037                             puls      cc,pc     ; restore registers and return
+                      (    ../datmods.as):00038         
+0021                  (    ../datmods.as):00039         _datlink
+0021 3460             (    ../datmods.as):00040                             pshs      y,u       ; save Y,U on the hardware stack
+0023 6FE2             (    ../datmods.as):00041                             clr       ,-s       ; clear memory pointed to by -S
+0025 6FE2             (    ../datmods.as):00042                             clr       ,-s       ; clear memory pointed to by -S
+0027 AE68             (    ../datmods.as):00043                             ldx       8,s       ; load X from stack-relative value 8,s
+0029 8640             (    ../datmods.as):00044                             lda       #$40      ; load A from immediate value $40
+002B 103F00           (    ../datmods.as):00045                             os9       F_Link    ; invoke OS-9 system call F_Link
+002E 2415             (    ../datmods.as):00046                             bcc       BranchTarget_02 ; branch if carry is clear to BranchTarget_02
+0030 C1DD             (    ../datmods.as):00047                             cmpb      #$DD      ; compare B against immediate value $DD
+0032 2706             (    ../datmods.as):00048                             beq       BranchTarget_01 ; branch if equal/zero to BranchTarget_01
+0034 43               (    ../datmods.as):00049                             coma
+0035 3570             (    ../datmods.as):00050         Loop_02             puls      x,y,u     ; restore X,Y,U from the hardware stack
+0037 160000           (    ../datmods.as):00051                             lbra      _os9err   ; long branch unconditionally to _os9err
+003A AE68             (    ../datmods.as):00052         BranchTarget_01     ldx       8,s       ; load X from stack-relative value 8,s
+003C 8640             (    ../datmods.as):00053                             lda       #$40      ; load A from immediate value $40
+003E 103F01           (    ../datmods.as):00054                             os9       F_Load    ; invoke OS-9 system call F_Load
+0041 25F2             (    ../datmods.as):00055                             bcs       Loop_02   ; branch if carry is set to Loop_02
+0043 6C61             (    ../datmods.as):00056                             inc       1,s       ; increment stack-relative value 1,s
+0045 3420             (    ../datmods.as):00057         BranchTarget_02     pshs      y         ; save Y on the hardware stack
+0047 1F30             (    ../datmods.as):00058                             tfr       u,d       ; transfer U,D
+0049 A3E1             (    ../datmods.as):00059                             subd      ,s++      ; subtract memory pointed to by S+, then advance S+ from D
+004B EDA1             (    ../datmods.as):00060                             std       ,y++      ; store D to memory pointed to by Y+, then advance Y+
+004D 10AFF80A         (    ../datmods.as):00061                             sty       [10,s]    ; store Y to indirect address [10,s]
+0051 E342             (    ../datmods.as):00062                             addd      2,u       ; add indexed value 2,u into D
+0053 830005           (    ../datmods.as):00063                             subd      #5        ; subtract immediate value 5 from D
+0056 EDF80C           (    ../datmods.as):00064                             std       [12,s]    ; store D to indirect address [12,s]
+0059 ECE4             (    ../datmods.as):00065                             ldd       ,s        ; load D from memory pointed to by S
+005B 270A             (    ../datmods.as):00066                             beq       BranchTarget_03 ; branch if equal/zero to BranchTarget_03
+005D 3420             (    ../datmods.as):00067                             pshs      y         ; save Y on the hardware stack
+005F 8D9F             (    ../datmods.as):00068                             bsr       _lockdata ; branch to subroutine to _lockdata
+0061 EDE1             (    ../datmods.as):00069                             std       ,s++      ; store D to memory pointed to by S+, then advance S+
+0063 2702             (    ../datmods.as):00070                             beq       BranchTarget_03 ; branch if equal/zero to BranchTarget_03
+0065 6F61             (    ../datmods.as):00071                             clr       1,s       ; clear stack-relative value 1,s
+0067 35E6             (    ../datmods.as):00072         BranchTarget_03     puls      d,y,u,pc  ; restore registers and return
+                      (    ../datmods.as):00073         
+0069                  (    ../datmods.as):00074         _dunlink
+0069 3440             (    ../datmods.as):00075                             pshs      u         ; save U on the hardware stack
+006B EE64             (    ../datmods.as):00076                             ldu       4,s       ; load U from stack-relative value 4,s
+006D ECC3             (    ../datmods.as):00077                             ldd       ,--u      ; load D from memory pointed to by --U
+006F 33CB             (    ../datmods.as):00078                             leau      d,u       ; compute effective address into U from d,u
+0071 103F02           (    ../datmods.as):00079                             os9       F_UnLink  ; invoke OS-9 system call F_UnLink
+0074 3540             (    ../datmods.as):00080                             puls      u         ; restore U from the hardware stack
+0076 160000           (    ../datmods.as):00081                             lbra      _sysret   ; long branch unconditionally to _sysret
+                      (    ../datmods.as):00082         
+                      (    ../datmods.as):00083                             endsect             ; end current section

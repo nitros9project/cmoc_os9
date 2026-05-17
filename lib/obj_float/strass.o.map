@@ -1,0 +1,4 @@
+Symbol: __strass (strass.o) = 0000
+Symbol: BranchTarget_01 (strass.o) = 0013
+Symbol: BranchTarget_02 (strass.o) = 001F
+Symbol: Loop_01 (strass.o) = 0017

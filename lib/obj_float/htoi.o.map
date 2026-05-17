@@ -1,0 +1,6 @@
+Symbol: BranchTarget_01 (htoi.o) = 0014
+Symbol: BranchTarget_02 (htoi.o) = 0034
+Symbol: BranchTarget_03 (htoi.o) = 003B
+Symbol: htoi (htoi.o) = 0000
+Symbol: Loop_01 (htoi.o) = 000A
+Symbol: Loop_02 (htoi.o) = 0018

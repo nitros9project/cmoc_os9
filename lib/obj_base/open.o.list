@@ -1,0 +1,25 @@
+                      (       ../open.as):00001         * Compact assembly implementation of open()/close().
+                      (       ../open.as):00002         
+                      (       ../open.as):00003                             section   code      ; begin code section
+                      (       ../open.as):00004         
+                      (       ../open.as):00005         _open               EXPORT              ; export this symbol
+                      (       ../open.as):00006         _close              EXPORT              ; export this symbol
+                      (       ../open.as):00007         
+                      (       ../open.as):00008         _os9err             EXTERNAL            ; import external symbol
+                      (       ../open.as):00009         _sysret             EXTERNAL            ; import external symbol
+                      (       ../open.as):00010         
+0000                  (       ../open.as):00011         _open
+0000 AE62             (       ../open.as):00012                             ldx       2,s       ; load X from stack-relative value 2,s
+0002 A665             (       ../open.as):00013                             lda       5,s       ; load A from stack-relative value 5,s
+0004 103F84           (       ../open.as):00014                             os9       $84       ; invoke OS-9 system call $84
+0007 10250000         (       ../open.as):00015                             lbcs      _os9err   ; long branch if carry is set to _os9err
+000B 1F89             (       ../open.as):00016                             tfr       a,b       ; transfer A,B
+000D 4F               (       ../open.as):00017                             clra                ; clear A
+000E 39               (       ../open.as):00018                             rts                 ; return to caller
+                      (       ../open.as):00019         
+000F                  (       ../open.as):00020         _close
+000F A663             (       ../open.as):00021                             lda       3,s       ; load A from stack-relative value 3,s
+0011 103F8F           (       ../open.as):00022                             os9       $8F       ; invoke OS-9 system call $8F
+0014 160000           (       ../open.as):00023                             lbra      _sysret   ; long branch unconditionally to _sysret
+                      (       ../open.as):00024         
+                      (       ../open.as):00025                             endsect             ; end current section

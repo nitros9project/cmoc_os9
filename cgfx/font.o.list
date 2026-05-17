@@ -1,0 +1,61 @@
+                      (          font.as):00001                 section code
+                      (          font.as):00002         
+                      (          font.as):00003         _cgfx_font              EXPORT * export this symbol
+                      (          font.as):00004         _cgfx_tcharsw           EXPORT * export this symbol
+                      (          font.as):00005         _cgfx_boldsw            EXPORT * export this symbol
+                      (          font.as):00006         _cgfx_propsw            EXPORT * export this symbol
+                      (          font.as):00007         
+                      (          font.as):00008         _errno                  EXTERNAL * import external symbol
+                      (          font.as):00009         _write                  EXTERNAL * import external symbol
+                      (          font.as):00010         
+                      (          font.as):00011         * Set the active font: _cgfx_font(path, grp, buf)
+0000                  (          font.as):00012         _cgfx_font
+0000 3440             (          font.as):00013                 pshs    u
+0002 A667             (          font.as):00014                 lda     7,s * load A from stack-relative value 7,s
+0004 E669             (          font.as):00015                 ldb     9,s * load B from stack-relative value 9,s
+0006 3406             (          font.as):00016                 pshs    d
+0008 CC1B3A           (          font.as):00017                 ldd     #$1b3a * load D from immediate value $1b3a
+000B 3406             (          font.as):00018                 pshs    d
+000D CE0004           (          font.as):00019                 ldu     #4 * load U from immediate value 4
+0010 30E4             (          font.as):00020                 leax    ,s * compute effective address into X from ,s
+0012 A669             (          font.as):00021                 lda     9,s * load A from stack-relative value 9,s
+0014 170000           (          font.as):00022                 lbsr    _write * long branch to subroutine to _write
+0017 3264             (          font.as):00023                 leas    4,s * adjust S using 4,s
+0019 2023             (          font.as):00024                 bra     os9err0
+                      (          font.as):00025         
+                      (          font.as):00026         * Transparent character switch: _cgfx_tcharsw(path, sw)
+001B                  (          font.as):00027         _cgfx_tcharsw
+001B CC1B3C           (          font.as):00028                 ldd     #$1b3c * load D from immediate value $1b3c
+001E 2008             (          font.as):00029                 bra     send3
+                      (          font.as):00030         
+                      (          font.as):00031         * Bold switch: _cgfx_boldsw(path, sw)
+0020                  (          font.as):00032         _cgfx_boldsw
+0020 CC1B3D           (          font.as):00033                 ldd     #$1b3d * load D from immediate value $1b3d
+0023 2003             (          font.as):00034                 bra     send3
+                      (          font.as):00035         
+                      (          font.as):00036         * Proportional-width switch: _cgfx_propsw(path, sw)
+0025                  (          font.as):00037         _cgfx_propsw
+0025 CC1B3F           (          font.as):00038                 ldd     #$1b3f * load D from immediate value $1b3f
+                      (          font.as):00039         
+0028 3440             (          font.as):00040         send3   pshs    u * save U on the hardware stack
+002A 327D             (          font.as):00041                 leas    -3,s * adjust S using -3,s
+002C EDE4             (          font.as):00042                 std     ,s * store D to memory pointed to by S
+002E A66A             (          font.as):00043                 lda     10,s * load A from stack-relative value 10,s
+0030 A762             (          font.as):00044                 sta     2,s * store A to stack-relative value 2,s
+0032 CE0003           (          font.as):00045                 ldu     #3 * load U from immediate value 3
+0035 30E4             (          font.as):00046                 leax    ,s * compute effective address into X from ,s
+0037 A668             (          font.as):00047                 lda     8,s * load A from stack-relative value 8,s
+0039 170000           (          font.as):00048                 lbsr    _write * long branch to subroutine to _write
+003C 3263             (          font.as):00049                 leas    3,s * adjust S using 3,s
+                      (          font.as):00050         
+003E 3540             (          font.as):00051         os9err0 puls    u * restore U from the hardware stack
+0040 2409             (          font.as):00052                 bcc     noerr0
+0042 4F               (          font.as):00053                 clra * clear A
+0043 EDA90000         (          font.as):00054                 std     _errno,y * store D to indexed value _errno,y
+0047 CCFFFF           (          font.as):00055                 ldd     #-1 * load D from immediate value -1
+004A 39               (          font.as):00056                 rts * return to caller
+004B 4F               (          font.as):00057         noerr0  clra * clear A
+004C 5F               (          font.as):00058                 clrb * clear B
+004D 39               (          font.as):00059                 rts * return to caller
+                      (          font.as):00060         
+                      (          font.as):00061                 endsect * end current section

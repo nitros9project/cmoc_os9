@@ -1,0 +1,26 @@
+                      (    ../strncat.as):00001         * Adapted from Deek's KLibc strncat for the live cmoc_os9 ABI.
+                      (    ../strncat.as):00002         
+                      (    ../strncat.as):00003                             section   code      ; begin code section
+                      (    ../strncat.as):00004         
+                      (    ../strncat.as):00005         _strncat            EXPORT              ; export this symbol
+                      (    ../strncat.as):00006         
+0000                  (    ../strncat.as):00007         _strncat
+0000 3460             (    ../strncat.as):00008                             pshs      y,u       ; save Y,U on the hardware stack
+0002 EE68             (    ../strncat.as):00009                             ldu       8,s       ; load U from stack-relative value 8,s
+0004 AE66             (    ../strncat.as):00010                             ldx       6,s       ; load X from stack-relative value 6,s
+0006 10AE6A           (    ../strncat.as):00011                             ldy       10,s      ; load Y from stack-relative value 10,s
+0009 2713             (    ../strncat.as):00012                             beq       BranchTarget_02 ; branch if equal/zero to BranchTarget_02
+000B E680             (    ../strncat.as):00013         Loop_01             ldb       ,x+       ; load B from memory pointed to by X, then advance X
+000D 26FC             (    ../strncat.as):00014                             bne       Loop_01   ; branch if not equal to Loop_01
+000F 301F             (    ../strncat.as):00015                             leax      -1,x      ; compute effective address into X from -1,x
+0011 E6C0             (    ../strncat.as):00016         Loop_02             ldb       ,u+       ; load B from memory pointed to by U, then advance U
+0013 E780             (    ../strncat.as):00017                             stb       ,x+       ; store B to memory pointed to by X, then advance X
+0015 313F             (    ../strncat.as):00018                             leay      -1,y      ; compute effective address into Y from -1,y
+0017 2703             (    ../strncat.as):00019                             beq       BranchTarget_01 ; branch if equal/zero to BranchTarget_01
+0019 5D               (    ../strncat.as):00020                             tstb                ; test B and update condition codes
+001A 26F5             (    ../strncat.as):00021                             bne       Loop_02   ; branch if not equal to Loop_02
+001C 6F84             (    ../strncat.as):00022         BranchTarget_01     clr       ,x        ; clear memory pointed to by X
+001E EC66             (    ../strncat.as):00023         BranchTarget_02     ldd       6,s       ; load D from stack-relative value 6,s
+0020 35E0             (    ../strncat.as):00024                             puls      y,u,pc    ; restore registers and return
+                      (    ../strncat.as):00025         
+                      (    ../strncat.as):00026                             endsect             ; end current section

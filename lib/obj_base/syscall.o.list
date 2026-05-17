@@ -1,0 +1,34 @@
+                      (    ../syscall.as):00001         __os_syscall        EXPORT              ; export generic system-call wrapper
+                      (    ../syscall.as):00002         
+                      (    ../syscall.as):00003         _oserr              EXTERNAL            ; common OS-9 error return helper
+                      (    ../syscall.as):00004         _osret              EXTERNAL            ; common successful return helper
+                      (    ../syscall.as):00005         
+                      (    ../syscall.as):00006                             section   code      ; begin code section
+                      (    ../syscall.as):00007         
+0000                  (    ../syscall.as):00008         __os_syscall
+0000 3460             (    ../syscall.as):00009                             pshs      y,u       ; preserve Y and U while staging the call
+0002 A665             (    ../syscall.as):00010                             lda       5,s       ; load requested OS-9 call code byte
+0004 C639             (    ../syscall.as):00011                             ldb       #$39      ; build trailing RTS opcode for stub frame
+0006 3406             (    ../syscall.as):00012                             pshs      d         ; push call code and RTS byte onto the stack
+0008 CC103F           (    ../syscall.as):00013                             ldd       #$103F    ; load SWI2 prefix used by OS-9 system calls
+000B 3406             (    ../syscall.as):00014                             pshs      d         ; push SWI2 opcode ahead of the call code
+000D EE6C             (    ../syscall.as):00015                             ldu       12,s      ; load pointer to caller-supplied register block
+000F EC41             (    ../syscall.as):00016                             ldd       1,u       ; restore caller's A and B into D
+0011 AE44             (    ../syscall.as):00017                             ldx       4,u       ; restore caller's X register
+0013 10AE46           (    ../syscall.as):00018                             ldy       6,u       ; restore caller's Y register
+0016 EE48             (    ../syscall.as):00019                             ldu       8,u       ; restore caller's U register
+0018 ADE4             (    ../syscall.as):00020                             jsr       ,s        ; execute the synthesized system-call stub
+001A 3441             (    ../syscall.as):00021                             pshs      cc,u      ; save returned condition codes and U
+001C EE6F             (    ../syscall.as):00022                             ldu       15,s      ; reload pointer to register block
+001E 3348             (    ../syscall.as):00023                             leau      8,u       ; point at the saved U field within the block
+0020 363E             (    ../syscall.as):00024                             pshu      d,dp,x,y  ; store returned D, DP, X, and Y values
+0022 3512             (    ../syscall.as):00025                             puls      a,x       ; recover returned CC into A and U into X
+0024 A7C2             (    ../syscall.as):00026                             sta       ,-u       ; store returned condition codes ahead of saved U
+0026 AF48             (    ../syscall.as):00027                             stx       8,u       ; store returned U value into the register block
+0028 3264             (    ../syscall.as):00028                             leas      4,s       ; discard synthesized SWI2/call/RTS stub
+002A 3560             (    ../syscall.as):00029                             puls      y,u       ; restore caller's Y and U registers
+002C 8501             (    ../syscall.as):00030                             bita      #1        ; test carry flag from returned condition codes
+002E 10270000         (    ../syscall.as):00031                             lbeq      _osret    ; branch if the system call succeeded
+0032 160000           (    ../syscall.as):00032                             lbra      _oserr    ; dispatch carry-set failures through errno path
+                      (    ../syscall.as):00033         
+                      (    ../syscall.as):00034                             endsect             ; end code section

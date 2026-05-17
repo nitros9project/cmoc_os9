@@ -1,0 +1,22 @@
+                      (    ../uminmax.as):00001         * Adapted from cmoc_os9/lib/todo/uminmax.as for the live cmoc_os9 ABI.
+                      (    ../uminmax.as):00002         
+                      (    ../uminmax.as):00003                             section   code      ; begin code section
+                      (    ../uminmax.as):00004         
+                      (    ../uminmax.as):00005         _umin               EXPORT              ; export this symbol
+                      (    ../uminmax.as):00006         _umax               EXPORT              ; export this symbol
+                      (    ../uminmax.as):00007         
+0000                  (    ../uminmax.as):00008         _umin
+0000 EC62             (    ../uminmax.as):00009                             ldd       2,s       ; load D from stack-relative value 2,s
+0002 10A364           (    ../uminmax.as):00010                             cmpd      4,s       ; compare D against stack-relative value 4,s
+0005 2302             (    ../uminmax.as):00011                             bls       Return_01 ; branch if lower or same to Return_01
+0007 EC64             (    ../uminmax.as):00012                             ldd       4,s       ; load D from stack-relative value 4,s
+0009 39               (    ../uminmax.as):00013         Return_01           rts                 ; return to caller
+                      (    ../uminmax.as):00014         
+000A                  (    ../uminmax.as):00015         _umax
+000A EC62             (    ../uminmax.as):00016                             ldd       2,s       ; load D from stack-relative value 2,s
+000C 10A364           (    ../uminmax.as):00017                             cmpd      4,s       ; compare D against stack-relative value 4,s
+000F 2402             (    ../uminmax.as):00018                             bcc       Return_02 ; branch if carry is clear to Return_02
+0011 EC64             (    ../uminmax.as):00019                             ldd       4,s       ; load D from stack-relative value 4,s
+0013 39               (    ../uminmax.as):00020         Return_02           rts                 ; return to caller
+                      (    ../uminmax.as):00021         
+                      (    ../uminmax.as):00022                             endsect             ; end current section

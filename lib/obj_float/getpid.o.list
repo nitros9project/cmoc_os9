@@ -1,0 +1,18 @@
+                      (     ../getpid.as):00001         * Adapted from cmoc_os9/lib/ported/mktemp.as and old Kreider id.a.
+                      (     ../getpid.as):00002         * Return the current process ID as an int.
+                      (     ../getpid.as):00003         
+                      (     ../getpid.as):00004                             section   code      ; begin code section
+                      (     ../getpid.as):00005         
+                      (     ../getpid.as):00006         _getpid             EXPORT              ; export this symbol
+                      (     ../getpid.as):00007         
+     000C             (     ../getpid.as):00008         F_ID                equ       $0C       ; define constant as $0C
+                      (     ../getpid.as):00009         
+0000                  (     ../getpid.as):00010         _getpid
+0000 3420             (     ../getpid.as):00011                             pshs      y         ; save data pointer
+0002 103F0C           (     ../getpid.as):00012                             os9       F_ID      ; invoke OS-9 system call F_ID
+0005 3520             (     ../getpid.as):00013                             puls      y         ; restore Y from the hardware stack
+0007 1F89             (     ../getpid.as):00014                             tfr       a,b       ; transfer A,B
+0009 4F               (     ../getpid.as):00015                             clra                ; clear A
+000A 39               (     ../getpid.as):00016                             rts                 ; return to caller
+                      (     ../getpid.as):00017         
+                      (     ../getpid.as):00018                             endsect             ; end current section

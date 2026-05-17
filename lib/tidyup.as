@@ -1,8 +1,8 @@
- section code
+                    section   code      ; begin code section
 
-_tidyup EXPORT
+_tidyup             EXPORT              ; export this symbol
 
-_tidyup: rts    
+_tidyup:            rts                 ; return to caller
 
- endsect  
+                    endsect             ; end current section
 

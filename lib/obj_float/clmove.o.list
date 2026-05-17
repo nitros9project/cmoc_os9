@@ -1,0 +1,18 @@
+                      (     ../clmove.as):00001                             section   code      ; begin code section
+                      (     ../clmove.as):00002         
+                      (     ../clmove.as):00003         _lmove              EXPORT              ; export this symbol
+                      (     ../clmove.as):00004         
+0000 3420             (     ../clmove.as):00005         _lmove:             pshs      y         ; save Y on the hardware stack
+0002 10AE64           (     ../clmove.as):00006                             ldy       4,s       ; load Y from stack-relative value 4,s
+0005 EC84             (     ../clmove.as):00007                             ldd       ,x        ; load D from memory pointed to by X
+0007 EDA4             (     ../clmove.as):00008                             std       ,y        ; store D to memory pointed to by Y
+0009 EC02             (     ../clmove.as):00009                             ldd       2,x       ; load D from indexed value 2,x
+000B ED22             (     ../clmove.as):00010                             std       2,y       ; store D to indexed value 2,y
+000D 3510             (     ../clmove.as):00011                             puls      x         ; restore X from the hardware stack
+000F 1E21             (     ../clmove.as):00012                             exg       y,x       ; exchange Y,X
+0011 3506             (     ../clmove.as):00013                             puls      d         ; restore D from the hardware stack
+0013 EDE4             (     ../clmove.as):00014                             std       ,s        ; store D to memory pointed to by S
+0015 39               (     ../clmove.as):00015                             rts                 ; return to caller
+                      (     ../clmove.as):00016         
+                      (     ../clmove.as):00017                             endsect             ; end current section
+                      (     ../clmove.as):00018         

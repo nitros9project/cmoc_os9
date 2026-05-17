@@ -1,0 +1,78 @@
+                      (      ../ccdiv.as):00001                             section   code      ; begin code section
+                      (      ../ccdiv.as):00002         
+                      (      ../ccdiv.as):00003         _rpterr             EXTERNAL            ; import external symbol
+                      (      ../ccdiv.as):00004         
+                      (      ../ccdiv.as):00005         ccudiv              EXPORT              ; export this symbol
+                      (      ../ccdiv.as):00006         ccdiv               EXPORT              ; export this symbol
+                      (      ../ccdiv.as):00007         
+0000 830000           (      ../ccdiv.as):00008         ccudiv:             subd      #0        ; subtract immediate value 0 from D
+0003 270A             (      ../ccdiv.as):00009                             beq       Loop_01   ; branch if equal/zero to Loop_01
+0005 3406             (      ../ccdiv.as):00010                             pshs      d         ; save D on the hardware stack
+0007 327E             (      ../ccdiv.as):00011                             leas      -2,s      ; adjust S using -2,s
+0009 6FE4             (      ../ccdiv.as):00012                             clr       ,s        ; clear memory pointed to by S
+000B 6F61             (      ../ccdiv.as):00013                             clr       1,s       ; clear stack-relative value 1,s
+000D 202E             (      ../ccdiv.as):00014                             bra       BranchTarget_02 ; branch unconditionally to BranchTarget_02
+000F 3506             (      ../ccdiv.as):00015         Loop_01             puls      d         ; restore D from the hardware stack
+0011 EDE4             (      ../ccdiv.as):00016                             std       ,s        ; store D to memory pointed to by S
+0013 CC002D           (      ../ccdiv.as):00017                             ldd       #$002d    ; load D from immediate value $002d
+0016 160000           (      ../ccdiv.as):00018                             lbra      _rpterr   ; long branch unconditionally to _rpterr
+0019 830000           (      ../ccdiv.as):00019         ccdiv:              subd      #0        ; subtract immediate value 0 from D
+001C 27F1             (      ../ccdiv.as):00020                             beq       Loop_01   ; branch if equal/zero to Loop_01
+001E 3406             (      ../ccdiv.as):00021                             pshs      d         ; save D on the hardware stack
+0020 327E             (      ../ccdiv.as):00022                             leas      -2,s      ; adjust S using -2,s
+0022 6FE4             (      ../ccdiv.as):00023                             clr       ,s        ; clear memory pointed to by S
+0024 6F61             (      ../ccdiv.as):00024                             clr       1,s       ; clear stack-relative value 1,s
+0026 4D               (      ../ccdiv.as):00025                             tsta                ; test A and update condition codes
+0027 2A08             (      ../ccdiv.as):00026                             bpl       BranchTarget_01 ; branch if plus to BranchTarget_01
+0029 40               (      ../ccdiv.as):00027                             nega                ; negate A
+002A 50               (      ../ccdiv.as):00028                             negb                ; negate B
+002B 8200             (      ../ccdiv.as):00029                             sbca      #0        ; subtract immediate value 0 from A
+002D 6361             (      ../ccdiv.as):00030                             com       1,s
+002F ED62             (      ../ccdiv.as):00031                             std       2,s       ; store D to stack-relative value 2,s
+0031 EC66             (      ../ccdiv.as):00032         BranchTarget_01     ldd       6,s       ; load D from stack-relative value 6,s
+0033 2A08             (      ../ccdiv.as):00033                             bpl       BranchTarget_02 ; branch if plus to BranchTarget_02
+0035 40               (      ../ccdiv.as):00034                             nega                ; negate A
+0036 50               (      ../ccdiv.as):00035                             negb                ; negate B
+0037 8200             (      ../ccdiv.as):00036                             sbca      #0        ; subtract immediate value 0 from A
+0039 6361             (      ../ccdiv.as):00037                             com       1,s
+003B ED66             (      ../ccdiv.as):00038                             std       6,s       ; store D to stack-relative value 6,s
+003D 8601             (      ../ccdiv.as):00039         BranchTarget_02     lda       #1        ; load A from immediate value 1
+003F 4C               (      ../ccdiv.as):00040         Loop_02             inca                ; increment A
+0040 6863             (      ../ccdiv.as):00041                             asl       3,s       ; shift stack-relative value 3,s left by one bit
+0042 6962             (      ../ccdiv.as):00042                             rol       2,s       ; rotate stack-relative value 2,s left through carry
+0044 2AF9             (      ../ccdiv.as):00043                             bpl       Loop_02   ; branch if plus to Loop_02
+0046 A7E4             (      ../ccdiv.as):00044                             sta       ,s        ; store A to memory pointed to by S
+0048 EC66             (      ../ccdiv.as):00045                             ldd       6,s       ; load D from stack-relative value 6,s
+004A 6F66             (      ../ccdiv.as):00046                             clr       6,s       ; clear stack-relative value 6,s
+004C 6F67             (      ../ccdiv.as):00047                             clr       7,s       ; clear stack-relative value 7,s
+004E A362             (      ../ccdiv.as):00048         Loop_03             subd      2,s       ; subtract stack-relative value 2,s from D
+0050 2406             (      ../ccdiv.as):00049                             bcc       BranchTarget_03 ; branch if carry is clear to BranchTarget_03
+0052 E362             (      ../ccdiv.as):00050                             addd      2,s       ; add stack-relative value 2,s into D
+0054 1CFE             (      ../ccdiv.as):00051                             andcc     #254      ; clear condition-code bits with mask #254
+0056 2002             (      ../ccdiv.as):00052                             bra       Continue_01 ; branch unconditionally to Continue_01
+0058 1A01             (      ../ccdiv.as):00053         BranchTarget_03     orcc      #1        ; set condition-code bits with mask #1
+005A 6967             (      ../ccdiv.as):00054         Continue_01         rol       7,s       ; rotate stack-relative value 7,s left through carry
+005C 6966             (      ../ccdiv.as):00055                             rol       6,s       ; rotate stack-relative value 6,s left through carry
+005E 6462             (      ../ccdiv.as):00056                             lsr       2,s       ; logical shift stack-relative value 2,s right by one bit
+0060 6663             (      ../ccdiv.as):00057                             ror       3,s       ; rotate stack-relative value 3,s right through carry
+0062 6AE4             (      ../ccdiv.as):00058                             dec       ,s        ; decrement memory pointed to by S
+0064 26E8             (      ../ccdiv.as):00059                             bne       Loop_03   ; branch if not equal to Loop_03
+0066 ED62             (      ../ccdiv.as):00060                             std       2,s       ; store D to stack-relative value 2,s
+0068 6D61             (      ../ccdiv.as):00061                             tst       1,s       ; test stack-relative value 1,s and update condition codes
+006A 2708             (      ../ccdiv.as):00062                             beq       BranchTarget_04 ; branch if equal/zero to BranchTarget_04
+006C EC66             (      ../ccdiv.as):00063                             ldd       6,s       ; load D from stack-relative value 6,s
+006E 40               (      ../ccdiv.as):00064                             nega                ; negate A
+006F 50               (      ../ccdiv.as):00065                             negb                ; negate B
+0070 8200             (      ../ccdiv.as):00066                             sbca      #0        ; subtract immediate value 0 from A
+0072 ED66             (      ../ccdiv.as):00067                             std       6,s       ; store D to stack-relative value 6,s
+0074 AE64             (      ../ccdiv.as):00068         BranchTarget_04     ldx       4,s       ; load X from stack-relative value 4,s
+0076 EC66             (      ../ccdiv.as):00069                             ldd       6,s       ; load D from stack-relative value 6,s
+0078 ED64             (      ../ccdiv.as):00070                             std       4,s       ; store D to stack-relative value 4,s
+007A AF66             (      ../ccdiv.as):00071                             stx       6,s       ; store X to stack-relative value 6,s
+007C AE62             (      ../ccdiv.as):00072                             ldx       2,s       ; load X from stack-relative value 2,s
+007E EC64             (      ../ccdiv.as):00073                             ldd       4,s       ; load D from stack-relative value 4,s
+0080 3266             (      ../ccdiv.as):00074                             leas      6,s       ; adjust S using 6,s
+0082 39               (      ../ccdiv.as):00075                             rts                 ; return to caller
+                      (      ../ccdiv.as):00076         
+                      (      ../ccdiv.as):00077                             endsect             ; end current section
+                      (      ../ccdiv.as):00078         

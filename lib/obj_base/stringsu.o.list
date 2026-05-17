@@ -1,0 +1,34 @@
+                      (   ../stringsu.as):00001         * Adapted from Deek's KLibc stringsu_a for the live cmoc_os9 ABI.
+                      (   ../stringsu.as):00002         
+                      (   ../stringsu.as):00003                             section   code      ; begin code section
+                      (   ../stringsu.as):00004         
+                      (   ../stringsu.as):00005         _strucat            EXPORT              ; export this symbol
+                      (   ../stringsu.as):00006         _strucpy            EXPORT              ; export this symbol
+                      (   ../stringsu.as):00007         
+                      (   ../stringsu.as):00008         toupper             EXTERN              ; import external symbol
+                      (   ../stringsu.as):00009         
+0000                  (   ../stringsu.as):00010         _strucat
+0000 3440             (   ../stringsu.as):00011                             pshs      u         ; save U on the hardware stack
+0002 EE66             (   ../stringsu.as):00012                             ldu       6,s       ; load U from stack-relative value 6,s
+0004 AE64             (   ../stringsu.as):00013                             ldx       4,s       ; load X from stack-relative value 4,s
+0006 E680             (   ../stringsu.as):00014         Loop_01             ldb       ,x+       ; load B from memory pointed to by X, then advance X
+0008 26FC             (   ../stringsu.as):00015                             bne       Loop_01   ; branch if not equal to Loop_01
+000A 301F             (   ../stringsu.as):00016                             leax      -1,x      ; compute effective address into X from -1,x
+000C 2006             (   ../stringsu.as):00017                             bra       Loop_02   ; branch unconditionally to Loop_02
+                      (   ../stringsu.as):00018         
+000E                  (   ../stringsu.as):00019         _strucpy
+000E 3440             (   ../stringsu.as):00020                             pshs      u         ; save U on the hardware stack
+0010 EE66             (   ../stringsu.as):00021                             ldu       6,s       ; load U from stack-relative value 6,s
+0012 AE64             (   ../stringsu.as):00022                             ldx       4,s       ; load X from stack-relative value 4,s
+0014 E6C0             (   ../stringsu.as):00023         Loop_02             ldb       ,u+       ; load B from memory pointed to by U, then advance U
+0016 4F               (   ../stringsu.as):00024                             clra                ; clear A
+0017 3416             (   ../stringsu.as):00025                             pshs      d,x       ; save D,X on the hardware stack
+0019 170000           (   ../stringsu.as):00026                             lbsr      toupper   ; long branch to subroutine to toupper
+001C 3262             (   ../stringsu.as):00027                             leas      2,s       ; adjust S using 2,s
+001E 3510             (   ../stringsu.as):00028                             puls      x         ; restore X from the hardware stack
+0020 E780             (   ../stringsu.as):00029                             stb       ,x+       ; store B to memory pointed to by X, then advance X
+0022 26F0             (   ../stringsu.as):00030                             bne       Loop_02   ; branch if not equal to Loop_02
+0024 EC64             (   ../stringsu.as):00031                             ldd       4,s       ; load D from stack-relative value 4,s
+0026 35C0             (   ../stringsu.as):00032                             puls      u,pc      ; restore registers and return
+                      (   ../stringsu.as):00033         
+                      (   ../stringsu.as):00034                             endsect             ; end current section

@@ -1,0 +1,146 @@
+                      (     ../signal.as):00001         * Adapted from cmoc_os9/lib/todo/signal.as for the live cmoc_os9 ABI.
+                      (     ../signal.as):00002         *
+                      (     ../signal.as):00003         * 'signal' and 'intercept' are definitely incompatible and use of both in a
+                      (     ../signal.as):00004         * program will have undefined results.  Both modules export _sigint so the
+                      (     ../signal.as):00005         * linker reports an entry-name clash if an attempt is made to use both.
+                      (     ../signal.as):00006         
+                      (     ../signal.as):00007                             section   bss       ; begin bss section
+                      (     ../signal.as):00008         
+     0014             (     ../signal.as):00009         MAXENTS             equ       20        ; maximum simultaneous traps
+     0004             (     ../signal.as):00010         Zero                equ       %00000100 ; define constant as %00000100
+     0000             (     ../signal.as):00011         sig                 equ       0         ; define constant as 0
+     0001             (     ../signal.as):00012         func                equ       1         ; define constant as 1
+     0003             (     ../signal.as):00013         entsiz              equ       3         ; define constant as 3
+                      (     ../signal.as):00014         
+0000                  (     ../signal.as):00015         _table              rmb       entsiz*MAXENTS ; reserve entsiz*MAXENTS bytes
+003C                  (     ../signal.as):00016         _etable             rmb       0         ; reserve 0 bytes
+003C                  (     ../signal.as):00017         _flag               rmb       1         ; reserve 1 bytes
+                      (     ../signal.as):00018         
+                      (     ../signal.as):00019                             endsect             ; end current section
+                      (     ../signal.as):00020         
+                      (     ../signal.as):00021                             section   code      ; begin code section
+                      (     ../signal.as):00022         
+                      (     ../signal.as):00023         _sigint             EXPORT              ; export this symbol
+                      (     ../signal.as):00024         _signal             EXPORT              ; export this symbol
+                      (     ../signal.as):00025         
+     0006             (     ../signal.as):00026         F_Exit              equ       $06       ; define constant as $06
+     0009             (     ../signal.as):00027         F_Icpt              equ       $09       ; define constant as $09
+                      (     ../signal.as):00028         
+                      (     ../signal.as):00029         * signal(sig, func)
+0000                  (     ../signal.as):00030         _sigint
+0000                  (     ../signal.as):00031         _signal
+0000 EC62             (     ../signal.as):00032                             ldd       2,s       ; get the signal number
+0002 5D               (     ../signal.as):00033                             tstb                ; lsb 0?
+0003 2707             (     ../signal.as):00034                             beq       sigerr    ; signal 0 can't be caught or ignored
+0005 4D               (     ../signal.as):00035                             tsta                ; greater than 255?
+0006 2604             (     ../signal.as):00036                             bne       sigerr    ; branch if not equal to sigerr
+0008 8D32             (     ../signal.as):00037                             bsr       lookup    ; find a suitable entry
+000A 2604             (     ../signal.as):00038                             bne       signal10  ; branch if entry found
+                      (     ../signal.as):00039         
+000C                  (     ../signal.as):00040         sigerr
+000C CCFFFF           (     ../signal.as):00041                             ldd       #-1       ; error indication
+000F 39               (     ../signal.as):00042                             rts                 ; return to caller
+                      (     ../signal.as):00043         
+0010                  (     ../signal.as):00044         signal10
+0010 EC01             (     ../signal.as):00045                             ldd       func,x    ; get the old entry function
+0012 3406             (     ../signal.as):00046                             pshs      d         ; save it
+0014 EC66             (     ../signal.as):00047                             ldd       6,s       ; get the new function
+0016 ED01             (     ../signal.as):00048                             std       func,x    ; store in the structure
+0018 2604             (     ../signal.as):00049                             bne       signal20  ; if not 0 branch
+                      (     ../signal.as):00050         
+                      (     ../signal.as):00051         * the new 'function' is reset (0)
+001A 6F84             (     ../signal.as):00052                             clr       sig,x     ; reset the signal byte
+001C                  (     ../signal.as):00053         sigexit
+001C 3586             (     ../signal.as):00054                             puls      d,pc      ; return the old entry
+                      (     ../signal.as):00055         
+                      (     ../signal.as):00056         * value for 'func' is 1 or a real address - set it
+001E                  (     ../signal.as):00057         signal20
+001E E665             (     ../signal.as):00058                             ldb       5,s       ; get the signal
+0020 E784             (     ../signal.as):00059                             stb       sig,x     ; store it
+0022 6DA90000         (     ../signal.as):00060                             tst       _flag,y   ; have we intercepted before?
+0026 26F4             (     ../signal.as):00061                             bne       sigexit   ; yes - no more to do
+                      (     ../signal.as):00062         
+0028 1E23             (     ../signal.as):00063                             exg       y,u       ; set the local storage into u
+002A 308D003C         (     ../signal.as):00064                             leax      intrupt,pcr ; get the address of the interrupt routine
+002E 103F09           (     ../signal.as):00065                             os9       F_Icpt    ; invoke OS-9 system call F_Icpt
+0031 1E23             (     ../signal.as):00066                             exg       y,u       ; reset local storage into y
+0033 3506             (     ../signal.as):00067                             puls      d         ; get the old value into d
+0035 25D5             (     ../signal.as):00068                             bcs       sigerr    ; error?
+0037 6CA90000         (     ../signal.as):00069                             inc       _flag,y   ; indicate that we've done it
+003B 39               (     ../signal.as):00070                             rts                 ; all done
+                      (     ../signal.as):00071         
+                      (     ../signal.as):00072         * Table lookup function:
+                      (     ../signal.as):00073         *
+                      (     ../signal.as):00074         * find an entry in the table whose 'sig' matches the b reg.
+                      (     ../signal.as):00075         * failing that, the first empty entry
+                      (     ../signal.as):00076         * failing that, zero
+                      (     ../signal.as):00077         * return result in x reg. and set the z bit accordingly
+003C                  (     ../signal.as):00078         lookup
+003C 6FE2             (     ../signal.as):00079                             clr       ,-s       ; set up a null
+003E 6FE2             (     ../signal.as):00080                             clr       ,-s       ; 'empty' pointer
+0040 30A90000         (     ../signal.as):00081                             leax      _etable,y ; get table end address
+0044 3410             (     ../signal.as):00082                             pshs      x         ; save it
+0046 30A90000         (     ../signal.as):00083                             leax      _table,y  ; start at the beginning
+                      (     ../signal.as):00084         
+004A                  (     ../signal.as):00085         loop
+004A ACE4             (     ../signal.as):00086                             cmpx      ,s        ; end yet?
+004C 2717             (     ../signal.as):00087                             beq       eloop     ; yes - exit loop
+004E E184             (     ../signal.as):00088                             cmpb      sig,x     ; match?
+0050 2605             (     ../signal.as):00089                             bne       signal30  ; no - continue
+0052 3264             (     ../signal.as):00090                             leas      4,s       ; clean up stack
+0054 1CFB             (     ../signal.as):00091                             andcc     #^Zero    ; indicate success
+0056 39               (     ../signal.as):00092                             rts                 ; and return
+                      (     ../signal.as):00093         
+0057                  (     ../signal.as):00094         signal30
+0057 A684             (     ../signal.as):00095                             lda       sig,x     ; if the entry is not empty
+0059 AA62             (     ../signal.as):00096                             ora       2,s       ; or the 'empty' pointer
+005B AA63             (     ../signal.as):00097                             ora       3,s       ; is not null
+005D 2602             (     ../signal.as):00098                             bne       signal40  ; then continue
+005F AF62             (     ../signal.as):00099                             stx       2,s       ; else save address of empty entry
+                      (     ../signal.as):00100         
+0061                  (     ../signal.as):00101         signal40
+0061 3003             (     ../signal.as):00102                             leax      entsiz,x  ; bump to next
+0063 20E5             (     ../signal.as):00103                             bra       loop      ; and round again
+                      (     ../signal.as):00104         
+0065                  (     ../signal.as):00105         eloop
+                      (     ../signal.as):00106         * traversed table without finding a match
+0065 AE62             (     ../signal.as):00107                             ldx       2,s       ; get the empty entry pointer
+0067 3264             (     ../signal.as):00108                             leas      4,s       ; clean the stack
+0069 39               (     ../signal.as):00109                             rts                 ; return to caller
+                      (     ../signal.as):00110         
+                      (     ../signal.as):00111         * Entry point for all received signals.
+                      (     ../signal.as):00112         * If an entry is found matching the signal then
+                      (     ../signal.as):00113         *   if the function address is not 1 then execute it
+                      (     ../signal.as):00114         *   then rti
+                      (     ../signal.as):00115         * else
+                      (     ../signal.as):00116         *   exit with the signal as status
+006A                  (     ../signal.as):00117         intrupt
+006A 31C4             (     ../signal.as):00118                             leay      ,u        ; point to the data
+006C 8DCE             (     ../signal.as):00119                             bsr       lookup    ; branch to subroutine to lookup
+006E 2706             (     ../signal.as):00120                             beq       intr10    ; any entry returned?
+0070 3410             (     ../signal.as):00121                             pshs      x         ; save the entry pointer
+0072 AE01             (     ../signal.as):00122                             ldx       func,x    ; get the function address
+0074 2603             (     ../signal.as):00123                             bne       intr20    ; empty entry?
+                      (     ../signal.as):00124         
+                      (     ../signal.as):00125         * no matching entry - simulate condition of no 'intercept'
+0076                  (     ../signal.as):00126         intr10
+0076 103F06           (     ../signal.as):00127                             os9       F_Exit    ; status still in B reg.
+                      (     ../signal.as):00128         
+0079                  (     ../signal.as):00129         intr20
+0079 8C0001           (     ../signal.as):00130                             cmpx      #1        ; is it 'ignore'?
+007C 2603             (     ../signal.as):00131                             bne       intr30    ; no - execute
+007E 3262             (     ../signal.as):00132                             leas      2,s       ; reset stack
+0080 3B               (     ../signal.as):00133                             rti                 ; and resume
+                      (     ../signal.as):00134         
+0081                  (     ../signal.as):00135         intr30
+0081 4F               (     ../signal.as):00136                             clra                ; clear the MSB of the signal arg
+0082 3406             (     ../signal.as):00137                             pshs      d         ; put it on stack for the function
+0084 AD84             (     ../signal.as):00138                             jsr       ,x        ; go run the function
+0086 3516             (     ../signal.as):00139                             puls      d,x       ; get the entry pointer back
+0088 4F               (     ../signal.as):00140                             clra                ; clear A
+0089 5F               (     ../signal.as):00141                             clrb                ; clear B
+008A A784             (     ../signal.as):00142                             sta       sig,x     ; clear the entry
+008C ED01             (     ../signal.as):00143                             std       func,x    ; and its func address
+008E 3B               (     ../signal.as):00144                             rti                 ; and that's it
+                      (     ../signal.as):00145         
+                      (     ../signal.as):00146                             endsect             ; end current section

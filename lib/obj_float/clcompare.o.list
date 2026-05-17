@@ -1,0 +1,25 @@
+                      (  ../clcompare.as):00001                             section   code      ; begin code section
+                      (  ../clcompare.as):00002         
+                      (  ../clcompare.as):00003         _lcmpr              EXPORT              ; export this symbol
+                      (  ../clcompare.as):00004         
+0000 EC62             (  ../clcompare.as):00005         _lcmpr:             ldd       2,s       ; load D from stack-relative value 2,s
+0002 10A384           (  ../clcompare.as):00006                             cmpd      ,x        ; compare D against memory pointed to by X
+0005 2612             (  ../clcompare.as):00007                             bne       BranchTarget_02 ; branch if not equal to BranchTarget_02
+0007 EC64             (  ../clcompare.as):00008                             ldd       4,s       ; load D from stack-relative value 4,s
+0009 10A302           (  ../clcompare.as):00009                             cmpd      2,x       ; compare D against indexed value 2,x
+000C 270B             (  ../clcompare.as):00010                             beq       BranchTarget_02 ; branch if equal/zero to BranchTarget_02
+000E 2506             (  ../clcompare.as):00011                             bcs       BranchTarget_01 ; branch if carry is set to BranchTarget_01
+0010 8601             (  ../clcompare.as):00012                             lda       #1        ; load A from immediate value 1
+0012 1CFE             (  ../clcompare.as):00013                             andcc     #254      ; clear condition-code bits with mask #254
+0014 2003             (  ../clcompare.as):00014                             bra       BranchTarget_02 ; branch unconditionally to BranchTarget_02
+0016 4F               (  ../clcompare.as):00015         BranchTarget_01     clra                ; clear A
+0017 8101             (  ../clcompare.as):00016                             cmpa      #1        ; compare A against immediate value 1
+0019 3401             (  ../clcompare.as):00017         BranchTarget_02     pshs      cc        ; save CC on the hardware stack
+001B EC61             (  ../clcompare.as):00018                             ldd       1,s       ; load D from stack-relative value 1,s
+001D ED65             (  ../clcompare.as):00019                             std       5,s       ; store D to stack-relative value 5,s
+001F 3501             (  ../clcompare.as):00020                             puls      cc        ; restore CC from the hardware stack
+0021 3264             (  ../clcompare.as):00021                             leas      4,s       ; adjust S using 4,s
+0023 39               (  ../clcompare.as):00022                             rts                 ; return to caller
+                      (  ../clcompare.as):00023         
+                      (  ../clcompare.as):00024                             endsect             ; end current section
+                      (  ../clcompare.as):00025         

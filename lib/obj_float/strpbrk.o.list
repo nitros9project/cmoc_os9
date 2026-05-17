@@ -1,0 +1,25 @@
+                      (    ../strpbrk.as):00001         * Adapted from Deek's KLibc strpbrk.a for the live cmoc_os9 ABI.
+                      (    ../strpbrk.as):00002         
+                      (    ../strpbrk.as):00003                             section   code      ; begin code section
+                      (    ../strpbrk.as):00004         
+                      (    ../strpbrk.as):00005         _strpbrk            EXPORT              ; export this symbol
+                      (    ../strpbrk.as):00006         
+                      (    ../strpbrk.as):00007         _index              EXTERN              ; import external symbol
+                      (    ../strpbrk.as):00008         
+0000                  (    ../strpbrk.as):00009         _strpbrk
+0000 3450             (    ../strpbrk.as):00010                             pshs      x,u       ; save X,U on the hardware stack
+0002 AE68             (    ../strpbrk.as):00011                             ldx       8,s       ; load X from stack-relative value 8,s
+0004 EE66             (    ../strpbrk.as):00012                             ldu       6,s       ; load U from stack-relative value 6,s
+0006 3410             (    ../strpbrk.as):00013                             pshs      x         ; save X on the hardware stack
+0008 4F               (    ../strpbrk.as):00014         Loop_01             clra                ; clear A
+0009 E6C0             (    ../strpbrk.as):00015                             ldb       ,u+       ; load B from memory pointed to by U, then advance U
+000B 270B             (    ../strpbrk.as):00016         Label_01            beq       BranchTarget_01 ; branch if equal/zero to BranchTarget_01
+000D E763             (    ../strpbrk.as):00017                             stb       3,s       ; store B to stack-relative value 3,s
+000F 170000           (    ../strpbrk.as):00018                             lbsr      _index    ; long branch to subroutine to _index
+0012 27F4             (    ../strpbrk.as):00019                             beq       Loop_01   ; branch if equal/zero to Loop_01
+0014 335F             (    ../strpbrk.as):00020                             leau      -1,u      ; compute effective address into U from -1,u
+0016 1F30             (    ../strpbrk.as):00021                             tfr       u,d       ; transfer U,D
+0018 3264             (    ../strpbrk.as):00022         BranchTarget_01     leas      4,s       ; adjust S using 4,s
+001A 35C0             (    ../strpbrk.as):00023                             puls      u,pc      ; restore registers and return
+                      (    ../strpbrk.as):00024         
+                      (    ../strpbrk.as):00025                             endsect             ; end current section

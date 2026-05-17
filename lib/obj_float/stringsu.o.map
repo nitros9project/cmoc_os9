@@ -1,0 +1,4 @@
+Symbol: _strucat (stringsu.o) = 0000
+Symbol: _strucpy (stringsu.o) = 000E
+Symbol: Loop_01 (stringsu.o) = 0006
+Symbol: Loop_02 (stringsu.o) = 0014

@@ -1,0 +1,147 @@
+                      (       cbuffer.as):00001         *********************************************
+                      (       cbuffer.as):00002         *
+                      (       cbuffer.as):00003         * Buffering routines for CGFX library.
+                      (       cbuffer.as):00004         * These are included by including a call to
+                      (       cbuffer.as):00005         * '_CGFXBuf()' in your program.  This function
+                      (       cbuffer.as):00006         * just initializes the buffer used and returns.
+                      (       cbuffer.as):00007         *
+                      (       cbuffer.as):00008         * Any output to a path is buffered until
+                      (       cbuffer.as):00009         * one of the following conditions is met:
+                      (       cbuffer.as):00010         *
+                      (       cbuffer.as):00011         *  - you write to a different path
+                      (       cbuffer.as):00012         *  - you call _ss_mgpb(), _ss_wset(), GetBlk(),
+                      (       cbuffer.as):00013         *    writeln(), cwriteln(), read(), readln(),
+                      (       cbuffer.as):00014         *    cread(), creadln(), GPLoad(), or KilBuf().
+                      (       cbuffer.as):00015         *  - you call the _Flush() function to flush
+                      (       cbuffer.as):00016         *    the buffer.
+                      (       cbuffer.as):00017         *
+                      (       cbuffer.as):00018         * The _Flush() function call be called whether
+                      (       cbuffer.as):00019         * or not buffering is used.  If you have a set
+                      (       cbuffer.as):00020         * of functions that you regularly use that do
+                      (       cbuffer.as):00021         * screen output, the _Flush() call can be used
+                      (       cbuffer.as):00022         * safely (it is a NULL function without
+                      (       cbuffer.as):00023         * buffering.)
+                      (       cbuffer.as):00024         *
+                      (       cbuffer.as):00025         * Many thanks to Eddie Kuns, who suggested
+                      (       cbuffer.as):00026         * transparent buffering for this lib and
+                      (       cbuffer.as):00027         * kept me thinking about it.
+                      (       cbuffer.as):00028         * Also, thanks to Bob van der Poel for reminding
+                      (       cbuffer.as):00029         * me to return an error if _Flush() is unsuccessful....
+                      (       cbuffer.as):00030         *
+                      (       cbuffer.as):00031         * CGFX replacement lib buffering routines
+                      (       cbuffer.as):00032         * by Mike Sweet 5/10/90,8/11/90
+                      (       cbuffer.as):00033         *
+                      (       cbuffer.as):00034         
+                      (       cbuffer.as):00035          section bss
+0000                  (       cbuffer.as):00036         _CBuffer: rmb 256 this is the buffer for all output
+0100 0000             (       cbuffer.as):00037         _CUsed: fdb 0 this is 'how much is used' in the buffer
+0102 FF               (       cbuffer.as):00038         _CPath: fcb -1 the path all of this has to go to
+                      (       cbuffer.as):00039          endsect * end current section
+                      (       cbuffer.as):00040         
+                      (       cbuffer.as):00041          section code
+                      (       cbuffer.as):00042         _errno EXTERNAL * import external symbol
+                      (       cbuffer.as):00043         _Flush EXPORT * export this symbol
+0000                  (       cbuffer.as):00044         _Flush:
+0000 4F               (       cbuffer.as):00045          clra * clear A
+0001 5F               (       cbuffer.as):00046          clrb * clear B
+0002 3476             (       cbuffer.as):00047          pshs d,x,y,u * save caller-visible registers before touching OS-9 state
+                      (       cbuffer.as):00048         
+0004 1F23             (       cbuffer.as):00049          tfr y,u * keep the static data pointer in U for the rest of the routine
+0006 A6A90000         (       cbuffer.as):00050          lda _CPath,y * load A from indexed value _CPath,y
+000A 2B1A             (       cbuffer.as):00051          bmi noerror1 * skip the write when no buffered path is active
+000C 30A90000         (       cbuffer.as):00052          leax _CBuffer,y * compute effective address into X from _CBuffer,y
+0010 10AEA90000       (       cbuffer.as):00053          ldy _CUsed,y * load Y from indexed value _CUsed,y
+0015 270F             (       cbuffer.as):00054          beq noerror1 * skip the write when the buffer is already empty
+0017 103F8A           (       cbuffer.as):00055          os9 $8A I$Write * write the buffered bytes to the active path
+001A 240A             (       cbuffer.as):00056          bcc noerror1 * leave errno alone when the flush succeeds
+001C 4F               (       cbuffer.as):00057          clra * clear A
+001D EDC90000         (       cbuffer.as):00058          std _errno,u * store D to indexed value _errno,u
+0021 CCFFFF           (       cbuffer.as):00059          ldd #-1 * load D from immediate value -1
+0024 EDE4             (       cbuffer.as):00060          std ,s * overwrite saved D so the caller receives -1 on failure
+                      (       cbuffer.as):00061         
+0026                  (       cbuffer.as):00062         noerror1
+0026 4F               (       cbuffer.as):00063          clra * clear A
+0027 5F               (       cbuffer.as):00064          clrb * clear B
+0028 EDC90000         (       cbuffer.as):00065          std _CUsed,u * store D to indexed value _CUsed,u
+002C 35F6             (       cbuffer.as):00066          puls d,x,y,u,pc
+                      (       cbuffer.as):00067         
+                      (       cbuffer.as):00068         
+                      (       cbuffer.as):00069         *********************************
+                      (       cbuffer.as):00070         * Previously (version 5), you
+                      (       cbuffer.as):00071         * had to call _CGFXBuf() to init
+                      (       cbuffer.as):00072         * the buffer data structure.  No
+                      (       cbuffer.as):00073         * longer, tho....
+                      (       cbuffer.as):00074         *
+                      (       cbuffer.as):00075         
+002E                  (       cbuffer.as):00076         _CGFXBuf:
+002E 39               (       cbuffer.as):00077          rts * return to caller
+                      (       cbuffer.as):00078         
+                      (       cbuffer.as):00079         
+                      (       cbuffer.as):00080         **************************************
+                      (       cbuffer.as):00081         * write function- used for all other
+                      (       cbuffer.as):00082         * functions to write to a path-
+                      (       cbuffer.as):00083         * unbuffered version just calls I$WRITE.
+                      (       cbuffer.as):00084         *
+                      (       cbuffer.as):00085         * A=path
+                      (       cbuffer.as):00086         * X=address
+                      (       cbuffer.as):00087         * U=byte count
+                      (       cbuffer.as):00088         *
+                      (       cbuffer.as):00089         
+                      (       cbuffer.as):00090         _write EXPORT * export this symbol
+002F                  (       cbuffer.as):00091         _write:
+002F A1A90000         (       cbuffer.as):00092          cmpa _CPath,y * check whether the new write uses the current buffered path
+0033 270A             (       cbuffer.as):00093          beq noflush1 * keep buffering when the path has not changed
+                      (       cbuffer.as):00094         
+                      (       cbuffer.as):00095         * fix for version 7! 
+0035 3402             (       cbuffer.as):00096          pshs a * preserve the requested path because _Flush clobbers A
+                      (       cbuffer.as):00097         
+0037 8DC7             (       cbuffer.as):00098          bsr _Flush * flush buffered output before switching paths
+                      (       cbuffer.as):00099         
+                      (       cbuffer.as):00100         *fix for version 7!
+0039 3502             (       cbuffer.as):00101          puls a * recover the requested destination path
+003B A7A90000         (       cbuffer.as):00102          sta _CPath,y * record the destination path for subsequent buffered writes
+                      (       cbuffer.as):00103         
+003F 1F30             (       cbuffer.as):00104         noflush1 tfr u,d * copy the requested byte count into D
+0041 E3A90000         (       cbuffer.as):00105          addd _CUsed,y * add indexed value _CUsed,y into D
+0045 10830100         (       cbuffer.as):00106          cmpd #256 * see whether appending this write would overflow the buffer
+0049 2502             (       cbuffer.as):00107          blo noflush2 * keep buffering when the combined size still fits
+004B 8DB3             (       cbuffer.as):00108          bsr _Flush * flush existing buffered data before appending more
+                      (       cbuffer.as):00109         
+004D 11830100         (       cbuffer.as):00110         noflush2 cmpu #256 * test whether the caller wants to write a full buffer or more
+0051 251B             (       cbuffer.as):00111          blo bufferit * copy smaller writes into the buffer instead of writing now
+0053 3420             (       cbuffer.as):00112          pshs y * preserve Y because OS-9 expects the byte count there
+0055 A6A90000         (       cbuffer.as):00113          lda _CPath,y * fetch the active destination path
+0059 1F32             (       cbuffer.as):00114          tfr u,y * move the byte count into Y for OS-9
+005B 103F8A           (       cbuffer.as):00115          os9 $8A I$Write * send large writes directly to the path without buffering
+005E 3520             (       cbuffer.as):00116          puls y
+0060 2409             (       cbuffer.as):00117          bcc noerror2 * return success when the direct write worked
+0062 4F               (       cbuffer.as):00118          clra * clear A
+0063 EDA90000         (       cbuffer.as):00119          std _errno,y * store the OS-9 error code in errno
+0067 CCFFFF           (       cbuffer.as):00120          ldd #-1 * return -1 to report the direct-write failure
+006A 39               (       cbuffer.as):00121         return rts * return to caller
+                      (       cbuffer.as):00122         
+006B 4F               (       cbuffer.as):00123         noerror2 clra * clear A
+006C 5F               (       cbuffer.as):00124          clrb * clear B
+006D 39               (       cbuffer.as):00125          rts * return 0 for a successful direct write
+                      (       cbuffer.as):00126         
+                      (       cbuffer.as):00127         
+006E ECA90000         (       cbuffer.as):00128         bufferit ldd _CUsed,y * load D from indexed value _CUsed,y
+0072 3440             (       cbuffer.as):00129          pshs u * preserve the requested byte count while U is reused as a pointer
+0074 33A90000         (       cbuffer.as):00130          leau _CBuffer,y * compute effective address into U from _CBuffer,y
+0078 33CB             (       cbuffer.as):00131          leau d,u * advance U to the first free byte in the buffer
+007A ECE4             (       cbuffer.as):00132          ldd ,s * recover the requested byte count into D
+                      (       cbuffer.as):00133         
+007C A680             (       cbuffer.as):00134         bloop lda ,x+ * load A from memory pointed to by X, then advance X
+007E A7C0             (       cbuffer.as):00135          sta ,u+ * store A to memory pointed to by U, then advance U
+0080 5A               (       cbuffer.as):00136          decb * count one buffered byte copied
+0081 26F9             (       cbuffer.as):00137          bne bloop * keep copying until the caller's byte count reaches zero
+                      (       cbuffer.as):00138         
+0083 3506             (       cbuffer.as):00139          puls d * restore the original byte count
+0085 E3A90000         (       cbuffer.as):00140          addd _CUsed,y * add the copied byte count to the buffered-usage total
+0089 EDA90000         (       cbuffer.as):00141          std _CUsed,y * store D to indexed value _CUsed,y
+                      (       cbuffer.as):00142         
+008D 4F               (       cbuffer.as):00143          clra * clear A
+008E 5F               (       cbuffer.as):00144          clrb * clear B
+008F 39               (       cbuffer.as):00145          rts * return 0 after buffering the write successfully
+                      (       cbuffer.as):00146         
+                      (       cbuffer.as):00147          endsect * end current section

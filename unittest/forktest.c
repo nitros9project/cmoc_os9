@@ -45,15 +45,15 @@ void test_fork()
     if (result == 0)
     {
         printf("%s [PASS] _os_fork(\"%s\", %d, $%X, $%X, $%X, %d, [$%X]) = %d\n", __func__, module, paramsize, paramaddr, lang, type, datasize, &pid, result);
-        int pid;
-        result = _os_wait(&pid);
-        if (result == 0)
+        int status;
+        int child_pid = _os_wait(&status);
+        if (child_pid >= 0)
         {
-            printf("%s [PASS] _os_wait($%X) = %d\n", __func__, &pid, result);
+            printf("%s [PASS] _os_wait([$%X]) -> pid=%d status=%d\n", __func__, &status, child_pid, status);
         }
         else
         {
-            printf("%s [FAIL] _os_wait($%X) = %d\n", __func__, &pid, result);
+            printf("%s [FAIL] _os_wait([$%X]) = %d\n", __func__, &status, child_pid);
         }
     }
     else

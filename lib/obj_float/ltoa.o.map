@@ -1,0 +1,5 @@
+Symbol: _ltoa (ltoa.o) = 0000
+Symbol: D_ten (ltoa.o) = 0071
+Symbol: L_loop (ltoa.o) = 001F
+Symbol: L_pos (ltoa.o) = 001F
+Symbol: L_term (ltoa.o) = 005E

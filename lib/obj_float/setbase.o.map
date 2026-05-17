@@ -1,0 +1,17 @@
+Symbol: _setbase (setbase.o) = 0000
+Symbol: BIGBUF (setbase.o) = 0008
+Symbol: BUFSIZ_C (setbase.o) = 0100
+Symbol: DEVMASK (setbase.o) = 00C0
+Symbol: INIT (setbase.o) = 0080
+Symbol: L_setbase_big (setbase.o) = 005F
+Symbol: L_setbase_check (setbase.o) = 003D
+Symbol: L_setbase_done (setbase.o) = 007A
+Symbol: L_setbase_flag (setbase.o) = 006E
+Symbol: L_setbase_have_size (setbase.o) = 004A
+Symbol: L_setbase_known (setbase.o) = 0029
+Symbol: L_setbase_merge (setbase.o) = 0022
+Symbol: L_setbase_unbuf (setbase.o) = 0063
+Symbol: RBF (setbase.o) = 0080
+Symbol: SCF (setbase.o) = 0040
+Symbol: SS_Size (setbase.o) = 0002
+Symbol: UNBUF (setbase.o) = 0004

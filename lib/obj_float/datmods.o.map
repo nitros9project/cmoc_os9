@@ -1,0 +1,13 @@
+Symbol: _datlink (datmods.o) = 0021
+Symbol: _dunlink (datmods.o) = 0069
+Symbol: _lockdata (datmods.o) = 0000
+Symbol: _unlkdata (datmods.o) = 0011
+Symbol: BranchTarget_01 (datmods.o) = 003A
+Symbol: BranchTarget_02 (datmods.o) = 0045
+Symbol: BranchTarget_03 (datmods.o) = 0067
+Symbol: F_Link (datmods.o) = 0000
+Symbol: F_Load (datmods.o) = 0001
+Symbol: F_UnLink (datmods.o) = 0002
+Symbol: Loop_01 (datmods.o) = 000E
+Symbol: Loop_02 (datmods.o) = 0035
+Symbol: ReturnZero_01 (datmods.o) = 001D

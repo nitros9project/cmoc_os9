@@ -1,0 +1,72 @@
+                      (      ../clmul.as):00001                             section   code      ; begin code section
+                      (      ../clmul.as):00002         
+                      (      ../clmul.as):00003         _flacc              EXTERNAL            ; import external symbol
+                      (      ../clmul.as):00004         _lbexit             EXTERNAL            ; import external symbol
+                      (      ../clmul.as):00005         
+                      (      ../clmul.as):00006         _lmul               EXPORT              ; export this symbol
+                      (      ../clmul.as):00007         
+0000 EC02             (      ../clmul.as):00008         _lmul:              ldd       2,x       ; load D from indexed value 2,x
+0002 3406             (      ../clmul.as):00009                             pshs      d         ; save D on the hardware stack
+0004 EC84             (      ../clmul.as):00010                             ldd       ,x        ; load D from memory pointed to by X
+0006 3406             (      ../clmul.as):00011                             pshs      d         ; save D on the hardware stack
+0008 30A90000         (      ../clmul.as):00012                             leax      _flacc,y  ; compute effective address into X from _flacc,y
+000C 6F84             (      ../clmul.as):00013                             clr       ,x        ; clear memory pointed to by X
+000E 6F01             (      ../clmul.as):00014                             clr       1,x       ; clear indexed value 1,x
+0010 A669             (      ../clmul.as):00015                             lda       9,s       ; load A from stack-relative value 9,s
+0012 E663             (      ../clmul.as):00016                             ldb       3,s       ; load B from stack-relative value 3,s
+0014 3D               (      ../clmul.as):00017                             mul                 ; multiply A by B and leave the product in D
+0015 ED02             (      ../clmul.as):00018                             std       2,x       ; store D to indexed value 2,x
+0017 A669             (      ../clmul.as):00019                             lda       9,s       ; load A from stack-relative value 9,s
+0019 E662             (      ../clmul.as):00020                             ldb       2,s       ; load B from stack-relative value 2,s
+001B 3D               (      ../clmul.as):00021                             mul                 ; multiply A by B and leave the product in D
+001C E301             (      ../clmul.as):00022                             addd      1,x       ; add indexed value 1,x into D
+001E ED01             (      ../clmul.as):00023                             std       1,x       ; store D to indexed value 1,x
+0020 2402             (      ../clmul.as):00024                             bcc       BranchTarget_01 ; branch if carry is clear to BranchTarget_01
+0022 6C84             (      ../clmul.as):00025                             inc       ,x        ; increment memory pointed to by X
+0024 A668             (      ../clmul.as):00026         BranchTarget_01     lda       8,s       ; load A from stack-relative value 8,s
+0026 E663             (      ../clmul.as):00027                             ldb       3,s       ; load B from stack-relative value 3,s
+0028 3D               (      ../clmul.as):00028                             mul                 ; multiply A by B and leave the product in D
+0029 E301             (      ../clmul.as):00029                             addd      1,x       ; add indexed value 1,x into D
+002B ED01             (      ../clmul.as):00030                             std       1,x       ; store D to indexed value 1,x
+002D 2402             (      ../clmul.as):00031                             bcc       BranchTarget_02 ; branch if carry is clear to BranchTarget_02
+002F 6C84             (      ../clmul.as):00032                             inc       ,x        ; increment memory pointed to by X
+0031 A669             (      ../clmul.as):00033         BranchTarget_02     lda       9,s       ; load A from stack-relative value 9,s
+0033 E661             (      ../clmul.as):00034                             ldb       1,s       ; load B from stack-relative value 1,s
+0035 3D               (      ../clmul.as):00035                             mul                 ; multiply A by B and leave the product in D
+0036 E384             (      ../clmul.as):00036                             addd      ,x        ; add memory pointed to by X into D
+0038 ED84             (      ../clmul.as):00037                             std       ,x        ; store D to memory pointed to by X
+003A A668             (      ../clmul.as):00038                             lda       8,s       ; load A from stack-relative value 8,s
+003C E662             (      ../clmul.as):00039                             ldb       2,s       ; load B from stack-relative value 2,s
+003E 3D               (      ../clmul.as):00040                             mul                 ; multiply A by B and leave the product in D
+003F E384             (      ../clmul.as):00041                             addd      ,x        ; add memory pointed to by X into D
+0041 ED84             (      ../clmul.as):00042                             std       ,x        ; store D to memory pointed to by X
+0043 A667             (      ../clmul.as):00043                             lda       7,s       ; load A from stack-relative value 7,s
+0045 E663             (      ../clmul.as):00044                             ldb       3,s       ; load B from stack-relative value 3,s
+0047 3D               (      ../clmul.as):00045                             mul                 ; multiply A by B and leave the product in D
+0048 E384             (      ../clmul.as):00046                             addd      ,x        ; add memory pointed to by X into D
+004A ED84             (      ../clmul.as):00047                             std       ,x        ; store D to memory pointed to by X
+004C A669             (      ../clmul.as):00048                             lda       9,s       ; load A from stack-relative value 9,s
+004E E6E4             (      ../clmul.as):00049                             ldb       ,s        ; load B from memory pointed to by S
+0050 3D               (      ../clmul.as):00050                             mul                 ; multiply A by B and leave the product in D
+0051 EB84             (      ../clmul.as):00051                             addb      ,x        ; add memory pointed to by X into B
+0053 E784             (      ../clmul.as):00052                             stb       ,x        ; store B to memory pointed to by X
+0055 A668             (      ../clmul.as):00053                             lda       8,s       ; load A from stack-relative value 8,s
+0057 E661             (      ../clmul.as):00054                             ldb       1,s       ; load B from stack-relative value 1,s
+0059 3D               (      ../clmul.as):00055                             mul                 ; multiply A by B and leave the product in D
+005A EB84             (      ../clmul.as):00056                             addb      ,x        ; add memory pointed to by X into B
+005C E784             (      ../clmul.as):00057                             stb       ,x        ; store B to memory pointed to by X
+005E A667             (      ../clmul.as):00058                             lda       7,s       ; load A from stack-relative value 7,s
+0060 E662             (      ../clmul.as):00059                             ldb       2,s       ; load B from stack-relative value 2,s
+0062 3D               (      ../clmul.as):00060                             mul                 ; multiply A by B and leave the product in D
+0063 EB84             (      ../clmul.as):00061                             addb      ,x        ; add memory pointed to by X into B
+0065 E784             (      ../clmul.as):00062                             stb       ,x        ; store B to memory pointed to by X
+0067 A666             (      ../clmul.as):00063                             lda       6,s       ; load A from stack-relative value 6,s
+0069 E663             (      ../clmul.as):00064                             ldb       3,s       ; load B from stack-relative value 3,s
+006B 3D               (      ../clmul.as):00065                             mul                 ; multiply A by B and leave the product in D
+006C EB84             (      ../clmul.as):00066                             addb      ,x        ; add memory pointed to by X into B
+006E E784             (      ../clmul.as):00067                             stb       ,x        ; store B to memory pointed to by X
+0070 3264             (      ../clmul.as):00068                             leas      4,s       ; adjust S using 4,s
+0072 160000           (      ../clmul.as):00069                             lbra      _lbexit   ; long branch unconditionally to _lbexit
+                      (      ../clmul.as):00070         
+                      (      ../clmul.as):00071                             endsect             ; end current section
+                      (      ../clmul.as):00072         

@@ -1,0 +1,7 @@
+Symbol: _movemem (movemem.o) = 0000
+Symbol: mloop1 (movemem.o) = 002D
+Symbol: movehigh (movemem.o) = 0027
+Symbol: movelow (movemem.o) = 000D
+Symbol: movelst1 (movemem.o) = 001B
+Symbol: movelst2 (movemem.o) = 003B
+Symbol: moverts (movemem.o) = 0025

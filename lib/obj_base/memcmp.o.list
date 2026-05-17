@@ -1,0 +1,27 @@
+                      (     ../memcmp.as):00001         * Adapted from Deek's KLibc memcmp.a for the live cmoc_os9 ABI.
+                      (     ../memcmp.as):00002         
+                      (     ../memcmp.as):00003                             section   code      ; begin code section
+                      (     ../memcmp.as):00004         
+                      (     ../memcmp.as):00005         _memcmp             EXPORT              ; export this symbol
+                      (     ../memcmp.as):00006         
+0000                  (     ../memcmp.as):00007         _memcmp
+0000 3460             (     ../memcmp.as):00008                             pshs      y,u       ; save Y,U on the hardware stack
+0002 AE66             (     ../memcmp.as):00009                             ldx       6,s       ; load X from stack-relative value 6,s
+0004 AC68             (     ../memcmp.as):00010                             cmpx      8,s       ; compare X against stack-relative value 8,s
+0006 2715             (     ../memcmp.as):00011                             beq       ReturnZero_01 ; branch if equal/zero to ReturnZero_01
+0008 EE68             (     ../memcmp.as):00012                             ldu       8,s       ; load U from stack-relative value 8,s
+000A 10AE6A           (     ../memcmp.as):00013                             ldy       10,s      ; load Y from stack-relative value 10,s
+000D 270E             (     ../memcmp.as):00014                             beq       ReturnZero_01 ; branch if equal/zero to ReturnZero_01
+000F E6C0             (     ../memcmp.as):00015         Loop_01             ldb       ,u+       ; load B from memory pointed to by U, then advance U
+0011 E080             (     ../memcmp.as):00016                             subb      ,x+       ; subtract memory pointed to by X, then advance X from B
+0013 2704             (     ../memcmp.as):00017                             beq       BranchTarget_01 ; branch if equal/zero to BranchTarget_01
+0015 50               (     ../memcmp.as):00018                             negb                ; negate B
+0016 1D               (     ../memcmp.as):00019                             sex                 ; sign-extend B into A to form D
+0017 2006             (     ../memcmp.as):00020                             bra       Continue_01 ; branch unconditionally to Continue_01
+0019 313F             (     ../memcmp.as):00021         BranchTarget_01     leay      -1,y      ; compute effective address into Y from -1,y
+001B 26F2             (     ../memcmp.as):00022                             bne       Loop_01   ; branch if not equal to Loop_01
+001D 4F               (     ../memcmp.as):00023         ReturnZero_01       clra                ; clear A
+001E 5F               (     ../memcmp.as):00024                             clrb                ; clear B
+001F 35E0             (     ../memcmp.as):00025         Continue_01         puls      y,u,pc    ; restore registers and return
+                      (     ../memcmp.as):00026         
+                      (     ../memcmp.as):00027                             endsect             ; end current section

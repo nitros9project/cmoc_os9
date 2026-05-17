@@ -1,0 +1,12 @@
+                      (      ../getsp.as):00001         * Adapted from cmoc_os9/lib/todo/getsp.a for the live cmoc_os9 ABI.
+                      (      ../getsp.as):00002         
+                      (      ../getsp.as):00003                             section   code      ; begin code section
+                      (      ../getsp.as):00004         
+                      (      ../getsp.as):00005         _getsp              EXPORT              ; export this symbol
+                      (      ../getsp.as):00006         
+0000                  (      ../getsp.as):00007         _getsp
+0000 3062             (      ../getsp.as):00008                             leax      2,s       ; above return
+0002 1F10             (      ../getsp.as):00009                             tfr       x,d       ; get in primary register
+0004 39               (      ../getsp.as):00010                             rts                 ; return to caller
+                      (      ../getsp.as):00011         
+                      (      ../getsp.as):00012                             endsect             ; end current section

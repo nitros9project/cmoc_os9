@@ -1,0 +1,32 @@
+                      (        ../gs1.as):00001         * Adapted from cmoc_os9/lib/todo/gs1.as for the live cmoc_os9 ABI.
+                      (        ../gs1.as):00002         
+                      (        ../gs1.as):00003                             section   code      ; begin code section
+                      (        ../gs1.as):00004         
+                      (        ../gs1.as):00005         _gs_size            EXPORT              ; export this symbol
+                      (        ../gs1.as):00006         _gs_pos             EXPORT              ; export this symbol
+                      (        ../gs1.as):00007         
+                      (        ../gs1.as):00008         _flacc              EXTERNAL            ; import external symbol
+                      (        ../gs1.as):00009         _errno              EXTERNAL            ; import external symbol
+                      (        ../gs1.as):00010         
+     008D             (        ../gs1.as):00011         I_GetStt            equ       $8d       ; define constant as $8d
+                      (        ../gs1.as):00012         
+0000                  (        ../gs1.as):00013         _gs_size
+0000 C602             (        ../gs1.as):00014                             ldb       #2        ; load B from immediate value 2
+0002 2002             (        ../gs1.as):00015                             bra       Continue_01 ; branch unconditionally to Continue_01
+                      (        ../gs1.as):00016         
+0004                  (        ../gs1.as):00017         _gs_pos
+0004 C605             (        ../gs1.as):00018                             ldb       #5        ; load B from immediate value 5
+0006 3440             (        ../gs1.as):00019         Continue_01         pshs      u         ; save U on the hardware stack
+0008 A665             (        ../gs1.as):00020                             lda       5,s       ; load A from stack-relative value 5,s
+000A 103F8D           (        ../gs1.as):00021                             os9       I_GetStt  ; invoke OS-9 system call I_GetStt
+000D 240A             (        ../gs1.as):00022                             bcc       BranchTarget_01 ; branch if carry is clear to BranchTarget_01
+000F 8EFFFF           (        ../gs1.as):00023                             ldx       #-1       ; load X from immediate value -1
+0012 1F13             (        ../gs1.as):00024                             tfr       x,u       ; transfer X,U
+0014 4F               (        ../gs1.as):00025                             clra                ; clear A
+0015 EDA90000         (        ../gs1.as):00026                             std       _errno,y  ; store D to indexed value _errno,y
+0019 AFA90000         (        ../gs1.as):00027         BranchTarget_01     stx       _flacc,y  ; store X to indexed value _flacc,y
+001D 30A90000         (        ../gs1.as):00028                             leax      _flacc,y  ; compute effective address into X from _flacc,y
+0021 EF02             (        ../gs1.as):00029                             stu       2,x       ; store U to indexed value 2,x
+0023 35C0             (        ../gs1.as):00030                             puls      u,pc      ; restore registers and return
+                      (        ../gs1.as):00031         
+                      (        ../gs1.as):00032                             endsect             ; end current section

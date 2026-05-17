@@ -2,13 +2,24 @@
 
 _getstat            EXPORT              ; export generic GetStat wrapper
 _setstat            EXPORT              ; export generic SetStat wrapper
+_os_getstat         EXPORT              ; export modern generic GetStat wrapper
+_os_setstat         EXPORT              ; export modern generic SetStat wrapper
 
 _os9err             EXTERNAL            ; common OS-9 error return helper
+_osret              EXTERNAL            ; modern _os_* status return helper
 _sysret             EXTERNAL            ; common system-call return helper
 
                     section   code      ; begin code section
 
 _getstat
+                    lbsr      do_getstat ; perform GetStat and preserve carry result
+                    lbra      _sysret   ; return using shared status-to-C helper
+
+_os_getstat
+                    lbsr      do_getstat ; perform GetStat and preserve carry result
+                    lbra      _osret    ; return using modern _os_* status helper
+
+do_getstat
                     pshs      y,u       ; preserve Y and U across the system call
                     lda       9,s       ; load path number argument
                     ldb       7,s       ; load requested GetStat code
@@ -38,10 +49,17 @@ L002e               stx       [10,s]    ; store high word of 32-bit result throu
 L0039               ldy       12,s      ; load byte-count/aux pointer argument for SS_FD
 L003c               ldx       10,s      ; load primary buffer pointer argument
 L003e               os9       I_GetStt  ; issue the requested GetStat call
-gsbye               puls      y,u       ; restore preserved registers
-                    lbra      _sysret   ; return using shared status-to-C helper
+gsbye               puls      y,u,pc    ; restore preserved registers and return
 
 _setstat
+                    lbsr      do_setstat ; perform SetStat and preserve carry result
+                    lbra      _sysret   ; return using shared status-to-C helper
+
+_os_setstat
+                    lbsr      do_setstat ; perform SetStat and preserve carry result
+                    lbra      _osret    ; return using modern _os_* status helper
+
+do_setstat
                     pshs      y,u       ; preserve Y and U across the system call
                     lda       9,s       ; load path number argument
                     ldb       7,s       ; load requested SetStat code
@@ -89,7 +107,6 @@ L009a               tfr       a,b       ; move path number into B for SS_DCmd co
                     ldy       14,s      ; load secondary pointer/value into Y
                     ldu       16,s      ; load tertiary pointer/value into U
 L00a6               os9       I_SetStt  ; issue the requested SetStat call
-                    puls      y,u       ; restore preserved registers
-                    lbra      _sysret   ; return using shared status-to-C helper
+                    puls      y,u,pc    ; restore preserved registers and return
 
                     endsect             ; end code section

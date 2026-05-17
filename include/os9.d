@@ -37,7 +37,6 @@ E_EOF               equ       $D3       ; end-of-file status code
 E_FNA               equ       $D6       ; file not accessible error code
 E_Seek              equ       $F7       ; seek error code
 
-SS_Opt              equ       $00       ; path options query/set
 SS_Ready            equ       $01       ; path ready state query
 SS_Size             equ       $02       ; file size query/set
 SS_Reset            equ       $03       ; reset device/path state

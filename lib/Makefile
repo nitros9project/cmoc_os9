@@ -8,7 +8,7 @@ MEM = mem.o sbrk.o ibrk.o brk.o memory.o memchr.o memccpy.o memcmp.o memset.o me
 	memncmp.o calloc.o realloc.o
 SYS = sleep.o
 LOW_IO = access.o chmod.o chown.o dir.o create.o open.o read.o write.o
-MISC = rpterr.o chcodes.o htoi.o htol.o rand.o prof.o getopt.o popen.o adump.o pwent.o defdrive.o pwcryp.o errmsg.o prgname.o mktemp.o setbuf.o minmax.o uminmax.o bsearch.o qsort.o tidyup.o system.o setjmp.o devtyp.o sets.o dirutil.o datmods.o misc.o skip.o gs1.o gs2.o ss1.o ss2.o ss3.o os_gs_ss.o getsp.o intercept.o signal.o strtol.o
+MISC = rpterr.o chcodes.o htoi.o htol.o rand.o prof.o getopt.o popen.o adump.o pwent.o defdrive.o pwcryp.o errmsg.o prgname.o mktemp.o setbuf.o minmax.o uminmax.o bsearch.o qsort.o tidyup.o system.o setjmp.o devtyp.o sets.o dirutil.o datmods.o misc.o skip.o gs1.o gs2.o ss1.o ss2.o ss3.o getsp.o intercept.o signal.o strtol.o
 MATH_SUPPORT = ccmult.o ccdiv.o ccmod.o cshifts.o mul168.o atoi.o abs.o
 LONG_SUPPORT = clcommon.o clcompare.o clconvert.o claddsub.o clbits.o cldiv.o cludiv.o clmove.o clnegcompl.o clincdec.o clmul.o clshifts.o l3tol.o ltol3.o ltoc3tol.o atol.o
 FILE_SUPPORT = attr.o io.o

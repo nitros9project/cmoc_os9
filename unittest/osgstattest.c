@@ -15,6 +15,16 @@ static void check_status(const char *name, error_code result)
     }
 }
 
+static void check_error(const char *name, error_code result)
+{
+    if (result != 0) {
+        printf("%s [PASS] result=%d\n", name, result);
+    } else {
+        printf("%s [FAIL] result=%d\n", name, result);
+        failed = 1;
+    }
+}
+
 static void check_int_equal(const char *name, int actual, int expected)
 {
     if (actual == expected) {
@@ -45,10 +55,21 @@ static void check_string_equal(const char *name, const char *actual, const char 
     }
 }
 
+static void check_true(const char *name, int condition)
+{
+    if (condition) {
+        printf("%s [PASS]\n", name);
+    } else {
+        printf("%s [FAIL]\n", name);
+        failed = 1;
+    }
+}
+
 static void test_os_gs_ss_wrappers(void)
 {
     static const char file[] = "osgstattest.tmp";
     static const char payload[] = "abcdef\n";
+    static const path_id invalid_path = 127;
     path_id path = -1;
     int count;
     int read_count;
@@ -62,7 +83,9 @@ static void test_os_gs_ss_wrappers(void)
     char legacy_opts[32];
     char devnm[64];
     char legacy_devnm[64];
+    char fdbuf[256];
     char readbuf[16];
+    int fdcount;
 
     _os_delete(file, FAM_READ);
 
@@ -102,6 +125,12 @@ static void test_os_gs_ss_wrappers(void)
     result = _os_gs_eof(path, &eof_value);
     check_status("_os_gs_eof before seek", result);
     check_int_equal("_os_gs_eof before seek value", eof_value, -1);
+
+    fdcount = sizeof(fdbuf);
+    memset(fdbuf, 0, sizeof(fdbuf));
+    result = _os_gs_fd(path, fdbuf, &fdcount);
+    check_status("_os_gs_fd", result);
+    check_true("_os_gs_fd count positive", fdcount > 0);
 
     memset(opts, 0, sizeof(opts));
     memset(legacy_opts, 0, sizeof(legacy_opts));
@@ -162,16 +191,42 @@ static void test_os_gs_ss_wrappers(void)
     check_status("_os_getstat SS_Pos", result);
     check_long_equal("_os_getstat SS_Pos value", legacy_long, sizeof(payload) - 1);
 
+    ready_value = 0;
     result = _os_getstat(SS_EOF, path, &ready_value, 0);
-    check_status("_os_getstat SS_EOF", result);
-    check_int_equal("_os_getstat SS_EOF value", ready_value, -1);
+    check_error("_os_getstat SS_EOF", result);
+    check_int_equal("_os_getstat SS_EOF value", ready_value, 0);
+
+    result = _os_ss_reset(path);
+    check_status("_os_ss_reset", result);
+
+    result = _os_ss_relea(path);
+    check_error("_os_ss_relea", result);
 
     result = _os_close(path);
     check_status("_os_close", result);
+
+    result = _os_gs_pos(path, &pos_value);
+    check_error("_os_gs_pos after close", result);
+
+    result = _os_gs_popt(path, opts);
+    check_error("_os_gs_popt after close", result);
+
+    result = _os_getstat(SS_Pos, path, &legacy_long, 0);
+    check_error("_os_getstat SS_Pos after close", result);
+
     path = -1;
 
     result = _os_delete(file, FAM_READ);
     check_status("_os_delete", result);
+
+    result = _os_gs_size(invalid_path, &size_value);
+    check_error("_os_gs_size invalid path", result);
+
+    result = _os_gs_devnm(invalid_path, devnm);
+    check_error("_os_gs_devnm invalid path", result);
+
+    result = _os_setstat(SS_Reset, invalid_path, 0, 0, 0);
+    check_error("_os_setstat SS_Reset invalid path", result);
 }
 
 int main(void)

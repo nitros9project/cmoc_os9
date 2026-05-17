@@ -22,6 +22,7 @@ I_Create            equ       $83       ; OS-9 create path call
 I_Open              equ       $84       ; OS-9 open path call
 I_MakDir            equ       $85       ; OS-9 make-directory call
 I_ChgDir            equ       $86       ; OS-9 change-directory call
+I_Delete            equ       $87       ; OS-9 delete path call
 I_Seek              equ       $88       ; OS-9 direct seek call
 I_Read              equ       $89       ; OS-9 read call
 I_Write             equ       $8A       ; OS-9 write call
@@ -31,10 +32,12 @@ I_GetStt            equ       $8D       ; OS-9 GetStat call
 I_SetStt            equ       $8E       ; OS-9 SetStat call
 I_Close             equ       $8F       ; OS-9 close call
 I_DeletX            equ       $90       ; OS-9 extended delete call
+I_Dup               equ       $82       ; OS-9 duplicate path descriptor call
 
 E_UnkSvc            equ       $D0       ; unknown service error code
 E_EOF               equ       $D3       ; end-of-file status code
 E_FNA               equ       $D6       ; file not accessible error code
+E_CEF               equ       $DA       ; creating existing file error code
 E_Seek              equ       $F7       ; seek error code
 
 SS_Opt              equ       $00       ; path options query/set

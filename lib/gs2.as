@@ -14,7 +14,7 @@ _os9err             EXTERNAL            ; import external symbol
 _sysret             EXTERNAL            ; import external symbol
 
 _gs_rdy
-                    ldb       #1        ; load B from immediate value 1
+                    ldb       #SS_Ready ; request readiness status
                     lda       3,s       ; load A from stack-relative value 3,s
                     os9       I_GetStt  ; invoke OS-9 system call I_GetStt
                     lblo      _os9err   ; long branch if lower to _os9err
@@ -22,18 +22,18 @@ _gs_rdy
                     rts                 ; return to caller
 
 _gs_eof
-                    ldb       #6        ; load B from immediate value 6
+                    ldb       #SS_EOF   ; request end-of-file status
                     bra       Continue_01 ; branch unconditionally to Continue_01
 
 _gs_opt
-                    ldb       #0        ; load B from immediate value 0
+                    ldb       #SS_Opt   ; request path options packet
                     ldx       4,s       ; load X from stack-relative value 4,s
 Continue_01         lda       3,s       ; load A from stack-relative value 3,s
                     os9       I_GetStt  ; invoke OS-9 system call I_GetStt
                     bra       BranchTarget_01 ; branch unconditionally to BranchTarget_01
 
 _gs_devn
-                    ldb       #$0e      ; load B from immediate value $0e
+                    ldb       #SS_DevNm ; request device name string
                     ldx       4,s       ; load X from stack-relative value 4,s
                     lda       3,s       ; load A from stack-relative value 3,s
                     os9       I_GetStt  ; invoke OS-9 system call I_GetStt
@@ -47,7 +47,7 @@ Loop_01             lda       ,x+       ; load A from memory pointed to by X, th
 
 _gs_gfd
                     pshs      y         ; save Y on the hardware stack
-                    ldb       #$0f      ; load B from immediate value $0f
+                    ldb       #SS_FD    ; request file descriptor sector block
                     lda       5,s       ; load A from stack-relative value 5,s
                     ldx       6,s       ; load X from stack-relative value 6,s
                     ldy       8,s       ; load Y from stack-relative value 8,s

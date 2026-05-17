@@ -10,7 +10,7 @@ _sysret             EXTERNAL            ; import external symbol
 
 _ss_wtrk
                     pshs      y,u       ; save Y,U on the hardware stack
-                    ldb       #4        ; load B from immediate value 4
+                    ldb       #SS_WTrk  ; request write-track style SetStat
                     ldy       10,s      ; load Y from stack-relative value 10,s
                     ldu       8,s       ; load U from stack-relative value 8,s
                     ldx       14,s      ; load X from stack-relative value 14,s

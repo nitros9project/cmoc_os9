@@ -77,6 +77,7 @@
 #include <unistd.h>
 //
 #include <utime.h>
+#include <time.h>
 
 static unsigned /* short */ maze[X_MAZE_SIZE][Y_MAZE_SIZE];
 static struct {
@@ -91,7 +92,13 @@ static path_id outpath;
 static unsigned int xoffset_count, yoffset_count;
 static long rndseed;
 
-int time() { return 0; }
+static time_t
+time(time_t *arg)
+{
+     if (arg)
+          *arg = 0;
+     return 0;
+}
 
 void XDrawLine(unsigned int sx, unsigned int sy, unsigned int ex,
                unsigned int ey) {
@@ -495,7 +502,7 @@ int main(int argc, char **argv) {
      int keys;
      while ((_os_gs_keysense(outpath, &keys) == 0) &&
             ((keys & _SS_KEYSENSE_SPACE) == 0x00) /* spacebar not hit */) {
-          rndseed = time();
+          rndseed = time(0);
           srand((unsigned)rndseed);
           _cgfx_clear(outpath);
           _cgfx_fcolor(outpath, MAZEGROUND);

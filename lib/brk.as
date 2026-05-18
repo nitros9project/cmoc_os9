@@ -4,28 +4,39 @@
 
                     section   code      ; begin code section
 
-_brk                EXPORT              ; export this symbol
-_unbrk              EXPORT              ; export this symbol
+_brk                EXPORT    ;         export memory-bound adjustment entry point
+_unbrk              EXPORT    ;         export memory-bound shrink alias
 
-_os9err             EXTERNAL            ; import external symbol
-__memend            EXTERNAL            ; import external symbol
-_spare              EXTERNAL            ; import external symbol
+_os9err             EXTERNAL  ;         common OS-9 error return helper
+__memend            EXTERNAL  ;         current top of process memory
+_spare              EXTERNAL  ;         bytes between requested break and actual top
 
 *   brk(pnt)  set memory size to pnt, allocating or deallocating
-_brk
-_unbrk
-                    ldd       2,s       ; get new end / decrease amount
-                    pshs      y         ; save Y on the hardware stack
-                    os9       F_Mem     ; set new end
-                    bcc       BranchTarget_01 ; branch if carry is clear to BranchTarget_01
-                    puls      y         ; restore Y from the hardware stack
+_brk:
+stk_brk_ret         equ       0         ; caller return address
+stk_brk_target      equ       2         ; requested absolute memory end
+                    ldd       stk_brk_target,s ; get requested absolute memory end
+                    bra       BranchTarget_02 ; enter the common F$Mem adjustment path
+
+_unbrk:
+stk_unbrk_ret       equ       0         ; caller return address
+stk_unbrk_decrease  equ       2         ; byte count to release from current memory end
+                    ldd       __memend,y ; start from current process memory end
+                    subd      _spare,y  ; convert actual memory top to the logical break
+                    subd      stk_unbrk_decrease,s ; compute the new lower logical break
+                    std       stk_unbrk_decrease,s ; keep absolute target for common spare calculation
+BranchTarget_02
+                    pshs      y         ; preserve direct-page base while F$Mem returns new top in Y
+                    os9       F_Mem     ; ask OS-9 to adjust the process memory size
+                    bcc       BranchTarget_01 ; continue when memory adjustment succeeded
+                    puls      y         ; restore direct-page base before error return
                     lbra      _os9err   ; long branch unconditionally to _os9err
 
-BranchTarget_01     tfr       y,d       ; copy new top
-                    puls      y         ; recover base
+BranchTarget_01     tfr       y,d       ; copy the actual new memory top into D
+                    puls      y         ; recover direct-page base
                     std       __memend,y ; store D to indexed value __memend,y
-                    subd      2,s       ; subtract what we asked for
-                    std       _spare,y  ; save the difference
+                    subd      stk_brk_target,s ; compute spare bytes above requested break
+                    std       _spare,y  ; save the difference for allocator bookkeeping
                     rts                 ; return to caller
 
-                    endsect             ; end current section
+                    endsect   ;         end current section

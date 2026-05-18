@@ -130,6 +130,34 @@ static void test_ibrk(void)
 		printf("%s [PASS]\n", __func__);
 }
 
+static void test_brk_unbrk(void)
+{
+	char *before = (char *) sbrk(0);
+	char *target;
+	void *result;
+
+	if (before == (char *) -1) {
+		fail_ptr(__func__, "initial break", before, (void *) 1);
+		return;
+	}
+
+	target = before + 16;
+	result = brk(target);
+	if (result == (void *) -1)
+		fail_ptr(__func__, "brk grow", result, (void *) 1);
+	else if (sbrk(0) != target)
+		fail_ptr(__func__, "after brk", sbrk(0), target);
+	else {
+		result = unbrk(16);
+		if (result == (void *) -1)
+			fail_ptr(__func__, "unbrk shrink", result, (void *) 1);
+		else if (sbrk(0) != before)
+			fail_ptr(__func__, "after unbrk", sbrk(0), before);
+		else
+			printf("%s [PASS]\n", __func__);
+	}
+}
+
 static void test_memglobs(void)
 {
 	if (_memend == NULL || _sttop == NULL || _stbot == NULL || _mtop == NULL)
@@ -206,6 +234,7 @@ int main(void)
 	test_memglobs();
 	test_sbrk();
 	test_ibrk();
+	test_brk_unbrk();
 	test_memcpy();
 	test_memset();
 	test_memchr();

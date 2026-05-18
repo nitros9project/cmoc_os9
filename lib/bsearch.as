@@ -2,46 +2,56 @@
 
                     section   code      ; begin code section
 
-_bsearch            EXPORT              ; export this symbol
+_bsearch            EXPORT    ;         export binary-search entry point
 
-ccmult              EXTERNAL            ; import external symbol
+ccmult              EXTERNAL  ;         16-bit multiply helper
 
-_bsearch
-                    pshs      d,x,y,u   ; save D,X,Y,U on the hardware stack
-                    ldu       10,s      ; load U from stack-relative value 10,s
-                    clra                ; clear A
-                    clrb                ; clear B
-Loop_01             addd      #1        ; add immediate value 1 into D
-                    std       2,s       ; store D to stack-relative value 2,s
-                    ldd       14,s      ; load D from stack-relative value 14,s
-Loop_02             subd      2,s       ; subtract stack-relative value 2,s from D
-                    bmi       ReturnZero_01 ; branch if minus to ReturnZero_01
-                    ldd       14,s      ; load D from stack-relative value 14,s
-                    addd      2,s       ; add stack-relative value 2,s into D
-                    lsra                ; logical shift A right by one bit
-                    rorb                ; rotate B right through carry
-                    std       4,s       ; store D to stack-relative value 4,s
-                    addd      #-1       ; add immediate value -1 into D
-                    pshs      d         ; save D on the hardware stack
-                    ldd       18,s      ; load D from stack-relative value 18,s
-                    lbsr      ccmult    ; long branch to subroutine to ccmult
-                    addd      12,s      ; add stack-relative value 12,s into D
-                    std       ,s        ; store D to memory pointed to by S
-                    pshs      u         ; save U on the hardware stack
-                    jsr       [20,s]    ; call subroutine at [20,s]
-                    std       ,s++      ; store D to memory pointed to by S+, then advance S+
-                    beq       BranchTarget_01 ; branch if equal/zero to BranchTarget_01
-                    asla                ; shift A left by one bit
-                    ldd       4,s       ; load D from stack-relative value 4,s
-                    bcc       Loop_01   ; branch if carry is clear to Loop_01
-                    addd      #-1       ; add immediate value -1 into D
-                    std       14,s      ; store D to stack-relative value 14,s
-                    bra       Loop_02   ; branch unconditionally to Loop_02
-ReturnZero_01       clra                ; clear A
-                    clrb                ; clear B
-                    bra       Continue_01 ; branch unconditionally to Continue_01
-BranchTarget_01     ldd       ,s        ; load D from memory pointed to by S
-Continue_01         leas      6,s       ; adjust S using 6,s
+_bsearch:
+stk_bsearch_ret     equ       0         ; caller return address
+stk_bsearch_arg1    equ       2         ; first C argument
+stk_bsearch_arg2    equ       4         ; second C argument
+stk_bsearch_arg3    equ       6         ; third C argument
+stk_bsearch_arg4    equ       8         ; fourth C argument
+stk_bsearch_arg5    equ       10        ; comparison-function pointer
+stk_bsearch_temp0   equ       0         ; scratch pointer/result slot after pshs d,x,y,u
+stk_bsearch_low     equ       2         ; lower search bound stored in saved-X space
+stk_bsearch_mid     equ       4         ; midpoint stored in saved-Y space
+stk_bsearch_saved_u equ       6         ; saved U register
+                    pshs      d,x,y,u   ; preserve U and reserve scratch slots in saved-register space
+                    ldu       stk_bsearch_arg1+8,s ; keep the first argument for comparator calls
+                    clra                ; initialize lower bound high byte to zero
+                    clrb                ; initialize lower bound low byte to zero
+Loop_01             addd      #1        ; advance the lower-bound candidate
+                    std       stk_bsearch_low,s ; save the updated lower bound
+                    ldd       stk_bsearch_arg3+8,s ; load current upper/count argument
+Loop_02             subd      stk_bsearch_low,s ; test whether the range is exhausted
+                    bmi       ReturnZero_01 ; return NULL when lower bound passed upper bound
+                    ldd       stk_bsearch_arg3+8,s ; reload the current upper/count argument
+                    addd      stk_bsearch_low,s ; form low+high before dividing by two
+                    lsra                ; divide midpoint high byte by two
+                    rorb                ; divide midpoint low byte by two through carry
+                    std       stk_bsearch_mid,s ; save midpoint index
+                    addd      #-1       ; convert midpoint to zero-based element index
+                    pshs      d         ; pass index to multiply helper and shift original frame by two
+                    ldd       stk_bsearch_arg4+10,s ; load element-size argument after pushed index
+                    lbsr      ccmult    ; compute index * element size
+                    addd      stk_bsearch_arg1+10,s ; add original first-argument pointer after pushed index
+                    std       ,s        ; replace temporary index with computed element pointer
+                    pshs      u         ; pass saved first argument as the other comparator argument
+                    jsr       [stk_bsearch_arg5+10,s] ; call comparison function after two pushed arguments
+                    std       ,s++      ; drop comparator argument while preserving compare result
+                    beq       BranchTarget_01 ; comparator matched the current candidate
+                    asla                ; move comparison sign into carry for range update
+                    ldd       stk_bsearch_mid,s ; reload midpoint index
+                    bcc       Loop_01   ; comparison selects the upper half
+                    addd      #-1       ; comparison selects the lower half, so reduce upper bound
+                    std       stk_bsearch_arg3+8,s ; store new upper/count argument in caller slot
+                    bra       Loop_02   ; continue searching the reduced range
+ReturnZero_01       clra                ; return NULL high byte
+                    clrb                ; return NULL low byte
+                    bra       Continue_01 ; skip matched-pointer return
+BranchTarget_01     ldd       stk_bsearch_temp0,s ; return matched element pointer
+Continue_01         leas      6,s       ; discard scratch D/X/Y slots, leaving saved U on top
                     puls      u,pc      ; restore registers and return
 
-                    endsect             ; end current section
+                    endsect   ;         end current section

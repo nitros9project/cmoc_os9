@@ -26,7 +26,9 @@ check_true(const char *name, int condition)
 void test_qsort_bsearch(void)
 {
 	int data[6];
+	int first_key = 1;
 	int key = 7;
+	int last_key = 11;
 	int miss = 8;
 	int dup_data[5];
 	int solo[1];
@@ -48,8 +50,17 @@ void test_qsort_bsearch(void)
 	found = (int *) bsearch(&key, data, 6, sizeof(data[0]), cmp_int);
 	check_true("test_qsort_bsearch bsearch(hit)", found != 0 && *found == 7);
 
+	found = (int *) bsearch(&first_key, data, 6, sizeof(data[0]), cmp_int);
+	check_true("test_qsort_bsearch bsearch(first)", found != 0 && *found == 1);
+
+	found = (int *) bsearch(&last_key, data, 6, sizeof(data[0]), cmp_int);
+	check_true("test_qsort_bsearch bsearch(last)", found != 0 && *found == 11);
+
 	found = (int *) bsearch(&miss, data, 6, sizeof(data[0]), cmp_int);
 	check_true("test_qsort_bsearch bsearch(miss)", found == 0);
+
+	found = (int *) bsearch(&key, data, empty_count, sizeof(data[0]), cmp_int);
+	check_true("test_qsort_bsearch bsearch(empty)", found == 0);
 
 	dup_data[0] = 4;
 	dup_data[1] = 1;

@@ -1,25 +1,32 @@
+* CMOC long comparison helper ABI: X points at one 32-bit operand and the
+* other 32-bit operand is on the caller stack. The helper returns condition
+* codes for the comparison while removing the stacked long operand.
+
                     section   code      ; begin code section
 
-_lcmpr              EXPORT              ; export this symbol
+_lcmpr              EXPORT    ;         export this symbol
 
-_lcmpr:             ldd       2,s       ; load D from stack-relative value 2,s
-                    cmpd      ,x        ; compare D against memory pointed to by X
-                    bne       BranchTarget_02 ; branch if not equal to BranchTarget_02
-                    ldd       4,s       ; load D from stack-relative value 4,s
-                    cmpd      2,x       ; compare D against indexed value 2,x
-                    beq       BranchTarget_02 ; branch if equal/zero to BranchTarget_02
-                    bcs       BranchTarget_01 ; branch if carry is set to BranchTarget_01
-                    lda       #1        ; load A from immediate value 1
-                    andcc     #254      ; clear condition-code bits with mask #254
-                    bra       BranchTarget_02 ; branch unconditionally to BranchTarget_02
-BranchTarget_01     clra                ; clear A
-                    cmpa      #1        ; compare A against immediate value 1
-BranchTarget_02     pshs      cc        ; save CC on the hardware stack
-                    ldd       1,s       ; load D from stack-relative value 1,s
-                    std       5,s       ; store D to stack-relative value 5,s
-                    puls      cc        ; restore CC from the hardware stack
-                    leas      4,s       ; adjust S using 4,s
+_lcmpr:
+stk_lcmpr_ret       equ       0         ; caller return address
+stk_lcmpr_lhs_hi    equ       2         ; stacked left operand, bits 31-16
+stk_lcmpr_lhs_lo    equ       4         ; stacked left operand, bits 15-0
+                    ldd       stk_lcmpr_lhs_hi,s ; compare high words first
+                    cmpd      ,x        ; compare against right operand high word
+                    bne       BranchTarget_02 ; high words decide the comparison
+                    ldd       stk_lcmpr_lhs_lo,s ; high words match; compare low words
+                    cmpd      2,x       ; compare against right operand low word
+                    beq       BranchTarget_02 ; low words matched, so equality is true
+                    bcs       BranchTarget_01 ; synthesize negative flags when lhs < rhs
+                    lda       #1        ; synthesize positive flags when lhs > rhs
+                    andcc     #254      ; clear carry before the synthetic positive compare
+                    bra       BranchTarget_02 ; preserve synthetic positive flags
+BranchTarget_01     clra                ; prepare a zero value for signed flag synthesis
+                    cmpa      #1        ; set negative/carry as if lhs was smaller
+BranchTarget_02     pshs      cc        ; save comparison flags while moving the return address
+                    ldd       stk_lcmpr_ret+1,s ; fetch caller return address after pushed CC byte
+                    std       stk_lcmpr_lhs_lo+1,s ; move return address over consumed stacked long
+                    puls      cc        ; restore comparison flags after stack repair
+                    leas      stk_lcmpr_lhs_lo,s ; discard consumed stacked long
                     rts                 ; return to caller
 
-                    endsect             ; end current section
-
+                    endsect   ;         end current section

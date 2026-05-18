@@ -1,40 +1,49 @@
+* CMOC long shift helper ABI: X is loaded from the caller stack to find the
+* long operand, B is the shift count, and _ltoacc copies the operand to _flacc
+* before the in-place shift. The helper repairs the caller stack on return.
+
                     section   code      ; begin code section
 
-_ltoacc             EXTERNAL            ; import external symbol
+_ltoacc             EXTERNAL  ;         import external symbol
 
-_lshl               EXPORT              ; export this symbol
-_lshr               EXPORT              ; export this symbol
+_lshl               EXPORT    ;         export this symbol
+_lshr               EXPORT    ;         export this symbol
 
-_lshl:              ldx       2,s       ; load X from stack-relative value 2,s
+_lshl:
+stk_lshl_ret        equ       0         ; caller return address
+stk_lshl_operand    equ       2         ; pointer to long operand on caller stack
+                    ldx       stk_lshl_operand,s ; load pointer to long operand
                     pshs      b         ; save B on the hardware stack
-                    lbsr      _ltoacc   ; long branch to subroutine to _ltoacc
+                    lbsr      _ltoacc   ; copy operand to _flacc and return X=_flacc
                     puls      b         ; restore B from the hardware stack
-                    tstb                ; test B and update condition codes
-                    beq       BranchTarget_01 ; branch if equal/zero to BranchTarget_01
-Loop_01             asl       3,x       ; shift indexed value 3,x left by one bit
-                    rol       2,x       ; rotate indexed value 2,x left through carry
-                    rol       1,x       ; rotate indexed value 1,x left through carry
-                    rol       ,x        ; rotate memory pointed to by X left through carry
-                    decb                ; decrement B
-                    bne       Loop_01   ; branch if not equal to Loop_01
-BranchTarget_01     puls      d         ; restore D from the hardware stack
-                    std       ,s        ; store D to memory pointed to by S
+                    tstb                ; check whether any shift steps are required
+                    beq       BranchTarget_01 ; skip loop for zero shift count
+Loop_01             asl       3,x       ; shift byte 3 left and seed carry
+                    rol       2,x       ; rotate carry into byte 2
+                    rol       1,x       ; rotate carry into byte 1
+                    rol       ,x        ; rotate carry into byte 0
+                    decb                ; one shift step completed
+                    bne       Loop_01   ; continue until requested count is exhausted
+BranchTarget_01     puls      d         ; pull caller return address, leaving S at stacked operand pointer
+                    std       stk_lshl_operand-2,s ; place return address over consumed operand pointer
                     rts                 ; return to caller
-_lshr:              ldx       2,s       ; load X from stack-relative value 2,s
+_lshr:
+stk_lshr_ret        equ       0         ; caller return address
+stk_lshr_operand    equ       2         ; pointer to long operand on caller stack
+                    ldx       stk_lshr_operand,s ; load pointer to long operand
                     pshs      b         ; save B on the hardware stack
-                    lbsr      _ltoacc   ; long branch to subroutine to _ltoacc
+                    lbsr      _ltoacc   ; copy operand to _flacc and return X=_flacc
                     puls      b         ; restore B from the hardware stack
-                    tstb                ; test B and update condition codes
-                    beq       BranchTarget_02 ; branch if equal/zero to BranchTarget_02
-Loop_02             asr       ,x        ; arithmetic shift memory pointed to by X right by one bit
-                    ror       1,x       ; rotate indexed value 1,x right through carry
-                    ror       2,x       ; rotate indexed value 2,x right through carry
-                    ror       3,x       ; rotate indexed value 3,x right through carry
-                    decb                ; decrement B
-                    bne       Loop_02   ; branch if not equal to Loop_02
-BranchTarget_02     puls      d         ; restore D from the hardware stack
-                    std       ,s        ; store D to memory pointed to by S
+                    tstb                ; check whether any shift steps are required
+                    beq       BranchTarget_02 ; skip loop for zero shift count
+Loop_02             asr       ,x        ; shift byte 0 right while preserving sign
+                    ror       1,x       ; rotate carry into byte 1
+                    ror       2,x       ; rotate carry into byte 2
+                    ror       3,x       ; rotate carry into byte 3
+                    decb                ; one shift step completed
+                    bne       Loop_02   ; continue until requested count is exhausted
+BranchTarget_02     puls      d         ; pull caller return address, leaving S at stacked operand pointer
+                    std       stk_lshr_operand-2,s ; place return address over consumed operand pointer
                     rts                 ; return to caller
 
-                    endsect             ; end current section
-
+                    endsect   ;         end current section

@@ -4,6 +4,8 @@
 #include <string.h>
 #include <fcntl.h>
 
+static int failed;
+
 void test_os_create_and_delete_file()
 {
 	char *file = "existentfile";
@@ -30,16 +32,19 @@ void test_os_create_and_delete_file()
 			}
 			else
 			{
+				failed = 1;
 				printf("%s [FAIL] _os_delete(\"%s\", %x) = %d\n", __func__, file, mode, result);
 			}
 		}
 		else
 		{
+			failed = 1;
 			printf("%s [FAIL] _os_close(%d) = %d\n", __func__, path, result);
 		}
 	}
 	else
 	{
+		failed = 1;
 		printf("%s [FAIL] _os_create(\"%s\", %d, [%d], %x) = %d\n", __func__, file, mode, path, perms, result);
 	}
 }
@@ -57,6 +62,7 @@ void test_os_open_nonexistent_file()
 	}
 	else
 	{
+		failed = 1;
 		printf("%s [FAIL] _os_open(nonexistent) = %d\n", __func__, result);
 	}
 }
@@ -73,6 +79,7 @@ void test_os_delete_nonexistent_file()
 	}
 	else
 	{
+		failed = 1;
 		printf("%s [FAIL] _os_delete(nonexistent) = %d\n", __func__, result);
 	}
 }
@@ -113,6 +120,7 @@ void test_os_create_and_seek()
 			result = _os_open(file, mode, &path);
 			if (result != 0)
 			{
+				failed = 1;
 				printf("%s [FAIL] _os_open(\"%s\", %x, [%d]) = %d\n", __func__, file, mode, path, result);
 				_os_delete(file, FAM_READ);
 				return;
@@ -135,11 +143,13 @@ void test_os_create_and_seek()
 				}
 				else
 				{
+					failed = 1;
 					printf("%s [FAIL] _os_read(%d, \"-\", [%d]) = %d\n", __func__, path, readsize, result);
 				}
 			}
 			else
 			{
+				failed = 1;
 				printf("%s [FAIL] _os_seek(%d, %ld) = %d\n", __func__, path, offset, result);
 			}
 			_os_close(path);
@@ -147,11 +157,13 @@ void test_os_create_and_seek()
 		}
 		else
 		{
+			failed = 1;
 			printf("%s [FAIL] _os_writeln(%d, \"%s\", [%d]) = %d\n", __func__, path, message, length, result);
 		}
 	}
 	else
 	{
+		failed = 1;
 		printf("%s [FAIL] _os_create(\"%s\", %x, [%d], %d) = %d\n", __func__, file, mode, path, perms, result);
 	}
 }
@@ -183,16 +195,19 @@ void test_os_make_directory()
 			}
 			else
 			{
-    			printf("%s [FAIL] _os_delete(\"%s\", %d) = %d\n", __func__, file, mode, result);
+				failed = 1;
+				printf("%s [FAIL] _os_delete(\"%s\", %d) = %d\n", __func__, file, mode, result);
 			}
 		}
 		else
 		{
+			failed = 1;
 			printf("%s [FAIL] _os_ss_attr(\"%s\", %d) = %d\n", __func__, file, perm, result);
 		}
 	}
 	else
 	{
+		failed = 1;
 		printf("%s [FAIL] _os_makdir(\"%s\", %d) = %d\n", __func__, file, perm, result);
 	}
 }
@@ -222,16 +237,19 @@ void test_os_make_and_attr_file()
 			}
 			else
 			{
-    			printf("%s [FAIL] _os_delete(\"%s\", %d) = %d\n", __func__, file, mode, result);
+				failed = 1;
+				printf("%s [FAIL] _os_delete(\"%s\", %d) = %d\n", __func__, file, mode, result);
 			}
 		}
 		else
 		{
+			failed = 1;
 			printf("%s [FAIL] _os_ss_attr(\"%s\", %d) = %d\n", __func__, file, perm, result);
 		}
 	}
 	else
 	{
+		failed = 1;
 		printf("%s [FAIL] _os_create(\"%s\", %x, [%d], %d) = %d\n", __func__, file, mode, path, perm, result);
 	}
 }
@@ -245,5 +263,5 @@ int main()
 	test_os_make_directory();
 	test_os_make_and_attr_file();
 
-	return 0;
+	return failed;
 }

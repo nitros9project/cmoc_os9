@@ -187,6 +187,7 @@ static void test_malloc(void)
 static void test_calloc(void)
 {
 	char *p = (char *) calloc(8, 1);
+	char *q;
 
 	if (p == NULL)
 		fail_ptr(__func__, "calloc(8,1)", p, (void *) 1);
@@ -195,6 +196,16 @@ static void test_calloc(void)
 	else {
 		printf("%s [PASS]\n", __func__);
 		free(p);
+	}
+
+	q = (char *) calloc(3, 5);
+	if (q == NULL)
+		fail_ptr(__func__, "calloc(3,5)", q, (void *) 1);
+	else if (q[0] != 0 || q[7] != 0 || q[14] != 0)
+		fail_int(__func__, "count size zero fill", 0, 1);
+	else {
+		printf("%s count-size [PASS]\n", __func__);
+		free(q);
 	}
 }
 

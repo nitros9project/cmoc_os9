@@ -21,7 +21,7 @@ FLOAT_IO = $(COMMON_IO) pflinit.o pffinit.o
 COMMON_MODS = $(STRING) $(OS) $(MEM) $(SYS) $(MISC) $(MATH_SUPPORT) \
 	$(LONG_SUPPORT) $(DEBUG) $(TIME) $(COMMON_IO) $(LOW_IO) $(FILE_SUPPORT) \
 	syscall.o syscommon.o
-FLOAT_SUPPORT = fcommon.o cfloats.o scale.o atof.o frexp.o ldexp.o
+FLOAT_SUPPORT = fcommon.o scale.o atof.o frexp.o ldexp.o
 
 CC = cmoc
 ASM = lwasm

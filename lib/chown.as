@@ -7,45 +7,51 @@
 
                     section   code      ; begin code section
 
-_chown              EXPORT              ; export this symbol
+_chown              EXPORT    ;         export this symbol
 
-_sysret             EXTERNAL            ; import external symbol
+_sysret             EXTERNAL  ;         import external symbol
 
-Bufsize             equ       16        ; define constant as 16
+Bufsize             equ       16        ; file descriptor sector bytes copied locally
 
-_chown              pshs      y,u       ; save Y,U on the hardware stack
-                    leas      -Bufsize,s ; adjust S using -Bufsize,s
+_chown:
+stk_chown_ret       equ       0         ; caller return address at entry
+stk_chown_path      equ       2         ; pathname pointer argument
+stk_chown_owner     equ       4         ; new owner ID argument
+stk_chown_buf       equ       0         ; 16-byte file descriptor buffer after allocation
+stk_chown_saved     equ       Bufsize   ; saved Y/U pair above local buffer
+                    pshs      y,u       ; preserve caller frame registers
+                    leas      -Bufsize,s ; reserve local descriptor-sector buffer
                     os9       F_ID      ; fetch caller identity for ownership check
-                    bcs       chxit     ; branch if carry is set to chxit
+                    bcs       chxit     ; return F$ID error through _sysret
                     ldb       #E_FNA    ; deny non-owner ownership changes
-                    cmpy      #0        ; compare Y against immediate value 0
-                    orcc      #1        ; set condition-code bits with mask #1
-                    bne       chxit     ; branch if not equal to chxit
-                    bsr       openfile  ; branch to subroutine to openfile
-                    bcs       chxit     ; branch if carry is set to chxit
-                    pshs      a         ; save A on the hardware stack
-                    ldd       25,s      ; load D from stack-relative value 25,s
-                    std       1,x       ; store D to indexed value 1,x
-                    puls      a         ; restore A from the hardware stack
-                    ldb       #SS_FD    ; load B from immediate value SS_FD
+                    cmpy      #0        ; only superuser may change file ownership
+                    orcc      #1        ; pre-set carry so nonzero ID becomes E_FNA
+                    bne       chxit     ; reject non-superuser ownership change
+                    bsr       openfile  ; open path and load descriptor sector into local buffer
+                    bcs       chxit     ; return OS-9 error if open or descriptor read failed
+                    pshs      a         ; save path number while owner field is updated
+                    ldd       stk_chown_owner+Bufsize+4+1,s ; saved A shifts owner argument by 1 byte
+                    std       1,x       ; replace descriptor owner field
+                    puls      a         ; restore path number for SetStat/Close
+                    ldb       #SS_FD    ; request descriptor-sector SetStat
                     os9       I_SetStt  ; write back descriptor sector changes
-                    bcs       chxit     ; branch if carry is set to chxit
+                    bcs       chxit     ; preserve SetStat error for _sysret
                     os9       I_Close   ; close temporary path
-chxit               leas      Bufsize,s ; adjust S using Bufsize,s
-                    puls      y,u       ; restore Y,U from the hardware stack
-                    lbra      _sysret   ; long branch unconditionally to _sysret
+chxit               leas      Bufsize,s ; release local descriptor buffer
+                    puls      y,u       ; restore caller frame registers
+                    lbra      _sysret   ; translate OS-9 carry/B result to C return value
 
 openfile
-                    lda       #FAM_WRITE ; load A from immediate value FAM_WRITE
-                    ldx       24,s      ; load X from stack-relative value 24,s
+                    lda       #FAM_WRITE ; open with write access so descriptor changes are allowed
+                    ldx       stk_chown_path+Bufsize+4+2,s ; BSR return shifts original path argument by 2 bytes
                     os9       I_Open    ; open target for descriptor access
-                    bcc       openf10   ; branch if carry is clear to openf10
+                    bcc       openf10   ; read descriptor only after open succeeds
                     rts                 ; return to caller
 
-openf10             leax      2,s       ; compute effective address into X from 2,s
-                    ldy       #Bufsize  ; load Y from immediate value Bufsize
-                    ldb       #SS_FD    ; load B from immediate value SS_FD
+openf10             leax      stk_chown_buf+2,s ; point X at local descriptor buffer past BSR return address
+                    ldy       #Bufsize  ; read exactly one descriptor buffer
+                    ldb       #SS_FD    ; request descriptor-sector GetStat
                     os9       I_GetStt  ; load descriptor sector into local buffer
                     rts                 ; return to caller
 
-                    endsect             ; end current section
+                    endsect   ;         end current section

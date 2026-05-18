@@ -5,6 +5,8 @@
 #include <string.h>
 #include <fcntl.h>
 
+static int failed;
+
 void test_create_and_delete_file()
 {
 	char *file = "existentfile";
@@ -30,16 +32,19 @@ void test_create_and_delete_file()
 			}
 			else
 			{
+				failed = 1;
 				printf("%s [FAIL] unlink(\"%s\") = %d, errno = %d\n", __func__, file, result, errno);
 			}
 		}
 		else
 		{
+			failed = 1;
 			printf("%s [FAIL] close(%d) = %d, errno = %d\n", __func__, path, result, errno);
 		}
 	}
 	else
 	{
+		failed = 1;
 		printf("%s [FAIL] create(\"%s\", %d, %x) = %d, errno = %d\n", __func__, file, mode, perms, path, errno);
 	}
 }
@@ -56,6 +61,7 @@ void test_open_nonexistent_file()
 	}
 	else
 	{
+		failed = 1;
 		printf("%s [FAIL] open(\"%s\", %x) = %d\n", __func__, file, mode, path);
 	}
 }
@@ -71,6 +77,7 @@ void test_delete_nonexistent_file()
 	}
 	else
 	{
+		failed = 1;
 		printf("%s [FAIL] unlink(\"%s\") = %d\n", __func__, file, result);
 	}
 }
@@ -115,12 +122,14 @@ void test_create_and_seek()
 				}
 				else
 				{
+					failed = 1;
 					printf("%s [FAIL] read(%d, expected \"is\", %d) = %d got=\"%c%c\"\n",
 					       __func__, path, readsize, result, buf[0], buf[1]);
 				}
 			}
 			else
 			{
+				failed = 1;
 				printf("%s [FAIL] lseek(%d, %ld, %d) = %ld\n", __func__, path, offset, whence, seek_result);
 			}
 
@@ -139,12 +148,14 @@ void test_create_and_seek()
 				}
 				else
 				{
+					failed = 1;
 					printf("%s [FAIL] read(%d, expected \"text\", %d) = %d got=\"%s\"\n",
 					       __func__, path, readsize, result, buf);
 				}
 			}
 			else
 			{
+				failed = 1;
 				printf("%s [FAIL] lseek(%d, %ld, %d) = %ld\n", __func__, path, offset, whence, seek_result);
 			}
 
@@ -163,12 +174,14 @@ void test_create_and_seek()
 				}
 				else
 				{
+					failed = 1;
 					printf("%s [FAIL] read(%d, expected \"xt\", %d) = %d got=\"%c%c\"\n",
 					       __func__, path, readsize, result, buf[0], buf[1]);
 				}
 			}
 			else
 			{
+				failed = 1;
 				printf("%s [FAIL] lseek(%d, %ld, %d) = %ld\n", __func__, path, offset, whence, seek_result);
 			}
 			close(path);
@@ -176,11 +189,13 @@ void test_create_and_seek()
 		}
 		else
 		{
+			failed = 1;
 			printf("%s [FAIL] writeln(%d, \"%s\", %d) = %d\n", __func__, path, message, length, result);
 		}
 	}
 	else
 	{
+		failed = 1;
 		printf("%s [FAIL] create(\"%s\", %x, %d) = %d\n", __func__, file, mode, perms, path);
 	}
 }
@@ -197,6 +212,7 @@ void test_make_directory()
 	}
 	else
 	{
+		failed = 1;
 		printf("%s [FAIL] mknod(\"%s\", %d) = %d\n", __func__, file, perm, result);
 	}
 }
@@ -221,6 +237,7 @@ void test_make_and_attr_file()
 		}
 		else
 		{
+			failed = 1;
 			printf("%s [FAIL] _os_ss_attr(\"%s\", %d) = %d\n", __func__, file, perm, result);
 		}
 #endif
@@ -228,6 +245,7 @@ void test_make_and_attr_file()
 	}
 	else
 	{
+		failed = 1;
 		printf("%s [FAIL] create(\"%s\", %x, %d) = %d\n", __func__, file, mode, perm, path);
 	}
 }
@@ -246,6 +264,7 @@ void test_access_dup_unlinkx()
 	path = create(file, mode, perms);
 	if (path == -1)
 	{
+		failed = 1;
 		printf("%s [FAIL] create(\"%s\", %x, %d) = %d, errno = %d\n", __func__, file, mode, perms, path, errno);
 		return;
 	}
@@ -255,18 +274,23 @@ void test_access_dup_unlinkx()
 	result = access(file, FAM_READ);
 	if (result == 0)
 		printf("%s [PASS] access(\"%s\", %x) = %d\n", __func__, file, FAM_READ, result);
-	else
+	else {
+		failed = 1;
 		printf("%s [FAIL] access(\"%s\", %x) = %d, errno = %d\n", __func__, file, FAM_READ, result, errno);
+	}
 
 	result = access("missing.tmp", FAM_READ);
 	if (result == -1)
 		printf("%s [PASS] access(\"missing.tmp\", %x) = %d\n", __func__, FAM_READ, result);
-	else
+	else {
+		failed = 1;
 		printf("%s [FAIL] access(\"missing.tmp\", %x) = %d\n", __func__, FAM_READ, result);
+	}
 
 	path = open(file, FAM_READ);
 	if (path == -1)
 	{
+		failed = 1;
 		printf("%s [FAIL] open(\"%s\", %x) = %d, errno = %d\n", __func__, file, FAM_READ, path, errno);
 		unlink(file);
 		return;
@@ -281,6 +305,7 @@ void test_access_dup_unlinkx()
 	}
 	else
 	{
+		failed = 1;
 		printf("%s [FAIL] dup(%d) = %d, errno = %d\n", __func__, path, dup_path, errno);
 	}
 	close(path);
@@ -288,8 +313,10 @@ void test_access_dup_unlinkx()
 	result = unlinkx(file, FAM_WRITE);
 	if (result == 0)
 		printf("%s [PASS] unlinkx(\"%s\", %x) = %d\n", __func__, file, FAM_WRITE, result);
-	else
+	else {
+		failed = 1;
 		printf("%s [FAIL] unlinkx(\"%s\", %x) = %d, errno = %d\n", __func__, file, FAM_WRITE, result, errno);
+	}
 }
 
 int main()
@@ -302,5 +329,5 @@ int main()
 	test_make_and_attr_file();
 	test_access_dup_unlinkx();
 
-	return 0;
+	return failed;
 }

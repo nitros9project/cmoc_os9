@@ -30,7 +30,9 @@ void simple(void)
 	check_true("simple !isdigit", !isdigit('a'));
 	check_true("simple !isspace", !isspace('A'));
 	check_true("simple tolower", tolower('A') == 'a');
+	check_true("simple tolower unchanged", tolower('z') == 'z');
 	check_true("simple toupper", toupper('a') == 'A');
+	check_true("simple toupper unchanged", toupper('Z') == 'Z');
 }
 
 void exhaustive( void )

@@ -1,51 +1,58 @@
                     section   code      ; begin code section
 
-ccmult              EXPORT              ; export this symbol
+ccmult              EXPORT    ;         export this symbol
 
-ccmult:             tsta                ; test A and update condition codes
-                    bne       BranchTarget_01 ; branch if not equal to BranchTarget_01
-                    tst       2,s       ; test stack-relative value 2,s and update condition codes
-                    bne       BranchTarget_01 ; branch if not equal to BranchTarget_01
-                    lda       3,s       ; load A from stack-relative value 3,s
-                    mul                 ; multiply A by B and leave the product in D
-                    ldx       ,s        ; load X from memory pointed to by S
-                    stx       2,s       ; store X to stack-relative value 2,s
-                    ldx       #0        ; load X from immediate value 0
-                    std       ,s        ; store D to memory pointed to by S
-                    puls      d,pc      ; restore registers and return
-BranchTarget_01     pshs      d         ; save D on the hardware stack
-                    ldd       #0        ; load D from immediate value 0
-                    pshs      d         ; save D on the hardware stack
-                    pshs      d         ; save D on the hardware stack
-                    lda       5,s       ; load A from stack-relative value 5,s
-                    ldb       9,s       ; load B from stack-relative value 9,s
-                    mul                 ; multiply A by B and leave the product in D
-                    std       2,s       ; store D to stack-relative value 2,s
-                    lda       5,s       ; load A from stack-relative value 5,s
-                    ldb       8,s       ; load B from stack-relative value 8,s
-                    mul                 ; multiply A by B and leave the product in D
-                    addd      1,s       ; add stack-relative value 1,s into D
-                    std       1,s       ; store D to stack-relative value 1,s
+ccmult:
+stk_ccmult_ret      equ       0         ; caller return address
+stk_ccmult_rhs      equ       2         ; stacked 16-bit right operand
+stk_ccmult_acc_hi   equ       0         ; high word of 32-bit product after scratch frame is built
+stk_ccmult_acc_lo   equ       2         ; low word of 32-bit product after scratch frame is built
+stk_ccmult_lhs      equ       4         ; saved left operand after scratch frame is built
+stk_ccmult_saved_ret equ       6         ; caller return address after scratch frame is built
+stk_ccmult_rhs_work equ       8         ; stacked right operand after scratch frame is built
+                    tsta                ; use faster 8x8 path when left high byte is zero
+                    bne       BranchTarget_01 ; use full multiply when left operand exceeds 8 bits
+                    tst       stk_ccmult_rhs,s ; use full multiply when right high byte is non-zero
+                    bne       BranchTarget_01 ; use full multiply for a 16-bit right operand
+                    lda       stk_ccmult_rhs+1,s ; load right low byte for 8x8 multiply
+                    mul                 ; multiply right low byte by left low byte in B
+                    ldx       stk_ccmult_ret,s ; fetch caller return address
+                    stx       stk_ccmult_rhs,s ; move return address over consumed right operand
+                    ldx       #0        ; high word of 8x8 product is zero
+                    std       stk_ccmult_ret,s ; place low product word for final PULS D,PC
+                    puls      d,pc      ; return X:D 32-bit product
+BranchTarget_01     pshs      d         ; save left operand; original frame shifts by 2 bytes
+                    ldd       #0        ; clear D for product accumulator initialization
+                    pshs      d         ; allocate and clear product low word
+                    pshs      d         ; allocate and clear product high word
+                    lda       stk_ccmult_lhs+1,s ; left low byte
+                    ldb       stk_ccmult_rhs_work+1,s ; right low byte
+                    mul                 ; compute low-byte partial product
+                    std       stk_ccmult_acc_lo,s ; store low product word
+                    lda       stk_ccmult_lhs+1,s ; left low byte
+                    ldb       stk_ccmult_rhs_work,s ; right high byte
+                    mul                 ; compute cross product for middle bytes
+                    addd      stk_ccmult_acc_hi+1,s ; add into product bytes 1-2
+                    std       stk_ccmult_acc_hi+1,s ; store updated middle product bytes
                     bcc       BranchTarget_02 ; branch if carry is clear to BranchTarget_02
-                    inc       ,s        ; increment memory pointed to by S
-BranchTarget_02     lda       4,s       ; load A from stack-relative value 4,s
-                    ldb       9,s       ; load B from stack-relative value 9,s
-                    mul                 ; multiply A by B and leave the product in D
-                    addd      1,s       ; add stack-relative value 1,s into D
-                    std       1,s       ; store D to stack-relative value 1,s
+                    inc       stk_ccmult_acc_hi,s ; propagate carry into product high byte
+BranchTarget_02     lda       stk_ccmult_lhs,s ; left high byte
+                    ldb       stk_ccmult_rhs_work+1,s ; right low byte
+                    mul                 ; compute other cross product for middle bytes
+                    addd      stk_ccmult_acc_hi+1,s ; add into product bytes 1-2
+                    std       stk_ccmult_acc_hi+1,s ; store updated middle product bytes
                     bcc       BranchTarget_03 ; branch if carry is clear to BranchTarget_03
-                    inc       ,s        ; increment memory pointed to by S
-BranchTarget_03     lda       4,s       ; load A from stack-relative value 4,s
-                    ldb       8,s       ; load B from stack-relative value 8,s
-                    mul                 ; multiply A by B and leave the product in D
-                    addd      ,s        ; add memory pointed to by S into D
-                    std       ,s        ; store D to memory pointed to by S
-                    ldx       6,s       ; load X from stack-relative value 6,s
-                    stx       8,s       ; store X to stack-relative value 8,s
-                    ldx       ,s        ; load X from memory pointed to by S
-                    ldd       2,s       ; load D from stack-relative value 2,s
-                    leas      8,s       ; adjust S using 8,s
+                    inc       stk_ccmult_acc_hi,s ; propagate carry into product high byte
+BranchTarget_03     lda       stk_ccmult_lhs,s ; left high byte
+                    ldb       stk_ccmult_rhs_work,s ; right high byte
+                    mul                 ; compute high-byte partial product
+                    addd      stk_ccmult_acc_hi,s ; add into high product word
+                    std       stk_ccmult_acc_hi,s ; store final high product word
+                    ldx       stk_ccmult_saved_ret,s ; fetch caller return address
+                    stx       stk_ccmult_rhs_work,s ; move return address over consumed right operand
+                    ldx       stk_ccmult_acc_hi,s ; return high product word in X
+                    ldd       stk_ccmult_acc_lo,s ; return low product word in D
+                    leas      stk_ccmult_rhs_work,s ; discard scratch frame and saved left operand
                     rts                 ; return to caller
 
-                    endsect             ; end current section
-
+                    endsect   ;         end current section

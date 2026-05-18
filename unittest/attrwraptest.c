@@ -18,7 +18,7 @@ main(void)
     }
     close(fd);
 
-    result = chmod(file, FAP_READ | FAP_PREAD);
+    result = chmod(file, FAP_READ | FAP_PREAD | FAP_WRITE | FAP_PWRITE);
     if (result == 0)
         printf("%s [PASS] chmod()\n", __func__);
     else {
@@ -37,6 +37,13 @@ main(void)
         failed = 1;
     }
 
-    unlink(file);
+    result = unlink(file);
+    if (result == 0)
+        printf("%s [PASS] cleanup unlink()\n", __func__);
+    else {
+        printf("%s [FAIL] cleanup unlink()=%d errno=%d\n", __func__, result, errno);
+        failed = 1;
+    }
+
     return failed;
 }

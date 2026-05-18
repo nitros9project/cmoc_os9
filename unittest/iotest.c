@@ -232,6 +232,66 @@ void test_make_and_attr_file()
 	}
 }
 
+void test_access_dup_unlinkx()
+{
+	char *file = "access.tmp";
+	int mode = FAM_READ | FAM_WRITE;
+	int perms = FAP_READ | FAP_WRITE;
+	int path;
+	int dup_path;
+	int result;
+
+	unlink(file);
+
+	path = create(file, mode, perms);
+	if (path == -1)
+	{
+		printf("%s [FAIL] create(\"%s\", %x, %d) = %d, errno = %d\n", __func__, file, mode, perms, path, errno);
+		return;
+	}
+	printf("%s [PASS] create(\"%s\", %x, %d) = %d\n", __func__, file, mode, perms, path);
+	close(path);
+
+	result = access(file, FAM_READ);
+	if (result == 0)
+		printf("%s [PASS] access(\"%s\", %x) = %d\n", __func__, file, FAM_READ, result);
+	else
+		printf("%s [FAIL] access(\"%s\", %x) = %d, errno = %d\n", __func__, file, FAM_READ, result, errno);
+
+	result = access("missing.tmp", FAM_READ);
+	if (result == -1)
+		printf("%s [PASS] access(\"missing.tmp\", %x) = %d\n", __func__, FAM_READ, result);
+	else
+		printf("%s [FAIL] access(\"missing.tmp\", %x) = %d\n", __func__, FAM_READ, result);
+
+	path = open(file, FAM_READ);
+	if (path == -1)
+	{
+		printf("%s [FAIL] open(\"%s\", %x) = %d, errno = %d\n", __func__, file, FAM_READ, path, errno);
+		unlink(file);
+		return;
+	}
+	printf("%s [PASS] open(\"%s\", %x) = %d\n", __func__, file, FAM_READ, path);
+
+	dup_path = dup(path);
+	if (dup_path != -1)
+	{
+		printf("%s [PASS] dup(%d) = %d\n", __func__, path, dup_path);
+		close(dup_path);
+	}
+	else
+	{
+		printf("%s [FAIL] dup(%d) = %d, errno = %d\n", __func__, path, dup_path, errno);
+	}
+	close(path);
+
+	result = unlinkx(file, FAM_WRITE);
+	if (result == 0)
+		printf("%s [PASS] unlinkx(\"%s\", %x) = %d\n", __func__, file, FAM_WRITE, result);
+	else
+		printf("%s [FAIL] unlinkx(\"%s\", %x) = %d, errno = %d\n", __func__, file, FAM_WRITE, result, errno);
+}
+
 int main()
 {
 	test_create_and_delete_file();
@@ -240,6 +300,7 @@ int main()
 	test_create_and_seek();
 	test_make_directory();
 	test_make_and_attr_file();
+	test_access_dup_unlinkx();
 
 	return 0;
 }

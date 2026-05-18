@@ -5,11 +5,13 @@
 _abs                EXPORT              ; export this symbol
 
 _abs
-                    ldd       2,s       ; load D from stack-relative value 2,s
-                    bpl       L_abs_done ; branch if plus to L_abs_done
-                    nega                ; negate A
-                    negb                ; negate B
-                    sbca      #0        ; subtract immediate value 0 from A
+stk_abs_ret         equ       0         ; caller return address
+stk_abs_value       equ       2         ; signed 16-bit input value
+                    ldd       stk_abs_value,s ; fetch the signed argument
+                    bpl       L_abs_done ; non-negative values are already absolute
+                    nega                ; begin 16-bit two's-complement negation
+                    negb                ; negate the low byte
+                    sbca      #0        ; fold the low-byte borrow into the high byte
 L_abs_done
                     rts                 ; return to caller
 

@@ -22,6 +22,14 @@ int rand(void);
  */
 void srand(unsigned seed);
 
+/**
+ * @brief Return the absolute value of an integer.
+ *
+ * @param value Value to convert.
+ * @return Non-negative magnitude of `value`.
+ */
+int      abs(int value);
+
 #if defined(_CMOC_MC6839_) || defined(_CMOC_NATIVE_FLOAT_)
 /**
  * @brief Convert a string to a floating-point value.

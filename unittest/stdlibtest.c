@@ -34,6 +34,46 @@ void test_minmax(void)
 		printf("%s [FAIL] min/max family\n", __func__);
 }
 
+void test_abs_atoi_atol(void)
+{
+	int atol_ok = 1;
+	long value;
+
+	if (abs(0) == 0 && abs(123) == 123 && abs(-123) == 123)
+		printf("%s [PASS] abs()\n", __func__);
+	else
+		printf("%s [FAIL] abs()\n", __func__);
+
+	if (atoi("123") == 123 &&
+	    atoi(" -42") == -42 &&
+	    atoi("\t+77x") == 77 &&
+	    atoi("abc") == 0)
+		printf("%s [PASS] atoi()\n", __func__);
+	else
+		printf("%s [FAIL] atoi()\n", __func__);
+
+	value = atol("abc");
+	if (value != 0L)
+		atol_ok = 0;
+
+	value = atol("123456");
+	if (value != 123456L)
+		atol_ok = 0;
+
+	value = atol(" -12345");
+	if (value != -12345L)
+		atol_ok = 0;
+
+	value = atol("\t+99x");
+	if (value != 99L)
+		atol_ok = 0;
+
+	if (atol_ok)
+		printf("%s [PASS] atol()\n", __func__);
+	else
+		printf("%s [FAIL] atol()\n", __func__);
+}
+
 void test_mktemp(void)
 {
 	char name[16];
@@ -97,6 +137,7 @@ int main(void)
 {
 	test_xtoa();
 	test_minmax();
+	test_abs_atoi_atol();
 	test_mktemp();
 	test_setbuf();
 	test_rand();

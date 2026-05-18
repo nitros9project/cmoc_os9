@@ -60,6 +60,8 @@ echo pwenttest
 pwenttest >>>-pwenttest.out
 echo randtest
 randtest >>>-randtest.out
+echo lmultest
+lmultest >>>-lmultest.out
 echo searchtest
 searchtest >>>-searchtest.out
 echo setjmptest

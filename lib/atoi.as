@@ -5,60 +5,64 @@
 _atoi               EXPORT              ; export this symbol
 
 _atoi
+stk_atoi_ret        equ       0         ; caller return address
+stk_atoi_src        equ       2         ; source string pointer
+stk_atoi_sign       equ       0         ; local sign flag after workspace allocation
+stk_atoi_value      equ       1         ; local 16-bit accumulator after workspace allocation
                     pshs      u         ; save U on the hardware stack
-                    ldu       4,s       ; load U from stack-relative value 4,s
-                    clra                ; clear A
-                    clrb                ; clear B
-                    pshs      d         ; save D on the hardware stack
-                    pshs      b         ; save B on the hardware stack
+                    ldu       stk_atoi_src+2,s ; load source pointer after saving U
+                    clra                ; initialize accumulator high byte to zero
+                    clrb                ; initialize accumulator low byte and sign flag to zero
+                    pshs      d         ; allocate the 16-bit accumulator
+                    pshs      b         ; allocate the sign flag byte
 L_atoi_skip
-                    ldb       ,u+       ; load B from memory pointed to by U, then advance U
-                    cmpb      #$20      ; compare B against ASCII space
+                    ldb       ,u+       ; fetch next character while scanning leading whitespace
+                    cmpb      #$20      ; recognize an ASCII space
                     beq       L_atoi_skip ; branch if equal/zero to L_atoi_skip
-                    cmpb      #9        ; compare B against immediate value 9
+                    cmpb      #9        ; recognize an ASCII tab
                     beq       L_atoi_skip ; branch if equal/zero to L_atoi_skip
-                    cmpb      #'-'      ; compare B against character literal '-'
+                    cmpb      #'-'      ; check for a leading minus sign
                     bne       L_atoi_plus ; branch if not equal to L_atoi_plus
-                    stb       ,s        ; store B to memory pointed to by S
+                    stb       stk_atoi_sign,s ; remember that the final result must be negated
                     bra       L_atoi_next ; branch unconditionally to L_atoi_next
 
 L_atoi_plus
-                    cmpb      #'+'      ; compare B against character literal '+'
+                    cmpb      #'+'      ; accept an optional plus sign
                     bne       L_atoi_check ; branch if not equal to L_atoi_check
                     bra       L_atoi_next ; branch unconditionally to L_atoi_next
 
 L_atoi_accum
-                    ldd       1,s       ; load D from stack-relative value 1,s
-                    aslb                ; shift B left by one bit
-                    rola                ; rotate A left through carry
-                    aslb                ; shift B left by one bit
-                    rola                ; rotate A left through carry
-                    addd      1,s       ; add stack-relative value 1,s into D
-                    aslb                ; shift B left by one bit
-                    rola                ; rotate A left through carry
-                    pshs      d         ; save D on the hardware stack
-                    ldb       -1,u      ; load B from indexed value -1,u
-                    clra                ; clear A
-                    subb      #'0'      ; subtract character literal '0' from B
-                    addd      ,s++      ; add memory pointed to by S+, then advance S+ into D
-                    std       1,s       ; store D to stack-relative value 1,s
+                    ldd       stk_atoi_value,s ; load current accumulator value
+                    aslb                ; multiply accumulator by 2
+                    rola                ; propagate the shift into the high byte
+                    aslb                ; multiply accumulator by 4
+                    rola                ; propagate the shift into the high byte
+                    addd      stk_atoi_value,s ; form accumulator * 5
+                    aslb                ; form accumulator * 10
+                    rola                ; propagate the shift into the high byte
+                    pshs      d         ; stage accumulator * 10 while converting the digit
+                    ldb       -1,u      ; reload the digit that passed classification
+                    clra                ; extend digit value to 16 bits
+                    subb      #'0'      ; convert ASCII digit to binary
+                    addd      ,s++      ; add the digit to the staged accumulator
+                    std       stk_atoi_value,s ; save the updated accumulator
 
 L_atoi_next
-                    ldb       ,u+       ; load B from memory pointed to by U, then advance U
+                    ldb       ,u+       ; fetch the next candidate digit
 
 L_atoi_check
-                    cmpb      #'0'      ; compare B against character literal '0'
+                    cmpb      #'0'      ; reject characters below the digit range
                     blo       L_atoi_done ; branch if lower to L_atoi_done
-                    cmpb      #'9'      ; compare B against character literal '9'
+                    cmpb      #'9'      ; accept decimal digits only
                     bls       L_atoi_accum ; branch if lower or same to L_atoi_accum
 
 L_atoi_done
-                    tst       ,s+       ; test memory pointed to by S, then advance S and update condition codes
-                    puls      d         ; restore D from the hardware stack
+                    tst       ,s+       ; test and discard the local sign flag
+                    puls      d         ; load the accumulated positive value
                     beq       L_atoi_exit ; branch if equal/zero to L_atoi_exit
-                    nega                ; negate A
-                    negb                ; negate B
-                    sbca      #0        ; subtract immediate value 0 from A
+                    nega                ; begin 16-bit two's-complement negation
+                    negb                ; negate the low byte
+                    sbca      #0        ; fold the low-byte borrow into the high byte
 
 L_atoi_exit
                     puls      u,pc      ; restore registers and return

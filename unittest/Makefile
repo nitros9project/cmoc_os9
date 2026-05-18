@@ -31,9 +31,14 @@ floatfmttest: floatfmttest.c
 		$^ $(OBJS) -L../lib -lcf -L../cgfx -lcgfx \
 		-L$(CMOC_FLOAT_LIB_DIR) -lcmoc-float-mc6839_os9 -L../lib -lcf
 
+lmulwrap.o: lmulwrap.as
+	lwasm lmulwrap.as --obj -olmulwrap.o
+
+lmultest: lmultest.c lmulwrap.o
+	$(CC) $(LFLAGS) lmultest.c lmulwrap.o $(OBJS) -L../lib -lc -L../cgfx -lcgfx
 
 GRAPHICS_TESTS = wintest maze
-TESTS	= hello noop timetest fiotest iotest osiotest osopenerrtest syscalltest fdstreamtest memtest forktest forkhellotest forknowaittest forknooptest printtest osgstattest utimetest ctypetest stringtest floattest floatfmttest getopttest popentest pwenttest defdrivetest pwcryptest errmsgtest stdlibtest setbuftest stdioedgetest streamiotest searchtest stringexttest randtest filelayout setjmptest systemtest setstest dirtest compat3test signaltest intercepttest dirapitest misctest datmodstest attrwraptest abortchild aborttest
+TESTS	= hello noop timetest fiotest iotest osiotest osopenerrtest syscalltest fdstreamtest memtest forktest forkhellotest forknowaittest forknooptest printtest osgstattest utimetest ctypetest stringtest floattest floatfmttest getopttest popentest pwenttest defdrivetest pwcryptest errmsgtest stdlibtest setbuftest stdioedgetest streamiotest searchtest stringexttest randtest lmultest filelayout setjmptest systemtest setstest dirtest compat3test signaltest intercepttest dirapitest misctest datmodstest attrwraptest abortchild aborttest
 ALL_TESTS = $(TESTS) $(GRAPHICS_TESTS)
 
 all:	$(ALL_TESTS)
@@ -53,4 +58,5 @@ run:	dsk
 
 clean:
 	-rm -f $(ALL_TESTS) test.dsk go
+	-rm -f lmulwrap.o
 	-rm -f *.s.list *.s.map

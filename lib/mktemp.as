@@ -2,33 +2,36 @@
 
                     section   code      ; begin code section
 
-_mktemp             EXPORT              ; export this symbol
+_mktemp             EXPORT    ;         export this symbol
 
-_getpid             EXTERNAL            ; import external symbol
-_itoa               EXTERNAL            ; import external symbol
+_getpid             EXTERNAL  ;         import external symbol
+_itoa               EXTERNAL  ;         import external symbol
 
-_mktemp
-                    pshs      u         ; save U on the hardware stack
-                    ldu       4,s       ; load U from stack-relative value 4,s
-L_mktemp_scan
-                    ldb       ,u+       ; load B from memory pointed to by U, then advance U
-                    beq       L_mktemp_done ; branch if equal/zero to L_mktemp_done
+_mktemp:
+stk_mktemp_saved_u  equ       0         ; saved U register after pshs u
+stk_mktemp_ret      equ       2         ; caller return address after pshs u
+stk_mktemp_template equ       4         ; template string pointer
+                    pshs      u         ; preserve U while scanning template
+                    ldu       stk_mktemp_template,s ; load template string pointer
+mktemp_scan
+                    ldb       ,u+       ; read next template byte and advance cursor
+                    beq       mktemp_done ; no X run found before terminator
                     cmpb      #'X
-                    bne       L_mktemp_scan ; branch if not equal to L_mktemp_scan
-                    leau      -1,u      ; compute effective address into U from -1,u
-                    pshs      u         ; save U on the hardware stack
-                    ldd       #5        ; load D from immediate value 5
-L_mktemp_zero
-                    sta       ,u+       ; store A to memory pointed to by U, then advance U
-                    decb                ; decrement B
-                    bne       L_mktemp_zero ; branch if not equal to L_mktemp_zero
-                    puls      u         ; restore U from the hardware stack
-                    lbsr      _getpid   ; long branch to subroutine to _getpid
-                    pshs      d,u       ; save D,U on the hardware stack
-                    lbsr      _itoa     ; long branch to subroutine to _itoa
-                    leas      4,s       ; adjust S using 4,s
-L_mktemp_done
-                    ldd       4,s       ; load D from stack-relative value 4,s
+                    bne       mktemp_scan ; keep scanning until first X
+                    leau      -1,u      ; back up to the first X
+                    pshs      u         ; save replacement start pointer
+                    ldd       #5        ; clear five template bytes before writing the PID
+mktemp_zero_loop
+                    sta       ,u+       ; write NUL and advance through X run
+                    decb                ; count one cleared template byte
+                    bne       mktemp_zero_loop ; clear the fixed five-byte replacement field
+                    puls      u         ; recover replacement start pointer
+                    lbsr      _getpid   ; get current process ID
+                    pshs      d,u       ; pass pid and replacement buffer to itoa()
+                    lbsr      _itoa     ; write decimal pid into template
+                    leas      4,s       ; discard itoa() arguments
+mktemp_done
+                    ldd       stk_mktemp_template,s ; return original template pointer
                     puls      u,pc      ; restore registers and return
 
-                    endsect             ; end current section
+                    endsect   ;         end current section

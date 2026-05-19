@@ -131,13 +131,26 @@ void test_htoi_htol(void)
 void test_mktemp(void)
 {
 	char name[16];
+	char unchanged[16];
+	char *result;
 
 	strcpy(name, "tmp.XXXXX");
-	mktemp(name);
-	if (strncmp(name, "tmp.", 4) == 0 && strlen(name) >= 5)
-		printf("%s [PASS] mktemp()\n", __func__);
-	else
+	result = mktemp(name);
+	if (result != name) {
+		printf("%s [FAIL] mktemp() returned wrong pointer\n", __func__);
+		failed = 1;
+	} else if (strncmp(name, "tmp.", 4) != 0 || strlen(name) < 5) {
 		printf("%s [FAIL] mktemp(): got %s\n", __func__, name);
+		failed = 1;
+	} else {
+		strcpy(unchanged, "plain.tmp");
+		result = mktemp(unchanged);
+		if (result != unchanged || strcmp(unchanged, "plain.tmp") != 0) {
+			printf("%s [FAIL] mktemp(no X): got %s\n", __func__, unchanged);
+			failed = 1;
+		} else
+			printf("%s [PASS] mktemp()\n", __func__);
+	}
 }
 
 void test_setbuf(void)

@@ -2,23 +2,29 @@
 
                     section   code      ; begin code section
 
-_memchr             EXPORT              ; export this symbol
+_memchr             EXPORT    ;         export this symbol
 
-_memchr
-                    pshs      x,u       ; save X,U on the hardware stack
-                    ldu       6,s       ; load U from stack-relative value 6,s
-                    ldx       10,s      ; load X from stack-relative value 10,s
-                    beq       ReturnZero_01 ; branch if equal/zero to ReturnZero_01
-Loop_01             lda       ,u+       ; load A from memory pointed to by U, then advance U
-                    cmpa      9,s       ; compare A against stack-relative value 9,s
-                    bne       BranchTarget_01 ; branch if not equal to BranchTarget_01
-                    leau      -1,u      ; compute effective address into U from -1,u
-                    tfr       u,d       ; transfer U,D
-                    bra       Continue_01 ; branch unconditionally to Continue_01
-BranchTarget_01     leax      -1,x      ; compute effective address into X from -1,x
-                    bne       Loop_01   ; branch if not equal to Loop_01
-ReturnZero_01       clra                ; clear A
-                    clrb                ; clear B
-Continue_01         puls      x,u,pc    ; restore registers and return
+_memchr:
+stk_memchr_saved_xu equ       0         ; saved X/U registers after pshs x,u
+stk_memchr_ret      equ       4         ; caller return address after pshs x,u
+stk_memchr_buffer   equ       6         ; buffer pointer
+stk_memchr_char     equ       8         ; 16-bit search character argument
+stk_memchr_char_byte equ       9         ; low byte compared against buffer bytes
+stk_memchr_count    equ       10        ; maximum byte count
+                    pshs      x,u       ; preserve registers used as cursor/count
+                    ldu       stk_memchr_buffer,s ; load buffer cursor
+                    ldx       stk_memchr_count,s ; load remaining byte count
+                    beq       memchr_not_found ; zero length cannot contain the byte
+memchr_scan_loop    lda       ,u+       ; fetch next byte and advance cursor
+                    cmpa      stk_memchr_char_byte,s ; compare with requested byte
+                    bne       memchr_next ; keep scanning while bytes differ
+                    leau      -1,u      ; back up to the matching byte
+                    tfr       u,d       ; return pointer to the matching byte
+                    bra       memchr_done ; finish with non-NULL pointer
+memchr_next         leax      -1,x      ; consume one byte from remaining count
+                    bne       memchr_scan_loop ; continue until count reaches zero
+memchr_not_found    clra                ; return NULL high byte
+                    clrb                ; return NULL low byte
+memchr_done         puls      x,u,pc    ; restore registers and return
 
-                    endsect             ; end current section
+                    endsect   ;         end current section

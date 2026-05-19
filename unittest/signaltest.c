@@ -49,6 +49,9 @@ main(void)
     }
 
     got_signal = 0;
+    prev = signal(SIGQUIT, handler);
+    check_true("signaltest signal(reset handler)", prev == SIG_DFL);
+
     err = kill(pid, SIGQUIT);
     if (err == 0 && got_signal == SIGQUIT)
         printf("%s [PASS]\n", "signaltest kill(delivery)");

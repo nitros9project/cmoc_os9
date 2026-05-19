@@ -31,8 +31,18 @@ static void test_memcpy(void)
 		fail_int(__func__, "bytes", memcmp(dst, "test", 4), 0);
 	else if ((unsigned char) dst[4] != 0x5A)
 		fail_int(__func__, "sentinel", (unsigned char) dst[4], 0x5A);
-	else
-		printf("%s [PASS]\n", __func__);
+	else {
+		memset(dst, 0x5A, sizeof(dst));
+		result = memcpy(dst, "abcde", 5);
+		if (result != dst)
+			fail_ptr(__func__, "odd return", result, dst);
+		else if (memcmp(dst, "abcde", 5) != 0)
+			fail_int(__func__, "odd bytes", memcmp(dst, "abcde", 5), 0);
+		else if ((unsigned char) dst[5] != 0x5A)
+			fail_int(__func__, "odd sentinel", (unsigned char) dst[5], 0x5A);
+		else
+			printf("%s [PASS]\n", __func__);
+	}
 }
 
 static void test_memset(void)
@@ -44,8 +54,15 @@ static void test_memset(void)
 		fail_ptr(__func__, "return", result, dst);
 	else if (dst[0] != 'X' || dst[1] != 'X' || dst[2] != 'X' || dst[3] != 'X' || dst[4] != 'X')
 		fail_int(__func__, "fill", 0, 1);
-	else
-		printf("%s [PASS]\n", __func__);
+	else {
+		result = memset(dst, 'Y', 0);
+		if (result != dst)
+			fail_ptr(__func__, "zero return", result, dst);
+		else if (dst[0] != 'X')
+			fail_int(__func__, "zero write", dst[0], 'X');
+		else
+			printf("%s [PASS]\n", __func__);
+	}
 }
 
 static void test_memchr(void)
@@ -57,6 +74,8 @@ static void test_memchr(void)
 		fail_ptr(__func__, "hit", result, src + 7);
 	else if (memchr(src, 'Z', strlen(src)) != NULL)
 		fail_ptr(__func__, "miss", memchr(src, 'Z', strlen(src)), NULL);
+	else if (memchr(src, 'A', 0) != NULL)
+		fail_ptr(__func__, "zero count", memchr(src, 'A', 0), NULL);
 	else
 		printf("%s [PASS]\n", __func__);
 }
@@ -66,10 +85,30 @@ static void test_memcmp(void)
 	int result = memcmp("abcd", "abcd", 4);
 	if (result != 0)
 		fail_int(__func__, "equal", result, 0);
+	else if (memcmp("abce", "abcd", 0) != 0)
+		fail_int(__func__, "zero count", memcmp("abce", "abcd", 0), 0);
+	else if (memcmp("abcd", "abcd", 4) != 0)
+		fail_int(__func__, "same pointer", memcmp("abcd", "abcd", 4), 0);
 	else if (memcmp("abce", "abcd", 4) <= 0)
 		fail_int(__func__, "greater", memcmp("abce", "abcd", 4), 1);
 	else if (memcmp("abcd", "abce", 4) >= 0)
 		fail_int(__func__, "less", memcmp("abcd", "abce", 4), -1);
+	else
+		printf("%s [PASS]\n", __func__);
+}
+
+static void test_memncmp(void)
+{
+	int result = memncmp("abcd", "abcd", 4);
+
+	if (result != 0)
+		fail_int(__func__, "equal", result, 0);
+	else if (memncmp("abce", "abcd", 0) != 0)
+		fail_int(__func__, "zero count", memncmp("abce", "abcd", 0), 0);
+	else if (memncmp("abce", "abcd", 4) <= 0)
+		fail_int(__func__, "greater", memncmp("abce", "abcd", 4), 1);
+	else if (memncmp("abcd", "abce", 4) >= 0)
+		fail_int(__func__, "less", memncmp("abcd", "abce", 4), -1);
 	else
 		printf("%s [PASS]\n", __func__);
 }
@@ -94,8 +133,16 @@ static void test_memccpy(void)
 			fail_ptr(__func__, "nomatch return", result, NULL);
 		else if (memcmp(dst, "abcd", 4) != 0)
 			fail_int(__func__, "nomatch bytes", memcmp(dst, "abcd", 4), 0);
-		else
-			printf("%s [PASS]\n", __func__);
+		else {
+			memset(dst, 0x5A, sizeof(dst));
+			result = memccpy(dst, "abcd", 'a', 0);
+			if (result != NULL)
+				fail_ptr(__func__, "zero return", result, NULL);
+			else if ((unsigned char) dst[0] != 0x5A)
+				fail_int(__func__, "zero write", (unsigned char) dst[0], 0x5A);
+			else
+				printf("%s [PASS]\n", __func__);
+		}
 	}
 }
 
@@ -171,6 +218,8 @@ static void test_memglobs(void)
 static void test_malloc(void)
 {
 	char *p = (char *) malloc(16);
+	char *q;
+
 	if (p == NULL)
 		fail_ptr(__func__, "malloc(16)", p, (void *) 1);
 	else {
@@ -178,8 +227,22 @@ static void test_malloc(void)
 		p[15] = 'Z';
 		if (p[0] != 'A' || p[15] != 'Z')
 			fail_int(__func__, "readback", 0, 1);
-		else
-			printf("%s [PASS]\n", __func__);
+		else {
+			free(p);
+			q = (char *) malloc(8);
+			if (q == NULL)
+				fail_ptr(__func__, "reuse malloc(8)", q, (void *) 1);
+			else {
+				q[0] = 'R';
+				q[7] = 'S';
+				if (q[0] != 'R' || q[7] != 'S')
+					fail_int(__func__, "reuse readback", 0, 1);
+				else
+					printf("%s [PASS]\n", __func__);
+				free(q);
+			}
+			return;
+		}
 		free(p);
 	}
 }
@@ -250,6 +313,7 @@ int main(void)
 	test_memset();
 	test_memchr();
 	test_memcmp();
+	test_memncmp();
 	test_memccpy();
 	test_malloc();
 	test_calloc();

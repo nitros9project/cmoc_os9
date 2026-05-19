@@ -5,14 +5,15 @@
 
                     section   code      ; begin code section
 
-_getpid             EXPORT              ; export this symbol
+_getpid             EXPORT    ;         export this symbol
 
-_getpid
+_getpid:
+stk_getpid_ret      equ       0         ; caller return address
                     pshs      y         ; save data pointer
                     os9       F_ID      ; invoke OS-9 system call F_ID
-                    puls      y         ; restore Y from the hardware stack
-                    tfr       a,b       ; transfer A,B
-                    clra                ; clear A
-                    rts                 ; return to caller
+                    puls      y         ; restore CMOC data pointer
+                    tfr       a,b       ; move process ID into low byte of int result
+                    clra                ; clear high byte of int result
+                    rts                 ; return process ID
 
-                    endsect             ; end current section
+                    endsect   ;         end current section

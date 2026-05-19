@@ -1,123 +1,144 @@
+                    use       ../include/stdio.d ; shared FILE layout and flag constants
+
                     section   code      ; begin code section
 
-_getc               EXPORT              ; export this symbol
-_ungetc             EXPORT              ; export this symbol
-_getw               EXPORT              ; export this symbol
+_getc               EXPORT    ;         export this symbol
+_ungetc             EXPORT    ;         export this symbol
+_getw               EXPORT    ;         export this symbol
 
-__iob               EXTERN              ; import external symbol
+__iob               EXTERN    ;         import FILE table base
 
-_getc               pshs      u         ; save U on the hardware stack
-                    ldu       4,s       ; load U from stack-relative value 4,s
-                    beq       Loop_05   ; branch if equal/zero to Loop_05
-                    lda       6,u       ; load A from indexed value 6,u
-                    anda      #1        ; AND A with immediate value 1
-                    beq       Loop_00   ; branch if stream is not marked written in update mode
-                    ldx       ,u        ; load current buffer pointer
-                    cmpx      4,u       ; allow reads only after a reposition parked ptr at end
-                    bne       Loop_05   ; branch if buffered write state is still active
-                    lda       6,u       ; reload high byte of FILE flags
-                    anda      #^1       ; clear _WRITTEN after fseek-style reposition
-                    sta       6,u       ; save cleaned update-state flag
-Loop_00             ldx       ,u        ; load X from memory pointed to by U
-                    cmpx      4,u       ; compare X against indexed value 4,u
-                    bcc       BranchTarget_02 ; branch if carry is clear to BranchTarget_02
-Loop_01             ldb       ,x+       ; load B from memory pointed to by X, then advance X
-Loop_02             stx       ,u        ; store X to memory pointed to by U
+_getc:
+stk_getc_saved_u    equ       0         ; saved U after entry prologue
+stk_getc_read_count equ       -2        ; temporary read count after I/O args are discarded
+stk_getc_ret        equ       2         ; caller return address after entry prologue
+stk_getc_stream     equ       4         ; FILE * stream argument after entry prologue
+                    pshs      u         ; preserve caller U while using it as FILE pointer
+                    ldu       stk_getc_stream,s ; load FILE * argument
+                    beq       getc_return_eof ; NULL streams fail with EOF
+                    lda       FILE_FLAG,u ; read high byte of FILE flags
+                    anda      #_WRITTEN_HIGH ; stream was written in update mode?
+                    beq       getc_buffer_ready ; ordinary read stream can continue
+                    ldx       FILE_PTR,u ; load current buffer pointer
+                    cmpx      FILE_END,u ; reads are allowed only after repositioning to the end
+                    bne       getc_return_eof ; active buffered write state cannot be read
+                    lda       FILE_FLAG,u ; reload high byte of FILE flags
+                    anda      #^_WRITTEN_HIGH ; clear write-state after reposition
+                    sta       FILE_FLAG,u ; save updated high flag byte
+getc_buffer_ready   ldx       FILE_PTR,u ; load next buffered character pointer
+                    cmpx      FILE_END,u ; is buffered input still available?
+                    bcc       getc_refill_buffer ; refill when pointer reached the end
+getc_consume_buffered
+                    ldb       ,x+       ; fetch buffered byte and advance FILE pointer
+getc_store_ptr_return
+                    stx       FILE_PTR,u ; save updated FILE pointer
                     clra                ; clear A
                     puls      u,pc      ; restore registers and return
 
-_ungetc             pshs      u         ; save U on the hardware stack
-                    ldu       6,s       ; load U from stack-relative value 6,s
-                    beq       Loop_05   ; branch if equal/zero to Loop_05
-                    ldb       7,u       ; load B from indexed value 7,u
-                    andb      #1        ; AND B with immediate value 1
-                    beq       Loop_05   ; branch if equal/zero to Loop_05
-                    ldd       4,s       ; load D from stack-relative value 4,s
-                    cmpd      #-1       ; compare D against immediate value -1
-                    beq       Loop_05   ; branch if equal/zero to Loop_05
-                    ldx       ,u        ; load X from memory pointed to by U
-                    cmpx      2,u       ; compare X against indexed value 2,u
-                    beq       Loop_05   ; branch if equal/zero to Loop_05
-                    stb       ,-x       ; store B to memory pointed to by -X
-                    bra       Loop_02   ; branch unconditionally to Loop_02
+_ungetc:
+stk_ungetc_saved_u  equ       0         ; saved U after entry prologue
+stk_ungetc_ret      equ       2         ; caller return address after entry prologue
+stk_ungetc_char     equ       4         ; character to push back after entry prologue
+stk_ungetc_stream   equ       6         ; FILE * stream argument after entry prologue
+                    pshs      u         ; preserve caller U while using it as FILE pointer
+                    ldu       stk_ungetc_stream,s ; load FILE * argument
+                    beq       getc_return_eof ; NULL streams fail with EOF
+                    ldb       FILE_FLAG+1,u ; read low byte of FILE flags
+                    andb      #_READ    ; pushback requires a readable stream
+                    beq       getc_return_eof ; non-readable streams fail with EOF
+                    ldd       stk_ungetc_char,s ; load candidate character
+                    cmpd      #-1       ; EOF cannot be pushed back
+                    beq       getc_return_eof ; reject EOF
+                    ldx       FILE_PTR,u ; load current FILE pointer
+                    cmpx      FILE_BASE,u ; cannot push before the buffer base
+                    beq       getc_return_eof ; no pushback room remains
+                    stb       ,-x       ; store character in the previous buffer slot
+                    bra       getc_store_ptr_return ; save decremented FILE pointer and return it
 
-_getw               pshs      u         ; save U on the hardware stack
-                    ldu       4,s       ; load U from stack-relative value 4,s
-                    pshs      u,pc      ; save U,PC on the hardware stack
-                    bsr       _getc     ; branch to subroutine to _getc
-                    std       2,s       ; store D to stack-relative value 2,s
-                    cmpd      #-1       ; compare D against immediate value -1
-                    beq       BranchTarget_01 ; branch if equal/zero to BranchTarget_01
-                    bsr       _getc     ; branch to subroutine to _getc
-                    cmpd      #-1       ; compare D against immediate value -1
-                    beq       BranchTarget_01 ; branch if equal/zero to BranchTarget_01
-                    lda       3,s       ; load A from stack-relative value 3,s
-BranchTarget_01     leas      4,s       ; adjust S using 4,s
+_getw:
+stk_getw_saved_u    equ       0         ; saved U after entry prologue
+stk_getw_ret        equ       2         ; caller return address after entry prologue
+stk_getw_stream     equ       4         ; FILE * stream argument after entry prologue
+stk_getw_first_byte equ       3         ; low byte saved beside staged FILE * argument
+                    pshs      u         ; preserve caller U while staging FILE pointer
+                    ldu       stk_getw_stream,s ; load FILE * argument
+                    pshs      u,pc      ; stage FILE * plus a two-byte scratch slot
+                    bsr       _getc     ; read the high byte
+                    std       stk_getw_first_byte-1,s ; save first byte in scratch slot
+                    cmpd      #-1       ; EOF on first byte?
+                    beq       getw_done ; return EOF
+                    bsr       _getc     ; read the low byte
+                    cmpd      #-1       ; EOF on second byte?
+                    beq       getw_done ; return EOF
+                    lda       stk_getw_first_byte,s ; combine first byte with second byte
+getw_done           leas      4,s       ; discard staged FILE pointer and scratch slot
                     puls      u,pc      ; restore registers and return
 
-Loop_03             ldb       #$10      ; load B from immediate value $10
-                    bra       Continue_01 ; branch unconditionally to Continue_01
-Loop_04             ldb       #$20      ; load B from immediate value $20
-Continue_01         orb       7,u       ; OR B with indexed value 7,u
-                    stb       7,u       ; store B to indexed value 7,u
-Loop_05             ldd       #-1       ; load D from immediate value -1
+getc_mark_eof       ldb       #_EOF     ; prepare EOF flag for FILE status
+                    bra       getc_set_status ; merge status and return EOF
+getc_mark_error     ldb       #_ERR     ; prepare ERR flag for FILE status
+getc_set_status     orb       FILE_FLAG+1,u ; merge new status with low FILE flags
+                    stb       FILE_FLAG+1,u ; save updated low flag byte
+getc_return_eof     ldd       #-1       ; return EOF
                     puls      u,pc      ; restore registers and return
 
-BranchTarget_02     ldd       6,u       ; load D from indexed value 6,u
-                    anda      #$80      ; AND A with immediate value $80
-                    andb      #$31      ; AND B with immediate value $31
-                    bitb      #$30      ; reject streams already marked EOF or ERR
-                    bne       Loop_05   ; branch if EOF or ERR is already set
-                    bitb      #$01      ; require read permission, but allow update streams too
-                    beq       Loop_05   ; branch if stream is not readable
-                    cmpa      #$80      ; compare A against immediate value $80
-                    beq       BranchTarget_03 ; branch if equal/zero to BranchTarget_03
-                    pshs      u         ; save U on the hardware stack
-_setbase            EXTERN              ; import external symbol
+getc_refill_buffer  ldd       FILE_FLAG,u ; load both FILE flag bytes
+                    anda      #_INIT_HIGH ; isolate initialized-buffer flag
+                    andb      #_READ|_EOF|_ERR ; keep readable, EOF, and error state
+                    bitb      #_EOF|_ERR ; reject streams already marked EOF or ERR
+                    bne       getc_return_eof ; status already prevents more reads
+                    bitb      #_READ    ; require read permission, but allow update streams too
+                    beq       getc_return_eof ; stream is not readable
+                    cmpa      #_INIT_HIGH ; has the stream buffer been initialized?
+                    beq       getc_buffer_initialized ; skip setup when initialized
+                    pshs      u         ; pass FILE * to _setbase()
+_setbase            EXTERN    ;         import FILE buffer initializer
                     lbsr      _setbase  ; long branch to subroutine to _setbase
                     leas      2,s       ; adjust S using 2,s
-BranchTarget_03     leax      __iob,y   ; compute effective address into X from __iob,y
-                    pshs      x         ; save X on the hardware stack
-                    cmpu      ,s++      ; compare U against memory pointed to by S+, then advance S+
-                    bne       BranchTarget_04 ; branch if not equal to BranchTarget_04
-                    ldb       7,u       ; load B from indexed value 7,u
-                    andb      #$40      ; AND B with immediate value $40
-                    beq       BranchTarget_04 ; branch if equal/zero to BranchTarget_04
-                    leax      __iob+13,y ; compute effective address into X from __iob+13,y
-                    pshs      x         ; save X on the hardware stack
-_fflush             EXTERN              ; import external symbol
+getc_buffer_initialized
+                    leax      __iob,y   ; point X at stdin FILE entry
+                    pshs      x         ; stage stdin pointer for comparison
+                    cmpu      ,s++      ; is this read from stdin?
+                    bne       getc_read_from_stream ; only stdin can trigger stdout flush
+                    ldb       FILE_FLAG+1,u ; load low FILE flags
+                    andb      #_SCF     ; test for interactive SCF input
+                    beq       getc_read_from_stream ; non-SCF stdin does not flush stdout
+                    leax      __iob+FILE_SIZE,y ; point X at stdout FILE entry
+                    pshs      x         ; pass stdout to _fflush()
+_fflush             EXTERN    ;         import FILE flush helper
                     lbsr      _fflush   ; long branch to subroutine to _fflush
                     leas      2,s       ; adjust S using 2,s
-BranchTarget_04     ldb       7,u       ; load B from indexed value 7,u
-                    andb      #8        ; AND B with immediate value 8
-                    beq       BranchTarget_05 ; branch if equal/zero to BranchTarget_05
-                    ldd       11,u      ; load D from indexed value 11,u
-                    pshs      d         ; save D on the hardware stack
-                    ldx       2,u       ; load X from indexed value 2,u
-                    ldd       8,u       ; load D from indexed value 8,u
-                    pshs      d,x       ; save D,X on the hardware stack
-                    ldb       7,u       ; load B from indexed value 7,u
-                    andb      #$40      ; AND B with immediate value $40
-                    beq       BranchTarget_06 ; branch if equal/zero to BranchTarget_06
-_readln             EXTERN              ; import external symbol
+getc_read_from_stream
+                    ldb       FILE_FLAG+1,u ; load low FILE flags
+                    andb      #_BIGBUF  ; does the FILE own a real input buffer?
+                    beq       getc_single_byte ; use the one-byte save area for unbuffered streams
+                    ldd       FILE_BUFSIZ,u ; load buffer size
+                    pshs      d         ; pass read count
+                    ldx       FILE_BASE,u ; load buffer base
+                    ldd       FILE_FD,u ; load OS-9 path number
+                    pshs      d,x       ; pass path and buffer pointer
+                    ldb       FILE_FLAG+1,u ; reload low FILE flags
+                    andb      #_SCF     ; SCF paths use line input
+                    beq       getc_call_read ; RBF paths use raw read
+_readln             EXTERN    ;         import OS-9 line-read wrapper
                     lbsr      _readln   ; long branch to subroutine to _readln
-                    bra       Continue_02 ; branch unconditionally to Continue_02
-BranchTarget_05     ldd       #1        ; load D from immediate value 1
-                    pshs      d         ; save D on the hardware stack
-                    leax      10,u      ; compute effective address into X from 10,u
-                    stx       2,u       ; store X to indexed value 2,u
-                    ldd       8,u       ; load D from indexed value 8,u
-                    pshs      d,x       ; save D,X on the hardware stack
-_read               EXTERN              ; import external symbol
-BranchTarget_06     lbsr      _read     ; long branch to subroutine to _read
-Continue_02         leas      6,s       ; adjust S using 6,s
-                    std       -2,s      ; store D to stack-relative value -2,s
-                    beq       Loop_03   ; branch if equal/zero to Loop_03
-                    bmi       Loop_04   ; branch if minus to Loop_04
-                    ldx       2,u       ; load X from indexed value 2,u
-                    leax      d,x       ; compute effective address into X from d,x
-                    stx       4,u       ; store X to indexed value 4,u
-                    ldx       2,u       ; load X from indexed value 2,u
-                    lbra      Loop_01   ; long branch unconditionally to Loop_01
+                    bra       getc_after_read ; normalize the returned byte count
+getc_single_byte    ldd       #1        ; request one byte
+                    pshs      d         ; pass read count
+                    leax      FILE_SAVE,u ; use FILE._save as the one-byte buffer
+                    stx       FILE_BASE,u ; make the save byte the active buffer base
+                    ldd       FILE_FD,u ; load OS-9 path number
+                    pshs      d,x       ; pass path and buffer pointer
+_read               EXTERN    ;         import OS-9 read wrapper
+getc_call_read      lbsr      _read     ; read bytes into the selected buffer
+getc_after_read     leas      6,s       ; discard count, pointer, and path arguments
+                    std       stk_getc_read_count,s ; keep byte count while testing it
+                    beq       getc_mark_eof ; zero bytes read means EOF
+                    bmi       getc_mark_error ; negative result means OS-9 error
+                    ldx       FILE_BASE,u ; reload buffer base
+                    leax      d,x       ; compute end pointer from bytes read
+                    stx       FILE_END,u ; save new buffer end
+                    ldx       FILE_BASE,u ; start consuming at buffer base
+                    lbra      getc_consume_buffered ; return the first freshly read byte
 
-                    endsect             ; end current section
+                    endsect   ;         end current section

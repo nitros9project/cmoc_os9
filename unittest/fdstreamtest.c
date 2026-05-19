@@ -111,6 +111,18 @@ static void test_fdopen_badmode(void)
     close(fd);
 }
 
+static void test_fopen_badmode(void)
+{
+    FILE *fp;
+
+    unlink(fdopen_write_tmp);
+    fp = fopen(fdopen_write_tmp, "q");
+    check_true("test_fopen_badmode fopen(q)", fp == 0);
+    if (fp != 0)
+        fclose(fp);
+    unlink(fdopen_write_tmp);
+}
+
 static void test_freopen(void)
 {
     FILE *fp;
@@ -218,6 +230,7 @@ int main(void)
     test_fdopen_read();
     test_fdopen_write();
     test_fdopen_badmode();
+    test_fopen_badmode();
     test_freopen();
     test_freopen_flushes_pending_write();
     test_freopen_failure_keeps_stream_usable();

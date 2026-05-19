@@ -1,6 +1,6 @@
                     section   bss       ; begin bss section
 
-_flacc              EXPORT              ; export this symbol
-_flacc:             rmb       8         ; reserve 8 bytes for the shared floating-point and long accumulator
+_flacc              EXPORT    ;         export this symbol
+_flacc:             rmb       8         ; shared floating-point and long accumulator storage
 
-                    endsect             ; end current section
+                    endsect   ;         end current section

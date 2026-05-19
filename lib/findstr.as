@@ -2,71 +2,83 @@
 
                     section   code      ; begin code section
 
-_findstr            EXPORT              ; export this symbol
-_findnstr           EXPORT              ; export this symbol
+_findstr            EXPORT    ;         export this symbol
+_findnstr           EXPORT    ;         export this symbol
 
 * int match_at(const char *hay, const char *needle)
 * X = hay, Y = needle
 * returns D = 1 on match, 0 on mismatch
 match_at
-                    pshs      x,y,u     ; save X,Y,U on the hardware stack
-                    tfr       x,u       ; transfer X,U
-Loop_01             ldb       ,y+       ; load B from memory pointed to by Y, then advance Y
-                    beq       BranchTarget_01 ; branch if equal/zero to BranchTarget_01
-                    cmpb      ,u+       ; compare B against memory pointed to by U, then advance U
-                    beq       Loop_01   ; branch if equal/zero to Loop_01
-                    clra                ; clear A
-                    clrb                ; clear B
-                    puls      x,y,u,pc  ; restore registers and return
-BranchTarget_01     ldd       #1        ; load D from immediate value 1
-                    puls      x,y,u,pc  ; restore registers and return
+stk_match_ret       equ       0         ; internal return address
+                    pshs      x,y,u     ; preserve caller scan registers
+                    tfr       x,u       ; scan haystack copy without disturbing caller X
+Loop_01             ldb       ,y+       ; fetch next needle byte
+                    beq       BranchTarget_01 ; whole needle matched when its terminator is reached
+                    cmpb      ,u+       ; compare against corresponding haystack byte
+                    beq       Loop_01   ; keep matching while bytes agree
+                    clra                ; return false high byte
+                    clrb                ; return false low byte
+                    puls      x,y,u,pc  ; restore registers and return mismatch
+BranchTarget_01     ldd       #1        ; return true for complete needle match
+                    puls      x,y,u,pc  ; restore registers and return match
 
-_findstr
-                    pshs      y,u       ; save Y,U on the hardware stack
-                    ldu       8,s       ; load U from stack-relative value 8,s
-                    ldb       ,u        ; load B from memory pointed to by U
-                    bne       BranchTarget_02 ; branch if not equal to BranchTarget_02
-                    ldd       6,s       ; load D from stack-relative value 6,s
-                    puls      y,u,pc    ; restore registers and return
-BranchTarget_02     ldx       6,s       ; load X from stack-relative value 6,s
-Loop_02             ldb       ,x        ; load B from memory pointed to by X
-                    beq       ReturnZero_01 ; branch if equal/zero to ReturnZero_01
-                    ldy       8,s       ; load Y from stack-relative value 8,s
-                    bsr       match_at  ; branch to subroutine to match_at
-                    bne       BranchTarget_03 ; branch if not equal to BranchTarget_03
-                    leax      1,x       ; compute effective address into X from 1,x
-                    bra       Loop_02   ; branch unconditionally to Loop_02
-BranchTarget_03     tfr       x,d       ; transfer X,D
-                    puls      y,u,pc    ; restore registers and return
-ReturnZero_01       clra                ; clear A
-                    clrb                ; clear B
-                    puls      y,u,pc    ; restore registers and return
+_findstr:
+stk_findstr_saved_y equ       0         ; saved Y after entry prologue
+stk_findstr_saved_u equ       2         ; saved U after entry prologue
+stk_findstr_ret     equ       4         ; caller return address after entry prologue
+stk_findstr_hay     equ       6         ; haystack string pointer after entry prologue
+stk_findstr_needle  equ       8         ; needle string pointer after entry prologue
+                    pshs      y,u       ; preserve registers used for scans
+                    ldu       stk_findstr_needle,s ; inspect needle pointer
+                    ldb       ,u        ; test first needle byte
+                    bne       BranchTarget_02 ; search when needle is not empty
+                    ldd       stk_findstr_hay,s ; empty needle matches at haystack start
+                    puls      y,u,pc    ; restore registers and return haystack pointer
+BranchTarget_02     ldx       stk_findstr_hay,s ; start scanning at haystack beginning
+Loop_02             ldb       ,x        ; test current haystack byte
+                    beq       ReturnZero_01 ; no match is possible after haystack terminator
+                    ldy       stk_findstr_needle,s ; reload needle pointer for this candidate
+                    bsr       match_at  ; test whether needle matches at current haystack byte
+                    bne       BranchTarget_03 ; return current position when match_at succeeded
+                    leax      1,x       ; advance to next haystack byte
+                    bra       Loop_02   ; continue scanning for a match
+BranchTarget_03     tfr       x,d       ; return matching haystack pointer
+                    puls      y,u,pc    ; restore registers and return match pointer
+ReturnZero_01       clra                ; return null high byte
+                    clrb                ; return null low byte
+                    puls      y,u,pc    ; restore registers and return null
 
-_findnstr
-                    pshs      y,u       ; save Y,U on the hardware stack
-                    ldu       8,s       ; load U from stack-relative value 8,s
-                    ldb       ,u        ; load B from memory pointed to by U
-                    bne       BranchTarget_04 ; branch if not equal to BranchTarget_04
-                    ldd       6,s       ; load D from stack-relative value 6,s
-                    puls      y,u,pc    ; restore registers and return
-BranchTarget_04     ldx       6,s       ; load X from stack-relative value 6,s
-                    ldy       10,s      ; load Y from stack-relative value 10,s
-                    beq       ReturnZero_02 ; branch if equal/zero to ReturnZero_02
-Loop_03             ldb       ,x        ; load B from memory pointed to by X
-                    beq       ReturnZero_02 ; branch if equal/zero to ReturnZero_02
-                    pshs      x,y       ; save X,Y on the hardware stack
-                    ldy       12,s      ; load Y from stack-relative value 12,s
-                    bsr       match_at  ; branch to subroutine to match_at
-                    puls      x,y       ; restore X,Y from the hardware stack
-                    bne       BranchTarget_05 ; branch if not equal to BranchTarget_05
-                    leax      1,x       ; compute effective address into X from 1,x
-                    leay      -1,y      ; compute effective address into Y from -1,y
-                    bne       Loop_03   ; branch if not equal to Loop_03
+_findnstr:
+stk_findnstr_saved_y equ       0         ; saved Y after entry prologue
+stk_findnstr_saved_u equ       2         ; saved U after entry prologue
+stk_findnstr_ret    equ       4         ; caller return address after entry prologue
+stk_findnstr_hay    equ       6         ; haystack string pointer after entry prologue
+stk_findnstr_needle equ       8         ; needle string pointer after entry prologue
+stk_findnstr_count  equ       10        ; maximum haystack bytes to inspect after entry prologue
+                    pshs      y,u       ; preserve registers used for scans
+                    ldu       stk_findnstr_needle,s ; inspect needle pointer
+                    ldb       ,u        ; test first needle byte
+                    bne       BranchTarget_04 ; bounded search when needle is not empty
+                    ldd       stk_findnstr_hay,s ; empty needle matches at haystack start
+                    puls      y,u,pc    ; restore registers and return haystack pointer
+BranchTarget_04     ldx       stk_findnstr_hay,s ; start scanning at haystack beginning
+                    ldy       stk_findnstr_count,s ; load remaining candidate count
+                    beq       ReturnZero_02 ; zero-length search cannot match non-empty needle
+Loop_03             ldb       ,x        ; test current haystack byte
+                    beq       ReturnZero_02 ; stop at haystack terminator
+                    pshs      x,y       ; preserve scan pointer and remaining count around match_at
+                    ldy       stk_findnstr_needle+4,s ; pushed X/Y shift needle pointer by four bytes
+                    bsr       match_at  ; test whether needle matches at current haystack byte
+                    puls      x,y       ; restore scan pointer and remaining count
+                    bne       BranchTarget_05 ; return current position when match_at succeeded
+                    leax      1,x       ; advance to next haystack byte
+                    leay      -1,y      ; consume one byte of the search limit
+                    bne       Loop_03   ; continue while count remains
                     bra       ReturnZero_02 ; limit exhausted without a match
-BranchTarget_05     tfr       x,d       ; transfer X,D
-                    puls      y,u,pc    ; restore registers and return
-ReturnZero_02       clra                ; clear A
-                    clrb                ; clear B
-                    puls      y,u,pc    ; restore registers and return
+BranchTarget_05     tfr       x,d       ; return matching haystack pointer
+                    puls      y,u,pc    ; restore registers and return match pointer
+ReturnZero_02       clra                ; return null high byte
+                    clrb                ; return null low byte
+                    puls      y,u,pc    ; restore registers and return null
 
-                    endsect             ; end current section
+                    endsect   ;         end current section

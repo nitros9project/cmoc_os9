@@ -34,6 +34,8 @@ I_Close             equ       $8F       ; OS-9 close call
 I_DeletX            equ       $90       ; OS-9 extended delete call
 I_Dup               equ       $82       ; OS-9 duplicate path descriptor call
 
+E_PthFul            equ       $C8       ; path table full error code
+E_BMode             equ       $CB       ; bad access mode error code
 E_UnkSvc            equ       $D0       ; unknown service error code
 E_EOF               equ       $D3       ; end-of-file status code
 E_FNA               equ       $D6       ; file not accessible error code

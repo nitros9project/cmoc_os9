@@ -26,6 +26,9 @@ void test_find_helpers(void)
 
 	hit = findnstr(text, "shelf", 10);
 	check_true("test_find_helpers findnstr(hit)", hit != 0 && strcmp(hit, "shelf") == 0);
+
+	hit = findnstr(text, "coco", 4);
+	check_true("test_find_helpers findnstr(start exact)", hit == text);
 }
 
 void test_find_edge_cases(void)
@@ -45,11 +48,17 @@ void test_find_edge_cases(void)
 	hit = findnstr(text, "ana", 1);
 	check_true("test_find_edge_cases findnstr(limit miss)", hit == 0);
 
+	hit = findnstr(text, "ana", 0);
+	check_true("test_find_edge_cases findnstr(zero limit)", hit == 0);
+
 	hit = findnstr(text, "ana", 2);
 	check_true("test_find_edge_cases findnstr(limit exact)", hit != 0 && strcmp(hit, "anana") == 0);
 
 	hit = findnstr(text, "", 3);
 	check_true("test_find_edge_cases findnstr(empty)", hit == text);
+
+	hit = findnstr(text, "", 0);
+	check_true("test_find_edge_cases findnstr(empty zero limit)", hit == text);
 }
 
 void test_swab(void)

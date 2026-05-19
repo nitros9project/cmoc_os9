@@ -108,6 +108,10 @@ void test_fseek_ftell(void)
 	check_true("test_fseek_ftell fseek(set)", fseek(fp, 3L, SEEK_SET) == 0);
 	check_true("test_fseek_ftell ftell(set)", ftell(fp) == 3L);
 
+	check_true("test_fseek_ftell fseek(end)", fseek(fp, 0L, SEEK_END) == 0);
+	check_true("test_fseek_ftell ftell(end seek)", ftell(fp) == (long) strlen(out));
+	check_true("test_fseek_ftell fseek(reset)", fseek(fp, 3L, SEEK_SET) == 0);
+
 	memset(buf, 0, sizeof(buf));
 	n = fread(buf, 1, 4, fp);
 	if (n == 4 && strcmp(buf, "3456") == 0)
@@ -131,6 +135,14 @@ void test_fseek_ftell(void)
 	}
 
 	check_true("test_fseek_ftell rewind", (rewind(fp), ftell(fp) == 0L));
+	memset(buf, 0, sizeof(buf));
+	n = fread(buf, 1, 4, fp);
+	if (n == 4 && strcmp(buf, "0123") == 0)
+		printf("%s [PASS]\n", "test_fseek_ftell fread(after rewind)");
+	else {
+		printf("%s [FAIL] n=%d buf=\"%s\"\n", "test_fseek_ftell fread(after rewind)", (int) n, buf);
+		failed = 1;
+	}
 
 	fclose(fp);
 	unlink(rw_tmp);

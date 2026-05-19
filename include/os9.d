@@ -17,6 +17,7 @@ F_PErr              equ       $0F       ; OS-9 print-error service
 F_Time              equ       $15       ; OS-9 read system time service
 F_STime             equ       $16       ; OS-9 set system time service
 F_CRC               equ       $17       ; OS-9 CRC helper service
+F_SUser             equ       $1C       ; OS-9 set user ID service
 
 I_Create            equ       $83       ; OS-9 create path call
 I_Open              equ       $84       ; OS-9 open path call
@@ -41,6 +42,7 @@ E_EOF               equ       $D3       ; end-of-file status code
 E_FNA               equ       $D6       ; file not accessible error code
 E_CEF               equ       $DA       ; creating existing file error code
 E_MNF               equ       $DD       ; module not found error code
+E_NoRAM             equ       $ED       ; no RAM available error code
 E_Seek              equ       $F7       ; seek error code
 
 ModType_Data        equ       $40       ; OS-9 data-module type nibble

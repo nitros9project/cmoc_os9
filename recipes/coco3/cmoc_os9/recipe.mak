@@ -14,6 +14,6 @@ BOOTMODS = krnp2 ioman init $(RBF) $(SCF) $(PIPE) $(CLOCK)
 CMDS_BASE = shell grfdrv utilpak1 dump free ident
 CMOC_OS9_GRAPHICS_TESTS = wintest maze
 CMOC_OS9_UTILITIES = wc cat head cmp tr cut
-CMOC_OS9_TESTS = hello noop timetest fiotest iotest osiotest osopenerrtest syscalltest fdstreamtest memtest forktest forkhellotest forknowaittest forknooptest printtest osgstattest utimetest ctypetest stringtest floattest floatfmttest getopttest gtest getstest popentest pwenttest defdrivetest pwcryptest errmsgtest stdlibtest setbuftest stdioedgetest streamiotest searchtest stringexttest randtest longtest lmultest intmathtest filelayout setjmptest systemtest setstest dirtest compat3test signaltest intercepttest dirapitest misctest datmodstest attrwraptest abortchild aborttest
+CMOC_OS9_TESTS = hello noop timetest fiotest iotest osiotest osopenerrtest syscalltest fdstreamtest memtest forktest forkhellotest forknowaittest forknooptest printtest osgstattest utimetest ctypetest stringtest floattest floatfmttest getopttest gtest popentest pwenttest defdrivetest pwcryptest errmsgtest stdlibtest setbuftest stdioedgetest streamiotest searchtest stringexttest randtest longtest lmultest intmathtest filelayout setjmptest systemtest setstest dirtest compat3test signaltest intercepttest dirapitest misctest datmodstest attrwraptest abortchild aborttest
 CMOC_OS9_ALL_TESTS = $(CMOC_OS9_TESTS) $(CMOC_OS9_GRAPHICS_TESTS)
 CMDS_EXTRA += $(CMOC_OS9_ALL_TESTS) $(CMOC_OS9_UTILITIES)

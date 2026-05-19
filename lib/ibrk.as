@@ -3,34 +3,40 @@
 * Adapted from cmoc_os9/lib/todo/ibrk.a for the live CMOC ABI.
 *
 
+                    use       ../include/os9.d ; shared OS-9 service constants
+
                     section   code      ; begin code section
 
-_ibrk               EXPORT              ; export this symbol
+_ibrk               EXPORT    ;         export this symbol
 
-__mtop              EXTERNAL            ; import external symbol
-__stbot             EXTERNAL            ; import external symbol
-_os9err             EXTERNAL            ; import external symbol
+__mtop              EXTERNAL  ;         import external symbol
+__stbot             EXTERNAL  ;         import external symbol
+_os9err             EXTERNAL  ;         import external symbol
 
-_ibrk               ldd       2,s       ; get the size required
-                    addd      __mtop,y  ; add current top
-                    bcs       ibrk20    ; if it wraps, error
-                    cmpd      __stbot,y ; overlap stack?
-                    bhs       ibrk20    ; branch if higher or same to ibrk20
-                    pshs      d         ; save new top
-                    ldx       __mtop,y  ; reset to bottom
+_ibrk:
+stk_ibrk_ret        equ       0         ; caller return address
+stk_ibrk_size       equ       2         ; requested additional allocation size
+stk_ibrk_new_top    equ       0         ; temporary top pointer after pshs d
+                    ldd       stk_ibrk_size,s ; get requested allocation size
+                    addd      __mtop,y  ; compute proposed heap top
+                    bcs       ibrk_fail ; reject arithmetic wraparound
+                    cmpd      __stbot,y ; reject allocations that would overlap the stack
+                    bhs       ibrk_fail ; proposed top reached or crossed stack bottom
+                    pshs      d         ; save proposed heap top while zeroing new memory
+                    ldx       __mtop,y  ; start clearing at the previous heap top
 
-                    clra                ; clear A
-sbloop              cmpx      0,s       ; reached the end?
-                    bhs       ibrk10    ; branch if higher or same to ibrk10
-                    sta       ,x+       ; store A to memory pointed to by X, then advance X
-                    bra       sbloop    ; branch unconditionally to sbloop
+                    clra                ; zero byte used to initialize the new allocation
+ibrk_clear_loop     cmpx      stk_ibrk_new_top,s ; stop once old top reaches proposed top
+                    bhs       ibrk_done ; no more bytes need clearing
+                    sta       ,x+       ; clear next byte and advance through the allocation
+                    bra       ibrk_clear_loop ; keep clearing the newly exposed memory
 
-ibrk10              ldd       __mtop,y  ; return old top
-                    puls      x         ; restore new top
-                    stx       __mtop,y  ; save for next time
+ibrk_done           ldd       __mtop,y  ; return previous heap top
+                    puls      x         ; recover proposed heap top
+                    stx       __mtop,y  ; commit new heap top for future allocations
                     rts                 ; return to caller
 
-ibrk20              ldb       #$ED      ; E$NoRAM
-                    lbra      _os9err   ; long branch unconditionally to _os9err
+ibrk_fail           ldb       #E_NoRAM  ; report insufficient memory
+                    lbra      _os9err   ; return failure through OS-9 error helper
 
-                    endsect             ; end current section
+                    endsect   ;         end current section

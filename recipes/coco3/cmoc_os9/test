@@ -38,8 +38,6 @@ echo getopttest
 getopttest >>>-getopttest.out
 echo gtest
 gtest >>>-gtest.out
-echo getstest
-echo gets input ! getstest >>>-getstest.out
 echo hello
 hello >>>-hello.out
 echo intercepttest

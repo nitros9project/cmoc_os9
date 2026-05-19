@@ -9,6 +9,15 @@ S_IOEXEC            equ       $20       ; public-execute permission bit
 S_SHARED            equ       $40       ; sharable file bit
 S_DIR               equ       $80       ; directory attribute bit
 
+FAP_READ            equ       $01       ; owner-read access permission
+FAP_WRITE           equ       $02       ; owner-write access permission
+FAP_EXEC            equ       $04       ; owner-execute access permission
+FAP_PREAD           equ       $08       ; public-read access permission
+FAP_PWRITE          equ       $10       ; public-write access permission
+FAP_PEXEC           equ       $20       ; public-execute access permission
+FAP_SHARE           equ       $40       ; sharable-file permission bit
+FAP_DIR             equ       $80       ; directory attribute bit
+
 FAM_READ            equ       S_IREAD   ; open for reading
 FAM_WRITE           equ       S_IWRITE  ; open for writing
 FAM_UPDATE          equ       S_IREAD|S_IWRITE ; open for read/write

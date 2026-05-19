@@ -10,17 +10,28 @@ void test_getime()
 	struct _os_time localP;
 
 	int result = _os_getime(&localP);
-	// Sanity check... compare year/month/day
+	// Sanity check the whole packet after test_setime() establishes it.
 	if (result == 0 &&
 		 localP.year == p.year &&
 		 localP.month == p.month &&
-		 localP.day == p.day)
+		 localP.day == p.day &&
+		 localP.hours == p.hours &&
+		 localP.minutes == p.minutes &&
+		 localP.seconds == p.seconds)
 	{
 		printf("%s [PASS] _os_getime()\n", __func__);
 	}
 	else
 	{
-		printf("%s [FAIL] _os_getime(), errno=%d\n", __func__, errno);
+		printf("%s [FAIL] _os_getime(), errno=%d got %d/%d/%d %d:%d:%d\n",
+				__func__,
+				errno,
+				localP.year,
+				localP.month,
+				localP.day,
+				localP.hours,
+				localP.minutes,
+				localP.seconds);
 		failed = 1;
 	}
 }

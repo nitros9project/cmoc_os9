@@ -49,6 +49,15 @@ main(void)
     }
 
     got_signal = 0;
+    err = kill(pid, SIGQUIT);
+    if (err == 0 && got_signal == SIGQUIT)
+        printf("%s [PASS]\n", "signaltest kill(delivery)");
+    else {
+        printf("%s [FAIL] err=%d got=%d\n", "signaltest kill(delivery)", err, got_signal);
+        failed = 1;
+    }
+
+    got_signal = 0;
     prev = signal(SIGINT, SIG_IGN);
     check_true("signaltest signal(ignore install)", prev == SIG_DFL);
 

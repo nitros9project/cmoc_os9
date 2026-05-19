@@ -5,13 +5,18 @@
 
                     section   code      ; begin code section
 
-_kill               EXPORT              ; export this symbol
-_sysret             EXTERNAL            ; import external symbol
+_kill               EXPORT    ;         export this symbol
+_sysret             EXTERNAL  ;         import external symbol
 
-_kill
-                    lda       3,s       ; get process id
-                    ldb       5,s       ; get signal number
-                    os9       F_Send    ; invoke OS-9 system call F_Send
-                    lbra      _sysret   ; long branch unconditionally to _sysret
+_kill:
+stk_kill_ret        equ       0         ; caller return address
+stk_kill_pid        equ       2         ; process ID argument
+stk_kill_pid_byte   equ       3         ; low byte passed to F_Send in A
+stk_kill_signal     equ       4         ; signal number argument
+stk_kill_signal_byte equ       5         ; low byte passed to F_Send in B
+                    lda       stk_kill_pid_byte,s ; pass target process ID to OS-9
+                    ldb       stk_kill_signal_byte,s ; pass signal number to OS-9
+                    os9       F_Send    ; send the signal to the target process
+                    lbra      _sysret   ; return OS-9 carry/status through shared helper
 
-                    endsect             ; end current section
+                    endsect   ;         end current section

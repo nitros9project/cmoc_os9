@@ -4,27 +4,37 @@
 
 static int failed;
 
+static void check_string(const char *name, const char *actual, const char *expected)
+{
+	if (strcmp(actual, expected) == 0)
+		printf("%s [PASS]\n", name);
+	else {
+		printf("%s [FAIL] got %s expected %s\n", name, actual, expected);
+		failed = 1;
+	}
+}
+
 void test_xtoa(void)
 {
 	char buf[16];
 
 	itoa(-1234, buf);
-	if (strcmp(buf, "-1234") == 0)
-		printf("%s [PASS] itoa()\n", __func__);
-	else
-		printf("%s [FAIL] itoa(): got %s\n", __func__, buf);
+	check_string("test_xtoa itoa()", buf, "-1234");
 
 	utoa(54321, buf);
-	if (strcmp(buf, "54321") == 0)
-		printf("%s [PASS] utoa()\n", __func__);
-	else
-		printf("%s [FAIL] utoa(): got %s\n", __func__, buf);
+	check_string("test_xtoa utoa()", buf, "54321");
+
+	ltoa(0L, buf);
+	check_string("test_xtoa ltoa(zero)", buf, "0");
+
+	ltoa(-1L, buf);
+	check_string("test_xtoa ltoa(negative one)", buf, "-1");
+
+	ltoa(-1234567L, buf);
+	check_string("test_xtoa ltoa(negative)", buf, "-1234567");
 
 	ltoa(1234567L, buf);
-	if (strcmp(buf, "1234567") == 0)
-		printf("%s [PASS] ltoa()\n", __func__);
-	else
-		printf("%s [FAIL] ltoa(): got %s\n", __func__, buf);
+	check_string("test_xtoa ltoa(positive)", buf, "1234567");
 }
 
 void test_minmax(void)

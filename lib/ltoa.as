@@ -6,102 +6,115 @@
 
                     section   code      ; begin code section
 
-_ltoa               EXPORT              ; export this symbol
+_ltoa               EXPORT    ;         export this symbol
 
-_lnegx              EXTERNAL            ; import external symbol
-_reverse            EXTERNAL            ; import external symbol
-divDWordDWord       EXTERNAL            ; import external symbol
-isDWordZero         EXTERNAL            ; import external symbol
-modDWordDWord       EXTERNAL            ; import external symbol
+_lnegx              EXTERNAL  ;         import external symbol
+_reverse            EXTERNAL  ;         import external symbol
+divDWordDWord       EXTERNAL  ;         import external symbol
+isDWordZero         EXTERNAL  ;         import external symbol
+modDWordDWord       EXTERNAL  ;         import external symbol
 
-_ltoa
-                    pshs      u         ; save U on the hardware stack
-                    leau      ,s        ; compute effective address into U from ,s
-                    leas      -11,s     ; adjust S using -11,s
+_ltoa:
+stk_ltoa_saved_u    equ       0         ; saved U register at U after prologue
+stk_ltoa_ret        equ       2         ; caller return address at U after prologue
+stk_ltoa_value_hi   equ       4         ; high word of signed long input
+stk_ltoa_value_lo   equ       6         ; low word of signed long input
+stk_ltoa_buffer     equ       8         ; caller output buffer pointer
+stk_ltoa_sign       equ       -11       ; local sign flag
+stk_ltoa_orig_buffer equ       -10       ; local original buffer pointer
+stk_ltoa_current_hi equ       -8        ; local current absolute value high word
+stk_ltoa_current_lo equ       -6        ; local current absolute value low word
+stk_ltoa_remainder_hi equ       -4        ; local division remainder high word
+stk_ltoa_remainder_lo equ       -2        ; local division remainder low word
+                    pshs      u         ; preserve caller's U register
+                    leau      ,s        ; use U as a stable frame pointer at saved U
+                    leas      -11,s     ; allocate sign, original pointer, current, and remainder locals
 
 * locals relative to U:
-*  -11,u  sign flag
-*  -10,u  orig buffer pointer
-*   -8,u  current absolute value (dword)
-*   -4,u  remainder scratch (dword)
+*  stk_ltoa_sign,u         sign flag
+*  stk_ltoa_orig_buffer,u  original output buffer pointer
+*  stk_ltoa_current_hi,u   current absolute value, high word
+*  stk_ltoa_current_lo,u   current absolute value, low word
+*  stk_ltoa_remainder_hi,u division remainder, high word
+*  stk_ltoa_remainder_lo,u division remainder, low word
 
 * orig = buffer;
-                    ldx       8,u       ; load X from indexed value 8,u
-                    stx       -10,u     ; store X to indexed value -10,u
+                    ldx       stk_ltoa_buffer,u ; load caller output buffer pointer
+                    stx       stk_ltoa_orig_buffer,u ; remember original buffer for reverse/return
 
 * current = value;
-                    ldd       4,u       ; load D from indexed value 4,u
-                    std       -8,u      ; store D to indexed value -8,u
-                    ldd       6,u       ; load D from indexed value 6,u
-                    std       -6,u      ; store D to indexed value -6,u
+                    ldd       stk_ltoa_value_hi,u ; copy input high word into current value
+                    std       stk_ltoa_current_hi,u ; store current high word
+                    ldd       stk_ltoa_value_lo,u ; copy input low word into current value
+                    std       stk_ltoa_current_lo,u ; store current low word
 
 * sign = 0;
-                    clr       -11,u     ; clear indexed value -11,u
+                    clr       stk_ltoa_sign,u ; assume non-negative until high bit says otherwise
 
 * if (value < 0) { sign = 1; current = -current; }
-                    tst       4,u       ; test indexed value 4,u and update condition codes
-                    bpl       L_pos     ; branch if plus to L_pos
-                    inc       -11,u     ; increment indexed value -11,u
-                    leax      -8,u      ; compute effective address into X from -8,u
-                    lbsr      _lnegx    ; long branch to subroutine to _lnegx
+                    tst       stk_ltoa_value_hi,u ; check sign bit of input high byte
+                    bpl       ltoa_positive ; skip negation for non-negative values
+                    inc       stk_ltoa_sign,u ; remember that a '-' must be appended later
+                    leax      stk_ltoa_current_hi,u ; pass current dword to negation helper
+                    lbsr      _lnegx    ; convert current value to its absolute magnitude
 
-L_pos
+ltoa_positive
 * do {
-L_loop
+ltoa_digit_loop
 *     rem = current % 10;
-                    leax      D_ten,pcr ; compute effective address into X from D_ten,pcr
-                    pshs      x         ; save X on the hardware stack
-                    leax      -8,u      ; compute effective address into X from -8,u
-                    pshs      x         ; save X on the hardware stack
-                    leax      -4,u      ; compute effective address into X from -4,u
-                    lbsr      modDWordDWord ; long branch to subroutine to modDWordDWord
-                    leas      4,s       ; adjust S using 4,s
+                    leax      ltoa_ten,pcr ; point at divisor constant 10
+                    pshs      x         ; pass divisor pointer
+                    leax      stk_ltoa_current_hi,u ; point at current dividend
+                    pshs      x         ; pass dividend pointer
+                    leax      stk_ltoa_remainder_hi,u ; pass destination for remainder
+                    lbsr      modDWordDWord ; compute current % 10 into remainder local
+                    leas      4,s       ; discard divisor and dividend pointer arguments
 
 *     *buffer++ = rem + '0';
-                    ldx       8,u       ; load X from indexed value 8,u
-                    ldb       -1,u      ; load B from indexed value -1,u
-                    addb      #$30      ; add immediate value $30 into B
-                    stb       ,x+       ; store B to memory pointed to by X, then advance X
-                    stx       8,u       ; store X to indexed value 8,u
+                    ldx       stk_ltoa_buffer,u ; load current output cursor
+                    ldb       stk_ltoa_remainder_lo+1,u ; use low byte of remainder
+                    addb      #$30      ; convert binary digit to ASCII '0'..'9'
+                    stb       ,x+       ; append digit and advance cursor
+                    stx       stk_ltoa_buffer,u ; save updated output cursor
 
 *     current /= 10;
-                    leax      D_ten,pcr ; compute effective address into X from D_ten,pcr
-                    pshs      x         ; save X on the hardware stack
-                    leax      -8,u      ; compute effective address into X from -8,u
-                    pshs      x         ; save X on the hardware stack
-                    leax      -8,u      ; compute effective address into X from -8,u
-                    lbsr      divDWordDWord ; long branch to subroutine to divDWordDWord
-                    leas      4,s       ; adjust S using 4,s
+                    leax      ltoa_ten,pcr ; point at divisor constant 10
+                    pshs      x         ; pass divisor pointer
+                    leax      stk_ltoa_current_hi,u ; point at current dividend
+                    pshs      x         ; pass dividend pointer
+                    leax      stk_ltoa_current_hi,u ; quotient overwrites current value
+                    lbsr      divDWordDWord ; compute current / 10 into current local
+                    leas      4,s       ; discard divisor and dividend pointer arguments
 
 * } while (current != 0);
-                    leax      -8,u      ; compute effective address into X from -8,u
-                    lbsr      isDWordZero ; long branch to subroutine to isDWordZero
-                    bne       L_loop    ; branch if not equal to L_loop
+                    leax      stk_ltoa_current_hi,u ; point at updated current value
+                    lbsr      isDWordZero ; test whether quotient reached zero
+                    bne       ltoa_digit_loop ; keep extracting digits while current != 0
 
 * if (sign) *buffer++ = '-';
-                    tst       -11,u     ; test indexed value -11,u and update condition codes
-                    beq       L_term    ; branch if equal/zero to L_term
-                    ldx       8,u       ; load X from indexed value 8,u
-                    ldb       #$2d      ; load B from immediate value $2d
-                    stb       ,x+       ; store B to memory pointed to by X, then advance X
-                    stx       8,u       ; store X to indexed value 8,u
+                    tst       stk_ltoa_sign,u ; was the original value negative?
+                    beq       ltoa_terminate ; skip '-' for non-negative values
+                    ldx       stk_ltoa_buffer,u ; load current output cursor
+                    ldb       #$2d      ; ASCII '-'
+                    stb       ,x+       ; append minus sign before reversing the string
+                    stx       stk_ltoa_buffer,u ; save updated output cursor
 
-L_term
+ltoa_terminate
 * *buffer = '\0';
-                    ldx       8,u       ; load X from indexed value 8,u
-                    clr       ,x        ; clear memory pointed to by X
+                    ldx       stk_ltoa_buffer,u ; load current output cursor
+                    clr       ,x        ; terminate reversed digit string
 
 * reverse(orig);
-                    ldd       -10,u     ; load D from indexed value -10,u
-                    pshs      d         ; save D on the hardware stack
-                    lbsr      _reverse  ; long branch to subroutine to _reverse
-                    leas      2,s       ; adjust S using 2,s
+                    ldd       stk_ltoa_orig_buffer,u ; pass original buffer pointer
+                    pshs      d         ; push reverse() argument
+                    lbsr      _reverse  ; reverse digits into printable order
+                    leas      2,s       ; discard reverse() argument
 
 * return orig;
-                    ldd       -10,u     ; load D from indexed value -10,u
-                    leas      ,u        ; adjust S using ,u
+                    ldd       stk_ltoa_orig_buffer,u ; return original output buffer pointer
+                    leas      ,u        ; discard local frame by restoring S to saved U
                     puls      u,pc      ; restore registers and return
 
-D_ten               fcb       $00,$00,$00,$0a ; define byte data $00,$00,$00,$0a
+ltoa_ten            fcb       $00,$00,$00,$0a ; 32-bit divisor constant 10
 
-                    endsect             ; end current section
+                    endsect   ;         end current section

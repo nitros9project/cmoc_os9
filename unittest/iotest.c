@@ -229,6 +229,45 @@ void test_readln_existing_file()
 	unlink(file);
 }
 
+void test_write_zero_count(void)
+{
+	char *file = "writezero.tmp";
+	char *message = "ignored";
+	int mode = FAM_READ | FAM_WRITE;
+	int perms = FAP_READ | FAP_WRITE;
+	int path;
+	int result;
+
+	unlink(file);
+
+	path = create(file, mode, perms);
+	if (path == -1)
+	{
+		failed = 1;
+		printf("%s [FAIL] create(\"%s\", %x, %d) = %d, errno = %d\n", __func__, file, mode, perms, path, errno);
+		return;
+	}
+
+	result = write(path, message, 0);
+	if (result == 0)
+		printf("%s [PASS] write(%d, zero count) = %d\n", __func__, path, result);
+	else {
+		failed = 1;
+		printf("%s [FAIL] write(%d, zero count) = %d, errno = %d\n", __func__, path, result, errno);
+	}
+
+	result = writeln(path, message, 0);
+	if (result == 0)
+		printf("%s [PASS] writeln(%d, zero count) = %d\n", __func__, path, result);
+	else {
+		failed = 1;
+		printf("%s [FAIL] writeln(%d, zero count) = %d, errno = %d\n", __func__, path, result, errno);
+	}
+
+	close(path);
+	unlink(file);
+}
+
 void test_delete_nonexistent_file()
 {
 	char *file = "deletenonexistentfile";
@@ -488,6 +527,7 @@ int main()
 	test_open_nonexistent_file();
 	test_open_read_close_existing_file();
 	test_readln_existing_file();
+	test_write_zero_count();
 	test_delete_nonexistent_file();
 	test_create_and_seek();
 	test_make_directory();

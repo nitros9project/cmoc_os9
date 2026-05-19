@@ -8,16 +8,19 @@ static int failed;
 void test_getime()
 {
 	struct _os_time localP;
+	int seconds_delta;
 
 	int result = _os_getime(&localP);
-	// Sanity check the whole packet after test_setime() establishes it.
+	seconds_delta = localP.seconds - p.seconds;
+	// Sanity check the packet after test_setime(), allowing the clock to tick.
 	if (result == 0 &&
 		 localP.year == p.year &&
 		 localP.month == p.month &&
 		 localP.day == p.day &&
 		 localP.hours == p.hours &&
 		 localP.minutes == p.minutes &&
-		 localP.seconds == p.seconds)
+		 seconds_delta >= 0 &&
+		 seconds_delta <= 5)
 	{
 		printf("%s [PASS] _os_getime()\n", __func__);
 	}

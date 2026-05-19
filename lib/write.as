@@ -1,34 +1,44 @@
 * Compact assembly implementation of write()/writeln().
 
+                    use       ../include/os9.d ; shared OS-9 service constants
+
                     section   code      ; begin code section
 
-_write              EXPORT              ; export this symbol
-_writeln            EXPORT              ; export this symbol
+_write              EXPORT    ;         export write() wrapper
+_writeln            EXPORT    ;         export writeln() wrapper
 
-_os9err             EXTERNAL            ; import external symbol
+_os9err             EXTERNAL  ;         convert OS-9 carry/error into C return
 
-_write
-                    pshs      y         ; save Y on the hardware stack
-                    ldy       8,s       ; load Y from stack-relative value 8,s
-                    beq       L_write_exit ; branch if equal/zero to L_write_exit
-                    lda       5,s       ; load A from stack-relative value 5,s
-                    ldx       6,s       ; load X from stack-relative value 6,s
-                    os9       $8A       ; invoke OS-9 system call $8A
+_write:
+stk_write_ret       equ       0         ; caller return address
+stk_write_path      equ       2         ; path descriptor argument
+stk_write_buffer    equ       4         ; caller data buffer pointer
+stk_write_count     equ       6         ; requested byte count
+                    pshs      y         ; preserve CMOC data pointer while OS-9 uses Y
+                    ldy       stk_write_count+2,s ; pass requested byte count after saved Y
+                    beq       L_write_exit ; return zero immediately for empty writes
+                    lda       stk_write_path+3,s ; pass low byte of path descriptor in A
+                    ldx       stk_write_buffer+2,s ; pass caller data buffer in X
+                    os9       I_Write   ; write raw bytes to the OS-9 path
 L_write_common
-                    bcc       L_write_exit ; branch if carry is clear to L_write_exit
-                    puls      y         ; restore Y from the hardware stack
-                    lbra      _os9err   ; long branch unconditionally to _os9err
+                    bcc       L_write_exit ; return byte count when OS-9 reports success
+                    puls      y         ; restore CMOC data pointer before error exit
+                    lbra      _os9err   ; return -1 and set errno from OS-9 error
 L_write_exit
-                    tfr       y,d       ; transfer Y,D
-                    puls      y,pc      ; restore registers and return
+                    tfr       y,d       ; return byte count written as a C int
+                    puls      y,pc      ; restore CMOC data pointer and return
 
-_writeln
-                    pshs      y         ; save Y on the hardware stack
-                    ldy       8,s       ; load Y from stack-relative value 8,s
-                    beq       L_write_exit ; branch if equal/zero to L_write_exit
-                    lda       5,s       ; load A from stack-relative value 5,s
-                    ldx       6,s       ; load X from stack-relative value 6,s
-                    os9       $8C       ; invoke OS-9 system call $8C
-                    bra       L_write_common ; branch unconditionally to L_write_common
+_writeln:
+stk_writeln_ret     equ       0         ; caller return address
+stk_writeln_path    equ       2         ; path descriptor argument
+stk_writeln_buffer  equ       4         ; caller line buffer pointer
+stk_writeln_count   equ       6         ; requested byte count
+                    pshs      y         ; preserve CMOC data pointer while OS-9 uses Y
+                    ldy       stk_writeln_count+2,s ; pass requested byte count after saved Y
+                    beq       L_write_exit ; return zero immediately for empty writes
+                    lda       stk_writeln_path+3,s ; pass low byte of path descriptor in A
+                    ldx       stk_writeln_buffer+2,s ; pass caller line buffer in X
+                    os9       I_WritLn  ; write bytes, stopping at line terminator if reached
+                    bra       L_write_common ; share success/error return handling
 
-                    endsect             ; end current section
+                    endsect   ;         end current section

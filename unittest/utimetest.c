@@ -42,6 +42,44 @@ void test_o2utime()
 	}
 }
 
+void test_u2otime()
+{
+	struct tm tmp;
+	struct _os_time converted;
+	int ok;
+
+	memset(&tmp, 0, sizeof(tmp));
+	memset(&converted, 0, sizeof(converted));
+	tmp.tm_sec = p.seconds;
+	tmp.tm_min = p.minutes;
+	tmp.tm_hour = p.hours;
+	tmp.tm_mday = p.day;
+	tmp.tm_mon = p.month;
+	tmp.tm_year = p.year;
+
+	u2otime(&converted, &tmp);
+	ok = converted.year == p.year &&
+	     converted.month == p.month &&
+	     converted.day == p.day &&
+	     converted.hours == p.hours &&
+	     converted.minutes == p.minutes &&
+	     converted.seconds == p.seconds;
+
+	if (ok)
+		printf("%s [PASS] u2otime(): date\n", __func__);
+	else {
+		printf("%s [FAIL] u2otime(): got %d/%d/%d %d:%d:%d\n",
+		       __func__,
+		       converted.year,
+		       converted.month,
+		       converted.day,
+		       converted.hours,
+		       converted.minutes,
+		       converted.seconds);
+		failed = 1;
+	}
+}
+
 
 void test_time()
 {
@@ -143,6 +181,7 @@ void test_gmtime_localtime()
 int main()
 {
 	test_o2utime();
+	test_u2otime();
 	test_time();
 	test_ctime();
 	test_mktime();

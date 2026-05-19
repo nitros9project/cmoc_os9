@@ -1,31 +1,31 @@
 * Disassembly by Os9disasm of utime.r
 
 
-__os_getime         EXTERNAL            ; import external symbol
-_flacc              EXTERNAL            ; import external symbol
-_sprintf            EXTERNAL            ; import external symbol
-_DEBUG              EXTERNAL            ; import external symbol
+__os_getime         EXTERNAL  ;         import external symbol
+_flacc              EXTERNAL  ;         CMOC floating/long accumulator storage
+_sprintf            EXTERNAL  ;         formatted string builder used by legacy asctime
+_DEBUG              EXTERNAL  ;         debugger hook retained for legacy object compatibility
 
-_time               EXPORT              ; export this symbol
-_o2utime            EXPORT              ; export this symbol
-_u2otime            EXPORT              ; export this symbol
+_time               EXPORT    ;         export Unix-style time() helper
+_o2utime            EXPORT    ;         export OS-9 packet to Unix time conversion
+_u2otime            EXPORT    ;         export struct tm to OS-9 packet conversion
 
                     section   bss       ; begin bss section
 
 * Uninitialized data (class B)
-_tm                 rmb       16        ; reserve 16 bytes
-_datebuf            rmb       26        ; reserve 26 bytes
+_tm                 rmb       16        ; static legacy struct tm result buffer
+_datebuf            rmb       26        ; static legacy asctime output buffer
 
-                    endsection           ; end current section
+                    endsection ;         end current section
 
                     section   rwdata    ; begin rwdata section
 
 *
 * static int   monsiz[] = {31,28,31,30,31,30,31,31,30,31,30,31};
 monsiz
-                    fdb       31,28,31,30,31,30,31,31,30,31,30,31 ; define word data 31,28,31,30,31,30,31,31,30,31,30,31
+                    fdb       31,28,31,30,31,30,31,31,30,31,30,31 ; month lengths, February patched for leap years
 
-                    endsect             ; end current section
+                    endsect   ;         end current section
 
                     section   code      ; begin code section
 
@@ -56,24 +56,27 @@ monsiz
 * s+12 s+14 hidden long * to _time
 * s+14 s+16 long *arg
 
-_time
-                    pshs      u         ; save U on the hardware stack
-                    leas      -6,s      ; tbuf
-                    leau      ,s        ; address of tbuf
-                    pshs      u         ; save U on the hardware stack
-                    lbsr      __os_getime ; get system time
-                    stu       ,s        ; still &tbuf
-                    ldx       12,s      ; argument to time
-                    pshs      x         ; argument to o2utime
-                    bsr       _o2utime  ; convert unix style
-                    ldu       16,s      ; check arg
-                    beq       noarg     ; branch if equal/zero to noarg
-                    ldd       ,x        ; so copy over
-                    std       ,u        ; store D to memory pointed to by U
-                    ldd       2,x       ; load D from indexed value 2,x
-                    std       2,u       ; store D to indexed value 2,u
-noarg               leas      10,s      ; adjust S using 10,s
-                    puls      u,pc      ; restore registers and return
+_time:
+stk_time_ret        equ       0         ; caller return address
+stk_time_result     equ       2         ; hidden CMOC long-return destination
+stk_time_arg        equ       4         ; optional caller destination for returned time_t
+                    pshs      u         ; preserve caller's U register
+                    leas      -6,s      ; allocate local OS-9 time packet
+                    leau      ,s        ; point U at local packet storage
+                    pshs      u         ; pass local packet pointer to _os_getime()
+                    lbsr      __os_getime ; fill local packet with current OS-9 time
+                    stu       ,s        ; reuse argument slot as _o2utime packet pointer
+                    ldx       stk_time_result+10,s ; load hidden long-return destination through saved/local frame
+                    pshs      x         ; pass _o2utime hidden return destination
+                    bsr       _o2utime  ; convert OS-9 packet to Unix seconds
+                    ldu       stk_time_arg+12,s ; load optional time_t * argument after nested call frame
+                    beq       noarg     ; skip store when caller passed NULL
+                    ldd       ,x        ; copy high word of converted time_t
+                    std       ,u        ; store high word through caller pointer
+                    ldd       2,x       ; copy low word of converted time_t
+                    std       2,u       ; store low word through caller pointer
+noarg               leas      10,s      ; discard _o2utime args and local packet
+                    puls      u,pc      ; restore U and return hidden long result
 
 
 * long
@@ -85,159 +88,173 @@ noarg               leas      10,s      ; adjust S using 10,s
 *
 * CMOC adds an extra parameter
 * long o2utime(long *return, _os_time *tp)
-_o2utime
-                    pshs      D,U       ; save D,U on the hardware stack
-                    ldu       8,s       ; get tp
-                    clra                ; clear A
-                    clrb                ; clear B
-                    pshs      d         ; save D on the hardware stack
-                    pshs      d         ; save D on the hardware stack
+_o2utime:
+stk_o2utime_ret     equ       0         ; caller return address
+stk_o2utime_result  equ       2         ; hidden CMOC long-return destination
+stk_o2utime_packet  equ       4         ; source OS-9 time packet pointer
+stk_o2utime_accum_high equ       0         ; high word once local accumulator is allocated
+stk_o2utime_accum_high_lo equ       1         ; low byte of accumulator high word
+stk_o2utime_accum_low equ       2         ; low word once local accumulator is allocated
+stk_o2utime_month_counter equ       4         ; scratch month counter byte in saved-D slot
+                    pshs      d,u       ; preserve working registers used during conversion
+                    ldu       stk_o2utime_packet+4,s ; load source packet after saved D/U
+                    clra                ; prepare zero high word of 32-bit accumulator
+                    clrb                ; prepare zero low word of 32-bit accumulator
+                    pshs      d         ; allocate accumulator high word
+                    pshs      d         ; allocate accumulator low word
 
 *    for (j = 70; j < *tp; ++j)         /* total up days in years past */
 *       accum += ((j & 3) ? 365 : 366);     /* don't forget leap years */
-                    ldb       #70-1     ; load B from immediate value 70-1
-                    ldx       #0        ; load X from immediate value 0
-                    bra       o2ut2     ; branch unconditionally to o2ut2
+                    ldb       #70-1     ; seed year counter just before epoch year 70
+                    ldx       #0        ; accumulate elapsed days in X
+                    bra       o2ut2     ; enter loop through counter increment
 
-o2ut1               leax      365,x     ; compute effective address into X from 365,x
-                    bitb      #3        ; test bits in B against immediate value 3
-                    bne       o2ut2     ; branch if not equal to o2ut2
-                    leax      1,x       ; compute effective address into X from 1,x
-o2ut2               incb                ; increment B
-                    cmpb      ,u        ; year
-                    blt       o2ut1     ; branch if less than to o2ut1
-                    stx       2,s       ; store X to stack-relative value 2,s
+o2ut1               leax      365,x     ; add a normal year to elapsed-day count
+                    bitb      #3        ; test low year bits for simple OS-9 leap-year rule
+                    bne       o2ut2     ; skip leap-day adjustment for non-leap years
+                    leax      1,x       ; add February 29 for leap year
+o2ut2               incb                ; advance to next year offset
+                    cmpb      ,u        ; compare against packet year
+                    blt       o2ut1     ; continue until all prior years are counted
+                    stx       stk_o2utime_accum_low,s ; store elapsed days in accumulator low word
 *
 *    monsiz[1] = (*tp++ & 3) ? 28 : 29;           /* fix for leap year */
-                    leax      monsiz,y  ; compute effective address into X from monsiz,y
-                    lda       #29       ; assume leap year
-                    ldb       ,u+       ; load B from memory pointed to by U, then advance U
-                    andb      #3        ; AND B with immediate value 3
-                    beq       o2ut3     ; it is a leap year
-                    lda       #28       ; load A from immediate value 28
-o2ut3               sta       3,x       ; fix up February in table
+                    leax      monsiz,y  ; point at mutable month-size table
+                    lda       #29       ; assume February has leap-day
+                    ldb       ,u+       ; consume packet year
+                    andb      #3        ; apply same four-year leap test
+                    beq       o2ut3     ; keep 29 days for leap year
+                    lda       #28       ; otherwise use normal February length
+o2ut3               sta       3,x       ; patch February entry low byte
 
 *
 *    for (j = 0; j < *tp; ++j)             /* add day1 for months past */
 *       accum += monsiz[j];
-                    ldb       #1        ; load B from immediate value 1
-                    bra       o2ut5     ; branch unconditionally to o2ut5
+                    ldb       #1        ; month counter starts at January
 
-o2ut4               ldd       ,x++      ; load D from memory pointed to by X+, then advance X+
-                    addd      2,s       ; add stack-relative value 2,s into D
-                    std       2,s       ; store D to stack-relative value 2,s
+                    bra       o2ut5     ; test before adding first month
 
-                    ldb       4,s       ; load B from stack-relative value 4,s
-                    incb                ; increment B
-o2ut5               stb       4,s       ; store B to stack-relative value 4,s
-                    cmpb      ,u        ; compare B against memory pointed to by U
-                    blt       o2ut4     ; branch if less than to o2ut4
+o2ut4               ldd       ,x++      ; fetch month length and advance table pointer
+                    addd      stk_o2utime_accum_low,s ; add month length to accumulator days
+                    std       stk_o2utime_accum_low,s ; keep updated day count
+
+                    ldb       stk_o2utime_month_counter,s ; reload current month counter
+                    incb                ; advance to next month
+o2ut5               stb       stk_o2utime_month_counter,s ; save current month counter in scratch byte
+                    cmpb      ,u        ; compare with packet month
+                    blt       o2ut4     ; add each full month before target month
 
 *
 *    ++tp;
-                    leau      1,u       ; compute effective address into U from 1,u
+                    leau      1,u       ; skip packet month byte
 
 *    accum += (*tp++ - 1);                      /* add days this month */
-                    ldb       ,u+       ; load B from memory pointed to by U, then advance U
-                    decb                ; decrement B
-                    clra                ; clear A
-                    addd      2,s       ; add stack-relative value 2,s into D
-                    std       2,s       ; store D to stack-relative value 2,s
+                    ldb       ,u+       ; consume day-of-month
+                    decb                ; convert 1-based day to zero-based offset
+                    clra                ; widen day offset to 16 bits
+                    addd      stk_o2utime_accum_low,s ; add day offset to elapsed days
+                    std       stk_o2utime_accum_low,s ; update accumulator low word
 
 *    accum *= 24;                                  /* convert to hours */
-                    lslb                ; shift B left by one bit
-                    rola                ; rotate A left through carry
-                    addd      2,s       ; 3
-                    lslb                ; shift B left by one bit
-                    rola                ; rotate A left through carry
-                    rol       1,s       ; 6
-                    lslb                ; shift B left by one bit
-                    rola                ; rotate A left through carry
-                    rol       1,s       ; 12
-                    lslb                ; shift B left by one bit
-                    rola                ; rotate A left through carry
-                    rol       1,s       ; 24
-                    std       2,s       ; store D to stack-relative value 2,s
+                    lslb                ; multiply low word by 2
+                    rola                ; propagate shift through high byte
+                    addd      stk_o2utime_accum_low,s ; form days * 3
+                    lslb                ; double to days * 6
+                    rola                ; propagate shift through high byte
+                    rol       stk_o2utime_accum_high_lo,s ; propagate carry into accumulator high word
+                    lslb                ; double to days * 12
+                    rola                ; propagate shift through high byte
+                    rol       stk_o2utime_accum_high_lo,s ; propagate carry into accumulator high word
+                    lslb                ; double to days * 24
+                    rola                ; propagate shift through high byte
+                    rol       stk_o2utime_accum_high_lo,s ; propagate carry into accumulator high word
+                    std       stk_o2utime_accum_low,s ; store low word of elapsed hours
 
 *
 *    accum += *tp++;                                /* add hours today */
-                    ldb       ,u+       ; load B from memory pointed to by U, then advance U
-                    clra                ; clear A
-                    addd      2,s       ; add stack-relative value 2,s into D
-                    std       2,s       ; store D to stack-relative value 2,s
-                    ldb       1,s       ; load B from stack-relative value 1,s
-                    adcb      #0        ; add immediate value 0 into B
-                    stb       1,s       ; store B to stack-relative value 1,s
+                    ldb       ,u+       ; consume packet hour
+                    clra                ; widen hour to 16 bits
+                    addd      stk_o2utime_accum_low,s ; add hour to elapsed hours
+                    std       stk_o2utime_accum_low,s ; update accumulator low word
+                    ldb       stk_o2utime_accum_high_lo,s ; reload accumulator high byte
+                    adcb      #0        ; fold carry from low-word addition
+                    stb       stk_o2utime_accum_high_lo,s ; store updated accumulator high byte
 
 *    accum *= 60;                                /* convert to minutes */
-                    bsr       mul60     ; branch to subroutine to mul60
+                    bsr       mul60     ; scale 32-bit accumulator by 60
 *
 *    accum += *tp++;                              /* add minutes today */
-                    ldb       ,u+       ; load B from memory pointed to by U, then advance U
-                    clra                ; clear A
-                    addd      2,s       ; add stack-relative value 2,s into D
-                    std       2,s       ; store D to stack-relative value 2,s
-                    ldd       ,s        ; load D from memory pointed to by S
-                    adcb      #0        ; add immediate value 0 into B
-                    adca      #0        ; add immediate value 0 into A
-                    std       ,s        ; store D to memory pointed to by S
+                    ldb       ,u+       ; consume packet minutes
+                    clra                ; widen minutes to 16 bits
+                    addd      stk_o2utime_accum_low,s ; add minutes to accumulator low word
+                    std       stk_o2utime_accum_low,s ; store updated low word
+                    ldd       stk_o2utime_accum_high,s ; reload high word
+                    adcb      #0        ; propagate low-word carry into high word
+                    adca      #0        ; propagate carry through full high word
+                    std       stk_o2utime_accum_high,s ; store updated high word
 
 *    accum *= 60;                                /* convert to seconds */
-                    bsr       mul60     ; branch to subroutine to mul60
+                    bsr       mul60     ; scale 32-bit accumulator by 60
 
 *
 *    accum += *tp;                                /* add seconds today */
-                    ldb       ,u+       ; load B from memory pointed to by U, then advance U
-                    clra                ; clear A
-                    addd      2,s       ; add stack-relative value 2,s into D
-                    std       2,s       ; store D to stack-relative value 2,s
-                    ldd       ,s        ; load D from memory pointed to by S
-                    adcb      #0        ; add immediate value 0 into B
-                    adca      #0        ; add immediate value 0 into A
-                    std       ,s        ; store D to memory pointed to by S
+                    ldb       ,u+       ; consume packet seconds
+                    clra                ; widen seconds to 16 bits
+                    addd      stk_o2utime_accum_low,s ; add seconds to accumulator low word
+                    std       stk_o2utime_accum_low,s ; store updated low word
+                    ldd       stk_o2utime_accum_high,s ; reload high word
+                    adcb      #0        ; propagate low-word carry into high word
+                    adca      #0        ; propagate carry through full high word
+                    std       stk_o2utime_accum_high,s ; store updated high word
 
 *
 * return (accum);
-                    leau      ,s        ; compute effective address into U from ,s
-                    ldx       10,s      ; leax  _flacc,y
-                    ldd       ,u        ; load D from memory pointed to by U
-                    std       ,x        ; store D to memory pointed to by X
-                    ldd       2,u       ; load D from indexed value 2,u
-                    std       2,x       ; store D to indexed value 2,x
-                    leas      6,s       ; adjust S using 6,s
-                    puls      u,pc      ; restore registers and return
+                    leau      stk_o2utime_accum_high,s ; point U at 32-bit accumulator
+                    ldx       stk_o2utime_result+8,s ; load hidden return destination after locals
+                    ldd       ,u        ; copy accumulator high word
+                    std       ,x        ; store high word to return destination
+                    ldd       2,u       ; copy accumulator low word
+                    std       2,x       ; store low word to return destination
+                    leas      6,s       ; discard accumulator and saved D
+                    puls      u,pc      ; restore U and return
 
 *    }
-mul60               ldx       2,s       ; load X from stack-relative value 2,s
-                    ldd       4,s       ; load D from stack-relative value 4,s
-                    bsr       shift16   ; branch to subroutine to shift16
-                    bsr       shift16   ; branch to subroutine to shift16
-                    addd      4,s       ; add stack-relative value 4,s into D
-                    exg       d,x       ; exchange D,X
-                    adcb      3,s       ; add stack-relative value 3,s into B
-                    adca      2,s       ; add stack-relative value 2,s into A
-                    exg       d,x       ; exchange D,X
-                    stx       2,s       ; store X to stack-relative value 2,s
-                    std       4,s       ; store D to stack-relative value 4,s
-                    bsr       shift16   ; branch to subroutine to shift16
-                    addd      4,s       ; add stack-relative value 4,s into D
-                    exg       d,x       ; exchange D,X
-                    adcb      3,s       ; add stack-relative value 3,s into B
-                    adca      2,s       ; add stack-relative value 2,s into A
-                    exg       d,x       ; exchange D,X
-                    bsr       shift16   ; branch to subroutine to shift16
-                    bsr       shift16   ; branch to subroutine to shift16
-                    stx       2,s       ; store X to stack-relative value 2,s
-                    std       4,s       ; store D to stack-relative value 4,s
-                    rts                 ; return to caller
+mul60
+stk_mul60_ret       equ       0         ; return address from helper call
+stk_mul60_high      equ       2         ; accumulator high word in caller frame
+stk_mul60_low       equ       4         ; accumulator low word in caller frame
+                    ldx       stk_mul60_high,s ; load high word into X
+                    ldd       stk_mul60_low,s ; load low word into D
+                    bsr       shift16   ; multiply accumulator by 2
+                    bsr       shift16   ; multiply accumulator by 4
+                    addd      stk_mul60_low,s ; add original low word for partial *5
+                    exg       d,x       ; move high word into D for carry propagation
+                    adcb      stk_mul60_high+1,s ; add original high low byte plus carry
+                    adca      stk_mul60_high,s ; add original high high byte plus carry
+                    exg       d,x       ; restore X:D as 32-bit accumulator
+                    stx       stk_mul60_high,s ; save partial high word
+                    std       stk_mul60_low,s ; save partial low word
+                    bsr       shift16   ; multiply partial by 2
+                    addd      stk_mul60_low,s ; add saved partial low word for *15
+                    exg       d,x       ; move high word into D for carry propagation
+                    adcb      stk_mul60_high+1,s ; add saved high low byte plus carry
+                    adca      stk_mul60_high,s ; add saved high high byte plus carry
+                    exg       d,x       ; restore X:D as 32-bit accumulator
+                    bsr       shift16   ; multiply by 2
+                    bsr       shift16   ; multiply by 4, yielding *60 overall
+                    stx       stk_mul60_high,s ; store scaled high word
+                    std       stk_mul60_low,s ; store scaled low word
+                    rts                 ; return with accumulator updated in caller frame
 
-shift16             lslb                ; shift B left by one bit
-                    rola                ; rotate A left through carry
-                    exg       d,x       ; exchange D,X
-                    rolb                ; rotate B left through carry
-                    rola                ; rotate A left through carry
-                    exg       d,x       ; exchange D,X
-                    rts                 ; return to caller
+shift16
+stk_shift16_ret     equ       0         ; return address from helper call
+                    lslb                ; shift low byte of low word left
+                    rola                ; shift high byte of low word through carry
+                    exg       d,x       ; switch to high word for carry propagation
+                    rolb                ; shift low byte of high word through carry
+                    rola                ; shift high byte of high word through carry
+                    exg       d,x       ; restore X:D accumulator order
+                    rts                 ; return one-bit left shift result
 
 * /*
 * ** function to convert a 'tm' style time to os9 time
@@ -254,21 +271,24 @@ shift16             lslb                ; shift B left by one bit
 *    otime->t_minute = tmp->tm_min;
 *    otime->t_second = tmp->tm_sec;
 *    }
-_u2otime
-                    pshs      u         ; save U on the hardware stack
-                    ldu       6,s       ; tmp
-                    ldx       4,s       ; otime
-                    leax      6,x       ; get to end
-                    lda       #6        ; bytes to copy
-u2o1                ldb       ,u+       ; dummy
-                    ldb       ,u+       ; get data
-                    stb       ,-x       ; stash away
-                    deca                ; decrement A
-                    bne       u2o1      ; branch if not equal to u2o1
-                    puls      u,pc      ; restore registers and return
+_u2otime:
+stk_u2otime_ret     equ       0         ; caller return address
+stk_u2otime_packet  equ       2         ; destination OS-9 time packet pointer
+stk_u2otime_tm      equ       4         ; source struct tm pointer
+                    pshs      u         ; preserve U while walking struct tm fields
+                    ldu       stk_u2otime_tm+2,s ; load struct tm pointer after saved U
+                    ldx       stk_u2otime_packet+2,s ; load OS-9 packet destination after saved U
+                    leax      6,x       ; write destination packet from end toward start
+                    lda       #6        ; copy six byte-sized fields
+u2o1                ldb       ,u+       ; skip high byte of CMOC int field
+                    ldb       ,u+       ; take low byte for OS-9 packet field
+                    stb       ,-x       ; store packet byte in reverse field order
+                    deca                ; count copied packet fields
+                    bne       u2o1      ; continue until all six packet bytes are stored
+                    puls      u,pc      ; restore U and return
 
-daylight            fdb       0         ; define word data 0
-timezone            fdb       0,0       ; define word data 0,0
+daylight            fdb       0         ; legacy daylight-saving flag storage
+timezone            fdb       0,0       ; legacy timezone offset storage
 *
 * struct tm *
 * localtime(utime)
@@ -280,122 +300,133 @@ timezone            fdb       0,0       ; define word data 0,0
 *    int   fac;
 *
 old_localtime
-                    pshs      d,u       ; save U and allocate some scratch
-                    leau      _tm,y     ; compute effective address into U from _tm,y
+stk_old_localtime_ret equ       0         ; caller return address
+stk_old_localtime_ticks equ       2         ; source time_t pointer
+stk_old_localtime_work_high equ       0         ; local dividend high word after allocation
+stk_old_localtime_work_low equ       2         ; local dividend low word after allocation
+stk_old_localtime_days equ       4         ; saved remaining day count after allocation
+                    pshs      d,u       ; preserve U and reserve a days scratch word
+                    leau      _tm,y     ; point U at static struct tm result buffer
 
 *    tmp->tm_sec = ticks % 60;                      /* split out seconds */
 *    ticks /= 60;
-                    ldx       6,s       ; point to utime
-                    ldd       2,x       ; copy to local storage
-                    pshs      d         ; save D on the hardware stack
-                    ldd       ,x        ; load D from memory pointed to by X
-                    pshs      d         ; save D on the hardware stack
-                    leax      ,s        ; point to our copy
-                    ldd       #60       ; load D from immediate value 60
-                    bsr       div32     ; branch to subroutine to div32
-                    std       ,u        ; seconds
+                    ldx       stk_old_localtime_ticks+4,s ; load source time_t pointer after saved D/U
+                    ldd       2,x       ; copy low word of input seconds
+                    pshs      d         ; allocate local 32-bit dividend low word
+                    ldd       ,x        ; copy high word of input seconds
+                    pshs      d         ; allocate local 32-bit dividend high word
+                    leax      ,s        ; point X at mutable dividend
+                    ldd       #60       ; divide by seconds per minute
+                    bsr       div32     ; split seconds from quotient
+                    std       ,u        ; store tm_sec remainder
 *
 *    tmp->tm_min = ticks % 60;                      /* split out minutes */
 *    ticks /= 60;
-                    ldd       #60       ; load D from immediate value 60
-                    bsr       div32     ; branch to subroutine to div32
-                    std       2,u       ; minutes
+                    ldd       #60       ; divide by minutes per hour
+                    bsr       div32     ; split minutes from quotient
+                    std       2,u       ; store tm_min remainder
 *
 *    tmp->tm_hr = ticks %24;                          /* split out hours */
 *    days = ticks / 24;
-                    ldd       #24       ; load D from immediate value 24
-                    bsr       div32     ; branch to subroutine to div32
-                    std       4,u       ; hours
-                    ldd       2,x       ; get days total
-                    std       4,s       ; save days for later
+                    ldd       #24       ; divide by hours per day
+                    bsr       div32     ; split hours from day count
+                    std       4,u       ; store tm_hour remainder
+                    ldd       2,x       ; load remaining day count
+                    std       stk_old_localtime_days,s ; save days in scratch word
 *
 *    for (tmp->tm_yr = 70; days >= 0; ++tmp->tm_yr)
 *       days -= (fac = ((tmp->tm_yr & 3) ? 365 : 366));
 *    tmp->tm_yr -= 1;
 *    tmp->tm_yday = (days += fac);               /* adjust for overshoot */
-                    ldd       #70       ; load D from immediate value 70
-                    std       10,u      ; iniz the year
-lt1                 leax      yrsiz,pcr ; compute effective address into X from yrsiz,pcr
-                    ldb       11,u      ; get current year
-                    andb      #3        ; AND B with immediate value 3
-                    bne       lt2       ; branch if not equal to lt2
-                    leax      2,x       ; use leap size
-lt2                 ldd       4,s       ; get saved days
-                    subd      ,x        ; one year worth of days
-                    inc       11,u      ; bump year
-                    std       4,s       ; save remainder
-                    bcc       lt1       ; branch if carry is clear to lt1
-                    addd      ,x        ; fix up days left
-                    std       4,s       ; store D to stack-relative value 4,s
-                    dec       11,u      ; unbump year
-                    std       14,u      ; day of year
+                    ldd       #70       ; initialize tm_year to Unix epoch year offset
+                    std       10,u      ; store candidate year
+lt1                 leax      yrsiz,pcr ; point at normal/leap year lengths
+                    ldb       11,u      ; inspect low byte of current year offset
+                    andb      #3        ; apply simple four-year leap test
+                    bne       lt2       ; use normal year size when not divisible by four
+                    leax      2,x       ; select leap-year size
+lt2                 ldd       stk_old_localtime_days,s ; reload remaining day count
+                    subd      ,x        ; subtract one candidate year
+                    inc       11,u      ; advance candidate year
+                    std       stk_old_localtime_days,s ; save remaining day count
+                    bcc       lt1       ; keep subtracting while days do not underflow
+                    addd      ,x        ; undo final overshoot
+                    std       stk_old_localtime_days,s ; keep day-of-year value
+                    dec       11,u      ; restore actual year
+                    std       14,u      ; store tm_yday
 *
 *    monsiz[2] = (tmp->tm_yr & 3) ? 28 : 29;
-                    ldb       11,u      ; load B from indexed value 11,u
-                    leax      monsiz,y  ; compute effective address into X from monsiz,y
+                    ldb       11,u      ; reload final year offset
+                    leax      monsiz,y  ; point at mutable month-size table
                     lda       #29       ; assume leap year
-                    andb      #3        ; AND B with immediate value 3
-                    beq       lt3       ; branch if equal/zero to lt3
-                    lda       #28       ; load A from immediate value 28
-lt3                 sta       3,x       ; store A to indexed value 3,x
+                    andb      #3        ; apply simple four-year leap test
+                    beq       lt3       ; keep February at 29 days for leap year
+                    lda       #28       ; otherwise use normal February length
+lt3                 sta       3,x       ; patch February entry low byte
 
 *    for (tmp->tm_mon = 1; days >= monsiz[tmp->tm_mon]; ++tmp->tm_mon)
 *       days -= monsiz[tmp->tm_mon];
-                    clra                ; clear A
-                    clrb                ; clear B
+                    clra                ; initialize month field high byte
+                    clrb                ; initialize month field low byte
                     *         ldd
-                    std       8,u       ; store D to indexed value 8,u
-                    ldd       4,s       ; load D from stack-relative value 4,s
-lt4                 inc       9,u       ; increment indexed value 9,u
-                    subd      ,x++      ; subtract memory pointed to by X+, then advance X+ from D
-                    bcc       lt4       ; branch if carry is clear to lt4
-                    addd      -2,x      ; add indexed value -2,x into D
-                    addd      #1        ; add immediate value 1 into D
-                    std       6,u       ; store D to indexed value 6,u
+                    std       8,u       ; start tm_mon at zero
+                    ldd       stk_old_localtime_days,s ; load remaining days in current year
+lt4                 inc       9,u       ; advance month number
+                    subd      ,x++      ; subtract current month length
+                    bcc       lt4       ; continue until month subtraction underflows
+                    addd      -2,x      ; restore days within final month
+                    addd      #1        ; convert zero-based day to 1-based day-of-month
+                    std       6,u       ; store tm_mday
 
 *    tmp->tm_wday = (days + 4) % 7;           /* extract the day of week */
-                    leax      ,s        ; point to utime again
-                    ldd       2,x       ; load D from indexed value 2,x
-                    addd      #4        ; add immediate value 4 into D
-                    std       2,x       ; store D to indexed value 2,x
-                    ldd       #7        ; load D from immediate value 7
-                    bsr       div32     ; branch to subroutine to div32
-                    std       12,u      ; day of week
+                    leax      stk_old_localtime_work_high,s ; point X at local dividend storage
+                    ldd       2,x       ; load total day count
+                    addd      #4        ; offset because epoch day was Thursday
+                    std       2,x       ; store dividend for modulo seven
+                    ldd       #7        ; divide by days per week
+                    bsr       div32     ; get weekday remainder
+                    std       12,u      ; store tm_wday
 *
 *    return (tmp);
-                    tfr       u,d       ; transfer U,D
-                    leas      6,s       ; adjust S using 6,s
-                    stu       4,s       ; store U to stack-relative value 4,s
-                    puls      u,pc      ; restore registers and return
+                    tfr       u,d       ; return static struct tm pointer in D
+                    leas      6,s       ; discard local dividend and days scratch
+                    stu       stk_old_localtime_days,s ; preserve return pointer through U restore slot
+                    puls      u,pc      ; restore U and return
 * }
 
 div32
-                    clr       ,-s       ; set up remainder
-                    clr       ,-s       ; and clear carry
-                    pshs      d         ; dave dsor
-                    ldb       #33       ; loop count
-                    pshs      b         ; save B on the hardware stack
-                    bra       div32b    ; branch unconditionally to div32b
-div32a              ldd       3,s       ; load D from stack-relative value 3,s
-                    subd      1,s       ; subtract dsor
-                    bcs       div32b    ; underflow
-                    std       3,s       ; update remainder
-div32b              rol       3,x       ; shoft ddend
-                    rol       2,x       ; rotate indexed value 2,x left through carry
-                    rol       1,x       ; rotate indexed value 1,x left through carry
-                    rol       ,x        ; rotate memory pointed to by X left through carry
-                    rol       4,s       ; shift remainder
-                    rol       3,s       ; rotate stack-relative value 3,s left through carry
-                    dec       ,s        ; count off
-                    bne       div32a    ; branch if not equal to div32a
-                    com       3,x       ; fix up dsor
-                    com       2,x
-                    com       1,x
-                    com       ,x
-                    lsr       3,s       ; fix up remainder
-                    ror       4,s       ; rotate stack-relative value 4,s right through carry
-                    leas      3,s       ; clean off counter and dsor
-                    puls      d,pc      ; get remainder and return
+stk_div32_ret       equ       0         ; return address from helper call
+stk_div32_dividend  equ       2         ; caller's mutable 32-bit dividend pointer in X
+stk_div32_count     equ       0         ; loop counter after local division frame allocation
+stk_div32_divisor   equ       1         ; 16-bit divisor after local division frame allocation
+stk_div32_remainder equ       3         ; 16-bit remainder after local division frame allocation
+stk_div32_remainder_low equ       4         ; low byte of remainder after allocation
+                    clr       ,-s       ; allocate and clear remainder low byte
+                    clr       ,-s       ; allocate and clear remainder high byte
+                    pshs      d         ; save 16-bit divisor
+                    ldb       #33       ; run one extra shift to finish quotient/remainder
+                    pshs      b         ; allocate loop counter
+                    bra       div32b    ; enter division loop with initial shift
+div32a              ldd       stk_div32_remainder,s ; load current 16-bit remainder
+                    subd      stk_div32_divisor,s ; try subtracting divisor
+                    bcs       div32b    ; leave quotient bit clear on underflow
+                    std       stk_div32_remainder,s ; keep reduced remainder and set quotient bit via carry state
+div32b              rol       3,x       ; shift dividend/quotient low byte through carry
+                    rol       2,x       ; shift next dividend byte through carry
+                    rol       1,x       ; shift next dividend byte through carry
+                    rol       ,x        ; shift high dividend byte through carry
+                    rol       stk_div32_remainder_low,s ; shift remainder low byte through carry
+                    rol       stk_div32_remainder,s ; shift remainder high byte through carry
+                    dec       stk_div32_count,s ; consume one division bit
+                    bne       div32a    ; continue until all quotient bits are produced
+                    com       3,x       ; convert quotient bits into final quotient
+                    com       2,x       ; complement quotient byte
+                    com       1,x       ; complement quotient byte
+                    com       ,x        ; complement quotient high byte
+                    lsr       stk_div32_remainder,s ; align remainder high byte
+                    ror       stk_div32_remainder_low,s ; align remainder low byte
+                    leas      3,s       ; discard counter and divisor
+                    puls      d,pc      ; return remainder in D
 
 *
 *
@@ -409,46 +440,49 @@ div32b              rol       3,x       ; shoft ddend
 *    return (xx);
 *    }
 
-old_asctime         pshs      u         ; save U on the hardware stack
-                    ldu       4,s       ; load U from stack-relative value 4,s
-                    ldd       10,u      ; tm_yr
-                    addd      #1900     ; add immediate value 1900 into D
-                    pshs      d         ; save D on the hardware stack
-                    ldd       ,u        ; tm_sec
-                    pshs      d         ; save D on the hardware stack
-                    ldd       2,u       ; tm_min
-                    pshs      d         ; save D on the hardware stack
-                    ldd       4,u       ; tm_hr
-                    pshs      d         ; save D on the hardware stack
-                    ldd       6,u       ; tm_day
-                    pshs      d         ; save D on the hardware stack
-                    ldd       8,u       ; tm_mon
+old_asctime
+stk_old_asctime_ret equ       0         ; caller return address
+stk_old_asctime_tm  equ       2         ; source struct tm pointer
+                    pshs      u         ; preserve U while staging sprintf arguments
+                    ldu       stk_old_asctime_tm+2,s ; load struct tm pointer after saved U
+                    ldd       10,u      ; load tm_year
+                    addd      #1900     ; convert year offset to full calendar year
+                    pshs      d         ; push sprintf year argument
+                    ldd       ,u        ; load tm_sec
+                    pshs      d         ; push sprintf seconds argument
+                    ldd       2,u       ; load tm_min
+                    pshs      d         ; push sprintf minutes argument
+                    ldd       4,u       ; load tm_hour
+                    pshs      d         ; push sprintf hours argument
+                    ldd       6,u       ; load tm_mday
+                    pshs      d         ; push sprintf day-of-month argument
+                    ldd       8,u       ; load tm_mon
 * subd #1 fix the basing *+crk+ this needed fixed too
-                    subd      #1        ; subtract immediate value 1 from D
-                    lslb                ; shift B left by one bit
-                    rola                ; rotate A left through carry
-                    lslb                ; shift B left by one bit
-                    rola                ; rotate A left through carry
-                    leax      >months,pcr ; compute effective address into X from >months,pcr
-                    leax      d,x       ; compute effective address into X from d,x
-                    pshs      x         ; month string
-                    ldd       12,u      ; tm_wday
-                    lslb                ; shift B left by one bit
-                    rola                ; rotate A left through carry
-                    lslb                ; shift B left by one bit
-                    rola                ; rotate A left through carry
-                    leax      >days,pcr ; compute effective address into X from >days,pcr
-                    leax      d,x       ; compute effective address into X from d,x
-                    pshs      x         ; day of week string
-                    leax      >datefmt,pcr ; compute effective address into X from >datefmt,pcr
-                    pshs      x         ; sprintf string spec
-                    leax      _datebuf,y ; compute effective address into X from _datebuf,y
-                    pshs      x         ; dest buffer
-                    lbsr      _sprintf  ; long branch to subroutine to _sprintf
-                    leas      18,s      ; adjust S using 18,s
-                    leax      _datebuf,y ; compute effective address into X from _datebuf,y
-                    tfr       x,d       ; transfer X,D
-                    puls      u,pc      ; restore registers and return
+                    subd      #1        ; convert one-based month to zero-based table index
+                    lslb                ; multiply month index by two
+                    rola                ; propagate shift through high byte
+                    lslb                ; multiply month index by four-byte string slot
+                    rola                ; propagate shift through high byte
+                    leax      >months,pcr ; point at month-name table
+                    leax      d,x       ; select month string
+                    pshs      x         ; push sprintf month string argument
+                    ldd       12,u      ; load tm_wday
+                    lslb                ; multiply weekday index by two
+                    rola                ; propagate shift through high byte
+                    lslb                ; multiply weekday index by four-byte string slot
+                    rola                ; propagate shift through high byte
+                    leax      >days,pcr ; point at weekday-name table
+                    leax      d,x       ; select weekday string
+                    pshs      x         ; push sprintf weekday string argument
+                    leax      >datefmt,pcr ; load legacy format string
+                    pshs      x         ; push sprintf format argument
+                    leax      _datebuf,y ; load static output buffer
+                    pshs      x         ; push sprintf destination argument
+                    lbsr      _sprintf  ; build formatted date string
+                    leas      18,s      ; discard nine 2-byte sprintf arguments
+                    leax      _datebuf,y ; return static date buffer
+                    tfr       x,d       ; place return pointer in D
+                    puls      u,pc      ; restore U and return
 
 *
 *
@@ -462,63 +496,65 @@ old_asctime         pshs      u         ; save U on the hardware stack
 *    }
 
 old_ctime
-                    ldd       2,s       ; load D from stack-relative value 2,s
-                    pshs      d         ; save D on the hardware stack
-                    lbsr      old_localtime ; long branch to subroutine to old_localtime
-                    std       ,s        ; store D to memory pointed to by S
-                    lbsr      old_asctime ; long branch to subroutine to old_asctime
-                    puls      x,pc      ; restore registers and return
+stk_old_ctime_ret   equ       0         ; caller return address
+stk_old_ctime_ticks equ       2         ; source time_t pointer
+                    ldd       stk_old_ctime_ticks,s ; load source time_t pointer
+                    pshs      d         ; pass ticks pointer to legacy localtime helper
+                    lbsr      old_localtime ; convert ticks to static struct tm
+                    std       ,s        ; replace argument with returned struct tm pointer
+                    lbsr      old_asctime ; format static struct tm into date string
+                    puls      x,pc      ; discard argument and return date string pointer
 
-                    endsect             ; end current section
+                    endsect   ;         end current section
 
                     section   rodata    ; begin rodata section
 
 yrsiz
-                    fdb       365,366   ; define word data 365,366
+                    fdb       365,366   ; normal and leap-year day counts
 
 days
-                    fcc       /Sun/     ; define string data /Sun/
-                    fcb       $00       ; define byte data $00
-                    fcc       /Mon/     ; define string data /Mon/
-                    fcb       $00       ; define byte data $00
-                    fcc       /Tue/     ; define string data /Tue/
-                    fcb       $00       ; define byte data $00
-                    fcc       /Wed/     ; define string data /Wed/
-                    fcb       $00       ; define byte data $00
-                    fcc       /Thu/     ; define string data /Thu/
-                    fcb       $00       ; define byte data $00
-                    fcc       /Fri/     ; define string data /Fri/
-                    fcb       $00       ; define byte data $00
-                    fcc       /Sat/     ; define string data /Sat/
-                    fcb       $00       ; define byte data $00
+                    fcc       /Sun/     ; weekday name slot 0
+                    fcb       $00       ; terminate weekday name
+                    fcc       /Mon/     ; weekday name slot 1
+                    fcb       $00       ; terminate weekday name
+                    fcc       /Tue/     ; weekday name slot 2
+                    fcb       $00       ; terminate weekday name
+                    fcc       /Wed/     ; weekday name slot 3
+                    fcb       $00       ; terminate weekday name
+                    fcc       /Thu/     ; weekday name slot 4
+                    fcb       $00       ; terminate weekday name
+                    fcc       /Fri/     ; weekday name slot 5
+                    fcb       $00       ; terminate weekday name
+                    fcc       /Sat/     ; weekday name slot 6
+                    fcb       $00       ; terminate weekday name
 months
-                    fcc       /Jan/     ; define string data /Jan/
-                    fcb       $00       ; define byte data $00
-                    fcc       /Feb/     ; define string data /Feb/
-                    fcb       $00       ; define byte data $00
-                    fcc       /Mar/     ; define string data /Mar/
-                    fcb       $00       ; define byte data $00
-                    fcc       /Apr/     ; define string data /Apr/
-                    fcb       $00       ; define byte data $00
-                    fcc       /May/     ; define string data /May/
-                    fcb       $00       ; define byte data $00
-                    fcc       /Jun/     ; define string data /Jun/
-                    fcb       $00       ; define byte data $00
-                    fcc       /Jul/     ; define string data /Jul/
-                    fcb       $00       ; define byte data $00
-                    fcc       /Aug/     ; define string data /Aug/
-                    fcb       $00       ; define byte data $00
-                    fcc       /Sep/     ; define string data /Sep/
-                    fcb       $00       ; define byte data $00
-                    fcc       /Oct/     ; define string data /Oct/
-                    fcb       $00       ; define byte data $00
-                    fcc       /Nov/     ; define string data /Nov/
-                    fcb       $00       ; define byte data $00
-                    fcc       /Dec/     ; define string data /Dec/
-                    fcb       $00       ; define byte data $00
+                    fcc       /Jan/     ; month name slot 1
+                    fcb       $00       ; terminate month name
+                    fcc       /Feb/     ; month name slot 2
+                    fcb       $00       ; terminate month name
+                    fcc       /Mar/     ; month name slot 3
+                    fcb       $00       ; terminate month name
+                    fcc       /Apr/     ; month name slot 4
+                    fcb       $00       ; terminate month name
+                    fcc       /May/     ; month name slot 5
+                    fcb       $00       ; terminate month name
+                    fcc       /Jun/     ; month name slot 6
+                    fcb       $00       ; terminate month name
+                    fcc       /Jul/     ; month name slot 7
+                    fcb       $00       ; terminate month name
+                    fcc       /Aug/     ; month name slot 8
+                    fcb       $00       ; terminate month name
+                    fcc       /Sep/     ; month name slot 9
+                    fcb       $00       ; terminate month name
+                    fcc       /Oct/     ; month name slot 10
+                    fcb       $00       ; terminate month name
+                    fcc       /Nov/     ; month name slot 11
+                    fcb       $00       ; terminate month name
+                    fcc       /Dec/     ; month name slot 12
+                    fcb       $00       ; terminate month name
 
 datefmt
                     fcc       /%s       ; %s %2d %02d:%02d:%02d %04d/
-                    fcb       $00       ; define byte data $00
+                    fcb       $00       ; terminate legacy asctime format string
 
-                    endsect             ; end current section
+                    endsect   ;         end current section

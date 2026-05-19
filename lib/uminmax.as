@@ -2,21 +2,27 @@
 
                     section   code      ; begin code section
 
-_umin               EXPORT              ; export this symbol
-_umax               EXPORT              ; export this symbol
+_umin               EXPORT    ;         export unsigned minimum helper
+_umax               EXPORT    ;         export unsigned maximum helper
 
-_umin
-                    ldd       2,s       ; load D from stack-relative value 2,s
-                    cmpd      4,s       ; compare D against stack-relative value 4,s
-                    bls       Return_01 ; branch if lower or same to Return_01
-                    ldd       4,s       ; load D from stack-relative value 4,s
-Return_01           rts                 ; return to caller
+_umin:
+stk_umin_ret        equ       0         ; caller return address
+stk_umin_lhs        equ       2         ; first unsigned int argument
+stk_umin_rhs        equ       4         ; second unsigned int argument
+                    ldd       stk_umin_lhs,s ; start with the first candidate
+                    cmpd      stk_umin_rhs,s ; compare candidates as unsigned values
+                    bls       Return_01 ; keep first value when it is lower or equal
+                    ldd       stk_umin_rhs,s ; otherwise return the second value
+Return_01           rts                 ; return selected unsigned minimum
 
-_umax
-                    ldd       2,s       ; load D from stack-relative value 2,s
-                    cmpd      4,s       ; compare D against stack-relative value 4,s
-                    bcc       Return_02 ; branch if carry is clear to Return_02
-                    ldd       4,s       ; load D from stack-relative value 4,s
-Return_02           rts                 ; return to caller
+_umax:
+stk_umax_ret        equ       0         ; caller return address
+stk_umax_lhs        equ       2         ; first unsigned int argument
+stk_umax_rhs        equ       4         ; second unsigned int argument
+                    ldd       stk_umax_lhs,s ; start with the first candidate
+                    cmpd      stk_umax_rhs,s ; compare candidates as unsigned values
+                    bcc       Return_02 ; keep first value when it is higher or equal
+                    ldd       stk_umax_rhs,s ; otherwise return the second value
+Return_02           rts                 ; return selected unsigned maximum
 
-                    endsect             ; end current section
+                    endsect   ;         end current section

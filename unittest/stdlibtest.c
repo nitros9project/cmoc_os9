@@ -40,10 +40,14 @@ void test_xtoa(void)
 void test_minmax(void)
 {
 	if (min(4, 9) == 4 && max(4, 9) == 9 &&
-	    umin(7U, 3U) == 3U && umax(7U, 3U) == 7U)
+	    umin(7U, 3U) == 3U && umax(7U, 3U) == 7U &&
+	    umin(65535U, 1U) == 1U && umax(65535U, 1U) == 65535U &&
+	    umin(42U, 42U) == 42U && umax(42U, 42U) == 42U)
 		printf("%s [PASS] min/max family\n", __func__);
-	else
+	else {
 		printf("%s [FAIL] min/max family\n", __func__);
+		failed = 1;
+	}
 }
 
 void test_abs_atoi_atol(void)

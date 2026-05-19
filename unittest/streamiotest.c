@@ -48,6 +48,9 @@ void test_fread_fwrite(void)
 
 	memset(in, 0, sizeof(in));
 	n = fread(in, 1, strlen(out), fp);
+	check_true("test_fread_fwrite fread(count)", n == strlen(out));
+	check_true("test_fread_fwrite ferror(clear)", ferror(fp) == 0);
+	check_true("test_fread_fwrite fread(eof)", fread(in, 1, 1, fp) == 0 && feof(fp));
 	fclose(fp);
 	unlink(rw_tmp);
 
@@ -81,6 +84,8 @@ void test_fgets(void)
 	check_true("test_fgets fgets(second)",
 		   fgets(line, sizeof(line), fp) != 0 && strcmp(line, "line2\r") == 0);
 	check_true("test_fgets fgets(eof)", fgets(line, sizeof(line), fp) == 0 && feof(fp));
+	clearerr(fp);
+	check_true("test_fgets clearerr()", feof(fp) == 0 && ferror(fp) == 0);
 
 	fclose(fp);
 	unlink(fgets_tmp);
@@ -135,6 +140,7 @@ void test_fseek_ftell(void)
 	}
 
 	check_true("test_fseek_ftell rewind", (rewind(fp), ftell(fp) == 0L));
+	check_true("test_fseek_ftell feof(after rewind)", feof(fp) == 0);
 	memset(buf, 0, sizeof(buf));
 	n = fread(buf, 1, 4, fp);
 	if (n == 4 && strcmp(buf, "0123") == 0)

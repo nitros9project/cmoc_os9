@@ -57,16 +57,24 @@ void test_abs_atoi_atol(void)
 
 	if (abs(0) == 0 && abs(123) == 123 && abs(-123) == 123)
 		printf("%s [PASS] abs()\n", __func__);
-	else
+	else {
 		printf("%s [FAIL] abs()\n", __func__);
+		failed = 1;
+	}
 
 	if (atoi("123") == 123 &&
 	    atoi(" -42") == -42 &&
+	    atoi("+17") == 17 &&
+	    atoi("-0") == 0 &&
 	    atoi("\t+77x") == 77 &&
-	    atoi("abc") == 0)
+	    atoi("") == 0 &&
+	    atoi("abc") == 0 &&
+	    atoi("+abc") == 0)
 		printf("%s [PASS] atoi()\n", __func__);
-	else
+	else {
 		printf("%s [FAIL] atoi()\n", __func__);
+		failed = 1;
+	}
 
 	value = atol("abc");
 	if (value != 0L)
@@ -84,10 +92,16 @@ void test_abs_atoi_atol(void)
 	if (value != 99L)
 		atol_ok = 0;
 
+	value = atol("-0");
+	if (value != 0L)
+		atol_ok = 0;
+
 	if (atol_ok)
 		printf("%s [PASS] atol()\n", __func__);
-	else
+	else {
 		printf("%s [FAIL] atol()\n", __func__);
+		failed = 1;
+	}
 }
 
 void test_htoi_htol(void)
@@ -169,9 +183,11 @@ void test_setbuf(void)
 	    (stdout->_flag & _BIGBUF) != 0 &&
 	    (stdout->_flag & _UNBUF) == 0)
 		printf("%s [PASS] setbuf(buffered)\n", __func__);
-	else
+	else {
 		printf("%s [FAIL] setbuf(buffered) flag=%04x bufsiz=%d\n",
 		       __func__, stdout->_flag, stdout->_bufsiz);
+		failed = 1;
+	}
 
 	setbuf(stdout, 0);
 	if ((stdout->_flag & _UNBUF) != 0 &&
@@ -179,8 +195,10 @@ void test_setbuf(void)
 	    stdout->_ptr == stdout->_end &&
 	    stdout->_bufsiz == BUFSIZ)
 		printf("%s [PASS] setbuf(unbuffered)\n", __func__);
-	else
+	else {
 		printf("%s [FAIL] setbuf(unbuffered)\n", __func__);
+		failed = 1;
+	}
 
 	setbuf(stdout, buf);
 	if (stdout->_base == buf &&
@@ -189,8 +207,10 @@ void test_setbuf(void)
 	    (stdout->_flag & _BIGBUF) != 0 &&
 	    (stdout->_flag & _UNBUF) == 0)
 		printf("%s [PASS] setbuf(rebuffered)\n", __func__);
-	else
+	else {
 		printf("%s [FAIL] setbuf(rebuffered)\n", __func__);
+		failed = 1;
+	}
 }
 
 void test_rand(void)
@@ -200,8 +220,10 @@ void test_rand(void)
 	    rand() == 5758 &&
 	    rand() == 10113)
 		printf("%s [PASS] srand()/rand()\n", __func__);
-	else
+	else {
 		printf("%s [FAIL] srand()/rand()\n", __func__);
+		failed = 1;
+	}
 }
 
 int main(void)

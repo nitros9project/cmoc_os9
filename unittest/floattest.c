@@ -2,6 +2,33 @@
 #include <math.h>
 #include <stdlib.h>
 
+static int failed;
+
+static void check_near(const char *name, float actual, float expected, float tolerance)
+{
+	float diff = actual - expected;
+
+	if (diff < 0.0f)
+		diff = -diff;
+
+	if (diff <= tolerance)
+		printf("%s [PASS]\n", name);
+	else {
+		printf("%s [FAIL] actual=%f expected=%f\n", name, actual, expected);
+		failed = 1;
+	}
+}
+
+static void check_int(const char *name, int actual, int expected)
+{
+	if (actual == expected)
+		printf("%s [PASS]\n", name);
+	else {
+		printf("%s [FAIL] actual=%d expected=%d\n", name, actual, expected);
+		failed = 1;
+	}
+}
+
 int main(int argc, char *argv[])
 {
 	float f0 = 0.0f, f1 = 18.44f;
@@ -30,5 +57,13 @@ int main(int argc, char *argv[])
 	printf("roundtrip=[%f]\n", roundtrip);
 	printf("floattest [INFO] done\n");
 
-	return 0;
+	check_near("floattest sum", sum, 18.44f, 0.01f);
+	check_near("floattest atof decimal", parsed, 123.5f, 0.01f);
+	check_near("floattest atof exponent", parsed_exp, 62.5f, 0.01f);
+	check_near("floattest atof uppercase exponent", parsed_exp_upper, 62.5f, 0.01f);
+	check_int("floattest frexp exponent", exp, 5);
+	check_near("floattest frexp fraction", frac, 0.57625f, 0.001f);
+	check_near("floattest ldexp roundtrip", roundtrip, sum, 0.01f);
+
+	return failed;
 }

@@ -4,6 +4,7 @@
 #include <sys/types.h>
 #include <string.h>
 #include <fcntl.h>
+#include <os.h>
 
 static int failed;
 
@@ -55,14 +56,14 @@ void test_open_nonexistent_file()
 
 	int mode = FAM_READ;
 	int path = open(file, mode);
-	if (path == -1)
+	if (path == -1 && (errno == E$PNNF || errno == E$MNF))
 	{
-		printf("%s [PASS] open(\"%s\", %x) = %d\n", __func__, file, mode, path);
+		printf("%s [PASS] open(\"%s\", %x) = %d errno=%d\n", __func__, file, mode, path, errno);
 	}
 	else
 	{
 		failed = 1;
-		printf("%s [FAIL] open(\"%s\", %x) = %d\n", __func__, file, mode, path);
+		printf("%s [FAIL] open(\"%s\", %x) = %d errno=%d\n", __func__, file, mode, path, errno);
 	}
 }
 
@@ -273,14 +274,14 @@ void test_delete_nonexistent_file()
 	char *file = "deletenonexistentfile";
 	
 	int result = unlink(file);
-	if (result == -1)
+	if (result == -1 && (errno == E$PNNF || errno == E$MNF))
 	{
-		printf("%s [PASS] unlink(\"%s\") = %d\n", __func__, file, result);
+		printf("%s [PASS] unlink(\"%s\") = %d errno=%d\n", __func__, file, result, errno);
 	}
 	else
 	{
 		failed = 1;
-		printf("%s [FAIL] unlink(\"%s\") = %d\n", __func__, file, result);
+		printf("%s [FAIL] unlink(\"%s\") = %d errno=%d\n", __func__, file, result, errno);
 	}
 }
 
@@ -457,6 +458,8 @@ void test_access_dup_unlinkx()
 	char *file = "access.tmp";
 	int mode = FAM_READ | FAM_WRITE;
 	int perms = FAP_READ | FAP_WRITE;
+	char *payload = "dup-check";
+	char buf[16];
 	int path;
 	int dup_path;
 	int result;
@@ -471,6 +474,16 @@ void test_access_dup_unlinkx()
 		return;
 	}
 	printf("%s [PASS] create(\"%s\", %x, %d) = %d\n", __func__, file, mode, perms, path);
+	result = write(path, payload, strlen(payload));
+	if (result == strlen(payload))
+		printf("%s [PASS] write(\"%s\") = %d\n", __func__, payload, result);
+	else {
+		failed = 1;
+		printf("%s [FAIL] write(\"%s\") = %d, errno = %d\n", __func__, payload, result, errno);
+		close(path);
+		unlink(file);
+		return;
+	}
 	close(path);
 
 	result = access(file, FAM_READ);
@@ -503,14 +516,23 @@ void test_access_dup_unlinkx()
 	if (dup_path != -1)
 	{
 		printf("%s [PASS] dup(%d) = %d\n", __func__, path, dup_path);
+		close(path);
+		memset(buf, 0, sizeof(buf));
+		result = read(dup_path, buf, strlen(payload));
+		if (result == strlen(payload) && strcmp(buf, payload) == 0)
+			printf("%s [PASS] read(dup path) = %d\n", __func__, result);
+		else {
+			failed = 1;
+			printf("%s [FAIL] read(dup path) = %d got=\"%s\" errno=%d\n", __func__, result, buf, errno);
+		}
 		close(dup_path);
 	}
 	else
 	{
 		failed = 1;
 		printf("%s [FAIL] dup(%d) = %d, errno = %d\n", __func__, path, dup_path, errno);
+		close(path);
 	}
-	close(path);
 
 	result = unlinkx(file, FAM_WRITE);
 	if (result == 0)

@@ -56,14 +56,14 @@ void test_os_open_nonexistent_file()
 	int mode = FAM_READ;
 	path_id path = -1;
 	int result = _os_open(file, mode, &path);
-	if (result != 0)
+	if ((result == E$PNNF || result == E$MNF) && path == -1)
 	{
-		printf("%s [PASS] _os_open(nonexistent) = %d\n", __func__, result);
+		printf("%s [PASS] _os_open(nonexistent) = %d path=%d\n", __func__, result, path);
 	}
 	else
 	{
 		failed = 1;
-		printf("%s [FAIL] _os_open(nonexistent) = %d\n", __func__, result);
+		printf("%s [FAIL] _os_open(nonexistent) = %d path=%d\n", __func__, result, path);
 	}
 }
 
@@ -73,7 +73,7 @@ void test_os_delete_nonexistent_file()
 	int mode = FAM_READ;
 	
 	int result = _os_delete(file, mode);
-	if (result != 0)
+	if (result == E$PNNF || result == E$MNF)
 	{
 		printf("%s [PASS] _os_delete(nonexistent) = %d\n", __func__, result);
 	}

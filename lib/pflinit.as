@@ -2,7 +2,7 @@
 
                     section   bss       ; begin bss section
 buf1                rmb       20        ; reserve 20 bytes
-                    endsect             ; end current section
+                    endsect   ;         end current section
 
 
                     section   rodata    ; begin rodata section
@@ -15,42 +15,49 @@ ldectbl             fdb       $3b9a,$ca00 ; define word data $3b9a,$ca00
                     fdb       $0000,1000 ; define word data $0000,1000
                     fdb       $0000,100 ; define word data $0000,100
                     fdb       $0000,10  ; define word data $0000,10
-                    endsect             ; end current section
+                    endsect   ;         end current section
 
                     section   code      ; begin code section
 
-_pflinit            EXPORT              ; export this symbol
-_pflinit:           rts                 ; return to caller
+_pflinit            EXPORT    ;         export long-format initialization hook
+_pflinit:
+stk_pflinit_ret     equ       0         ; caller return address
+                    rts                 ; no initialization required for integer long formatting
 
 
-_pflong             EXPORT              ; export this symbol
-_pflong:            pshs      u         ; save U on the hardware stack
-                    leau      buf1,y    ; compute effective address into U from buf1,y
-                    pshs      u         ; save U on the hardware stack
-                    ldb       4+2+1,s   ; load B from stack-relative value 4+2+1,s
-switch              cmpb      #'d
+_pflong             EXPORT    ;         export printf long-format helper
+_pflong:
+stk_pflong_ret      equ       0         ; caller return address
+stk_pflong_spec     equ       2         ; format specifier argument
+stk_pflong_spec_byte equ       3         ; low byte used as the conversion character
+stk_pflong_value    equ       4         ; 32-bit long value argument
+                    pshs      u         ; preserve caller's U register
+                    leau      buf1,y    ; point U at the reusable conversion buffer
+                    pshs      u         ; stage buffer pointer as the function result
+                    ldb       stk_pflong_spec_byte+4,s ; load conversion character after two pushed U values
+switch              cmpb      #'d       ; select signed decimal conversion
                     beq       case_d    ; branch if equal/zero to case_d
-                    cmpb      #'u
+                    cmpb      #'u       ; select unsigned decimal conversion
                     lbeq      case_u    ; long branch if equal/zero to case_u
-                    cmpb      #'o
+                    cmpb      #'o       ; select octal conversion
                     beq       case_o    ; branch if equal/zero to case_o
-                    cmpb      #'x
+                    cmpb      #'x       ; select lowercase hexadecimal conversion
                     beq       case_x    ; branch if equal/zero to case_x
-                    cmpb      #'X
+                    cmpb      #'X       ; select uppercase hexadecimal conversion
                     beq       case_x    ; branch if equal/zero to case_x
-                    lda       #'l
-                    std       ,u++      ; store D to memory pointed to by U+, then advance U+
-pflxit              clr       ,u        ; clear memory pointed to by U
-                    puls      d,u,pc    ; restore registers and return
+                    lda       #'l       ; unsupported specifier keeps the leading 'l'
+                    std       ,u++      ; emit "l<specifier>" into the buffer
+pflxit              clr       ,u        ; terminate the generated string
+                    puls      d,u,pc    ; return staged buffer pointer in D and restore U
                     pag
-case_o              leax      8,s       ; long
-case_o1             ldb       3,x       ; load B from indexed value 3,x
-                    andb      #$07      ; AND B with immediate value $07
-                    addb      #'0
-                    stb       ,u+       ; store B to memory pointed to by U, then advance U
-                    ldb       #3        ; load B from immediate value 3
-                    bsr       fshifts   ; branch to subroutine to fshifts
-                    bne       case_o1   ; branch if not equal to case_o1
+case_o              leax      stk_pflong_value+4,s ; point X at mutable long value
+case_o1             ldb       3,x       ; take the low octal digit from the value
+                    andb      #$07      ; isolate three octal bits
+                    addb      #'0       ; convert digit to ASCII
+                    stb       ,u+       ; append octal digit and advance output pointer
+                    ldb       #3        ; shift the value by one octal digit
+                    bsr       fshifts   ; shift the 32-bit value right by B bits
+                    bne       case_o1   ; continue until the shifted value becomes zero
                     bra       case_x3   ; branch unconditionally to case_x3
 
 
@@ -64,41 +71,41 @@ fshifts             lsr       0,x       ; logical shift indexed value 0,x right 
                     ora       1,x       ; OR A with indexed value 1,x
                     ora       2,x       ; OR A with indexed value 2,x
                     ora       3,x       ; OR A with indexed value 3,x
-                    rts                 ; return to caller
+                    rts                 ; return with Z reflecting whether the value is now zero
 
 
-case_x              andb      #$20      ; lower case bit
-                    pshs      b         ; save B on the hardware stack
-                    leax      9,s       ; compute effective address into X from 9,s
-case_x1             ldb       3,x       ; load B from indexed value 3,x
-                    andb      #$0f      ; AND B with immediate value $0f
-                    pshs      b         ; save B on the hardware stack
-                    lda       #'0
+case_x              andb      #$20      ; keep ASCII lowercase bit for x versus X
+                    pshs      b         ; save case-adjustment bit
+                    leax      stk_pflong_value+5,s ; point X at long value after extra case byte
+case_x1             ldb       3,x       ; fetch low hexadecimal nibble
+                    andb      #$0f      ; isolate one hex digit
+                    pshs      b         ; save raw digit while choosing ASCII base
+                    lda       #'0       ; assume a numeric digit
                     cmpb      #9        ; compare B against immediate value 9
                     ble       case_x2   ; branch if less or equal to case_x2
-                    lda       #'A-10
-                    adda      1,s       ; add stack-relative value 1,s into A
-case_x2             adda      ,s+       ; add memory pointed to by S, then advance S into A
-                    sta       ,u+       ; store A to memory pointed to by U, then advance U
-                    ldb       #4        ; load B from immediate value 4
-                    bsr       fshifts   ; branch to subroutine to fshifts
-                    bne       case_x1   ; branch if not equal to case_x1
-                    leas      1,s       ; adjust S using 1,s
-case_x3             ldx       ,s        ; load X from memory pointed to by S
-                    clr       ,u        ; clear memory pointed to by U
-frevers             EXTERNAL            ; import external symbol
-                    lbsr      frevers   ; long branch to subroutine to frevers
-                    puls      d,u,pc    ; restore registers and return
+                    lda       #'A-10    ; alphabetic digits start at A/a after adjustment
+                    adda      1,s       ; apply lowercase bit when needed
+case_x2             adda      ,s+       ; add digit value and discard raw digit
+                    sta       ,u+       ; append hex digit and advance output pointer
+                    ldb       #4        ; shift the value by one hex digit
+                    bsr       fshifts   ; shift the 32-bit value right by B bits
+                    bne       case_x1   ; continue until the shifted value becomes zero
+                    leas      1,s       ; discard case-adjustment byte
+case_x3             ldx       ,s        ; load start of the generated digit string
+                    clr       ,u        ; terminate the reversed digit string
+frevers             EXTERNAL  ;         import external symbol
+                    lbsr      frevers   ; reverse emitted digits into display order
+                    puls      d,u,pc    ; return buffer pointer and restore U
 
-case_d              ldb       8,s       ; load B from stack-relative value 8,s
-                    bpl       case_d4   ; branch if plus to case_d4
-                    ldd       #0        ; load D from immediate value 0
-                    subd      10,s      ; subtract stack-relative value 10,s from D
-                    std       10,s      ; store D to stack-relative value 10,s
-                    ldd       #0        ; load D from immediate value 0
-                    sbcb      9,s       ; subtract stack-relative value 9,s from B
-                    sbca      8,s       ; subtract stack-relative value 8,s from A
-                    std       8,s       ; store D to stack-relative value 8,s
+case_d              ldb       stk_pflong_value+4,s ; inspect high byte for signed decimal
+                    bpl       case_d4   ; non-negative values use unsigned decimal path
+                    ldd       #0        ; start two's-complement negation of low word
+                    subd      stk_pflong_value+6,s ; subtract low word from zero
+                    std       stk_pflong_value+6,s ; store negated low word
+                    ldd       #0        ; continue negation through high word
+                    sbcb      stk_pflong_value+5,s ; subtract high-word low byte with borrow
+                    sbca      stk_pflong_value+4,s ; subtract high-word high byte with borrow
+                    std       stk_pflong_value+4,s ; store negated high word
                     cmpd      #$8000    ; compare D against immediate value $8000
                     bne       case_d3   ; branch if not equal to case_d3
                     ldd       2,x       ; load D from indexed value 2,x
@@ -109,8 +116,8 @@ case_d2             lda       ,x+       ; load A from memory pointed to by X, th
                     bne       case_d2   ; branch if not equal to case_d2
 case_d1             lbra      pflxit    ; long branch unconditionally to pflxit
 
-case_d3             ldb       #'-
-                    stb       ,u+       ; store B to memory pointed to by U, then advance U
+case_d3             ldb       #'-       ; prefix negative decimal output
+                    stb       ,u+       ; append sign and advance output pointer
 case_u
 case_d4             leax      ldectbl,pcr ; compute effective address into X from ldectbl,pcr
                     clra                ; clear A
@@ -157,4 +164,4 @@ case_d11            dec       1,s       ; decrement stack-relative value 1,s
 tminlong            fcc       '-2147483648' ; define string data '-2147483648'
                     fcb       0         ; define byte data 0
 
-                    endsect             ; end current section
+                    endsect   ;         end current section

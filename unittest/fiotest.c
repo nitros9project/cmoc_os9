@@ -4,6 +4,7 @@
 #include <unistd.h>
 
 static const char text_file[] = "fiotest.out.tmp";
+static const char word_file[] = "fiotest.word.tmp";
 static int failed;
 
 static void check_true(const char *name, int condition)
@@ -82,9 +83,33 @@ static void test_stdout_puts(void)
     check_true("test_stdout_puts puts()", puts("fiotest stdout smoke") >= 0);
 }
 
+static void test_putw(void)
+{
+    FILE *fp;
+    int value;
+
+    unlink(word_file);
+    fp = fopen(word_file, "w+");
+    if (fp == 0) {
+        printf("%s [FAIL] fopen(w+)\n", __func__);
+        failed = 1;
+        return;
+    }
+
+    check_true("test_putw putw()", putw(0x1234, fp) == 0);
+    check_true("test_putw fflush()", fflush(fp) == 0);
+    rewind(fp);
+    value = getw(fp);
+    check_true("test_putw getw()", value == 0x1234);
+
+    fclose(fp);
+    unlink(word_file);
+}
+
 int main(void)
 {
     test_text_output();
     test_stdout_puts();
+    test_putw();
     return failed;
 }

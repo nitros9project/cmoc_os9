@@ -78,6 +78,10 @@ echo setstest
 setstest >>>-setstest.out
 echo signaltest
 signaltest >>>-signaltest.out
+echo skiptest
+skiptest >>>-skiptest.out
+echo sleeptest
+sleeptest >>>-sleeptest.out
 echo stdioedgetest
 stdioedgetest >>>-stdioedgetest.out
 echo stdlibtest

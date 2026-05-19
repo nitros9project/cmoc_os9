@@ -2,20 +2,23 @@
 
                     section   code      ; begin code section
 
-_strcmp             EXPORT              ; export this symbol
+_strcmp             EXPORT    ;         export strcmp helper
 
-_strcmp
-                    pshs      u         ; save U on the hardware stack
-                    ldx       4,s       ; load X from stack-relative value 4,s
-                    ldu       6,s       ; load U from stack-relative value 6,s
-                    bra       Continue_01 ; branch unconditionally to Continue_01
-Loop_01             ldb       ,u+       ; load B from memory pointed to by U, then advance U
-                    beq       BranchTarget_01 ; branch if equal/zero to BranchTarget_01
-Continue_01         ldb       ,u        ; load B from memory pointed to by U
-                    subb      ,x+       ; subtract memory pointed to by X, then advance X from B
-                    beq       Loop_01   ; branch if equal/zero to Loop_01
-                    negb                ; negate B
-BranchTarget_01     sex                 ; sign-extend B into A to form D
-                    puls      u,pc      ; restore registers and return
+_strcmp:
+stk_strcmp_ret      equ       0         ; caller return address
+stk_strcmp_left     equ       2         ; left-hand string pointer
+stk_strcmp_right    equ       4         ; right-hand string pointer
+                    pshs      u         ; preserve caller's U register
+                    ldx       stk_strcmp_left+2,s ; load left-hand string after saved U
+                    ldu       stk_strcmp_right+2,s ; load right-hand string after saved U
+                    bra       Continue_01 ; compare first character before advancing right string
+Loop_01             ldb       ,u+       ; advance over matching right-hand character
+                    beq       BranchTarget_01 ; equal strings ended at NUL
+Continue_01         ldb       ,u        ; load current right-hand character
+                    subb      ,x+       ; subtract current left-hand character and advance left
+                    beq       Loop_01   ; continue while characters match
+                    negb                ; return left-minus-right ordering
+BranchTarget_01     sex                 ; sign-extend signed byte result into D
+                    puls      u,pc      ; restore U and return
 
-                    endsect             ; end current section
+                    endsect   ;         end current section

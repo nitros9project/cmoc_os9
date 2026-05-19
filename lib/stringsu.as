@@ -2,33 +2,39 @@
 
                     section   code      ; begin code section
 
-_strucat            EXPORT              ; export this symbol
-_strucpy            EXPORT              ; export this symbol
+_strucat            EXPORT    ;         export uppercase strcat helper
+_strucpy            EXPORT    ;         export uppercase strcpy helper
 
-toupper             EXTERN              ; import external symbol
+toupper             EXTERN    ;         import character uppercase helper
 
-_strucat
-                    pshs      u         ; save U on the hardware stack
-                    ldu       6,s       ; load U from stack-relative value 6,s
-                    ldx       4,s       ; load X from stack-relative value 4,s
-Loop_01             ldb       ,x+       ; load B from memory pointed to by X, then advance X
-                    bne       Loop_01   ; branch if not equal to Loop_01
-                    leax      -1,x      ; compute effective address into X from -1,x
-                    bra       Loop_02   ; branch unconditionally to Loop_02
+_strucat:
+stk_strucat_ret     equ       0         ; caller return address
+stk_strucat_dest    equ       2         ; destination string pointer
+stk_strucat_source  equ       4         ; source string pointer
+                    pshs      u         ; preserve caller's U register
+                    ldu       stk_strucat_source+2,s ; load source pointer after saved U
+                    ldx       stk_strucat_dest+2,s ; load destination pointer after saved U
+Loop_01             ldb       ,x+       ; scan destination byte and advance
+                    bne       Loop_01   ; continue until destination NUL
+                    leax      -1,x      ; back up to append over NUL
+                    bra       Loop_02   ; copy uppercased source into destination tail
 
-_strucpy
-                    pshs      u         ; save U on the hardware stack
-                    ldu       6,s       ; load U from stack-relative value 6,s
-                    ldx       4,s       ; load X from stack-relative value 4,s
-Loop_02             ldb       ,u+       ; load B from memory pointed to by U, then advance U
-                    clra                ; clear A
-                    pshs      d,x       ; save D,X on the hardware stack
-                    lbsr      toupper   ; long branch to subroutine to toupper
-                    leas      2,s       ; adjust S using 2,s
-                    puls      x         ; restore X from the hardware stack
-                    stb       ,x+       ; store B to memory pointed to by X, then advance X
-                    bne       Loop_02   ; branch if not equal to Loop_02
-                    ldd       4,s       ; load D from stack-relative value 4,s
-                    puls      u,pc      ; restore registers and return
+_strucpy:
+stk_strucpy_ret     equ       0         ; caller return address
+stk_strucpy_dest    equ       2         ; destination string pointer
+stk_strucpy_source  equ       4         ; source string pointer
+                    pshs      u         ; preserve caller's U register
+                    ldu       stk_strucpy_source+2,s ; load source pointer after saved U
+                    ldx       stk_strucpy_dest+2,s ; load destination pointer after saved U
+Loop_02             ldb       ,u+       ; fetch next source byte
+                    clra                ; form int argument for toupper
+                    pshs      d,x       ; save character argument and destination pointer
+                    lbsr      toupper   ; uppercase the source byte
+                    leas      2,s       ; discard toupper argument, leaving saved X
+                    puls      x         ; restore destination pointer
+                    stb       ,x+       ; store uppercased byte and advance destination
+                    bne       Loop_02   ; continue through source NUL
+                    ldd       stk_strucpy_dest+2,s ; return destination pointer
+                    puls      u,pc      ; restore U and return
 
-                    endsect             ; end current section
+                    endsect   ;         end current section

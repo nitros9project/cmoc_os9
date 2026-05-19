@@ -1,41 +1,46 @@
 * Adapted from cmoc_os9/lib/ported/setbuf.as for the live cmoc_os9 ABI.
 
+                    use       ../include/stdio.d ; shared FILE layout and flag constants
+
                     section   code      ; begin code section
 
-_setbuf             EXPORT              ; export this symbol
+_setbuf             EXPORT    ;         export stdio caller-supplied buffer setter
 
-_fflush             EXTERN              ; import external symbol
+_fflush             EXTERN    ;         import stream flush helper
 
-_setbuf
-                    pshs      u         ; save U on the hardware stack
-                    ldu       4,s       ; load U from stack-relative value 4,s
-                    beq       BranchTarget_04 ; branch if equal/zero to BranchTarget_04
-                    lda       6,u       ; load A from indexed value 6,u
-                    anda      #1        ; AND A with immediate value 1
-                    beq       BranchTarget_01 ; branch if equal/zero to BranchTarget_01
-                    pshs      u         ; save U on the hardware stack
-                    lbsr      _fflush   ; long branch to subroutine to _fflush
-                    leas      2,s       ; adjust S using 2,s
-BranchTarget_01     ldd       6,u       ; load D from indexed value 6,u
-                    anda      #^1       ; AND A with immediate value ^1
-                    andb      #$f3      ; AND B with immediate value $f3
-                    std       6,u       ; store D to indexed value 6,u
-                    ldx       6,s       ; load X from stack-relative value 6,s
-                    beq       BranchTarget_03 ; branch if equal/zero to BranchTarget_03
-                    ldd       11,u      ; load D from indexed value 11,u
-                    bne       BranchTarget_02 ; branch if not equal to BranchTarget_02
-                    ldd       #$0100    ; load D from immediate value $0100
-                    std       11,u      ; store D to indexed value 11,u
-BranchTarget_02     stx       2,u       ; store X to indexed value 2,u
-                    leax      d,x       ; compute effective address into X from d,x
-                    ldb       #8        ; load B from immediate value 8
-                    bra       Continue_01 ; branch unconditionally to Continue_01
-BranchTarget_03     leax      11,u      ; compute effective address into X from 11,u
-                    ldb       #4        ; load B from immediate value 4
-Continue_01         orb       7,u       ; OR B with indexed value 7,u
-                    stb       7,u       ; store B to indexed value 7,u
-                    stx       4,u       ; store X to indexed value 4,u
-                    stx       ,u        ; store X to memory pointed to by U
-BranchTarget_04     puls      u,pc      ; restore registers and return
+_setbuf:
+stk_setbuf_ret      equ       0         ; caller return address
+stk_setbuf_file     equ       2         ; FILE pointer argument
+stk_setbuf_buffer   equ       4         ; caller buffer pointer or NULL
+                    pshs      u         ; preserve caller's U register
+                    ldu       stk_setbuf_file+2,s ; load FILE pointer after saved U
+                    beq       BranchTarget_04 ; ignore NULL stream pointers
+                    lda       FILE_FLAG,u ; load high byte of FILE flags
+                    anda      #_WRITTEN_HIGH ; test for pending write state
+                    beq       BranchTarget_01 ; skip flush if no write data is pending
+                    pshs      u         ; pass FILE pointer to fflush
+                    lbsr      _fflush   ; flush pending output before changing buffer
+                    leas      2,s       ; discard fflush argument
+BranchTarget_01     ldd       FILE_FLAG,u ; load current FILE flags
+                    anda      #^_WRITTEN_HIGH ; clear written-state bit
+                    andb      #^(_BIGBUF|_UNBUF) ; clear existing buffer-mode bits
+                    std       FILE_FLAG,u ; save reset FILE flags
+                    ldx       stk_setbuf_buffer+2,s ; load caller buffer pointer after saved U
+                    beq       BranchTarget_03 ; NULL buffer requests unbuffered mode
+                    ldd       FILE_BUFSIZ,u ; load current buffer size
+                    bne       BranchTarget_02 ; keep current size when already set
+                    ldd       #$0100    ; default caller buffer size to BUFSIZ
+                    std       FILE_BUFSIZ,u ; save default buffer size
+BranchTarget_02     stx       FILE_BASE,u ; install caller buffer as base pointer
+                    leax      d,x       ; compute end pointer as buffer + size
+                    ldb       #_BIGBUF  ; mark stream as using a full buffer
+                    bra       Continue_01 ; merge buffer-mode flag
+BranchTarget_03     leax      FILE_BUFSIZ,u ; use FILE buffer-size field as one-byte fallback storage
+                    ldb       #_UNBUF   ; mark stream unbuffered
+Continue_01         orb       FILE_FLAG+1,u ; merge selected buffer-mode flag
+                    stb       FILE_FLAG+1,u ; save low FILE flags
+                    stx       FILE_END,u ; set current buffer end
+                    stx       FILE_PTR,u ; reset current pointer to buffer end
+BranchTarget_04     puls      u,pc      ; restore U and return
 
-                    endsect             ; end current section
+                    endsect   ;         end current section

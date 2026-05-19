@@ -257,8 +257,27 @@ static void test_os_gs_ss_wrappers(void)
     check_error("_os_setstat SS_Reset invalid path", result);
 }
 
+static void test_legacy_ss_wrappers_invalid_path(void)
+{
+    static const path_id invalid_path = 127;
+    char opts[32];
+    char fdbuf[256];
+
+    memset(opts, 0, sizeof(opts));
+    memset(fdbuf, 0, sizeof(fdbuf));
+
+    check_error("_ss_opt invalid path", _ss_opt(invalid_path, opts));
+    check_error("_ss_pfd invalid path", _ss_pfd(invalid_path, fdbuf));
+    check_error("_ss_ssig invalid path", _ss_ssig(invalid_path, 0));
+    check_error("_ss_tiks invalid path", _ss_tiks(invalid_path, opts));
+    check_error("_ss_rest invalid path", _ss_rest(invalid_path, 0));
+    check_error("_ss_rel invalid path", _ss_rel(invalid_path, 0));
+    check_error("_ss_attr invalid path", _ss_attr(invalid_path, opts));
+}
+
 int main(void)
 {
     test_os_gs_ss_wrappers();
+    test_legacy_ss_wrappers_invalid_path();
     return failed;
 }

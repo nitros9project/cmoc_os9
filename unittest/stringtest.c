@@ -59,6 +59,31 @@ void test_strncat(void)
 	}
 }
 
+void test_strncat_edges(void)
+{
+	char buf[BUFLEN];
+
+	strcpy(buf, "cat");
+	strncat(buf, "dog", 0);
+	if (strcmp(buf, "cat") == 0)
+	{
+		printf("%s [PASS] zero count\n",__func__);
+	} else {
+		failed = 1;
+		printf("%s [FAIL] zero count, expected 'cat' got '%s'\n",__func__,buf);
+	}
+
+	strcpy(buf, "cat");
+	strncat(buf, "dog", 2);
+	if (strcmp(buf, "catdo") == 0)
+	{
+		printf("%s [PASS] partial count\n",__func__);
+	} else {
+		failed = 1;
+		printf("%s [FAIL] partial count, expected 'catdo' got '%s'\n",__func__,buf);
+	}
+}
+
 #ifdef _CMOC_VERSION_
 void test_strhcpy(void)
 {
@@ -99,6 +124,40 @@ void test_strncpy(void)
 	} else {
 		failed = 1;
 		printf("%s [FAIL], expected '%s' got '%s'\n",__func__,p,buf);
+	}
+}
+
+void test_strncpy_edges(void)
+{
+	char buf[8];
+	char expect[] = {'c','a','t',0,0,0};
+
+	memset(buf, 'X', sizeof(buf));
+	strncpy(buf, "cat", 0);
+	if (buf[0] == 'X')
+	{
+		printf("%s [PASS] zero count\n",__func__);
+	} else {
+		failed = 1;
+		printf("%s [FAIL] zero count, expected X got %02x\n",__func__,(unsigned char)buf[0]);
+	}
+
+	memset(buf, 'X', sizeof(buf));
+	strncpy(buf, "cat", 6);
+	if (memcmp(buf, expect, sizeof(expect)) == 0 && buf[6] == 'X')
+	{
+		printf("%s [PASS] nul padding\n",__func__);
+	} else {
+		failed = 1;
+		printf("%s [FAIL] nul padding, bytes=%02x,%02x,%02x,%02x,%02x,%02x,%02x\n",
+			__func__,
+			(unsigned char)buf[0],
+			(unsigned char)buf[1],
+			(unsigned char)buf[2],
+			(unsigned char)buf[3],
+			(unsigned char)buf[4],
+			(unsigned char)buf[5],
+			(unsigned char)buf[6]);
 	}
 }
 
@@ -242,6 +301,27 @@ void test_strncmp(void)
 }
 
 
+void test_strncmp_edges(void)
+{
+	int ok = 1;
+
+	if (strncmp("cat", "dog", 0) != 0)
+		ok = 0;
+	if (strncmp("cat", "car", 2) != 0)
+		ok = 0;
+	if (strncmp("cat", "car", 3) <= 0)
+		ok = 0;
+
+	if (ok)
+	{
+		printf("%s [PASS]\n",__func__);
+	} else {
+		failed = 1;
+		printf("%s [FAIL]\n",__func__);
+	}
+}
+
+
 void test_strlen(void)
 {
 	int r = strlen(p);
@@ -371,6 +451,26 @@ void test_strspn(void)
 	}
 }
 
+void test_strspn_edges(void)
+{
+	int ok = 1;
+
+	if (strspn("", "abc") != 0)
+		ok = 0;
+	if (strspn("abc", "abc") != 3)
+		ok = 0;
+	if (strspn("abc", "") != 0)
+		ok = 0;
+
+	if (ok)
+	{
+		printf("%s [PASS]\n",__func__);
+	} else {
+		failed = 1;
+		printf("%s [FAIL]\n",__func__);
+	}
+}
+
 void test_strcspn(void)
 {
 	size_t idx = strcspn(p, "dog");
@@ -380,6 +480,26 @@ void test_strcspn(void)
 	} else {
 		failed = 1;
 		printf("%s [FAIL], expected 'd' got p[%d]\n",__func__,idx);
+	}
+}
+
+void test_strcspn_edges(void)
+{
+	int ok = 1;
+
+	if (strcspn("", "abc") != 0)
+		ok = 0;
+	if (strcspn("abc", "x") != 3)
+		ok = 0;
+	if (strcspn("abc", "a") != 0)
+		ok = 0;
+
+	if (ok)
+	{
+		printf("%s [PASS]\n",__func__);
+	} else {
+		failed = 1;
+		printf("%s [FAIL]\n",__func__);
 	}
 }
 
@@ -427,6 +547,32 @@ void test_strtok(void)
 	}
 }
 
+void test_strtok_edges(void)
+{
+	char buf[BUFLEN];
+	char *token;
+	int ok = 1;
+
+	strcpy(buf, "  cat");
+	token = strtok(buf, sep);
+	if (token == NULL || strcmp(token, "cat") != 0)
+		ok = 0;
+	if (strtok(NULL, sep) != NULL)
+		ok = 0;
+
+	strcpy(buf, "   ");
+	if (strtok(buf, sep) != NULL)
+		ok = 0;
+
+	if (ok)
+	{
+		printf("%s [PASS]\n",__func__);
+	} else {
+		failed = 1;
+		printf("%s [FAIL]\n",__func__);
+	}
+}
+
 
 void test_strpbrk(void)
 {
@@ -437,6 +583,18 @@ void test_strpbrk(void)
 	} else {
 		failed = 1;
 		printf("%s [FAIL], expected 'd' got %c\n",__func__,*ptr);
+	}
+}
+
+void test_strpbrk_miss(void)
+{
+	char *ptr = strpbrk(p, "xyz");
+	if (ptr == NULL)
+	{
+		printf("%s [PASS]\n",__func__);
+	} else {
+		failed = 1;
+		printf("%s [FAIL], expected NULL got %04x\n",__func__,ptr);
 	}
 }
 
@@ -466,6 +624,27 @@ void test_strass(void)
 		printf("  f.a=%d p->a=%d\n",f.a, p->a);
 		printf("  f.b=%d p->b=%d\n",f.a, p->b);
 		printf("  f.c=%d p->c=%d\n",f.a, p->c);
+	}
+}
+
+void test_strass_odd(void)
+{
+	char src[] = {1,2,3,4,5};
+	char dst[] = {0,0,0,0,0};
+
+	_strass(dst, src, sizeof(src));
+	if (memcmp(dst, src, sizeof(src)) == 0)
+	{
+		printf("%s [PASS]\n",__func__);
+	} else {
+		failed = 1;
+		printf("%s [FAIL], bytes=%02x,%02x,%02x,%02x,%02x\n",
+			__func__,
+			(unsigned char)dst[0],
+			(unsigned char)dst[1],
+			(unsigned char)dst[2],
+			(unsigned char)dst[3],
+			(unsigned char)dst[4]);
 	}
 }
 #endif
@@ -578,22 +757,29 @@ int main()
 {
 	test_strcat();
 	test_strncat();
+	test_strncat_edges();
 	test_strcpy();
 	test_strncpy();
+	test_strncpy_edges();
 	test_index();
 	test_rindex();
 	test_strcmp();
 	test_strncmp();
+	test_strncmp_edges();
 	test_strcmp_ordering();
 	test_strlen();
 	test_strchr();
 	test_strchr_miss();
 	test_strrchr();
 	test_strspn();
+	test_strspn_edges();
 	test_strcspn();
+	test_strcspn_edges();
 	test_strtok();
 	test_strtok_single();
+	test_strtok_edges();
 	test_strpbrk();
+	test_strpbrk_miss();
 	test_memcpy_memcmp();
 	test_memchr();
 	test_memccpy();
@@ -608,6 +794,7 @@ int main()
 	test_patmatch_questionmark();
 	test_patmatch_asterix();
 	test_strass();
+	test_strass_odd();
 #endif
 	return failed;
 }

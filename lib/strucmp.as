@@ -2,32 +2,35 @@
 
                     section   code      ; begin code section
 
-_strucmp            EXPORT              ; export this symbol
+_strucmp            EXPORT    ;         export case-insensitive strcmp helper
 
-toupper             EXTERN              ; import external symbol
+toupper             EXTERN    ;         import character uppercase helper
 
-_strucmp
-                    pshs      u         ; save U on the hardware stack
-                    ldx       4,s       ; load X from stack-relative value 4,s
-                    ldu       6,s       ; load U from stack-relative value 6,s
-                    bra       Continue_01 ; branch unconditionally to Continue_01
-Loop_01             ldb       ,u+       ; load B from memory pointed to by U, then advance U
-                    beq       BranchTarget_01 ; branch if equal/zero to BranchTarget_01
-Continue_01         ldb       ,u        ; load B from memory pointed to by U
-                    clra                ; clear A
-                    pshs      d,x       ; save D,X on the hardware stack
-                    lbsr      toupper   ; long branch to subroutine to toupper
-                    leas      2,s       ; adjust S using 2,s
-                    ldx       ,s        ; load X from memory pointed to by S
-                    std       ,s        ; store D to memory pointed to by S
-                    ldb       ,x+       ; load B from memory pointed to by X, then advance X
-                    clra                ; clear A
-                    pshs      d,x       ; save D,X on the hardware stack
-                    lbsr      toupper   ; long branch to subroutine to toupper
-                    leas      2,s       ; adjust S using 2,s
-                    puls      x         ; restore X from the hardware stack
-                    subd      ,s++      ; subtract memory pointed to by S+, then advance S+ from D
-                    beq       Loop_01   ; branch if equal/zero to Loop_01
-BranchTarget_01     puls      u,pc      ; restore registers and return
+_strucmp:
+stk_strucmp_ret     equ       0         ; caller return address
+stk_strucmp_left    equ       2         ; left-hand string pointer
+stk_strucmp_right   equ       4         ; right-hand string pointer
+                    pshs      u         ; preserve caller's U register
+                    ldx       stk_strucmp_left+2,s ; load left-hand string after saved U
+                    ldu       stk_strucmp_right+2,s ; load right-hand string after saved U
+                    bra       Continue_01 ; compare first byte before advancing right side
+Loop_01             ldb       ,u+       ; advance over matched right-hand byte
+                    beq       BranchTarget_01 ; equal strings ended at NUL
+Continue_01         ldb       ,u        ; load current right-hand byte
+                    clra                ; form int argument for toupper
+                    pshs      d,x       ; save right byte and left pointer
+                    lbsr      toupper   ; uppercase right-hand byte
+                    leas      2,s       ; discard toupper argument, leaving saved X
+                    ldx       ,s        ; reload left-hand pointer
+                    std       ,s        ; save uppercased right byte for comparison
+                    ldb       ,x+       ; fetch current left-hand byte and advance
+                    clra                ; form int argument for toupper
+                    pshs      d,x       ; save left byte and advanced left pointer
+                    lbsr      toupper   ; uppercase left-hand byte
+                    leas      2,s       ; discard toupper argument, leaving saved X
+                    puls      x         ; restore advanced left-hand pointer
+                    subd      ,s++      ; compare uppercased bytes and discard saved right byte
+                    beq       Loop_01   ; continue while uppercased bytes match
+BranchTarget_01     puls      u,pc      ; restore U and return comparison result
 
-                    endsect             ; end current section
+                    endsect   ;         end current section

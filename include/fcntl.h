@@ -124,6 +124,15 @@ error_code _gs_devn(int path, char *name);
 error_code _ss_opt(int path, void *opts);
 
 /**
+ * @brief Write a file descriptor buffer using `SS_FD`.
+ *
+ * @param path Open path descriptor.
+ * @param buffer Source file descriptor buffer.
+ * @return `0` on success, otherwise an OS-9 error code.
+ */
+error_code _ss_pfd(int path, void *buffer);
+
+/**
  * @brief Set attributes using `SS_Attr`.
  *
  * @param path Open path descriptor.

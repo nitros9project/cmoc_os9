@@ -1,88 +1,90 @@
 * Compact assembly implementation of setbase().
 
                     use       ../include/os9.d ; shared OS-9 service constants
+                    use       ../include/stdio.d ; shared FILE layout and flag constants
 
                     section   code      ; begin code section
 
-_setbase            EXPORT              ; export this symbol
+_setbase            EXPORT    ;         export stdio buffer initializer
 
-_ibrk               EXTERNAL            ; import external symbol
-_getstat            EXTERNAL            ; import external symbol
+_ibrk               EXTERNAL  ;         import internal heap allocator
+_getstat            EXTERNAL  ;         import GetStat wrapper
 
-DEVMASK             equ       $C0       ; define constant as $C0
-SCF                 equ       $40       ; define constant as $40
-RBF                 equ       $80       ; define constant as $80
-INIT                equ       $80       ; define constant as $80
-BIGBUF              equ       $08       ; define constant as $08
-UNBUF               equ       $04       ; define constant as $04
 BUFSIZ_C            equ       256       ; define constant as 256
 
-_setbase
-                    pshs      u         ; save U on the hardware stack
-                    ldu       4,s       ; load U from stack-relative value 4,s
-                    ldb       7,u       ; load B from indexed value 7,u
-                    bitb      #DEVMASK  ; test bits in B against immediate value DEVMASK
-                    bne       L_setbase_known ; branch if not equal to L_setbase_known
-                    leas      -32,s     ; adjust S using -32,s
-                    leax      ,s        ; compute effective address into X from ,s
-                    ldd       8,u       ; load D from indexed value 8,u
-                    pshs      d,x       ; save D,X on the hardware stack
-                    clra                ; clear A
-                    clrb                ; clear B
-                    pshs      d         ; save D on the hardware stack
-                    lbsr      _getstat  ; long branch to subroutine to _getstat
-                    ldb       #SCF      ; load B from immediate value SCF
-                    lda       6,s       ; load A from stack-relative value 6,s
-                    beq       L_setbase_merge ; branch if equal/zero to L_setbase_merge
-                    ldb       #RBF      ; load B from immediate value RBF
+_setbase:
+stk_setbase_ret     equ       0         ; caller return address
+stk_setbase_file    equ       2         ; FILE pointer argument
+stk_setbase_gs_status equ       0         ; staged GetStat status-code argument
+stk_setbase_gs_bufp equ       2         ; staged path-options buffer pointer
+stk_setbase_gs_path equ       4         ; staged path number argument
+stk_setbase_gs_optbuf equ       6         ; path-options scratch buffer after arguments
+stk_setbase_gs_frame_size equ       38        ; staged arguments plus 32-byte scratch buffer
+                    pshs      u         ; preserve caller's U register
+                    ldu       stk_setbase_file+2,s ; load FILE pointer after saved U
+                    ldb       FILE_FLAG+1,u ; load low byte of FILE flags
+                    bitb      #_SCF|_RBF ; test whether device class is already known
+                    bne       L_setbase_known ; skip path options query when class is cached
+                    leas      -32,s     ; reserve path-options scratch buffer
+                    leax      ,s        ; point X at path-options scratch buffer
+                    ldd       FILE_FD,u ; load underlying path number
+                    pshs      d,x       ; stage path and options buffer for getstat
+                    clra                ; request SS_Opt
+                    clrb                ; request SS_Opt
+                    pshs      d         ; stage status code argument
+                    lbsr      _getstat  ; query path options to determine file manager type
+                    ldb       #_SCF     ; assume an SCF-style device when option byte is zero
+                    lda       stk_setbase_gs_optbuf,s ; inspect option byte from scratch buffer
+                    beq       L_setbase_merge ; keep SCF flag when option byte is zero
+                    ldb       #_RBF     ; otherwise mark as RBF-style buffered file
 L_setbase_merge
-                    leas      38,s      ; adjust S using 38,s
-                    orb       7,u       ; OR B with indexed value 7,u
-                    stb       7,u       ; store B to indexed value 7,u
+                    leas      stk_setbase_gs_frame_size,s ; discard getstat arguments and option scratch buffer
+                    orb       FILE_FLAG+1,u ; merge device-class bit into low FILE flags
+                    stb       FILE_FLAG+1,u ; save low FILE flags
 L_setbase_known
-                    lda       6,u       ; load A from indexed value 6,u
-                    ora       #INIT     ; OR A with immediate value INIT
-                    sta       6,u       ; store A to indexed value 6,u
-                    ldd       8,u       ; load D from indexed value 8,u
+                    lda       FILE_FLAG,u ; load high byte of FILE flags
+                    ora       #_INIT_HIGH ; mark stream buffer state initialized
+                    sta       FILE_FLAG,u ; save high byte of FILE flags
+                    ldd       FILE_FD,u ; load underlying path number
                     cmpd      #1        ; compare D against immediate value 1
-                    bne       L_setbase_check ; branch if not equal to L_setbase_check
-                    ldb       7,u       ; load B from indexed value 7,u
-                    orb       #UNBUF    ; OR B with immediate value UNBUF
-                    stb       7,u       ; store B to indexed value 7,u
+                    bne       L_setbase_check ; keep normal buffering for non-stdout streams
+                    ldb       FILE_FLAG+1,u ; load low byte of FILE flags
+                    orb       #_UNBUF   ; keep stdout unbuffered
+                    stb       FILE_FLAG+1,u ; save low byte of FILE flags
 L_setbase_check
-                    andb      #BIGBUF+UNBUF ; AND B with immediate value BIGBUF+UNBUF
-                    bne       L_setbase_done ; branch if not equal to L_setbase_done
-                    ldd       11,u      ; load D from indexed value 11,u
-                    bne       L_setbase_have_size ; branch if not equal to L_setbase_have_size
-                    ldd       #BUFSIZ_C ; load D from immediate value BUFSIZ_C
-                    std       11,u      ; store D to indexed value 11,u
+                    andb      #_BIGBUF+_UNBUF ; skip allocation if buffer mode is already selected
+                    bne       L_setbase_done ; leave existing buffer state alone
+                    ldd       FILE_BUFSIZ,u ; load requested buffer size
+                    bne       L_setbase_have_size ; keep caller-provided buffer size
+                    ldd       #BUFSIZ_C ; default to the standard C buffer size
+                    std       FILE_BUFSIZ,u ; save default buffer size
 L_setbase_have_size
-                    ldd       2,u       ; load D from indexed value 2,u
-                    bne       L_setbase_big ; branch if not equal to L_setbase_big
-                    ldd       11,u      ; load D from indexed value 11,u
-                    pshs      d         ; save D on the hardware stack
-                    lbsr      _ibrk     ; long branch to subroutine to _ibrk
-                    leas      2,s       ; adjust S using 2,s
-                    std       2,u       ; store D to indexed value 2,u
-                    cmpd      #-1       ; compare D against immediate value -1
-                    beq       L_setbase_unbuf ; branch if equal/zero to L_setbase_unbuf
+                    ldd       FILE_BASE,u ; load existing buffer base pointer
+                    bne       L_setbase_big ; use caller-supplied buffer when present
+                    ldd       FILE_BUFSIZ,u ; load allocation size
+                    pshs      d         ; pass allocation size to ibrk
+                    lbsr      _ibrk     ; allocate a buffer from the runtime heap
+                    leas      2,s       ; discard allocation argument
+                    std       FILE_BASE,u ; save allocated buffer base
+                    cmpd      #-1       ; test for allocation failure
+                    beq       L_setbase_unbuf ; fall back to one-byte unbuffered save area
 L_setbase_big
-                    ldb       #BIGBUF   ; load B from immediate value BIGBUF
-                    bra       L_setbase_flag ; branch unconditionally to L_setbase_flag
+                    ldb       #_BIGBUF  ; mark stream as owning a real buffer
+                    bra       L_setbase_flag ; merge buffer mode flag
 L_setbase_unbuf
-                    leax      10,u      ; compute effective address into X from 10,u
-                    stx       2,u       ; store X to indexed value 2,u
+                    leax      FILE_SAVE,u ; use the single-byte save slot as fallback buffer
+                    stx       FILE_BASE,u ; save fallback buffer base
                     ldd       #1        ; load D from immediate value 1
-                    std       11,u      ; store D to indexed value 11,u
-                    ldb       #UNBUF    ; load B from immediate value UNBUF
+                    std       FILE_BUFSIZ,u ; set fallback buffer size to one byte
+                    ldb       #_UNBUF   ; mark stream unbuffered
 L_setbase_flag
-                    orb       7,u       ; OR B with indexed value 7,u
-                    stb       7,u       ; store B to indexed value 7,u
-                    ldd       2,u       ; load D from indexed value 2,u
-                    addd      11,u      ; add indexed value 11,u into D
-                    std       4,u       ; store D to indexed value 4,u
-                    std       ,u        ; store D to memory pointed to by U
+                    orb       FILE_FLAG+1,u ; merge chosen buffer mode into low FILE flags
+                    stb       FILE_FLAG+1,u ; save low FILE flags
+                    ldd       FILE_BASE,u ; load buffer base pointer
+                    addd      FILE_BUFSIZ,u ; compute buffer end pointer
+                    std       FILE_END,u ; save buffer end pointer
+                    std       FILE_PTR,u ; initialize current pointer at buffer end
 L_setbase_done
-                    puls      u,pc      ; restore registers and return
+                    puls      u,pc      ; restore U and return
 
-                    endsect             ; end current section
+                    endsect   ;         end current section

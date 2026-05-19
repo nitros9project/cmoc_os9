@@ -7,66 +7,69 @@
                     section   bss       ; begin bss section
 
 MAXENTS             equ       20        ; maximum simultaneous traps
-Zero                equ       %00000100 ; define constant as %00000100
-sig                 equ       0         ; define constant as 0
-func                equ       1         ; define constant as 1
-entsiz              equ       3         ; define constant as 3
+Zero                equ       %00000100 ; condition-code Z bit mask
+sig                 equ       0         ; signal byte offset in a table entry
+func                equ       1         ; handler pointer offset in a table entry
+entsiz              equ       3         ; bytes per signal table entry
 
-_table              rmb       entsiz*MAXENTS ; reserve entsiz*MAXENTS bytes
-_etable             rmb       0         ; reserve 0 bytes
-_flag               rmb       1         ; reserve 1 bytes
+_table              rmb       entsiz*MAXENTS ; signal-to-handler table
+_etable             rmb       0         ; sentinel address just past signal table
+_flag               rmb       1         ; nonzero once F_Icpt has been installed
 
-                    endsect             ; end current section
+                    endsect   ;         end current section
 
                     use       ../include/os9.d ; shared OS-9 service constants
 
                     section   code      ; begin code section
 
-_sigint             EXPORT              ; export this symbol
-_signal             EXPORT              ; export this symbol
+_sigint             EXPORT    ;         export signal-compatible intercept installer
+_signal             EXPORT    ;         export C signal() entry point
 
 * signal(sig, func)
-_sigint
-_signal
-                    ldd       2,s       ; get the signal number
-                    tstb                ; lsb 0?
-                    beq       sigerr    ; signal 0 can't be caught or ignored
-                    tsta                ; greater than 255?
-                    bne       sigerr    ; branch if not equal to sigerr
-                    bsr       lookup    ; find a suitable entry
-                    bne       signal10  ; branch if entry found
+_sigint:
+_signal:
+stk_signal_ret      equ       0         ; caller return address
+stk_signal_signo    equ       2         ; signal number argument
+stk_signal_handler  equ       4         ; new signal handler pointer
+                    ldd       stk_signal_signo,s ; get the signal number
+                    tstb                ; signal zero cannot be caught or ignored
+                    beq       sigerr    ; reject signal zero
+                    tsta                ; high byte must be zero for OS-9 signal byte
+                    bne       sigerr    ; reject signal numbers above 255
+                    bsr       lookup    ; find existing or free table entry
+                    bne       signal10  ; continue when a table slot is available
 
 sigerr
-                    ldd       #-1       ; error indication
+                    ldd       #-1       ; return SIG_ERR on failure
                     rts                 ; return to caller
 
 signal10
-                    ldd       func,x    ; get the old entry function
-                    pshs      d         ; save it
-                    ldd       6,s       ; get the new function
-                    std       func,x    ; store in the structure
-                    bne       signal20  ; if not 0 branch
+                    ldd       func,x    ; get previous handler from the table entry
+                    pshs      d         ; save previous handler as signal() return value
+                    ldd       stk_signal_handler+2,s ; get new handler after saved return value
+                    std       func,x    ; store new handler in the table entry
+                    bne       signal20  ; install or keep table entry for non-default handlers
 
 * the new 'function' is reset (0)
-                    clr       sig,x     ; reset the signal byte
+                    clr       sig,x     ; clear the signal byte for SIG_DFL
 sigexit
-                    puls      d,pc      ; return the old entry
+                    puls      d,pc      ; return previous handler
 
 * value for 'func' is 1 or a real address - set it
 signal20
-                    ldb       5,s       ; get the signal
-                    stb       sig,x     ; store it
-                    tst       _flag,y   ; have we intercepted before?
-                    bne       sigexit   ; yes - no more to do
+                    ldb       stk_signal_signo+3,s ; get signal low byte after saved return value
+                    stb       sig,x     ; store signal number in table entry
+                    tst       _flag,y   ; test whether F_Icpt was already installed
+                    bne       sigexit   ; no kernel call needed after first install
 
-                    exg       y,u       ; set the local storage into u
-                    leax      intrupt,pcr ; get the address of the interrupt routine
-                    os9       F_Icpt    ; invoke OS-9 system call F_Icpt
-                    exg       y,u       ; reset local storage into y
-                    puls      d         ; get the old value into d
-                    bcs       sigerr    ; error?
-                    inc       _flag,y   ; indicate that we've done it
-                    rts                 ; all done
+                    exg       y,u       ; pass data area in U as required by F_Icpt
+                    leax      intrupt,pcr ; point X at intercept routine
+                    os9       F_Icpt    ; install signal intercept routine
+                    exg       y,u       ; restore CMOC data pointer
+                    puls      d         ; recover previous handler return value
+                    bcs       sigerr    ; return SIG_ERR if F_Icpt failed
+                    inc       _flag,y   ; remember intercept routine is installed
+                    rts                 ; return previous handler
 
 * Table lookup function:
 *
@@ -75,37 +78,39 @@ signal20
 * failing that, zero
 * return result in x reg. and set the z bit accordingly
 lookup
-                    clr       ,-s       ; set up a null
-                    clr       ,-s       ; 'empty' pointer
-                    leax      _etable,y ; get table end address
-                    pshs      x         ; save it
-                    leax      _table,y  ; start at the beginning
+stk_lookup_endp     equ       0         ; table end pointer scratch after setup
+stk_lookup_emptyp   equ       2         ; first empty entry pointer scratch after setup
+                    clr       ,-s       ; clear low byte of first-empty pointer
+                    clr       ,-s       ; clear high byte of first-empty pointer
+                    leax      _etable,y ; point X just past the table
+                    pshs      x         ; save table end pointer
+                    leax      _table,y  ; start scan at first table entry
 
 loop
-                    cmpx      ,s        ; end yet?
-                    beq       eloop     ; yes - exit loop
-                    cmpb      sig,x     ; match?
-                    bne       signal30  ; no - continue
-                    leas      4,s       ; clean up stack
-                    andcc     #^Zero    ; indicate success
-                    rts                 ; and return
+                    cmpx      stk_lookup_endp,s ; test whether scan reached table end
+                    beq       eloop     ; stop after all entries have been examined
+                    cmpb      sig,x     ; compare requested signal against entry signal
+                    bne       signal30  ; keep scanning if this entry is for another signal
+                    leas      4,s       ; discard lookup scratch
+                    andcc     #^Zero    ; clear Z to indicate success
+                    rts                 ; return matching entry in X
 
 signal30
-                    lda       sig,x     ; if the entry is not empty
-                    ora       2,s       ; or the 'empty' pointer
-                    ora       3,s       ; is not null
-                    bne       signal40  ; then continue
-                    stx       2,s       ; else save address of empty entry
+                    lda       sig,x     ; inspect whether entry is empty
+                    ora       stk_lookup_emptyp,s ; combine with saved empty pointer high byte
+                    ora       stk_lookup_emptyp+1,s ; combine with saved empty pointer low byte
+                    bne       signal40  ; keep first empty pointer already found
+                    stx       stk_lookup_emptyp,s ; remember this empty entry
 
 signal40
-                    leax      entsiz,x  ; bump to next
-                    bra       loop      ; and round again
+                    leax      entsiz,x  ; advance to next table entry
+                    bra       loop      ; continue table scan
 
 eloop
 * traversed table without finding a match
-                    ldx       2,s       ; get the empty entry pointer
-                    leas      4,s       ; clean the stack
-                    rts                 ; return to caller
+                    ldx       stk_lookup_emptyp,s ; return first empty entry, or zero if none
+                    leas      4,s       ; discard lookup scratch
+                    rts                 ; Z reflects whether X is zero
 
 * Entry point for all received signals.
 * If an entry is found matching the signal then
@@ -114,32 +119,32 @@ eloop
 * else
 *   exit with the signal as status
 intrupt
-                    leay      ,u        ; point to the data
-                    bsr       lookup    ; branch to subroutine to lookup
-                    beq       intr10    ; any entry returned?
-                    pshs      x         ; save the entry pointer
-                    ldx       func,x    ; get the function address
-                    bne       intr20    ; empty entry?
+                    leay      ,u        ; restore CMOC data pointer from OS-9 U
+                    bsr       lookup    ; find handler entry for signal in B
+                    beq       intr10    ; exit process when no entry exists
+                    pshs      x         ; save handler table entry pointer
+                    ldx       func,x    ; get handler address or SIG_IGN marker
+                    bne       intr20    ; continue when entry has a handler value
 
 * no matching entry - simulate condition of no 'intercept'
 intr10
                     os9       F_Exit    ; status still in B reg.
 
 intr20
-                    cmpx      #1        ; is it 'ignore'?
-                    bne       intr30    ; no - execute
-                    leas      2,s       ; reset stack
-                    rti                 ; and resume
+                    cmpx      #1        ; signal handler value 1 means ignore
+                    bne       intr30    ; execute real handler pointers
+                    leas      2,s       ; discard saved table entry pointer
+                    rti                 ; resume interrupted code
 
 intr30
-                    clra                ; clear the MSB of the signal arg
-                    pshs      d         ; put it on stack for the function
-                    jsr       ,x        ; go run the function
-                    puls      d,x       ; get the entry pointer back
-                    clra                ; clear A
-                    clrb                ; clear B
-                    sta       sig,x     ; clear the entry
-                    std       func,x    ; and its func address
-                    rti                 ; and that's it
+                    clra                ; pass signal as positive int
+                    pshs      d         ; stage signal argument for handler
+                    jsr       ,x        ; call installed C handler
+                    puls      d,x       ; discard handler argument and recover table entry pointer
+                    clra                ; clear signal byte value
+                    clrb                ; clear handler pointer value
+                    sta       sig,x     ; reset signal entry after delivery
+                    std       func,x    ; clear handler pointer
+                    rti                 ; resume interrupted code
 
-                    endsect             ; end current section
+                    endsect   ;         end current section

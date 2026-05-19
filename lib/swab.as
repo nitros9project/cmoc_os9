@@ -2,11 +2,13 @@
 
                     section   code      ; begin code section
 
-_swab               EXPORT              ; export this symbol
+_swab               EXPORT    ;         export byte-swap helper
 
-_swab
-                    ldd       2,s       ; load D from stack-relative value 2,s
-                    exg       a,b       ; exchange A,B
+_swab:
+stk_swab_ret        equ       0         ; caller return address
+stk_swab_value      equ       2         ; 16-bit value to byte-swap
+                    ldd       stk_swab_value,s ; load input value
+                    exg       a,b       ; swap high and low bytes
                     rts                 ; return to caller
 
-                    endsect             ; end current section
+                    endsect   ;         end current section

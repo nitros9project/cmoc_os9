@@ -2,18 +2,21 @@
 
                     section   code      ; begin code section
 
-_strclr             EXPORT              ; export this symbol
+_strclr             EXPORT    ;         export string clear helper
 
-_strclr
-                    pshs      u         ; save U on the hardware stack
-                    ldu       4,s       ; load U from stack-relative value 4,s
-                    clrb                ; clear B
-                    ldx       6,s       ; load X from stack-relative value 6,s
-                    beq       BranchTarget_01 ; branch if equal/zero to BranchTarget_01
-Loop_01             stb       ,u+       ; store B to memory pointed to by U, then advance U
-                    leax      -1,x      ; compute effective address into X from -1,x
-                    bne       Loop_01   ; branch if not equal to Loop_01
-BranchTarget_01     ldd       4,s       ; load D from stack-relative value 4,s
-                    puls      u,pc      ; restore registers and return
+_strclr:
+stk_strclr_ret      equ       0         ; caller return address
+stk_strclr_dest     equ       2         ; destination pointer
+stk_strclr_count    equ       4         ; byte count to clear
+                    pshs      u         ; preserve caller's U register
+                    ldu       stk_strclr_dest+2,s ; load destination pointer after saved U
+                    clrb                ; prepare zero byte for clearing
+                    ldx       stk_strclr_count+2,s ; load byte count after saved U
+                    beq       BranchTarget_01 ; return immediately for zero length
+Loop_01             stb       ,u+       ; clear next destination byte
+                    leax      -1,x      ; count down remaining bytes
+                    bne       Loop_01   ; continue until buffer is cleared
+BranchTarget_01     ldd       stk_strclr_dest+2,s ; return destination pointer
+                    puls      u,pc      ; restore U and return
 
-                    endsect             ; end current section
+                    endsect   ;         end current section

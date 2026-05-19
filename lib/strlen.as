@@ -2,16 +2,18 @@
 
                     section   code      ; begin code section
 
-_strlen             EXPORT              ; export this symbol
+_strlen             EXPORT    ;         export strlen helper
 
-_strlen
-                    pshs      u         ; save U on the hardware stack
-                    ldu       4,s       ; load U from stack-relative value 4,s
-Loop_01             ldb       ,u+       ; load B from memory pointed to by U, then advance U
-                    bne       Loop_01   ; branch if not equal to Loop_01
-                    leau      -1,u      ; compute effective address into U from -1,u
-                    tfr       u,d       ; transfer U,D
-                    subd      4,s       ; subtract stack-relative value 4,s from D
-                    puls      u,pc      ; restore registers and return
+_strlen:
+stk_strlen_ret      equ       0         ; caller return address
+stk_strlen_string   equ       2         ; string pointer
+                    pshs      u         ; preserve caller's U register
+                    ldu       stk_strlen_string+2,s ; load string pointer after saved U
+Loop_01             ldb       ,u+       ; scan next byte and advance
+                    bne       Loop_01   ; continue until NUL terminator
+                    leau      -1,u      ; back up to the NUL terminator
+                    tfr       u,d       ; copy terminator address into D
+                    subd      stk_strlen_string+2,s ; subtract original string pointer
+                    puls      u,pc      ; restore U and return string length
 
-                    endsect             ; end current section
+                    endsect   ;         end current section

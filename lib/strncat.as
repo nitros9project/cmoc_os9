@@ -2,25 +2,29 @@
 
                     section   code      ; begin code section
 
-_strncat            EXPORT              ; export this symbol
+_strncat            EXPORT    ;         export strncat helper
 
-_strncat
-                    pshs      y,u       ; save Y,U on the hardware stack
-                    ldu       8,s       ; load U from stack-relative value 8,s
-                    ldx       6,s       ; load X from stack-relative value 6,s
-                    ldy       10,s      ; load Y from stack-relative value 10,s
-                    beq       BranchTarget_02 ; branch if equal/zero to BranchTarget_02
-Loop_01             ldb       ,x+       ; load B from memory pointed to by X, then advance X
-                    bne       Loop_01   ; branch if not equal to Loop_01
-                    leax      -1,x      ; compute effective address into X from -1,x
-Loop_02             ldb       ,u+       ; load B from memory pointed to by U, then advance U
-                    stb       ,x+       ; store B to memory pointed to by X, then advance X
-                    leay      -1,y      ; compute effective address into Y from -1,y
-                    beq       BranchTarget_01 ; branch if equal/zero to BranchTarget_01
-                    tstb                ; test B and update condition codes
-                    bne       Loop_02   ; branch if not equal to Loop_02
-BranchTarget_01     clr       ,x        ; clear memory pointed to by X
-BranchTarget_02     ldd       6,s       ; load D from stack-relative value 6,s
+_strncat:
+stk_strncat_ret     equ       0         ; caller return address
+stk_strncat_dest    equ       2         ; destination string pointer
+stk_strncat_source  equ       4         ; source string pointer
+stk_strncat_count   equ       6         ; maximum bytes to append
+                    pshs      y,u       ; preserve caller's Y and U registers
+                    ldu       stk_strncat_source+4,s ; load source pointer after saved Y/U
+                    ldx       stk_strncat_dest+4,s ; load destination pointer after saved Y/U
+                    ldy       stk_strncat_count+4,s ; load append count after saved Y/U
+                    beq       BranchTarget_02 ; return immediately when count is zero
+Loop_01             ldb       ,x+       ; scan destination byte and advance
+                    bne       Loop_01   ; continue until destination NUL
+                    leax      -1,x      ; back up to append over NUL
+Loop_02             ldb       ,u+       ; copy next source byte
+                    stb       ,x+       ; store byte into destination
+                    leay      -1,y      ; count down available append bytes
+                    beq       BranchTarget_01 ; force terminator after count expires
+                    tstb                ; check whether copied byte was NUL
+                    bne       Loop_02   ; continue until source NUL or count expires
+BranchTarget_01     clr       ,x        ; ensure destination remains NUL-terminated
+BranchTarget_02     ldd       stk_strncat_dest+4,s ; return destination pointer
                     puls      y,u,pc    ; restore registers and return
 
-                    endsect             ; end current section
+                    endsect   ;         end current section

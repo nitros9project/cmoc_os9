@@ -2,28 +2,32 @@
 
                     section   code      ; begin code section
 
-_skipbl             EXPORT              ; export this symbol
-_skipwd             EXPORT              ; export this symbol
+_skipbl             EXPORT    ;         export leading-blank skipper
+_skipwd             EXPORT    ;         export word skipper
 
-_skipbl
-                    ldx       2,s       ; load X from stack-relative value 2,s
-Loop_01             ldb       ,x+       ; load B from memory pointed to by X, then advance X
-                    cmpb      #$20      ; compare B against immediate value $20
-                    beq       Loop_01   ; branch if equal/zero to Loop_01
-                    cmpb      #9        ; compare B against immediate value 9
-                    beq       Loop_01   ; branch if equal/zero to Loop_01
-                    bra       BranchTarget_01 ; branch unconditionally to BranchTarget_01
+_skipbl:
+stk_skipbl_ret      equ       0         ; caller return address
+stk_skipbl_string   equ       2         ; input string pointer
+                    ldx       stk_skipbl_string,s ; load scan pointer
+Loop_01             ldb       ,x+       ; fetch next character and advance past it
+                    cmpb      #$20      ; treat ASCII space as skippable whitespace
+                    beq       Loop_01   ; continue through spaces
+                    cmpb      #9        ; treat horizontal tab as skippable whitespace
+                    beq       Loop_01   ; continue through tabs
+                    bra       BranchTarget_01 ; step back to first non-blank character
 
-_skipwd
-                    ldx       2,s       ; load X from stack-relative value 2,s
-Loop_02             ldb       ,x+       ; load B from memory pointed to by X, then advance X
-                    beq       BranchTarget_01 ; branch if equal/zero to BranchTarget_01
-                    cmpb      #$20      ; compare B against immediate value $20
-                    beq       BranchTarget_01 ; branch if equal/zero to BranchTarget_01
-                    cmpb      #9        ; compare B against immediate value 9
-                    bne       Loop_02   ; branch if not equal to Loop_02
-BranchTarget_01     leax      -1,x      ; compute effective address into X from -1,x
-                    tfr       x,d       ; transfer X,D
+_skipwd:
+stk_skipwd_ret      equ       0         ; caller return address
+stk_skipwd_string   equ       2         ; input string pointer
+                    ldx       stk_skipwd_string,s ; load scan pointer
+Loop_02             ldb       ,x+       ; fetch next character and advance past it
+                    beq       BranchTarget_01 ; stop at NUL terminator
+                    cmpb      #$20      ; stop at ASCII space
+                    beq       BranchTarget_01 ; return pointer to delimiter
+                    cmpb      #9        ; stop at horizontal tab
+                    bne       Loop_02   ; continue until word delimiter
+BranchTarget_01     leax      -1,x      ; back up to the character that stopped the scan
+                    tfr       x,d       ; return resulting pointer in D
                     rts                 ; return to caller
 
-                    endsect             ; end current section
+                    endsect   ;         end current section

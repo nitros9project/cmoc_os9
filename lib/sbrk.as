@@ -3,55 +3,60 @@
 * Adapted from cmoc_os9/lib/todo/sbrk.a for the live CMOC ABI.
 *
 
+                    use       ../include/os9.d ; shared OS-9 service and error constants
+
                     section   code      ; begin code section
 
-_sbrk               EXPORT              ; export this symbol
+_sbrk               EXPORT    ;         export C sbrk-style allocator
 
-__memend            EXTERNAL            ; import external symbol
-_spare              EXTERNAL            ; import external symbol
-_os9err             EXTERNAL            ; import external symbol
+__memend            EXTERNAL  ;         import current process memory end
+_spare              EXTERNAL  ;         import spare-byte count below current memory end
+_os9err             EXTERNAL  ;         import errno-style OS-9 error handler
 
-_sbrk               ldd       __memend,y ; get hi bound
-                    pshs      d         ; save it
-                    ldd       4,s       ; get requested size
-                    cmpd      _spare,y  ; any spare left?
-                    blo       sbrk20    ; branch if lower to sbrk20
+_sbrk:
+stk_sbrk_ret        equ       0         ; caller return address
+stk_sbrk_size       equ       2         ; requested byte count
+                    ldd       __memend,y ; get current high memory bound
+                    pshs      d         ; save old memory end while computing allocation
+                    ldd       stk_sbrk_size+2,s ; get requested size after saved old bound
+                    cmpd      _spare,y  ; check whether existing spare memory is enough
+                    blo       sbrk20    ; use spare space when request fits
 
 * have to get some from the system
-                    pshs      y         ; save data pointer
-                    clra                ; clear A
-                    clrb                ; clear B
-                    os9       $07       ; get current size/end
-                    addd      6,s       ; add requested increase
-                    os9       $07       ; re-size memory
-                    tfr       y,d       ; save high bound
+                    pshs      y         ; preserve data pointer across F_Mem
+                    clra                ; request current memory size from F_Mem
+                    clrb                ; request current memory size from F_Mem
+                    os9       F_Mem     ; get current memory size/end
+                    addd      stk_sbrk_size+4,s ; add requested increase after saved old bound/Y
+                    os9       F_Mem     ; resize process memory to requested high bound
+                    tfr       y,d       ; copy returned high bound into D
                     puls      y         ; restore data pointer
-                    bcc       sbrk10    ; branch if carry is clear to sbrk10
-                    leas      2,s       ; junk scratch
-                    ldb       #$CF      ; load B from immediate value $CF
-                    lbra      _os9err   ; long branch unconditionally to _os9err
+                    bcc       sbrk10    ; continue when OS-9 accepted the resize
+                    leas      2,s       ; discard saved old memory end
+                    ldb       #E_MemFul ; report process memory full
+                    lbra      _os9err   ; convert OS-9 error to C return convention
 
-sbrk10              std       __memend,y ; save new memory address
-                    addd      _spare,y  ; add in spare bytes
-                    subd      ,s        ; less old base
-                    std       _spare,y  ; is new spare value
+sbrk10              std       __memend,y ; save new memory end
+                    addd      _spare,y  ; include old spare bytes in the new spare total
+                    subd      ,s        ; subtract old memory end
+                    std       _spare,y  ; save updated spare count
 
 * now spare is big enough
-sbrk20              leas      2,s       ; junk scratch
-                    ldd       _spare,y  ; get spare count
-                    pshs      d         ; save D on the hardware stack
-                    subd      4,s       ; less size
-                    std       _spare,y  ; updated value
-                    ldd       __memend,y ; get hi bound
-                    subd      ,s++      ; base of free memory
-                    pshs      d         ; save
+sbrk20              leas      2,s       ; discard saved old memory end
+                    ldd       _spare,y  ; get spare byte count
+                    pshs      d         ; save original spare count
+                    subd      stk_sbrk_size+2,s ; subtract requested byte count after saved spare
+                    std       _spare,y  ; save remaining spare byte count
+                    ldd       __memend,y ; get current high memory bound
+                    subd      ,s++      ; compute base address of the free spare block
+                    pshs      d         ; save allocation base for return and zero-fill
 
-                    clra                ; clear A
-                    ldx       0,s       ; load X from stack-relative value 0,s
-sbrk30              sta       ,x+       ; clear new memory
-                    cmpx      __memend,y ; compare X against indexed value __memend,y
-                    blo       sbrk30    ; branch if lower to sbrk30
+                    clra                ; zero byte used to initialize allocated memory
+                    ldx       ,s        ; load allocation cursor
+sbrk30              sta       ,x+       ; clear next allocated byte
+                    cmpx      __memend,y ; stop when cursor reaches current memory end
+                    blo       sbrk30    ; keep clearing the allocated block
 
-                    puls      d,pc      ; restore registers and return
+                    puls      d,pc      ; return allocation base
 
-                    endsect             ; end current section
+                    endsect   ;         end current section

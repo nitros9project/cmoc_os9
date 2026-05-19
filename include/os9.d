@@ -37,6 +37,7 @@ I_Dup               equ       $82       ; OS-9 duplicate path descriptor call
 
 E_PthFul            equ       $C8       ; path table full error code
 E_BMode             equ       $CB       ; bad access mode error code
+E_MemFul            equ       $CF       ; process memory full error code
 E_UnkSvc            equ       $D0       ; unknown service error code
 E_EOF               equ       $D3       ; end-of-file status code
 E_FNA               equ       $D6       ; file not accessible error code
@@ -67,3 +68,4 @@ SS_BlkWr            equ       $15       ; block write command
 SS_ELog             equ       $19       ; error log command
 SS_SSig             equ       $1A       ; send signal command
 SS_Relea            equ       $1B       ; release command
+SS_Attr             equ       $1C       ; path attribute command

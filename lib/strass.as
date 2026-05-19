@@ -2,25 +2,29 @@
 
                     section   code      ; begin code section
 
-__strass            EXPORT              ; export this symbol
+__strass            EXPORT    ;         export counted string assignment helper
 
-__strass
-                    pshs      y,u       ; save Y,U on the hardware stack
-                    ldu       6,s       ; load U from stack-relative value 6,s
-                    ldy       8,s       ; load Y from stack-relative value 8,s
-                    ldd       10,s      ; load D from stack-relative value 10,s
-                    lsra                ; logical shift A right by one bit
-                    rorb                ; rotate B right through carry
-                    tfr       d,x       ; transfer D,X
-                    bcc       BranchTarget_01 ; branch if carry is clear to BranchTarget_01
-                    lda       ,y+       ; load A from memory pointed to by Y, then advance Y
-                    sta       ,u+       ; store A to memory pointed to by U, then advance U
-BranchTarget_01     stx       -2,s      ; store X to stack-relative value -2,s
-                    beq       BranchTarget_02 ; branch if equal/zero to BranchTarget_02
-Loop_01             ldd       ,y++      ; load D from memory pointed to by Y+, then advance Y+
-                    std       ,u++      ; store D to memory pointed to by U+, then advance U+
-                    leax      -1,x      ; compute effective address into X from -1,x
-                    bne       Loop_01   ; branch if not equal to Loop_01
+__strass:
+stk_strass_ret      equ       0         ; caller return address
+stk_strass_dest     equ       2         ; destination pointer
+stk_strass_source   equ       4         ; source pointer
+stk_strass_count    equ       6         ; byte count to copy
+                    pshs      y,u       ; preserve destination/source index registers
+                    ldu       stk_strass_dest+4,s ; load destination pointer after saved Y/U
+                    ldy       stk_strass_source+4,s ; load source pointer after saved Y/U
+                    ldd       stk_strass_count+4,s ; load byte count after saved Y/U
+                    lsra                ; divide byte count by two
+                    rorb                ; keep odd byte in carry while forming word count
+                    tfr       d,x       ; use X as the word-copy count
+                    bcc       BranchTarget_01 ; skip byte copy when count was even
+                    lda       ,y+       ; copy leading odd byte from source
+                    sta       ,u+       ; store leading odd byte to destination
+BranchTarget_01     stx       -2,s      ; update flags from word count without changing X
+                    beq       BranchTarget_02 ; no word copies remain
+Loop_01             ldd       ,y++      ; copy next two source bytes
+                    std       ,u++      ; store next two destination bytes
+                    leax      -1,x      ; count down copied words
+                    bne       Loop_01   ; continue until all words are copied
 BranchTarget_02     puls      y,u,pc    ; restore registers and return
 
-                    endsect             ; end current section
+                    endsect   ;         end current section

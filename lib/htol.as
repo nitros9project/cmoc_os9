@@ -1,53 +1,80 @@
+                    use       ../include/ctype.d ; shared character-class flag constants
+
                     section   code      ; begin code section
 
-_flacc              EXTERNAL            ; import external symbol
-_chcodes            EXTERNAL            ; import external symbol
+_flacc              EXTERNAL  ;         shared 32-bit long result accumulator
+_chcodes            EXTERNAL  ;         import character classification table
 
-htol                EXPORT              ; export this symbol
+_htol               EXPORT    ;         export C-callable entry point
+htol                EXPORT    ;         export this symbol
 
-htol:               pshs      y,u       ; save Y,U on the hardware stack
-                    leax      _flacc,y  ; compute effective address into X from _flacc,y
-                    leay      _chcodes,y ; compute effective address into Y from _chcodes,y
-                    ldu       6,s       ; load U from stack-relative value 6,s
-                    clra                ; clear A
-                    clrb                ; clear B
-                    std       ,x        ; store D to memory pointed to by X
-                    std       2,x       ; store D to indexed value 2,x
-Loop_01             ldb       ,u        ; load B from memory pointed to by U
-                    cmpb      #$20      ; compare B against immediate value $20
-                    beq       BranchTarget_01 ; branch if equal/zero to BranchTarget_01
-                    cmpb      #9        ; compare B against immediate value 9
-                    bne       BranchTarget_03 ; branch if not equal to BranchTarget_03
-BranchTarget_01     leau      1,u       ; compute effective address into U from 1,u
-                    bra       Loop_01   ; branch unconditionally to Loop_01
-Loop_02             lda       #4        ; load A from immediate value 4
-Loop_03             asl       3,x       ; shift indexed value 3,x left by one bit
-                    rol       2,x       ; rotate indexed value 2,x left through carry
-                    rol       1,x       ; rotate indexed value 1,x left through carry
-                    rol       ,x        ; rotate memory pointed to by X left through carry
-                    deca                ; decrement A
-                    bne       Loop_03   ; branch if not equal to Loop_03
-                    ldb       ,u+       ; load B from memory pointed to by U, then advance U
-                    subb      #$30      ; subtract immediate value $30 from B
-                    cmpb      #9        ; compare B against immediate value 9
-                    ble       BranchTarget_02 ; branch if less or equal to BranchTarget_02
-                    subb      #7        ; subtract immediate value 7 from B
-                    cmpb      #$0f      ; compare B against immediate value $0f
-                    ble       BranchTarget_02 ; branch if less or equal to BranchTarget_02
-                    subb      #$20      ; subtract immediate value $20 from B
-BranchTarget_02     andcc     #254      ; clear condition-code bits with mask #254
-                    lda       #3        ; load A from immediate value 3
-                    bra       Continue_01 ; branch unconditionally to Continue_01
-Loop_04             ldb       #0        ; load B from immediate value 0
-Continue_01         adcb      a,x       ; add indexed value a,x into B
-                    stb       a,x       ; store B to indexed value a,x
-                    deca                ; decrement A
-                    bpl       Loop_04   ; branch if plus to Loop_04
-                    ldb       ,u        ; load B from memory pointed to by U
-BranchTarget_03     ldb       b,y       ; load B from indexed value b,y
-                    andb      #$40      ; AND B with immediate value $40
-                    bne       Loop_02   ; branch if not equal to Loop_02
-                    puls      y,u,pc    ; restore registers and return
+_htol:
+htol:
+stk_htol_saved_y    equ       0         ; saved CMOC data pointer after entry prologue
+stk_htol_saved_u    equ       2         ; saved U after entry prologue
+stk_htol_ret        equ       4         ; caller return address after entry prologue
+stk_htol_dest       equ       6         ; hidden long-return destination pointer after entry prologue
+stk_htol_string     equ       8         ; input string pointer after entry prologue
+ascii_space         equ       $20       ; leading space accepted by this parser
+ascii_tab           equ       $09       ; leading horizontal tab accepted by this parser
+ascii_zero          equ       $30       ; ASCII base used to convert a digit character
+hex_digit_max       equ       9         ; largest decimal digit value before A-F adjustment
+hex_alpha_adjust    equ       7         ; gap between ASCII '9' and 'A'
+hex_nibble_max      equ       $0f       ; largest value accepted for one hexadecimal digit
+hex_case_adjust     equ       $20       ; gap between uppercase and lowercase hex letters
+hex_nibble_bits     equ       4         ; number of bits shifted for each hex digit
+flacc_low_word      equ       2         ; low word offset inside _flacc
+flacc_low_byte      equ       3         ; lowest byte offset inside _flacc
+cc_carry_bit        equ       $01       ; carry bit cleared before multi-byte addition
+                    pshs      y,u       ; preserve CMOC data pointer and caller U
+                    leax      _flacc,y  ; point X at the shared 32-bit result buffer
+                    leay      _chcodes,pcr ; point Y at the ctype flag table for this routine
+                    ldu       stk_htol_string,s ; point U at the input string
+                    clra                ; prepare zero for clearing the accumulator
+                    clrb                ; prepare zero for clearing the accumulator
+                    std       ,x        ; clear high word of the 32-bit accumulator
+                    std       flacc_low_word,x ; clear low word of the 32-bit accumulator
+htol_skip_ws        ldb       ,u        ; inspect the next input byte without consuming it
+                    cmpb      #ascii_space ; skip leading spaces
+                    beq       htol_advance_ws ; consume this leading space
+                    cmpb      #ascii_tab ; skip leading tabs
+                    bne       htol_check_digit ; stop skipping when the byte is not whitespace
+htol_advance_ws     leau      1,u       ; advance past accepted leading whitespace
+                    bra       htol_skip_ws ; continue scanning for the first hex digit
+htol_accumulate_digit
+                    lda       #hex_nibble_bits ; shift the 32-bit accumulator by one hex digit
+htol_shift_nibble   asl       flacc_low_byte,x ; shift lowest accumulator byte left
+                    rol       flacc_low_word,x ; rotate carry into low word high byte
+                    rol       1,x       ; rotate carry through high word low byte
+                    rol       ,x        ; rotate carry into high word high byte
+                    deca                ; count one bit of the four-bit shift
+                    bne       htol_shift_nibble ; continue until the full nibble shift is done
+                    ldb       ,u+       ; consume the current hex digit
+                    subb      #ascii_zero ; convert ASCII digit baseline to binary
+                    cmpb      #hex_digit_max ; is it in the '0'..'9' range?
+                    ble       htol_add_nibble ; decimal digit conversion is complete
+                    subb      #hex_alpha_adjust ; adjust 'A'..'F' into 10..15
+                    cmpb      #hex_nibble_max ; did uppercase conversion produce a nibble?
+                    ble       htol_add_nibble ; uppercase hex conversion is complete
+                    subb      #hex_case_adjust ; adjust lowercase 'a'..'f' into 10..15
+htol_add_nibble     andcc     #^cc_carry_bit ; start nibble addition with carry clear
+                    lda       #flacc_low_byte ; add from least significant byte upward
+                    bra       htol_add_carry ; add first byte using the converted nibble in B
+htol_propagate_carry
+                    ldb       #0        ; propagate only carry into higher accumulator bytes
+htol_add_carry      adcb      a,x       ; add nibble/carry into this accumulator byte
+                    stb       a,x       ; save updated accumulator byte
+                    deca                ; move to the next more significant byte
+                    bpl       htol_propagate_carry ; continue through all four accumulator bytes
+                    ldb       ,u        ; inspect the next byte before deciding whether to continue
+htol_check_digit    ldb       b,y       ; load ctype flags for the current byte
+                    andb      #_HEXDIG  ; keep only the hexadecimal-digit class bit
+                    bne       htol_accumulate_digit ; consume another digit while it is hexadecimal
+                    ldu       stk_htol_dest,s ; load caller's hidden long-return destination
+                    ldd       ,x        ; copy accumulated high word
+                    std       ,u        ; store high word into caller return slot
+                    ldd       flacc_low_word,x ; copy accumulated low word
+                    std       flacc_low_word,u ; store low word into caller return slot
+                    puls      y,u,pc    ; restore registers and return with X still pointing at _flacc
 
-                    endsect             ; end current section
-
+                    endsect   ;         end current section

@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+static int failed;
+
 void test_xtoa(void)
 {
 	char buf[16];
@@ -74,6 +76,48 @@ void test_abs_atoi_atol(void)
 		printf("%s [FAIL] atol()\n", __func__);
 }
 
+void test_htoi_htol(void)
+{
+	int htoi_ok = 1;
+	int htol_ok = 1;
+	long value;
+
+	if (htoi("0") != 0)
+		htoi_ok = 0;
+
+	if (htoi(" 7f") != 0x7f)
+		htoi_ok = 0;
+
+	if (htoi("\tABCx") != 0x0abc)
+		htoi_ok = 0;
+
+	if (htoi_ok)
+		printf("%s [PASS] htoi()\n", __func__);
+	else {
+		printf("%s [FAIL] htoi()\n", __func__);
+		failed = 1;
+	}
+
+	value = htol("0");
+	if (value != 0L)
+		htol_ok = 0;
+
+	value = htol(" abc");
+	if (value != 2748L)
+		htol_ok = 0;
+
+	value = htol("\t12345678x");
+	if (value != 305419896L)
+		htol_ok = 0;
+
+	if (htol_ok)
+		printf("%s [PASS] htol()\n", __func__);
+	else {
+		printf("%s [FAIL] htol()\n", __func__);
+		failed = 1;
+	}
+}
+
 void test_mktemp(void)
 {
 	char name[16];
@@ -138,8 +182,9 @@ int main(void)
 	test_xtoa();
 	test_minmax();
 	test_abs_atoi_atol();
+	test_htoi_htol();
 	test_mktemp();
 	test_setbuf();
 	test_rand();
-	return 0;
+	return failed;
 }

@@ -40,8 +40,14 @@ echo hello
 hello >>>-hello.out
 echo intercepttest
 intercepttest >>>-intercepttest.out
+echo intmathtest
+intmathtest >>>-intmathtest.out
 echo iotest
 iotest >>>-iotest.out
+echo lmultest
+lmultest >>>-lmultest.out
+echo longtest
+longtest >>>-longtest.out
 echo memtest
 memtest >>>-memtest.out
 echo misctest
@@ -60,12 +66,6 @@ echo pwenttest
 pwenttest >>>-pwenttest.out
 echo randtest
 randtest >>>-randtest.out
-echo longtest
-longtest >>>-longtest.out
-echo lmultest
-lmultest >>>-lmultest.out
-echo intmathtest
-intmathtest >>>-intmathtest.out
 echo searchtest
 searchtest >>>-searchtest.out
 echo setjmptest

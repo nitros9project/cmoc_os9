@@ -222,8 +222,36 @@ static void test_os_gs_ss_wrappers(void)
     result = _os_gs_size(invalid_path, &size_value);
     check_error("_os_gs_size invalid path", result);
 
+    result = _os_gs_ready(invalid_path, &ready_value);
+    check_error("_os_gs_ready invalid path", result);
+
+    result = _os_gs_eof(invalid_path, &eof_value);
+    check_error("_os_gs_eof invalid path", result);
+
     result = _os_gs_devnm(invalid_path, devnm);
     check_error("_os_gs_devnm invalid path", result);
+
+    fdcount = sizeof(fdbuf);
+    result = _os_gs_fd(invalid_path, fdbuf, &fdcount);
+    check_error("_os_gs_fd invalid path", result);
+
+    result = _os_ss_popt(invalid_path, opts);
+    check_error("_os_ss_popt invalid path", result);
+
+    result = _os_ss_pfd(invalid_path, fdbuf);
+    check_error("_os_ss_pfd invalid path", result);
+
+    result = _os_ss_sendsig(invalid_path, 0);
+    check_error("_os_ss_sendsig invalid path", result);
+
+    result = _os_ss_ticks(invalid_path, opts);
+    check_error("_os_ss_ticks invalid path", result);
+
+    result = _os_ss_reset(invalid_path);
+    check_error("_os_ss_reset invalid path", result);
+
+    result = _os_ss_relea(invalid_path);
+    check_error("_os_ss_relea invalid path", result);
 
     result = _os_setstat(SS_Reset, invalid_path, 0, 0, 0);
     check_error("_os_setstat SS_Reset invalid path", result);

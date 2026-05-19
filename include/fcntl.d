@@ -12,4 +12,5 @@ S_DIR               equ       $80       ; directory attribute bit
 FAM_READ            equ       S_IREAD   ; open for reading
 FAM_WRITE           equ       S_IWRITE  ; open for writing
 FAM_UPDATE          equ       S_IREAD|S_IWRITE ; open for read/write
+FAM_NONSHARE        equ       S_SHARED  ; open in non-sharable mode
 FAM_DIR             equ       S_DIR     ; operate on a directory path

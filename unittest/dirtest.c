@@ -8,7 +8,16 @@ int main(void)
     DIRECT *first;
     DIRECT *second;
     DIRECT *again;
+    char second_name[32];
     long pos;
+
+    dirp = opendir("no_such_directory");
+    if (dirp != 0) {
+        printf("dirtest [FAIL] opendir nonexistent\n");
+        closedir(dirp);
+        return 1;
+    }
+    printf("dirtest [PASS] opendir nonexistent\n");
 
     dirp = opendir(".");
     if (dirp == 0) {
@@ -30,6 +39,7 @@ int main(void)
         closedir(dirp);
         return 0;
     }
+    strcpy(second_name, second->d_name);
 
     seekdir(dirp, pos);
     again = readdir(dirp);
@@ -38,8 +48,8 @@ int main(void)
         closedir(dirp);
         return 1;
     }
-    if (strcmp(second->d_name, again->d_name) != 0) {
-        printf("dirtest [FAIL] seekdir mismatch %s != %s\n", second->d_name, again->d_name);
+    if (strcmp(second_name, again->d_name) != 0) {
+        printf("dirtest [FAIL] seekdir mismatch %s != %s\n", second_name, again->d_name);
         closedir(dirp);
         return 1;
     }

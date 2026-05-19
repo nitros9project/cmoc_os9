@@ -20,6 +20,7 @@ test_chdir_open(void)
     int fd;
     int missing;
 
+    check_true("test_chdir_open chdir(nonexistent) fails", chdir("/dd/no_such_dir") < 0);
     check_true("test_chdir_open chdir(/dd)", chdir("/dd") == 0);
 
     fd = open("startup", FAM_READ);
@@ -52,6 +53,7 @@ test_chdir_open(void)
 static void
 test_chxdir(void)
 {
+    check_true("test_chxdir chxdir(nonexistent) fails", chxdir("/dd/no_such_cmds") < 0);
     check_true("test_chxdir chxdir(/dd/cmds)", chxdir("/dd/cmds") == 0);
 }
 

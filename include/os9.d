@@ -38,7 +38,10 @@ E_UnkSvc            equ       $D0       ; unknown service error code
 E_EOF               equ       $D3       ; end-of-file status code
 E_FNA               equ       $D6       ; file not accessible error code
 E_CEF               equ       $DA       ; creating existing file error code
+E_MNF               equ       $DD       ; module not found error code
 E_Seek              equ       $F7       ; seek error code
+
+ModType_Data        equ       $40       ; OS-9 data-module type nibble
 
 SS_Opt              equ       $00       ; path options query/set
 SS_Ready            equ       $01       ; path ready state query

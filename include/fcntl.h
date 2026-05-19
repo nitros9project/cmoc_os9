@@ -27,7 +27,7 @@
 #define	FAM_READ	S_IREAD
 #define	FAM_WRITE	S_IWRITE
 #define	FAM_UPDATE	(S_IREAD|S_IWRITE)
-#define	FAM_SHARE	S_ISHARE
+#define	FAM_NONSHARE	S_ISHARE
 
 /* _os style file access permissions */
 #define	FAP_READ	0x01

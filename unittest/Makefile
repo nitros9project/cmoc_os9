@@ -38,7 +38,7 @@ lmultest: lmultest.c lmulwrap.o
 	$(CC) $(LFLAGS) lmultest.c lmulwrap.o $(OBJS) -L../lib -lc -L../cgfx -lcgfx
 
 GRAPHICS_TESTS = wintest maze
-TESTS	= hello noop timetest fiotest iotest osiotest osopenerrtest syscalltest fdstreamtest memtest forktest forkhellotest forknowaittest forknooptest printtest osgstattest utimetest ctypetest stringtest floattest floatfmttest getopttest gtest popentest pwenttest defdrivetest pwcryptest errmsgtest stdlibtest setbuftest stdioedgetest streamiotest searchtest stringexttest randtest longtest lmultest intmathtest filelayout setjmptest systemtest setstest dirtest compat3test signaltest intercepttest dirapitest misctest datmodstest attrwraptest abortchild aborttest
+TESTS	= abortchild aborttest attrwraptest compat3test ctypetest datmodstest defdrivetest dirapitest dirtest errmsgtest fdstreamtest filelayout fiotest floatfmttest floattest forkhellotest forknooptest forknowaittest forktest getopttest gtest hello intercepttest intmathtest iotest lmultest longtest memtest misctest noop osgstattest osiotest osopenerrtest popentest printtest pwcryptest pwenttest randtest searchtest setbuftest setjmptest setstest signaltest stdioedgetest stdlibtest streamiotest stringexttest stringtest syscalltest systemtest timetest utimetest
 ALL_TESTS = $(TESTS) $(GRAPHICS_TESTS)
 
 all:	$(ALL_TESTS)

@@ -155,6 +155,80 @@ void test_open_read_close_existing_file()
 		printf("%s [PASS] unlink(\"%s\") = %d\n", __func__, file, result);
 }
 
+void test_readln_existing_file()
+{
+	char file[] = "readln.tmp";
+	char message[] = "first\rsecond\r";
+	char buf[16];
+	int mode = FAM_READ | FAM_WRITE;
+	int perms = FAP_READ | FAP_WRITE;
+	int path;
+	int result;
+
+	unlink(file);
+
+	path = create(file, mode, perms);
+	if (path == -1)
+	{
+		failed = 1;
+		printf("%s [FAIL] create(\"%s\", %x, %d) = %d, errno = %d\n", __func__, file, mode, perms, path, errno);
+		return;
+	}
+
+	result = write(path, message, strlen(message));
+	if (result != strlen(message))
+	{
+		failed = 1;
+		printf("%s [FAIL] write(%d, \"%s\") = %d, errno = %d\n", __func__, path, message, result, errno);
+		close(path);
+		unlink(file);
+		return;
+	}
+	close(path);
+
+	path = open(file, FAM_READ);
+	if (path == -1)
+	{
+		failed = 1;
+		printf("%s [FAIL] open(\"%s\", %x) = %d, errno = %d\n", __func__, file, FAM_READ, path, errno);
+		unlink(file);
+		return;
+	}
+
+	memset(buf, 0, sizeof(buf));
+	result = readln(path, buf, sizeof(buf));
+	if (result == 6 && strcmp(buf, "first\r") == 0)
+		printf("%s [PASS] readln(first) = %d\n", __func__, result);
+	else
+	{
+		failed = 1;
+		printf("%s [FAIL] readln(first) = %d got=\"%s\", errno = %d\n", __func__, result, buf, errno);
+	}
+
+	memset(buf, 0, sizeof(buf));
+	result = readln(path, buf, sizeof(buf));
+	if (result == 7 && strcmp(buf, "second\r") == 0)
+		printf("%s [PASS] readln(second) = %d\n", __func__, result);
+	else
+	{
+		failed = 1;
+		printf("%s [FAIL] readln(second) = %d got=\"%s\", errno = %d\n", __func__, result, buf, errno);
+	}
+
+	memset(buf, 0, sizeof(buf));
+	result = readln(path, buf, sizeof(buf));
+	if (result == 0)
+		printf("%s [PASS] readln(eof) = %d\n", __func__, result);
+	else
+	{
+		failed = 1;
+		printf("%s [FAIL] readln(eof) = %d, errno = %d\n", __func__, result, errno);
+	}
+
+	close(path);
+	unlink(file);
+}
+
 void test_delete_nonexistent_file()
 {
 	char *file = "deletenonexistentfile";
@@ -413,6 +487,7 @@ int main()
 	test_create_and_delete_file();
 	test_open_nonexistent_file();
 	test_open_read_close_existing_file();
+	test_readln_existing_file();
 	test_delete_nonexistent_file();
 	test_create_and_seek();
 	test_make_directory();

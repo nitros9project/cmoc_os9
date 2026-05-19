@@ -2,32 +2,34 @@
 
                     section   code      ; begin code section
 
-_reverse            EXPORT              ; export this symbol
+_reverse            EXPORT    ;         export in-place string reverse helper
 
-_strlen             EXTERNAL            ; import external symbol
+_strlen             EXTERNAL  ;         import string length helper
 
-_reverse
-                    pshs      u         ; save U on the hardware stack
-                    ldu       4,s       ; load U from stack-relative value 4,s
-                    pshs      u         ; save U on the hardware stack
-                    pshs      u         ; save U on the hardware stack
-                    lbsr      _strlen   ; long branch to subroutine to _strlen
-                    leas      2,s       ; adjust S using 2,s
-                    addd      ,s++      ; add memory pointed to by S+, then advance S+ into D
-                    tfr       d,x       ; transfer D,X
-                    bra       L_reverse_check ; branch unconditionally to L_reverse_check
+_reverse:
+stk_reverse_ret     equ       0         ; caller return address
+stk_reverse_string  equ       2         ; string pointer argument
+                    pshs      u         ; preserve caller's U register
+                    ldu       stk_reverse_string+2,s ; load string pointer after saved U
+                    pshs      u         ; save original string pointer for return address math
+                    pshs      u         ; pass string pointer to strlen()
+                    lbsr      _strlen   ; compute string length
+                    leas      2,s       ; discard strlen argument
+                    addd      ,s++      ; add string base and discard saved base pointer
+                    tfr       d,x       ; point X one byte past the string terminator
+                    bra       L_reverse_check ; enter loop test before swapping
 
 L_reverse_loop
-                    ldb       ,u        ; load B from memory pointed to by U
-                    lda       ,-x       ; load A from memory pointed to by -X
-                    sta       ,u+       ; store A to memory pointed to by U, then advance U
-                    stb       ,x        ; store B to memory pointed to by X
+                    ldb       ,u        ; fetch character from the front half
+                    lda       ,-x       ; step back and fetch character from the back half
+                    sta       ,u+       ; write back-half character to front and advance U
+                    stb       ,x        ; write front-half character to back
 
 L_reverse_check
-                    pshs      x         ; save X on the hardware stack
-                    cmpu      ,s++      ; compare U against memory pointed to by S+, then advance S+
-                    blo       L_reverse_loop ; branch if lower to L_reverse_loop
-                    ldd       4,s       ; load D from stack-relative value 4,s
-                    puls      u,pc      ; restore registers and return
+                    pshs      x         ; stage back pointer for compare because CMPU lacks direct X form
+                    cmpu      ,s++      ; compare front pointer against back pointer and discard staged X
+                    blo       L_reverse_loop ; continue while pointers have not crossed
+                    ldd       stk_reverse_string+2,s ; return original string pointer after saved U
+                    puls      u,pc      ; restore U and return
 
-                    endsect             ; end current section
+                    endsect   ;         end current section

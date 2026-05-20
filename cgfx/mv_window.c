@@ -33,7 +33,7 @@ _cgfx_gs_mnsel(path_id path, int *itemno, int *menuid)
 		std		[2+1+2,s]		save into item no pointer
 		puls	b
 		std		[2+1+4,s]		save into menu id pointer
-		lbra	_os9ret
+		lbra	os9err0
 	}
 }
 

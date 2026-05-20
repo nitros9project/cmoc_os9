@@ -6,7 +6,6 @@ _cgfx_ss_wnset(path_id path, int wintype, WNDSCR *windat)
     asm
     {
 _Flush	EXTERNAL
-os9err0	EXTERNAL
 		pshs	y
 		lbsr	_Flush
 		lda		2+2+1,s			get path
@@ -33,7 +32,7 @@ _cgfx_gs_mnsel(path_id path, int *itemno, int *menuid)
 		std		[2+1+2,s]		save into item no pointer
 		puls	b
 		std		[2+1+4,s]		save into menu id pointer
-		lbra	os9err0
+		bra		os9err0
 	}
 }
 

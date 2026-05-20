@@ -3,15 +3,11 @@
 
 static int failed;
 
-extern void call_lmul(long *out, const long *lhs, const long *rhs);
-
 static void check_lmul(const char *name, long lhs, long rhs, long expected)
 {
-	long actual;
+	long actual = lhs * rhs;
 	char actual_buf[16];
 	char expected_buf[16];
-
-	call_lmul(&actual, &lhs, &rhs);
 
 	if (actual == expected)
 	{

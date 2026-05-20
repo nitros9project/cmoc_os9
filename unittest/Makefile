@@ -31,12 +31,6 @@ floatfmttest: floatfmttest.c
 		$^ $(OBJS) -L../lib -lcf -L../cgfx -lcgfx \
 		-L$(CMOC_FLOAT_LIB_DIR) -lcmoc-float-mc6839_os9 -L../lib -lcf
 
-lmulwrap.o: lmulwrap.as
-	lwasm lmulwrap.as --obj -olmulwrap.o
-
-lmultest: lmultest.c lmulwrap.o
-	$(CC) $(LFLAGS) lmultest.c lmulwrap.o $(OBJS) -L../lib -lc -L../cgfx -lcgfx
-
 GRAPHICS_TESTS = wintest maze
 TESTS	= abortchild aborttest attrwraptest compat3test ctypetest datmodstest defdrivetest dirapitest dirtest errmsgtest fdstreamtest filelayout fiotest floatfmttest floattest forkhellotest forknooptest forknowaittest forktest getopttest gtest hello intercepttest intmathtest iotest lmultest longtest memtest misctest noop osgstattest osiotest osopenerrtest popentest printtest pwcryptest pwenttest randtest searchtest setbuftest setjmptest setstest signaltest skiptest sleeptest stdioedgetest stdlibtest streamiotest stringexttest stringtest syscalltest systemtest timetest utimetest
 ALL_TESTS = $(TESTS) $(GRAPHICS_TESTS)
@@ -58,5 +52,4 @@ run:	dsk
 
 clean:
 	-rm -f $(ALL_TESTS) test.dsk go
-	-rm -f lmulwrap.o
 	-rm -f *.s.list *.s.map

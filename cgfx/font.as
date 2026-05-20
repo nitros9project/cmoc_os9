@@ -1,15 +1,15 @@
         section code
 
-_cgfx_font              EXPORT * export this symbol
-_cgfx_tcharsw           EXPORT * export this symbol
-_cgfx_boldsw            EXPORT * export this symbol
-_cgfx_propsw            EXPORT * export this symbol
+__cgfx_font              EXPORT * export this symbol
+__cgfx_tcharsw           EXPORT * export this symbol
+__cgfx_boldsw            EXPORT * export this symbol
+__cgfx_propsw            EXPORT * export this symbol
 
 _errno                  EXTERNAL * import external symbol
 _write                  EXTERNAL * import external symbol
 
 * Set the active font: _cgfx_font(path, grp, buf)
-_cgfx_font
+__cgfx_font
         pshs    u
         lda     7,s * load A from stack-relative value 7,s
         ldb     9,s * load B from stack-relative value 9,s
@@ -24,17 +24,17 @@ _cgfx_font
         bra     os9err0
 
 * Transparent character switch: _cgfx_tcharsw(path, sw)
-_cgfx_tcharsw
+__cgfx_tcharsw
         ldd     #$1b3c * load D from immediate value $1b3c
         bra     send3
 
 * Bold switch: _cgfx_boldsw(path, sw)
-_cgfx_boldsw
+__cgfx_boldsw
         ldd     #$1b3d * load D from immediate value $1b3d
         bra     send3
 
 * Proportional-width switch: _cgfx_propsw(path, sw)
-_cgfx_propsw
+__cgfx_propsw
         ldd     #$1b3f * load D from immediate value $1b3f
 
 send3   pshs    u * save U on the hardware stack

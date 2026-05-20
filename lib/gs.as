@@ -16,7 +16,7 @@ _errno              EXTERNAL  ;         import external symbol
 _os9err             EXTERNAL  ;         import external symbol
 _sysret             EXTERNAL  ;         import external symbol
 
-_gs_size:
+__gs_size:
 stk_gs_size_ret     equ       0         ; caller return address
 stk_gs_size_dest    equ       2         ; hidden long-return destination pointer
 stk_gs_size_path    equ       4         ; OS-9 path number argument
@@ -88,7 +88,7 @@ L_gs_devn_scan      lda       ,x+       ; scan for OS-9 high-bit terminator
                     clrb                ; return zero on success
                     rts                 ; return success
 
-_gs_gfd:
+__gs_gfd:
 stk_gs_gfd_ret      equ       0         ; caller return address
 stk_gs_gfd_path     equ       2         ; OS-9 path number argument
 stk_gs_gfd_buffer   equ       4         ; destination file-descriptor buffer

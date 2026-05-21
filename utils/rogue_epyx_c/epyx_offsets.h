@@ -30,6 +30,8 @@
 #define OFF_CURRENT_ARMOR_PTR        0x0db1
 #define OFF_OLD_HERO_POS             0x0dad
 #define OFF_CURRENT_ROOM_TILE_PTR    0x0db9
+#define OFF_DUNGEON_LEVEL            0x0d91
+#define OFF_PLAYER_GOLD              0x0d92
 #define OFF_HERO_POS                 0x10dc
 
 #define OFF_DEFAULT_PLAYER_NAME      0x14b0
@@ -71,6 +73,14 @@
 #define OFF_REVERSE_ON               0x37e0
 #define OFF_CURSOR_ON                0x2def
 #define OFF_CURSOR_OFF               0x2df1
+#define OFF_EAT_GOOD_FOOD            0x29fd
+#define OFF_NO_WAY_DOWN              0x2b04
+#define OFF_NO_WAY_UP                0x2b5f
+#define OFF_FOUND_OBJECT_MESSAGE     0x2af1
+#define OFF_SOME_FOOD                0x3a29
+#define OFF_NO_APPROPRIATE_OBJECT    0x3860
+#define OFF_FOUND_GOLD_MESSAGE       0x3981
+#define OFF_FOOD_NAME                0x4342
 
 #define WEAPON_COUNT                 10
 #define ARMOR_COUNT                  8

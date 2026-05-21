@@ -1,13 +1,16 @@
 PROGRAM = roguec
 CMOC ?= cmoc
-CFLAGS = --os9 -O2 --function-stack=0 -I. -I../../include
+LWASM ?= lwasm
+CFLAGS = --os9 -O2 --function-stack=0 --add-os9-stack-space=256 -I. -I../../include
+ASFLAGS = --obj
 LDLIBS = -L../../lib -lc
 ROGUE_DAT_SRC ?= ../../../nitros9/3rdparty/packages/rogue/rogue.dat
 ROGUE_HLP_SRC ?= ../../../nitros9/3rdparty/packages/rogue/rogue.hlp
 ROGUE_CHR_SRC ?= ../../../nitros9/3rdparty/packages/rogue/rogue.chr
 
 SRCS = main.c epyx_arena.c epyx_format.c epyx_screen.c epyx_startup.c epyx_tables.c rogue_game.c
-OBJS = $(SRCS:.c=.o)
+ASRCS = rogue_signal.as
+OBJS = $(SRCS:.c=.o) $(ASRCS:.as=.o)
 
 all: $(PROGRAM) rogue.dat rogue.hlp rogue.chr
 
@@ -25,6 +28,9 @@ rogue.chr: $(ROGUE_CHR_SRC)
 
 %.o: %.c
 	$(CMOC) $(CFLAGS) -c $<
+
+%.o: %.as
+	$(LWASM) $(ASFLAGS) -o$@ $<
 
 clean:
 	rm -f $(PROGRAM) rogue.dat rogue.hlp rogue.chr *.o *.s *.list *.map

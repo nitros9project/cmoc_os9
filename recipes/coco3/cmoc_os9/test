@@ -92,6 +92,8 @@ echo stringexttest
 stringexttest >>>-stringexttest.out
 echo stringtest
 stringtest >>>-stringtest.out
+echo structcopytest
+structcopytest >>>-structcopytest.out
 echo syscalltest
 syscalltest >>>-syscalltest.out
 echo systemtest

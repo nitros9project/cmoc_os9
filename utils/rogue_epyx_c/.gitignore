@@ -1,5 +1,7 @@
 roguec
 rogue.dat
+rogue.hlp
+rogue.chr
 *.o
 *.s
 *.list

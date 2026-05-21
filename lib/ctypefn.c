@@ -1,6 +1,7 @@
 #include <ctype.h>
 
 #undef isdigit
+#undef isalpha
 #undef isprint
 #undef isspace
 #undef toupper
@@ -10,6 +11,12 @@ int
 isdigit(int c)
 {
     return _chcodes[c] & _DIGIT;
+}
+
+int
+isalpha(int c)
+{
+    return _chcodes[c] & (_UPPER | _LOWER);
 }
 
 int

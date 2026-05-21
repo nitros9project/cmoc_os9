@@ -127,6 +127,13 @@ int fputs(const char *s, FILE *stream);
 #define clearerr(p)	((p)->_flag&=~(_ERR|_EOF))
 #define fileno(p)   ((p)->_fd)
 
+#undef putchar
+#undef feof
+#undef fileno
+int putchar(int c);
+int feof(FILE *p);
+int fileno(FILE *p);
+
 /**
  * @brief Print formatted output to standard output.
  *

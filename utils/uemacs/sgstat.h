@@ -1,3 +1,6 @@
+#ifdef OS9
+#include <fcntl.h>
+#else
 struct sgbuf { /* structure for 'getstat()' and 'setstat()' */
    char sg_class,       /* device class */
 
@@ -32,6 +35,7 @@ struct sgbuf { /* structure for 'getstat()' and 'setstat()' */
    int  sg_tbl;         /* device table address */
    char sg_spare[3];    /* spare bytes - necessary for correct sizing */
 };
+#endif
 
 /* the following is a structure definition to set the names, types
  * and offsets of structure members which are applicable to an RBF

@@ -2,6 +2,7 @@
 
 #undef feof
 #undef fileno
+#undef putchar
 
 int feof(FILE *fp)
 {
@@ -11,4 +12,9 @@ int feof(FILE *fp)
 int fileno(FILE *fp)
 {
     return fp->_fd;
+}
+
+int putchar(int c)
+{
+    return putc(c, stdout);
 }

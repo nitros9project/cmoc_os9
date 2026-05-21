@@ -14,10 +14,13 @@
 #define OFF_SCROLL_TABLE             0x0156
 #define OFF_POTION_TABLE             0x0262
 #define OFF_RING_TABLE               0x034c
+#define OFF_WAND_TABLE               0x043c
 #define OFF_RANK_NAME_TABLE          0x0504
 
-#define OFF_SCROLL_FLAGS             0x061b
-#define OFF_OBJECT_IDENT_FLAGS       0x0629
+#define OFF_SCROLL_KNOWN_FLAGS       0x05fe
+#define OFF_POTION_KNOWN_FLAGS       0x060d
+#define OFF_RING_KNOWN_FLAGS         0x061b
+#define OFF_WAND_KNOWN_FLAGS         0x0629
 #define OFF_RANDOM_SCROLL_NAMES      0x0642
 #define OFF_POTION_COLOR_PTRS        0x077d
 #define OFF_RING_STONE_PTRS          0x0799
@@ -26,6 +29,8 @@
 #define OFF_POTION_CALLED_PTRS       0x080b
 #define OFF_RING_CALLED_PTRS         0x0827
 #define OFF_WAND_CALLED_PTRS         0x0843
+#define OFF_SCROLL_CONSONANTS        0x4a23
+#define OFF_SCROLL_VOWELS            0x4a39
 
 #define OFF_CURRENT_ARMOR_PTR        0x0db1
 #define OFF_OLD_HERO_POS             0x0dad
@@ -42,10 +47,25 @@
 #define OFF_COMMAND_LINE             0x1528
 #define OFF_AUTHOR_HEADER            0x153c
 #define OFF_SAVE_HEADER_BUFFER       0x156e
+#define OFF_TITLE_ROGUE              0x171b
+#define OFF_TITLE_COPYRIGHT          0x1721
+#define OFF_TITLE_PRESS_SPACE        0x1739
+#define OFF_MONSTER_TABLE            0x10fb
+#define OFF_DEATH_EPITAPH            0x1a3c
+#define OFF_DEATH_TOTAL_WORTH        0x1a57
+#define OFF_DEATH_YOU_DIED           0x1a77
+#define OFF_DEATH_TOP                0x1a81
+#define OFF_DEATH_SHOULDER           0x1a87
+#define OFF_DEATH_RIP                0x1a8f
+#define OFF_DEATH_BLANK1             0x1a99
+#define OFF_DEATH_BLANK2             0x1aa3
+#define OFF_DEATH_BLANK3             0x1aad
 
 #define OFF_DAMAGE_BONUS             0x220f
 #define OFF_DAMAGE_TAKEN_BONUS       0x2211
 #define OFF_PLAYER_NAME_BUFFER       0x2349
+#define OFF_NAME_PROMPT              0x2362
+#define OFF_NEW_GAME_GREETING        0x24b9
 #define OFF_DEBUG_ENABLE_FLAG        0x26bc
 #define OFF_RING_MOD_MAX_DAMAGE      0x2a34
 
@@ -63,6 +83,11 @@
 #define OFF_STATUS_TABLE_OFFSET      0x3662
 #define OFF_LAST_FAST_MODE_FLAG      0x3700
 #define OFF_STATUS_FORMATS           0x3701
+#define OFF_STATUS_LEVEL_FORMAT      0x3701
+#define OFF_STATUS_HITS_FORMAT       0x370e
+#define OFF_STATUS_STRENGTH_FORMAT   0x371e
+#define OFF_STATUS_GOLD_FORMAT       0x372d
+#define OFF_STATUS_ARMOR_FORMAT      0x3739
 #define OFF_SCREEN_WIDTH             0x37cb
 #define OFF_SCREEN_HEIGHT            0x37cc
 #define OFF_SCREEN_MAX_X             0x37cd
@@ -81,10 +106,20 @@
 #define OFF_NO_APPROPRIATE_OBJECT    0x3860
 #define OFF_FOUND_GOLD_MESSAGE       0x3981
 #define OFF_FOOD_NAME                0x4342
+#define OFF_SCROLL_MAP_MESSAGE       0x44c5
+#define OFF_BLANK_SCROLL_MESSAGE     0x45cd
+#define OFF_POTION_HEALING_MESSAGE   0x4707
+#define OFF_ODD_TASTING_POTION       0x48e1
 
 #define WEAPON_COUNT                 10
 #define ARMOR_COUNT                  8
+#define SCROLL_COUNT                 15
+#define POTION_COUNT                 14
+#define RING_COUNT                   14
+#define WAND_COUNT                   14
 #define RANK_COUNT                   21
+#define MONSTER_ENTRY_SIZE           18
 #define FORMAT_BUFFER_SIZE           128
+#define SCROLL_TITLE_SIZE            21
 
 #endif

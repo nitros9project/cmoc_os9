@@ -106,4 +106,5 @@ MAME_MACHINE ?= coco3
 MAME_FLAGS   ?= -inipath $(HOME)/mame -cfg_directory $(HOME)/mame/cfg -window -nothrottle -skip_gameinfo -autoboot_delay 5 -autoboot_command "DOS\n" -ext fdc -ext:fdc:wd17xx:0 525qd
 
 run: $(DSKIMAGE)
-	$(MAME) $(MAME_MACHINE) $(MAME_FLAGS) -flop1 $(DSKIMAGE)
+	$(MAME) $(MAME_MACHINE) $(MAME_FLAGS) -flop1 $(DSKIMAGE) -flop2 /Users/boisy/Projects/coco-shelf/nitros9/3rdparty/packages/rogue/rogue.dsk
+

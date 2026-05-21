@@ -53,4 +53,17 @@ extern const unsigned char     _chcodes[];	/* in chcodes.r */
 #define tolower(c)      _tolower(c)
 #define toascii(c)      ((c)&0x7f)
 
+#undef isdigit
+#undef isalpha
+#undef isprint
+#undef isspace
+#undef toupper
+#undef tolower
+int isdigit(int c);
+int isalpha(int c);
+int isprint(int c);
+int isspace(int c);
+int toupper(int c);
+int tolower(int c);
+
 #endif				/* _CTYPE_H */

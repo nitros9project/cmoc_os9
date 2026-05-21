@@ -3,21 +3,19 @@
 #include "tools.h"
 #include "ed.h"
 
-relink(a, x, y, b)
-LINE *a, *x, *y, *b;
+void relink(LINE *a, LINE *x, LINE *y, LINE *b)
 {
   x->l_prev = a;
   y->l_next = b;
 }
 
-clrbuf()
+void clrbuf(void)
 {
   del(1, lastln);
 }
 
-set_buf()
+void set_buf(void)
 {
   relink(&line0, &line0, &line0, &line0);
   curln = lastln = 0;
 }
-

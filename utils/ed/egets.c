@@ -24,7 +24,7 @@ FILE *stream;
                 return(count);
         }
         if (c == NL) {
-                *cp++ = c;
+                *cp++ = (char) c;
                 *cp = EOS;
                 return(++count);
         }
@@ -34,7 +34,7 @@ FILE *stream;
                 nonascii++;     /* count it */
         }
         if (c) {
-                *cp++ = c;      /* not null, keep it */
+                *cp++ = (char) c;       /* not null, keep it */
                 count++;
         } else
                 nullchar++;     /* count nulls */
@@ -48,4 +48,3 @@ FILE *stream;
   }
   return(count);
 }
-

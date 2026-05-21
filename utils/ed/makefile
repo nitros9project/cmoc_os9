@@ -1,5 +1,6 @@
 DCC = cmoc
-DCCFLAGS = --os9 -nodefaultlibs -I../../include
+CPP = cpp -Wno-builtin-macro-redefined
+DCCFLAGS = --cpp="$(CPP)" --os9 -nodefaultlibs -I../../include
 LFLAGS = -L../../lib -lc
 
 OFILES = amatch.o append.o bitmap.o catsub.o ckglob.o deflt.o del.o docmd.o \

@@ -19,7 +19,8 @@ int apflg;
 
   err = 0;
 
-  lines = bytes = 0;
+  lines = 0;
+  bytes = 0;
   if (diag) printf("\"%s\" ", fname);
   if ((fp = fopen(fname, (apflg ? "a" : "w"))) == NULL) {
         printf("file open error\n");
@@ -42,4 +43,3 @@ int apflg;
   fclose(fp);
   return(err);
 }
-

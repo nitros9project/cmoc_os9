@@ -14,6 +14,7 @@
  */
 #include <stdio.h>
 #include <signal.h>
+#include <fcntl.h>
 #include "tools.h"
 #include "ed.h"
 #include <setjmp.h>

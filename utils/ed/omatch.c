@@ -9,10 +9,7 @@
  * strings, 1 otherwise.  "boln" should point at the position that will
  * match a BOL token.
  */
-int omatch(linp, pat, boln)
-char **linp;
-TOKEN *pat;
-char *boln;
+int omatch(char **linp, TOKEN *pat, char *boln)
 {
 
   register int advance;
@@ -50,4 +47,3 @@ char *boln;
 
   return(++advance);
 }
-

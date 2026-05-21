@@ -14,7 +14,8 @@
  *      "boln"  is a pointer into "lin" which points at the
  *                      character at the beginning of the line.
  */
-static char *match(); /* Predeclaration */
+static char *match(char *lin, TOKEN *pat, char *boln);
+static char empty[] = "";
 
 char *paropen[9], *parclose[9];
 int between, parnum;
@@ -32,7 +33,7 @@ char *boln;
   if (between) return 0;
 
   while (parnum < 9) {
-        paropen[parnum] = parclose[parnum] = "";
+        paropen[parnum] = parclose[parnum] = empty;
         parnum++;
   }
   return lin;
@@ -76,12 +77,14 @@ char *boln;
                  * beginning of the closure.  The recursion goes, at
                  * most two levels deep. */
 
-                if (pat = pat->next) {
+                pat = pat->next;
+                if (pat) {
                         int savbtwn = between;
                         int savprnm = parnum;
 
                         while (bocl <= lin) {
-                                if (rval = match(lin, pat, boln)) {
+                                rval = match(lin, pat, boln);
+                                if (rval) {
                                         /* Success */
                                         return(rval);
                                 } else {
@@ -126,4 +129,3 @@ char *boln;
 
   return((char *) max(strstart, lin));
 }
-

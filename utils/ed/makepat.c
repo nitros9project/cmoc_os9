@@ -84,7 +84,8 @@ int delim;
                         arg++;
                 }
 
-                if (ntok->bitmap = makebitmap(CLS_SIZE))
+                ntok->bitmap = makebitmap(CLS_SIZE);
+                if (ntok->bitmap)
                         arg = dodash(CCLEND, arg, ntok->bitmap);
                 else {
                         fprintf(stderr, "Not enough memory for pat\n");
@@ -101,7 +102,7 @@ int delim;
                         arg++;
                 } else {
                         ntok->tok = LITCHAR;
-                        ntok->lchar = esc(&arg);
+                        ntok->lchar = (char) esc(&arg);
                 }
         }
 
@@ -139,4 +140,3 @@ int delim;
   tail->next = 0;
   return(head);
 }
-

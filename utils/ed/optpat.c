@@ -5,8 +5,7 @@
 
 TOKEN *oldpat;
 
-TOKEN *
- optpat()
+TOKEN *optpat(void)
 {
   char delim, str[MAXPAT], *cp;
 
@@ -23,4 +22,3 @@ TOKEN *
   oldpat = getpat(str);
   return(oldpat);
 }
-

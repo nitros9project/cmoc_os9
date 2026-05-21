@@ -3,8 +3,7 @@
 #include "tools.h"
 
 /* Free up the memory usde for token string */
-unmakepat(head)
-TOKEN *head;
+void unmakepat(TOKEN *head)
 {
 
   register TOKEN *old_head;

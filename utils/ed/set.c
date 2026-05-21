@@ -4,7 +4,7 @@
 #include "ed.h"
 
 struct tbl {
-  char *t_str;
+  const char *t_str;
   int *t_ptr;
   int t_val;
 } *t, tbl[] = {

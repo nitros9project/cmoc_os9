@@ -30,7 +30,8 @@ unsigned size;
   printf("Making a %d bit map (%d bytes required)\n", size, numbytes);
 #endif
 
-  if (map = (unsigned *) malloc(numbytes + sizeof(unsigned))) *map = size;
+  map = (unsigned *) malloc(numbytes + sizeof(unsigned));
+  if (map) *map = size;
 
   return((BITMAP *) map);
 }
@@ -48,9 +49,9 @@ char *map;
   map += sizeof(unsigned);      /* skip past size */
 
   if (val)
-        map[c >> 3] |= 1 << (c & 0x07);
+        map[c >> 3] = (char) (map[c >> 3] | (1 << (c & 0x07)));
   else
-        map[c >> 3] &= ~(1 << (c & 0x07));
+        map[c >> 3] = (char) (map[c >> 3] & ~(1 << (c & 0x07)));
 
   return 1;
 }
@@ -67,4 +68,3 @@ char *map;
 
   return(map[c >> 3] & (1 << (c & 0x07)));
 }
-

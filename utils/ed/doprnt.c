@@ -3,6 +3,9 @@
 #include "tools.h"
 #include "ed.h"
 
+static void prntln(char *str, int vflg, int lin);
+static void putcntl(int c, FILE *stream);
+
 int doprnt(from, to)
 int from, to;
 {
@@ -23,7 +26,7 @@ int from, to;
   return(0);
 }
 
-prntln(str, vflg, lin)
+static void prntln(str, vflg, lin)
 char *str;
 int vflg, lin;
 {
@@ -55,11 +58,10 @@ int vflg, lin;
   putc('\n', stdout);
 }
 
-putcntl(c, stream)
-char c;
+static void putcntl(c, stream)
+int c;
 FILE *stream;
 {
   putc('^', stream);
   putc((c & 31) | '@', stream);
 }
-

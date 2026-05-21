@@ -36,5 +36,32 @@ LINE *getptr(int num);
 char *getfn(void);
 char *gettxt(int num);
 
+int append(int line, int glob);
+int ckglob(void);
+int deflt(int def1, int def2);
+int del(int from, int to);
+int docmd(int glob);
+int doglob(void);
+int dolst(int from, int to);
+int doprnt(int from, int to);
+int doread(int lin, char *fname);
+int dowrite(int from, int to, char *fname, int apflg);
+int egets(char *str, int size, FILE *stream);
+int find(TOKEN *pat, int dir);
+int getlst(void);
+int getnum(int first);
+int getone(void);
+int getrhs(char *sub);
+int ins(char *str);
+int join(int first, int last);
+int move(int num);
+int set(void);
+int show(void);
+int subst(TOKEN *pat, char *sub, int gflg, int pflag);
+int transfer(int num);
+void clrbuf(void);
+void relink(LINE *a, LINE *x, LINE *y, LINE *b);
+void set_buf(void);
+
 #define nextln(l)       ((l)+1 > lastln ? 0 : (l)+1)
 #define prevln(l)       ((l)-1 < 0 ? lastln : (l)-1)

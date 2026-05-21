@@ -1,6 +1,7 @@
 /*      tools.h */
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 #ifndef NULL
 #define NULL 0
@@ -97,9 +98,18 @@ typedef struct token {
 
 TOKEN *makepat(char *arg, int delim);
 TOKEN *getpat(char *arg);
+TOKEN *optpat(void);
 char *amatch(char *lin, TOKEN *pat, char *boln);
 char *matchs(char *line, TOKEN *pat, int ret_endp);
 char *maksub(char *sub, int subsz);
+char *catsub(char *from, char *to, char *sub, char *new, char *newend);
+char *dodash(int delim, char *src, char *map);
+BITMAP *makebitmap(unsigned size);
+int esc(char **s);
+int omatch(char **linp, TOKEN *pat, char *boln);
+int setbit(unsigned c, char *map, unsigned val);
+int testbit(unsigned c, char *map);
+void unmakepat(TOKEN *head);
 
 /*
  *      An absolute maximun for strings.

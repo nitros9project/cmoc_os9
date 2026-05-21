@@ -10,7 +10,7 @@ _cwriteln               EXPORT * export this symbol
 _errno                  EXTERNAL * import external symbol
 _Flush                  EXTERNAL * import external symbol
 _strlen                 EXTERNAL * import external symbol
-_write                  EXTERNAL * import external symbol
+_xwrite                 EXTERNAL * import external symbol
 
 _cread
         lbsr    _Flush * flush any pending buffered output before blocking for input
@@ -63,11 +63,11 @@ _cwrite
         blo     cwrite_len_ok * keep the string length when it is already within the limit
         ldd     8,s * clamp the write length to the caller-supplied maximum
 cwrite_len_ok
-        tfr     d,u * move the chosen write length into U for _write
+        tfr     d,u * move the chosen write length into U for _xwrite
         pshs    u
         ldx     8,s * reload the string pointer
         lda     7,s * load the output path number
-        lbsr    _write * send the bounded byte count through the buffered writer
+        lbsr    _xwrite * send the bounded byte count through the buffered writer
         bcs     os9err2 * branch if the write helper returned an error
         puls    d,u,pc * discard the saved length and return the byte count in D
 

@@ -1,4 +1,3 @@
 echo * CMOC OS-9 test disk *
 link shell
 load utilpak1
-test

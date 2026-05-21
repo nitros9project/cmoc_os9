@@ -11,6 +11,8 @@ CMOC_OS9_LIB_DIR ?= $(CMOC_OS9_DIR)/lib
 CMOC_OS9_CGFX_DIR ?= $(CMOC_OS9_DIR)/cgfx
 CMOC_OS9_UNITTEST_DIR ?= $(CMOC_OS9_DIR)/unittest
 CMOC_OS9_UTILS_DIR ?= $(CMOC_OS9_DIR)/utils
+CMOC_OS9_UEMACS_DIR ?= $(CMOC_OS9_UTILS_DIR)/uemacs
+CMOC_OS9_ROGUE148_DIR ?= $(CMOC_OS9_UTILS_DIR)/rogue148
 CMOC_OS9_GRAPHICTEST_DIR ?= $(CMOC_OS9_DIR)/graphictest
 CMOC_OS9_SYSGO ?= sysgo_dd
 
@@ -41,6 +43,12 @@ $(CMOC_OS9_GRAPHICTEST_DIR)/%: $(CMOC_OS9_GRAPHICTEST_DIR)/%.c $(CMOC_OS9_LIB_DI
 $(CMOC_OS9_UTILS_DIR)/%: $(CMOC_OS9_UTILS_DIR)/%.c $(CMOC_OS9_LIB_DIR)/libc.a $(CMOC_OS9_LIB_DIR)/libcf.a $(CMOC_OS9_CGFX_DIR)/libcgfx.a
 	$(MAKE) -C $(CMOC_OS9_UTILS_DIR) $(@F)
 
+$(CMOC_OS9_UEMACS_DIR)/umacs: $(CMOC_OS9_LIB_DIR)/libc.a $(CMOC_OS9_LIB_DIR)/libcf.a
+	$(MAKE) -C $(CMOC_OS9_UEMACS_DIR) umacs
+
+$(CMOC_OS9_ROGUE148_DIR)/rogue148: $(CMOC_OS9_LIB_DIR)/libc.a $(CMOC_OS9_LIB_DIR)/libcf.a
+	$(MAKE) -C $(CMOC_OS9_ROGUE148_DIR) -f Makefile.cmoc rogue148
+
 $(addprefix $(MODDIR)/,$(CMOC_OS9_TESTS)): $(MODDIR)/%: $(CMOC_OS9_UNITTEST_DIR)/% | $(MODDIR)
 	$(CP) $(CMOC_OS9_UNITTEST_DIR)/$(@F) $@
 
@@ -49,6 +57,12 @@ $(addprefix $(MODDIR)/,$(CMOC_OS9_GRAPHICS_TESTS)): $(MODDIR)/%: $(CMOC_OS9_UNIT
 
 $(addprefix $(MODDIR)/,$(CMOC_OS9_UTILITIES)): $(MODDIR)/%: $(CMOC_OS9_UTILS_DIR)/% | $(MODDIR)
 	$(CP) $(CMOC_OS9_UTILS_DIR)/$(@F) $@
+
+$(MODDIR)/umacs: $(CMOC_OS9_UEMACS_DIR)/umacs | $(MODDIR)
+	$(CP) $(CMOC_OS9_UEMACS_DIR)/umacs $@
+
+$(MODDIR)/rogue148: $(CMOC_OS9_ROGUE148_DIR)/rogue148 | $(MODDIR)
+	$(CP) $(CMOC_OS9_ROGUE148_DIR)/rogue148 $@
 
 $(DSKIMAGE): kernelfile bootfile $(MODDIR)/$(CMOC_OS9_SYSGO) $(addprefix $(MODDIR)/,$(CMDS)) $(STARTUP) $(CMOC_OS9_TESTSCRIPT)
 	$(RM) $@
@@ -68,7 +82,7 @@ $(DSKIMAGE): kernelfile bootfile $(MODDIR)/$(CMOC_OS9_SYSGO) $(addprefix $(MODDI
 
 MAME         ?= mame
 MAME_MACHINE ?= coco3
-MAME_FLAGS   ?= -inipath $(HOME)/mame -cfg_directory $(HOME)/mame/cfg -window -nothrottle -skip_gameinfo -natural -autoboot_delay 5 -autoboot_command "DOS\n" -ext fdc -ext:fdc:wd17xx:0 525qd
+MAME_FLAGS   ?= -inipath $(HOME)/mame -cfg_directory $(HOME)/mame/cfg -window -nothrottle -skip_gameinfo -autoboot_delay 5 -autoboot_command "DOS\n" -ext fdc -ext:fdc:wd17xx:0 525qd
 
 run: $(DSKIMAGE)
 	$(MAME) $(MAME_MACHINE) $(MAME_FLAGS) -flop1 $(DSKIMAGE)

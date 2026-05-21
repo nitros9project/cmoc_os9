@@ -4,7 +4,7 @@
 
 _atoi               EXPORT              ; export this symbol
 
-_atoi
+_atoi:
 stk_atoi_ret        equ       0         ; caller return address
 stk_atoi_src        equ       2         ; source string pointer
 stk_atoi_sign       equ       0         ; local sign flag after workspace allocation

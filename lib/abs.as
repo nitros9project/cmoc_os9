@@ -4,7 +4,7 @@
 
 _abs                EXPORT              ; export this symbol
 
-_abs
+_abs:
 stk_abs_ret         equ       0         ; caller return address
 stk_abs_value       equ       2         ; signed 16-bit input value
                     ldd       stk_abs_value,s ; fetch the signed argument

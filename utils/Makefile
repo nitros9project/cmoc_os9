@@ -1,7 +1,7 @@
 CC = cmoc
 OS9FLAGS = --os9 -nodefaultlibs
 LFLAGS = -I../include -I../cgfx/include $(OS9FLAGS)
-SUBDIRS = uemacs
+SUBDIRS = uemacs ed
 
 %: %.c
 	$(CC) $(LFLAGS) $^ -L../lib -lc -L../cgfx -lcgfx

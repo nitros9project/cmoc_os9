@@ -3,6 +3,10 @@
 
 #include <sys/types.h>
 
+#ifndef NULL
+#define NULL 0
+#endif
+
 /**
  * @file stdio.h
  * @brief Buffered stream I/O for the CMOC OS-9 C Library.

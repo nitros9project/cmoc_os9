@@ -12,7 +12,7 @@ CMOC_OS9_CGFX_DIR ?= $(CMOC_OS9_DIR)/cgfx
 CMOC_OS9_UNITTEST_DIR ?= $(CMOC_OS9_DIR)/unittest
 CMOC_OS9_UTILS_DIR ?= $(CMOC_OS9_DIR)/utils
 CMOC_OS9_UEMACS_DIR ?= $(CMOC_OS9_UTILS_DIR)/uemacs
-CMOC_OS9_ROGUE148_DIR ?= $(CMOC_OS9_UTILS_DIR)/rogue148
+CMOC_OS9_ROGUE_EPYX_C_DIR ?= $(CMOC_OS9_UTILS_DIR)/rogue_epyx_c
 CMOC_OS9_GRAPHICTEST_DIR ?= $(CMOC_OS9_DIR)/graphictest
 CMOC_OS9_SYSGO ?= sysgo_dd
 
@@ -46,8 +46,17 @@ $(CMOC_OS9_UTILS_DIR)/%: $(CMOC_OS9_UTILS_DIR)/%.c $(CMOC_OS9_LIB_DIR)/libc.a $(
 $(CMOC_OS9_UEMACS_DIR)/umacs: $(CMOC_OS9_LIB_DIR)/libc.a $(CMOC_OS9_LIB_DIR)/libcf.a
 	$(MAKE) -C $(CMOC_OS9_UEMACS_DIR) umacs
 
-$(CMOC_OS9_ROGUE148_DIR)/rogue148: $(CMOC_OS9_LIB_DIR)/libc.a $(CMOC_OS9_LIB_DIR)/libcf.a
-	$(MAKE) -C $(CMOC_OS9_ROGUE148_DIR) -f Makefile.cmoc rogue148
+$(CMOC_OS9_ROGUE_EPYX_C_DIR)/roguec: $(CMOC_OS9_LIB_DIR)/libc.a
+	$(MAKE) -C $(CMOC_OS9_ROGUE_EPYX_C_DIR) roguec
+
+$(CMOC_OS9_ROGUE_EPYX_C_DIR)/rogue.dat:
+	$(MAKE) -C $(CMOC_OS9_ROGUE_EPYX_C_DIR) rogue.dat
+
+$(CMOC_OS9_ROGUE_EPYX_C_DIR)/rogue.hlp:
+	$(MAKE) -C $(CMOC_OS9_ROGUE_EPYX_C_DIR) rogue.hlp
+
+$(CMOC_OS9_ROGUE_EPYX_C_DIR)/rogue.chr:
+	$(MAKE) -C $(CMOC_OS9_ROGUE_EPYX_C_DIR) rogue.chr
 
 $(addprefix $(MODDIR)/,$(CMOC_OS9_TESTS)): $(MODDIR)/%: $(CMOC_OS9_UNITTEST_DIR)/% | $(MODDIR)
 	$(CP) $(CMOC_OS9_UNITTEST_DIR)/$(@F) $@
@@ -61,10 +70,19 @@ $(addprefix $(MODDIR)/,$(CMOC_OS9_UTILITIES)): $(MODDIR)/%: $(CMOC_OS9_UTILS_DIR
 $(MODDIR)/umacs: $(CMOC_OS9_UEMACS_DIR)/umacs | $(MODDIR)
 	$(CP) $(CMOC_OS9_UEMACS_DIR)/umacs $@
 
-$(MODDIR)/rogue148: $(CMOC_OS9_ROGUE148_DIR)/rogue148 | $(MODDIR)
-	$(CP) $(CMOC_OS9_ROGUE148_DIR)/rogue148 $@
+$(MODDIR)/roguec: $(CMOC_OS9_ROGUE_EPYX_C_DIR)/roguec | $(MODDIR)
+	$(CP) $(CMOC_OS9_ROGUE_EPYX_C_DIR)/roguec $@
 
-$(DSKIMAGE): kernelfile bootfile $(MODDIR)/$(CMOC_OS9_SYSGO) $(addprefix $(MODDIR)/,$(CMDS)) $(STARTUP) $(CMOC_OS9_TESTSCRIPT)
+$(MODDIR)/rogue.dat: $(CMOC_OS9_ROGUE_EPYX_C_DIR)/rogue.dat | $(MODDIR)
+	$(CP) $(CMOC_OS9_ROGUE_EPYX_C_DIR)/rogue.dat $@
+
+$(MODDIR)/rogue.hlp: $(CMOC_OS9_ROGUE_EPYX_C_DIR)/rogue.hlp | $(MODDIR)
+	$(CP) $(CMOC_OS9_ROGUE_EPYX_C_DIR)/rogue.hlp $@
+
+$(MODDIR)/rogue.chr: $(CMOC_OS9_ROGUE_EPYX_C_DIR)/rogue.chr | $(MODDIR)
+	$(CP) $(CMOC_OS9_ROGUE_EPYX_C_DIR)/rogue.chr $@
+
+$(DSKIMAGE): kernelfile bootfile $(MODDIR)/$(CMOC_OS9_SYSGO) $(addprefix $(MODDIR)/,$(CMDS)) $(MODDIR)/rogue.dat $(MODDIR)/rogue.hlp $(MODDIR)/rogue.chr $(STARTUP) $(CMOC_OS9_TESTSCRIPT)
 	$(RM) $@
 	$(OS9FORMAT_CMD) -q $@ -n"NitrOS-9/$(CPU) Level $(LEVEL)"
 	$(OS9GEN) $@ -b=bootfile -t=$(KERNELFILE)
@@ -75,6 +93,9 @@ $(DSKIMAGE): kernelfile bootfile $(MODDIR)/$(CMOC_OS9_SYSGO) $(addprefix $(MODDI
 	$(OS9ATTR_EXEC) $@,sysgo
 	$(OS9COPY) $(addprefix $(MODDIR)/,$(CMDS)) $@,CMDS
 	$(OS9ATTR_EXEC) $(foreach file,$(CMDS),$@,CMDS/$(file))
+	$(OS9COPY) $(MODDIR)/rogue.dat $@,rogue.dat
+	$(OS9COPY) $(MODDIR)/rogue.hlp $@,rogue.hlp
+	$(OS9COPY) $(MODDIR)/rogue.chr $@,rogue.chr
 	$(CPL) $(STARTUP) $@,startup
 	$(OS9ATTR_TEXT) $@,startup
 	$(CPL) $(CMOC_OS9_TESTSCRIPT) $@,test

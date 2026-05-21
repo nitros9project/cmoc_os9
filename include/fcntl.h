@@ -2,6 +2,7 @@
 #define _FCNTL_H
 
 #include "os.h"
+#include <sys/types.h>
 
 /**
  * @file fcntl.h
@@ -38,6 +39,62 @@
 #define	FAP_PEXEC	0x20
 #define	FAP_SHARE	0x40
 #define	FAP_DIR		0x80
+
+/**
+ * @brief OS-9 SCF path options packet.
+ *
+ * This is the byte layout returned by `SS_Opt` for character devices.
+ */
+struct sgbuf {
+	unsigned char sg_class;
+	unsigned char sg_case;
+	unsigned char sg_backsp;
+	unsigned char sg_delete;
+	unsigned char sg_echo;
+	unsigned char sg_alf;
+	unsigned char sg_nulls;
+	unsigned char sg_pause;
+	unsigned char sg_page;
+	unsigned char sg_bspch;
+	unsigned char sg_dlnch;
+	unsigned char sg_eorch;
+	unsigned char sg_eofch;
+	unsigned char sg_rlnch;
+	unsigned char sg_dulnch;
+	unsigned char sg_psch;
+	unsigned char sg_kbich;
+	unsigned char sg_kbach;
+	unsigned char sg_bsech;
+	unsigned char sg_bellch;
+	unsigned char sg_xon;
+	unsigned char sg_xoff;
+	unsigned char sg_tabcr;
+	unsigned char sg_tabsiz;
+	unsigned char sg_d2p;
+	unsigned char sg_parity;
+	unsigned char sg_baud;
+	unsigned char sg_d2p1;
+	unsigned char sg_xon1;
+	unsigned char sg_xoff1;
+	unsigned char sg_err;
+	unsigned char sg_unused;
+};
+
+/**
+ * @brief OS-9 RBF file descriptor sector layout.
+ */
+struct fildes {
+	unsigned char fd_att;
+	unsigned fd_own;
+	unsigned char fd_date[5];
+	unsigned char fd_link;
+	long fd_fsize;
+	unsigned char fd_dcr[3];
+	struct {
+		unsigned char addr[3];
+		unsigned size;
+	} fdseg[48];
+};
 
 /* traditional OS-9 stat calls */
 /**
@@ -115,6 +172,16 @@ error_code _gs_opt(int path, void *opts);
 error_code _gs_devn(int path, char *name);
 
 /**
+ * @brief Read a file descriptor sector block using `SS_FD`.
+ *
+ * @param path Open path descriptor.
+ * @param buffer Destination file descriptor buffer.
+ * @param count Number of bytes to request.
+ * @return `0` on success, otherwise an OS-9 error code.
+ */
+error_code _gs_gfd(int path, void *buffer, int count);
+
+/**
  * @brief Write an options packet using `SS_Opt`.
  *
  * @param path Open path descriptor.
@@ -148,7 +215,7 @@ error_code _ss_attr(int path, void *value);
  * @param value Size block or value pointer.
  * @return `0` on success, otherwise an OS-9 error code.
  */
-error_code _ss_size(int path, void *value);
+error_code _ss_size(int path, void *high_word, void *low_word);
 
 /**
  * @brief Lock a path or resource using `SS_Lock`.
@@ -166,7 +233,7 @@ error_code _ss_lock(int path, void *value);
  * @param value Release parameter block.
  * @return `0` on success, otherwise an OS-9 error code.
  */
-error_code _ss_rel(int path, void *value);
+error_code _ss_rel(int path);
 
 /**
  * @brief Reset a device or stream using `SS_Reset`.

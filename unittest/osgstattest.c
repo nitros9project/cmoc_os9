@@ -271,7 +271,7 @@ static void test_legacy_ss_wrappers_invalid_path(void)
     check_error("_ss_ssig invalid path", _ss_ssig(invalid_path, 0));
     check_error("_ss_tiks invalid path", _ss_tiks(invalid_path, opts));
     check_error("_ss_rest invalid path", _ss_rest(invalid_path, 0));
-    check_error("_ss_rel invalid path", _ss_rel(invalid_path, 0));
+    check_error("_ss_rel invalid path", _ss_rel(invalid_path));
     check_error("_ss_attr invalid path", _ss_attr(invalid_path, opts));
 }
 

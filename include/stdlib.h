@@ -3,6 +3,10 @@
 
 #include <sys/types.h>
 
+#ifndef NULL
+#define NULL 0
+#endif
+
 /**
  * @file stdlib.h
  * @brief Conversion, allocation, sorting, and utility routines.

@@ -25,6 +25,6 @@ The build uses `cmoc --os9` and links against the local CMOC OS-9 C library in
 
 ## Notes
 
-The original package included OS-9 shell scripts named `compile`, `makelib`,
-and `makeed`. They are retained for source lineage, but the maintained build
-entry point in this tree is the local `makefile`.
+The original package included OS-9 shell build helpers. Those obsolete files
+are not used in this tree; the maintained build entry point is the local
+`makefile`.

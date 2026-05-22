@@ -4,19 +4,27 @@
 
                     section   code      ; begin code section
 
-__gs_size            EXPORT    ;         export this symbol
-__gs_pos             EXPORT    ;         export this symbol
-__gs_rdy             EXPORT    ;         export this symbol
-__gs_eof             EXPORT    ;         export this symbol
-__gs_opt             EXPORT    ;         export this symbol
-__gs_devn            EXPORT    ;         export this symbol
-__gs_gfd             EXPORT    ;         export this symbol
+_gs_size            EXPORT    ;         export this symbol
+__gs_size           EXPORT    ;         export C ABI alias for _gs_size()
+_gs_pos             EXPORT    ;         export this symbol
+__gs_pos            EXPORT    ;         export C ABI alias for _gs_pos()
+_gs_rdy             EXPORT    ;         export this symbol
+__gs_rdy            EXPORT    ;         export C ABI alias for _gs_rdy()
+_gs_eof             EXPORT    ;         export this symbol
+__gs_eof            EXPORT    ;         export C ABI alias for _gs_eof()
+_gs_opt             EXPORT    ;         export this symbol
+__gs_opt            EXPORT    ;         export C ABI alias for _gs_opt()
+_gs_devn            EXPORT    ;         export this symbol
+__gs_devn           EXPORT    ;         export C ABI alias for _gs_devn()
+_gs_gfd             EXPORT    ;         export this symbol
+__gs_gfd            EXPORT    ;         export C ABI alias for _gs_gfd()
 
 _errno              EXTERNAL  ;         import external symbol
 _os9err             EXTERNAL  ;         import external symbol
 _sysret             EXTERNAL  ;         import external symbol
 
 __gs_size:
+_gs_size:
 stk_gs_size_ret     equ       0         ; caller return address
 stk_gs_size_dest    equ       2         ; hidden long-return destination pointer
 stk_gs_size_path    equ       4         ; OS-9 path number argument
@@ -24,6 +32,7 @@ stk_gs_size_path    equ       4         ; OS-9 path number argument
                     bra       L_gs_long ; handle the common 32-bit GetStat result
 
 __gs_pos:
+_gs_pos:
 stk_gs_pos_ret      equ       0         ; caller return address
 stk_gs_pos_dest     equ       2         ; hidden long-return destination pointer
 stk_gs_pos_path     equ       4         ; OS-9 path number argument
@@ -43,6 +52,7 @@ L_gs_long_store     tfr       x,d       ; copy high word before loading the dest
                     puls      u,pc      ; restore U and return
 
 __gs_rdy:
+_gs_rdy:
 stk_gs_rdy_ret      equ       0         ; caller return address
 stk_gs_rdy_path     equ       2         ; OS-9 path number argument
                     ldb       #SS_Ready ; request readiness status
@@ -53,6 +63,7 @@ stk_gs_rdy_path     equ       2         ; OS-9 path number argument
                     rts                 ; return readiness count
 
 __gs_eof:
+_gs_eof:
 stk_gs_eof_ret      equ       0         ; caller return address
 stk_gs_eof_path     equ       2         ; OS-9 path number argument
                     ldb       #SS_EOF   ; request end-of-file status
@@ -61,6 +72,7 @@ stk_gs_eof_path     equ       2         ; OS-9 path number argument
                     bra       L_gs_sysret ; normalize success or failure through _sysret
 
 __gs_opt:
+_gs_opt:
 stk_gs_opt_ret      equ       0         ; caller return address
 stk_gs_opt_path     equ       2         ; OS-9 path number argument
 stk_gs_opt_buffer   equ       4         ; destination options packet
@@ -71,6 +83,7 @@ stk_gs_opt_buffer   equ       4         ; destination options packet
                     bra       L_gs_sysret ; normalize success or failure through _sysret
 
 __gs_devn:
+_gs_devn:
 stk_gs_devn_ret     equ       0         ; caller return address
 stk_gs_devn_path    equ       2         ; OS-9 path number argument
 stk_gs_devn_buffer  equ       4         ; destination device-name buffer
@@ -89,6 +102,7 @@ L_gs_devn_scan      lda       ,x+       ; scan for OS-9 high-bit terminator
                     rts                 ; return success
 
 __gs_gfd:
+_gs_gfd:
 stk_gs_gfd_ret      equ       0         ; caller return address
 stk_gs_gfd_path     equ       2         ; OS-9 path number argument
 stk_gs_gfd_buffer   equ       4         ; destination file-descriptor buffer

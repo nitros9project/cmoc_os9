@@ -2,33 +2,39 @@
 #include <string.h>
 #include <os.h>
 
+static char *build_module_name(const char *command)
+{
+    const char *end = command;
+    char *module;
+    int len;
+
+    while (*end != ' ' && *end != '\0')
+        ++end;
+
+    len = end - command;
+    if (len == 0)
+        return 0;
+
+    module = (char *) malloc(len + 1);
+    if (module == 0)
+        return 0;
+
+    memcpy(module, command, len);
+    module[len] = '\0';
+    return module;
+}
+
 static char *build_parameter_string(const char *command, int *param_size)
 {
-    const char *space = command;
     char *params;
     int arg_len;
 
-    while (*space != ' ' && *space != '\0')
-        ++space;
-    if (*space == ' ')
-        ++space;
-
-    arg_len = strlen(space);
-    if (arg_len == 0) {
-        params = (char *) malloc(2);
-        if (params == 0)
-            return 0;
-        params[0] = '\n';
-        params[1] = '\0';
-        *param_size = 1;
-        return params;
-    }
-
+    arg_len = strlen(command);
     params = (char *) malloc(arg_len + 2);
     if (params == 0)
         return 0;
 
-    strcpy(params, space);
+    strcpy(params, command);
     strcat(params, "\n");
     *param_size = arg_len + 1;
     return params;
@@ -36,6 +42,7 @@ static char *build_parameter_string(const char *command, int *param_size)
 
 int system(const char *command)
 {
+    char *module;
     char *parameter;
     int param_size;
     int pid;
@@ -45,16 +52,24 @@ int system(const char *command)
     if (command == 0)
         return 1;
 
-    parameter = build_parameter_string(command, &param_size);
-    if (parameter == 0)
+    module = build_module_name(command);
+    if (module == 0)
         return -1;
 
-    if (_os_fork(command, param_size, parameter, Objct, Prgrm, 0, &pid) != 0) {
+    parameter = build_parameter_string(command, &param_size);
+    if (parameter == 0) {
+        free(module);
+        return -1;
+    }
+
+    if (_os_fork(module, param_size, parameter, Objct, Prgrm, 0, &pid) != 0) {
+        free(module);
         if (parameter != 0)
             free(parameter);
         return -1;
     }
 
+    free(module);
     if (parameter != 0)
         free(parameter);
 

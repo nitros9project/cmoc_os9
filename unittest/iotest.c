@@ -304,7 +304,7 @@ void test_create_and_seek()
 	if (path != -1)
 	{
 		printf("%s [PASS] create(\"%s\", %x, %d) = %d\n", __func__, file, mode, perms, path);
-			const char *message = "this is a line of text\n";
+		const char *message = "this is a line of text\n";
 		int length = strlen(message);
 		int result = writeln(path, message, length);
 		if (result == length)

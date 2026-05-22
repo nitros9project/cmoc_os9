@@ -584,9 +584,9 @@ store_exponent_marker ldx       30,s      ; load X from stack-relative value 30,
                     sbca      #0        ; subtract immediate value 0 from A
                     std       18,s      ; store D to stack-relative value 18,s
                     ldd       #$002d    ; load D from immediate value $002d
-                    bra       store_exponent_sign2 ; branch unconditionally to store_exponent_sign
+                    bra       store_exponent_sign ; branch unconditionally to store_exponent_sign
 positive_exponent_suffix ldd       #'+
-store_exponent_sign2 ldx       30,s      ; load X from stack-relative value 30,s
+store_exponent_sign ldx       30,s      ; load X from stack-relative value 30,s
                     leax      1,x       ; compute effective address into X from 1,x
                     stx       30,s      ; store X to stack-relative value 30,s
                     stb       -1,x      ; store B to indexed value -1,x

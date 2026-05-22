@@ -11,6 +11,6 @@ jobs:
     steps:
       - uses: actions/checkout@v6.0.2
 
-      - name: Check compile
+      - name: Check compile and run tests
         run: |
-          make
+          make tests

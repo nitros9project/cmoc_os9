@@ -50,6 +50,13 @@
 #define OFF_TITLE_ROGUE              0x171b
 #define OFF_TITLE_COPYRIGHT          0x1721
 #define OFF_TITLE_PRESS_SPACE        0x1739
+#define OFF_DEATH_RANKINGS_PROMPT    0x1965
+#define OFF_SCORE_HALL_HEADER        0x19e1
+#define OFF_SCORE_GOLD_HEADER        0x19fd
+#define OFF_SCORE_ROW_FORMAT         0x1a07
+#define OFF_SCORE_KILLED_BY_FORMAT   0x1a0f
+#define OFF_SCORE_RANK_FORMAT        0x1a1d
+#define OFF_SCORE_ON_LEVEL_FORMAT    0x1a23
 #define OFF_MONSTER_TABLE            0x10fb
 #define OFF_DEATH_EPITAPH            0x1a3c
 #define OFF_DEATH_TOTAL_WORTH        0x1a57
@@ -73,6 +80,7 @@
 #define OFF_MESSAGE_LENGTH           0x363f
 #define OFF_MESSAGE_CURSOR_X         0x3640
 #define OFF_MESSAGE_TEXT_WIDTH       0x3641
+#define OFF_ASCII_GLYPH_TABLE        0x35a6
 
 #define OFF_GRAPHICS_FONT_FLAG       0x3571
 #define OFF_MIN_WINDOW_WIDTHS        0x3664
@@ -105,11 +113,31 @@
 #define OFF_SOME_FOOD                0x3a29
 #define OFF_NO_APPROPRIATE_OBJECT    0x3860
 #define OFF_FOUND_GOLD_MESSAGE       0x3981
+#define OFF_ACTION_EAT               0x3969
+#define OFF_ACTION_DROP              0x396d
+#define OFF_OBJECT_ACTION_PROMPT     0x3900
+#define OFF_BAD_PACK_LETTER          0x392f
+#define OFF_DROPPED_OBJECT_MESSAGE   0x3bc8
 #define OFF_FOOD_NAME                0x4342
+#define OFF_ACTION_WEAR              0x4205
+#define OFF_ALREADY_WEARING_ARMOR    0x420a
+#define OFF_NOW_WEARING_ARMOR        0x425e
+#define OFF_NO_ARMOR_WORN            0x4275
+#define OFF_TOOK_OFF_ARMOR           0x4292
+#define OFF_ACTION_WIELD             0x439a
+#define OFF_NOW_WIELDING_WEAPON      0x43b6
+#define OFF_ACTION_READ              0x15d7
+#define OFF_ACTION_QUAFF             0x4690
 #define OFF_SCROLL_MAP_MESSAGE       0x44c5
 #define OFF_BLANK_SCROLL_MESSAGE     0x45cd
 #define OFF_POTION_HEALING_MESSAGE   0x4707
 #define OFF_ODD_TASTING_POTION       0x48e1
+#define OFF_COMBAT_HITS              0x20c9
+#define OFF_COMBAT_HIT               0x20ce
+#define OFF_COMBAT_JOIN_FORMAT       0x2284
+#define OFF_COMBAT_THE_MONSTER_VERB  0x2304
+#define OFF_COMBAT_YOU_VERB          0x2310
+#define OFF_COMBAT_DEFEATED          0x2328
 
 #define WEAPON_COUNT                 10
 #define ARMOR_COUNT                  8

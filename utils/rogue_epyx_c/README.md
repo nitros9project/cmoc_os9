@@ -14,20 +14,19 @@ Current status:
 
 - `epyx_offsets.h` names the first confirmed data-area offsets.
 - `epyx_arena.c` loads `rogue.dat` and exposes typed accessors.
-- `epyx_startup.c` mirrors the first translated startup behavior: load the
-  arena and place the command line at `$1528`.
+- `main.c` loads the arena and clears the command-line buffer at `$1528`;
+  full option parsing is still pending translation.
 - `epyx_screen.c` names the first translated terminal primitives from the
   `L63DD`/`L6CDE`/`L6D07`/`L6D6F` cluster.
 - `epyx_format.c` translates the compact `L3D23` formatter subset and exposes
   the first readable wrappers for `L6D16`/`L68D8`-style output.
-- `epyx_tables.c` wraps confirmed pointer tables and fixed strings in readable
-  C names.
 - `rogue_game.c` is the current playable harness. It draws a minimal room,
   moves the hero with `hjklyubn`, shows a Rogue-style status line, handles
   `?` and `/` using the original Epyx `rogue.hlp` and `rogue.chr` files, and
-  uses confirmed `rogue.dat` strings for inventory text. This is not the
-  translated game loop yet; it is a runnable target for testing display,
-  input, data loading, and binary size while the real routines are translated.
+  uses confirmed `rogue.dat` offsets directly for inventory text and object
+  names. This is not the translated game loop yet; it is a runnable target for
+  testing display, input, data loading, and binary size while the real routines
+  are translated.
 
 Next translation targets:
 

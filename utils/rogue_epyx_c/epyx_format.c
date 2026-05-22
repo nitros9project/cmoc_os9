@@ -4,8 +4,6 @@
 #include "epyx_format.h"
 #include "epyx_screen.h"
 
-static char empty_string[1];
-
 static int is_digit(ch)
 int ch;
 {
@@ -64,19 +62,6 @@ char *work;
   for (i = 0; i < count; i++) work[i] = reversed[count - i - 1];
   work[count] = 0;
   return count;
-}
-
-static int make_signed(value, work)
-int value;
-char *work;
-{
-  unsigned int magnitude;
-
-  if (value >= 0) return make_unsigned(value, work);
-
-  work[0] = '-';
-  magnitude = (unsigned int) (0 - value);
-  return make_unsigned(magnitude, work + 1) + 1;
 }
 
 static void out_field(dest, max, pos, text, width, precision, left_adjust)
@@ -158,7 +143,6 @@ va_list ap;
     ch = *fmt++;
     if (ch == 's') {
       text = va_arg(ap, char *);
-      if (text == 0) text = empty_string;
       out_field(dest, max, &pos, text, width, precision, left_adjust);
     } else if (ch == 'c') {
       one_char[0] = (char) va_arg(ap, int);
@@ -167,11 +151,9 @@ va_list ap;
     } else if (ch == 'u') {
       make_unsigned(va_arg(ap, unsigned int), work);
       out_field(dest, max, &pos, work, width, precision, left_adjust);
-    } else if (ch == 'd' || ch == 'i') {
-      make_signed(va_arg(ap, int), work);
+    } else if (ch == 'd') {
+      make_unsigned(va_arg(ap, int), work);
       out_field(dest, max, &pos, work, width, precision, left_adjust);
-    } else if (ch == '%') {
-      out_char(dest, max, &pos, '%');
     }
   }
 

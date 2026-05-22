@@ -7,7 +7,6 @@
 #include "epyx_arena.h"
 #include "epyx_format.h"
 #include "epyx_screen.h"
-#include "epyx_tables.h"
 #include "rogue_game.h"
 
 int read(int path, void *buffer, int count);
@@ -15,8 +14,12 @@ int rogue_ignore_signals();
 
 static void redraw_dungeon();
 static void show_inventory();
+static void show_hall_of_fame();
+static void pickup_here();
 static int read_key();
 static int starts_with_vowel(const char *s);
+static const char *monster_death_cause_for(int ch);
+static int visible_position(int x, int y);
 
 #define DUNGEON_MIN_WIDTH  28
 #define DUNGEON_MAX_WIDTH  78
@@ -26,10 +29,29 @@ static int starts_with_vowel(const char *s);
 #define INVENTORY_MAX  8
 #define HELP_TEXT_MAX  1024
 #define CHR_TEXT_MAX   192
+#define SCORE_ENTRY_SIZE 43
+#define SCORE_ENTRY_MAX  10
 #define KEY_CTRL_C     3
 #define KEY_CTRL_E     5
 #define KEY_ESCAPE     27
 #define KEY_RETURN     13
+
+#define GLYPH_PLAYER   0
+#define GLYPH_FLOOR    1
+#define GLYPH_HALLWAY  2
+#define GLYPH_HORIZ    3
+#define GLYPH_VERT     4
+#define GLYPH_CORNER1  5
+#define GLYPH_DOOR     9
+#define GLYPH_GOLD     10
+#define GLYPH_FOOD     11
+#define GLYPH_SCROLL   12
+#define GLYPH_POTION   13
+#define GLYPH_WEAPON   14
+#define GLYPH_ARMOR    15
+#define GLYPH_STAIRS   18
+
+#define glyph(index) rogue_get8(OFF_ASCII_GLYPH_TABLE + (index))
 
 #define OBJ_NONE       0
 #define OBJ_FOOD       1
@@ -81,9 +103,14 @@ static char dungeon_height;
 static char status_y;
 static char top_door_x;
 static char bottom_door_x;
+static char right_room_x;
+static char corridor_y;
+static char corridor_revealed_x;
+static char right_room_visible;
 static char stair_x;
 static char stair_y;
 static char status_invalid;
+static char clear_message_next;
 static char last_status_level;
 static char last_status_hp;
 static int last_status_gold;
@@ -94,7 +121,9 @@ static RogueMonster monster;
 static char room_line[DUNGEON_MAX_WIDTH + 1];
 static char object_name_buf[48];
 static char death_cause_buf[32];
+static char *kobold_name;
 static char potion_color_index[POTION_COUNT];
+static char score_data[SCORE_ENTRY_SIZE * SCORE_ENTRY_MAX];
 static struct sgbuf saved_stdin_opts;
 static struct sgbuf game_stdin_opts;
 static int have_saved_stdin_opts;
@@ -143,6 +172,14 @@ unsigned int off;
   return len;
 }
 
+static char *arena_table_string(base, index, stride)
+unsigned int base;
+int index;
+int stride;
+{
+  return rogue_string_at(rogue_get16(base + index * stride));
+}
+
 static int arena_random_char(off)
 unsigned int off;
 {
@@ -180,6 +217,8 @@ static void init_object_names()
   int i;
   int color;
 
+  kobold_name = arena_table_string(OFF_MONSTER_TABLE, 'K' - 'A',
+                                   MONSTER_ENTRY_SIZE);
   for (i = 0; i < 25; i++) used[i] = 0;
   for (i = 0; i < POTION_COUNT; i++) {
     do {
@@ -259,25 +298,15 @@ const char *text;
   epyx_write_string(text);
 }
 
-static void centered_format(y, fmt, a, b)
-int y;
-const char *fmt;
-const char *a;
-const char *b;
-{
-  epyx_format(object_name_buf, sizeof(object_name_buf), fmt, a, b);
-  centered_text(y, object_name_buf);
-}
-
 static void short_delay()
 {
   int ticks;
 
-  ticks = 2;
+  ticks = 3;
   _os9_sleep(&ticks);
 }
 
-static void show_title_screen()
+static void show_corner_stars()
 {
   int max_x;
   int max_y;
@@ -297,7 +326,7 @@ static void show_title_screen()
 
   left_x = 1;
   right_x = max_x - 1;
-  for (y = 0; y < half_y; y++) {
+  for (y = 0; y < half_y + 1; y++) {
     put_at(left_x, y, '*');
     put_at(right_x, y, '*');
     put_at(left_x, max_y - y, '*');
@@ -306,102 +335,204 @@ static void show_title_screen()
     left_x += step_x;
     right_x -= step_x;
   }
+}
 
+static void show_title_screen()
+{
+  int max_y;
+  int half_y;
+
+  show_corner_stars();
+  max_y = rogue_get8(OFF_SCREEN_MAX_Y);
+  half_y = max_y / 2;
   epyx_clear_window();
   centered_text(half_y, rogue_string_at(OFF_TITLE_ROGUE));
   if (rogue_get8(OFF_SCREEN_WIDTH) >= 26)
-    centered_text(half_y + 5, rogue_string_at(OFF_TITLE_COPYRIGHT));
-  centered_text(half_y + 7, rogue_string_at(OFF_TITLE_PRESS_SPACE));
+    centered_text(max_y - 5, rogue_string_at(OFF_TITLE_COPYRIGHT));
+  centered_text(max_y - 3, rogue_string_at(OFF_TITLE_PRESS_SPACE));
   while (read_key() != ' ') ;
   epyx_clear_window();
 }
 
 static const char *monster_death_cause()
 {
+  return monster_death_cause_for('K');
+}
+
+static const char *monster_death_cause_for(ch)
+int ch;
+{
   char *name;
 
-  name = rogue_string_at(rogue_get16(OFF_MONSTER_TABLE +
-                                    ('K' - 'A') * MONSTER_ENTRY_SIZE));
+  if (ch >= 'A' && ch <= 'Z')
+    name = arena_table_string(OFF_MONSTER_TABLE, ch - 'A',
+                              MONSTER_ENTRY_SIZE);
+  else
+    name = kobold_name;
   epyx_format(death_cause_buf, sizeof(death_cause_buf),
               starts_with_vowel(name) ? "an %s" : "a %s", name);
   return death_cause_buf;
 }
 
+static unsigned int score_gold(entry)
+char *entry;
+{
+  return ((unsigned int) (unsigned char) entry[37] << 8) |
+         (unsigned char) entry[38];
+}
+
+static void show_score_line(y, name, rank, gold, status, level)
+int y;
+char *name;
+int rank;
+unsigned int gold;
+int status;
+int level;
+{
+  const char *rank_name;
+
+  epyx_move_cursor(0, y);
+  epyx_printf(rogue_string_at(OFF_SCORE_ROW_FORMAT), gold, name);
+  if (rank > 1 && rank <= RANK_COUNT) {
+    rank_name = arena_table_string(OFF_RANK_NAME_TABLE, rank - 1, 2);
+    epyx_printf(rogue_string_at(OFF_SCORE_RANK_FORMAT), rank_name);
+  }
+  epyx_format(object_name_buf, sizeof(object_name_buf),
+              rogue_string_at(OFF_SCORE_KILLED_BY_FORMAT),
+              monster_death_cause_for(status));
+  epyx_printf(rogue_string_at(OFF_SCORE_ON_LEVEL_FORMAT),
+              object_name_buf, level);
+}
+
+static void show_current_score_line(y)
+int y;
+{
+  show_score_line(y, rogue_string_at(OFF_DEFAULT_PLAYER_NAME), 1,
+                  player_gold, 'K', dungeon_level);
+}
+
+static void show_hall_of_fame()
+{
+  char *entry;
+  path_id fd;
+  int count;
+  int i;
+  int row;
+  char current_shown;
+
+  epyx_clear_window();
+  epyx_move_cursor(0, 0);
+  epyx_write_string(rogue_string_at(OFF_SCORE_HALL_HEADER));
+  epyx_move_cursor(2, 2);
+  epyx_write_string(rogue_string_at(OFF_SCORE_GOLD_HEADER));
+
+  for (i = 0; i < SCORE_ENTRY_SIZE * SCORE_ENTRY_MAX; i++) score_data[i] = 0;
+  if (_os_open(rogue_string_at(OFF_SCORE_FILE_NAME), FAM_READ, &fd) == 0) {
+    count = SCORE_ENTRY_SIZE * SCORE_ENTRY_MAX;
+    _os_read(fd, score_data, &count);
+    _os_close(fd);
+  }
+
+  row = 4;
+  current_shown = 0;
+  for (i = 0; i < SCORE_ENTRY_MAX && row < rogue_get8(OFF_SCREEN_HEIGHT) - 1;
+       i++) {
+    entry = score_data + i * SCORE_ENTRY_SIZE;
+    if (score_gold(entry) == 0) break;
+    if (!current_shown && player_gold >= score_gold(entry)) {
+      show_current_score_line(row++);
+      current_shown = 1;
+      if (row >= rogue_get8(OFF_SCREEN_HEIGHT) - 1) break;
+    }
+    show_score_line(row++, entry, (unsigned char) entry[36],
+                    score_gold(entry), entry[39], entry[40]);
+  }
+  if (!current_shown && row < rogue_get8(OFF_SCREEN_HEIGHT) - 1)
+    show_current_score_line(row);
+}
+
 static void show_death_screen()
 {
+  const char *prompt;
+  int bottom;
+  int max_x;
+  int prompt_x;
+  int top;
+  int x;
   int y;
 
   epyx_clear_window();
-  y = rogue_get8(OFF_SCREEN_HEIGHT) - 14;
-  if (y < 0) y = 0;
+  max_x = rogue_get8(OFF_SCREEN_MAX_X);
+  top = 1;
+  bottom = rogue_get8(OFF_SCREEN_HEIGHT) - 2;
+  if (bottom < 14) bottom = rogue_get8(OFF_SCREEN_MAX_Y);
 
+  put_at(1, top, '*');
+  for (x = 2; x < max_x; x++) put_at(x, top, glyph(GLYPH_HORIZ));
+  put_at(max_x, top, '*');
+  for (y = top + 1; y < bottom; y++) {
+    put_at(1, y, glyph(GLYPH_VERT));
+    put_at(max_x, y, glyph(GLYPH_VERT));
+  }
+
+  y = top + (bottom - top) / 2 - 3;
   centered_text(y + 1, rogue_string_at(OFF_DEATH_TOP));
   centered_text(y + 2, rogue_string_at(OFF_DEATH_SHOULDER));
   centered_text(y + 3, rogue_string_at(OFF_DEATH_RIP));
   centered_text(y + 4, rogue_string_at(OFF_DEATH_BLANK1));
   centered_text(y + 5, rogue_string_at(OFF_DEATH_BLANK2));
   centered_text(y + 6, rogue_string_at(OFF_DEATH_BLANK3));
-  centered_format(y + 9, rogue_string_at(OFF_DEATH_EPITAPH),
-                  rogue_string_at(OFF_DEFAULT_PLAYER_NAME),
-                  monster_death_cause());
+  epyx_format(object_name_buf, sizeof(object_name_buf),
+              rogue_string_at(OFF_DEATH_EPITAPH),
+              rogue_string_at(OFF_DEFAULT_PLAYER_NAME),
+              monster_death_cause());
+  centered_text(y + 8, object_name_buf);
   epyx_format(object_name_buf, sizeof(object_name_buf),
               rogue_string_at(OFF_DEATH_TOTAL_WORTH), player_gold);
-  centered_text(y + 11, object_name_buf);
-  centered_text(y + 13, rogue_string_at(OFF_TITLE_PRESS_SPACE));
-  while (read_key() != ' ') ;
-  epyx_clear_window();
-}
+  centered_text(y + 10, object_name_buf);
 
-static int room_col(n)
-int n;
-{
-  return dungeon_x + n * (dungeon_width - 1) / 37;
+  prompt = rogue_string_at(OFF_DEATH_RANKINGS_PROMPT);
+  prompt_x = (rogue_get8(OFF_SCREEN_WIDTH) - string_width(prompt)) / 2;
+  if (prompt_x < 2) prompt_x = 2;
+  put_at(1, bottom, '*');
+  for (x = 2; x < prompt_x; x++) put_at(x, bottom, glyph(GLYPH_HORIZ));
+  epyx_move_cursor(prompt_x, bottom);
+  epyx_write_string(prompt);
+  x = prompt_x + string_width(prompt);
+  while (x < max_x) put_at(x++, bottom, glyph(GLYPH_HORIZ));
+  put_at(max_x, bottom, '*');
+
+  while (read_key() != KEY_RETURN) ;
+  show_hall_of_fame();
 }
 
 static void init_layout()
 {
   int screen_width;
   int screen_height;
+  int total_width;
 
   screen_width = rogue_get8(OFF_SCREEN_WIDTH);
   screen_height = rogue_get8(OFF_SCREEN_HEIGHT);
 
-  dungeon_x = 1;
-  dungeon_y = screen_height >= 20 ? 2 : 1;
+  dungeon_width = screen_width >= 70 ? 20 : 16;
+  dungeon_height = 5;
+  total_width = dungeon_width * 2 + 7;
+  dungeon_x = (char) ((screen_width - total_width) / 2);
+  if (dungeon_x < 1) dungeon_x = 1;
+  dungeon_y = screen_height >= 20 ? 5 : 2;
   status_y = (char) (screen_height > 2 ? screen_height - 2 : 0);
 
-  dungeon_width = (char) (screen_width - dungeon_x - 1);
-  if (dungeon_width > DUNGEON_MAX_WIDTH) dungeon_width = DUNGEON_MAX_WIDTH;
-  if (dungeon_width < DUNGEON_MIN_WIDTH) dungeon_width = DUNGEON_MIN_WIDTH;
-
-  dungeon_height = status_y - dungeon_y - 2;
-  if (dungeon_height > DUNGEON_MAX_HEIGHT) dungeon_height = DUNGEON_MAX_HEIGHT;
-  if (dungeon_height < DUNGEON_MIN_HEIGHT) dungeon_height = DUNGEON_MIN_HEIGHT;
-
-  top_door_x = (char) room_col(12);
-  bottom_door_x = (char) room_col(24);
-  stair_x = bottom_door_x;
-  stair_y = dungeon_y + dungeon_height - 2;
+  right_room_x = dungeon_x + dungeon_width + 7;
+  corridor_y = dungeon_y + dungeon_height / 2;
+  top_door_x = dungeon_x + dungeon_width - 1;
+  bottom_door_x = right_room_x;
+  stair_x = right_room_x + dungeon_width / 2;
+  stair_y = corridor_y;
 }
 
-static void set_floor_object(slot, kind, glyph, subtype, x, y, quantity)
-int slot;
-int kind;
-int glyph;
-int subtype;
-int x;
-int y;
-int quantity;
-{
-  floor_objects[slot].kind = (char) kind;
-  floor_objects[slot].glyph = (char) glyph;
-  floor_objects[slot].subtype = (char) subtype;
-  floor_objects[slot].x = (char) x;
-  floor_objects[slot].y = (char) y;
-  floor_objects[slot].quantity = (char) quantity;
-}
-
-static void draw_room_line(y, left, fill, right)
+static void draw_room_line(x0, y, left, fill, right)
+int x0;
 int y;
 int left;
 int fill;
@@ -414,23 +545,28 @@ int right;
   room_line[dungeon_width - 1] = (char) right;
   room_line[dungeon_width] = 0;
 
-  epyx_move_cursor(dungeon_x, y);
+  epyx_move_cursor(x0, y);
   epyx_write_string(room_line);
 }
 
-static void draw_room()
+static void draw_room_at(x0, left_door, right_door)
+int x0;
+int left_door;
+int right_door;
 {
   int y;
 
-  draw_room_line(dungeon_y, '+', '-', '+');
+  draw_room_line(x0, dungeon_y, glyph(GLYPH_CORNER1), glyph(GLYPH_HORIZ),
+                 glyph(GLYPH_CORNER1));
   for (y = 1; y < dungeon_height - 1; y++)
-    draw_room_line(dungeon_y + y, '|', '.', '|');
-  draw_room_line(dungeon_y + dungeon_height - 1, '+', '-', '+');
+    draw_room_line(x0, dungeon_y + y, glyph(GLYPH_VERT), glyph(GLYPH_FLOOR),
+                   glyph(GLYPH_VERT));
+  draw_room_line(x0, dungeon_y + dungeon_height - 1, glyph(GLYPH_CORNER1),
+                 glyph(GLYPH_HORIZ), glyph(GLYPH_CORNER1));
 
-  put_at(top_door_x, dungeon_y, '+');
-  put_at(top_door_x, dungeon_y - 1, '#');
-  put_at(bottom_door_x, dungeon_y + dungeon_height - 1, '+');
-  if (dungeon_y + dungeon_height < status_y) put_at(bottom_door_x, dungeon_y + dungeon_height, '#');
+  if (left_door) put_at(x0, corridor_y, glyph(GLYPH_DOOR));
+  if (right_door) put_at(x0 + dungeon_width - 1, corridor_y,
+                         glyph(GLYPH_DOOR));
 }
 
 static void draw_status()
@@ -473,19 +609,20 @@ static void draw_floor_objects()
   int i;
 
   for (i = 0; i < FLOOR_OBJECTS; i++) {
-    if (floor_objects[i].kind != OBJ_NONE)
+    if (floor_objects[i].kind != OBJ_NONE && visible_position(
+        floor_objects[i].x, floor_objects[i].y))
       put_at(floor_objects[i].x, floor_objects[i].y, floor_objects[i].glyph);
   }
 }
 
 static void draw_monster()
 {
-  if (monster.hp > 0) put_at(monster.x, monster.y, 'K');
+  if (monster.hp > 0 && right_room_visible) put_at(monster.x, monster.y, 'K');
 }
 
 static void draw_hero()
 {
-  put_at(hero_x, hero_y, '@');
+  put_at(hero_x, hero_y, glyph(GLYPH_PLAYER));
   rogue_put16(OFF_HERO_POS, hero_y * 256 + hero_x);
 }
 
@@ -493,8 +630,32 @@ static int is_walkable(x, y)
 int x;
 int y;
 {
-  return x > dungeon_x && x < dungeon_x + dungeon_width - 1 &&
+  if (y == corridor_y && x >= top_door_x && x <= bottom_door_x) return 1;
+  if (x > dungeon_x && x < dungeon_x + dungeon_width - 1 &&
+      y > dungeon_y && y < dungeon_y + dungeon_height - 1)
+    return 1;
+  return x > right_room_x && x < right_room_x + dungeon_width - 1 &&
          y > dungeon_y && y < dungeon_y + dungeon_height - 1;
+}
+
+static int in_room(x, y, x0)
+int x;
+int y;
+int x0;
+{
+  return x > x0 && x < x0 + dungeon_width - 1 &&
+         y > dungeon_y && y < dungeon_y + dungeon_height - 1;
+}
+
+static int visible_position(x, y)
+int x;
+int y;
+{
+  if (in_room(x, y, dungeon_x)) return 1;
+  if (in_room(x, y, right_room_x)) return right_room_visible;
+  if (y == corridor_y && x >= top_door_x && x <= corridor_revealed_x)
+    return 1;
+  return right_room_visible && y == corridor_y && x == bottom_door_x;
 }
 
 static RogueObject *object_at(x, y)
@@ -519,8 +680,12 @@ int y;
 
   obj = object_at(x, y);
   if (obj) return obj->glyph;
-  if (x == stair_x && y == stair_y) return '>';
-  return '.';
+  if (x == stair_x && y == stair_y) return glyph(GLYPH_STAIRS);
+  if (y == corridor_y && (x == top_door_x || x == bottom_door_x))
+    return glyph(GLYPH_DOOR);
+  if (y == corridor_y && x > top_door_x && x < bottom_door_x)
+    return glyph(GLYPH_HALLWAY);
+  return glyph(GLYPH_FLOOR);
 }
 
 static RogueObject *free_floor_object()
@@ -543,16 +708,17 @@ int y;
   return object_at(x, y) != 0;
 }
 
-static void random_floor_position(xp, yp)
+static void random_room_position(xp, yp, x0)
 int *xp;
 int *yp;
+int x0;
 {
   int tries;
   int x;
   int y;
 
   for (tries = 0; tries < 40; tries++) {
-    x = dungeon_x + 1 + random_range(dungeon_width - 2);
+    x = x0 + 1 + random_range(dungeon_width - 2);
     y = dungeon_y + 1 + random_range(dungeon_height - 2);
     if (!occupied_floor_position(x, y)) {
       *xp = x;
@@ -565,6 +731,13 @@ int *yp;
   *yp = dungeon_y + 1;
 }
 
+static void random_floor_position(xp, yp)
+int *xp;
+int *yp;
+{
+  random_room_position(xp, yp, random_range(2) ? right_room_x : dungeon_x);
+}
+
 static void set_random_floor_object(slot, kind, glyph, subtype, quantity)
 int slot;
 int kind;
@@ -575,8 +748,13 @@ int quantity;
   int x;
   int y;
 
-  random_floor_position(&x, &y);
-  set_floor_object(slot, kind, glyph, subtype, x, y, quantity);
+  random_room_position(&x, &y, right_room_x);
+  floor_objects[slot].kind = (char) kind;
+  floor_objects[slot].glyph = (char) glyph;
+  floor_objects[slot].subtype = (char) subtype;
+  floor_objects[slot].x = (char) x;
+  floor_objects[slot].y = (char) y;
+  floor_objects[slot].quantity = (char) quantity;
 }
 
 static void populate_level()
@@ -588,7 +766,9 @@ static void populate_level()
   for (i = 0; i < FLOOR_OBJECTS; i++) floor_objects[i].kind = OBJ_NONE;
 
   hero_x = dungeon_x + dungeon_width / 2;
-  hero_y = dungeon_y + dungeon_height / 2;
+  hero_y = corridor_y;
+  right_room_visible = 0;
+  corridor_revealed_x = top_door_x;
 
   monster.hp = 0;
   random_floor_position(&x, &y);
@@ -596,12 +776,56 @@ static void populate_level()
   monster.y = (char) y;
   monster.hp = (char) (2 + dungeon_level);
 
-  set_random_floor_object(0, OBJ_GOLD, '$', 0, 20 + random_range(60));
-  set_random_floor_object(1, OBJ_FOOD, '%', 0, 1);
-  set_random_floor_object(2, OBJ_POTION, '?', random_range(POTION_COUNT), 1);
-  set_random_floor_object(3, OBJ_SCROLL, '~', random_range(SCROLL_COUNT), 1);
-  set_random_floor_object(4, OBJ_WEAPON, '^', 0, 1);
-  set_random_floor_object(5, OBJ_ARMOR, '*', 0, 1);
+  set_random_floor_object(0, OBJ_GOLD, glyph(GLYPH_GOLD), 0,
+                          20 + random_range(60));
+  set_random_floor_object(1, OBJ_FOOD, glyph(GLYPH_FOOD), 0, 1);
+  set_random_floor_object(2, OBJ_POTION, glyph(GLYPH_POTION),
+                          random_range(POTION_COUNT), 1);
+  set_random_floor_object(3, OBJ_SCROLL, glyph(GLYPH_SCROLL),
+                          random_range(SCROLL_COUNT), 1);
+  set_random_floor_object(4, OBJ_WEAPON, glyph(GLYPH_WEAPON),
+                          random_range(WEAPON_COUNT), 1);
+  set_random_floor_object(5, OBJ_ARMOR, glyph(GLYPH_ARMOR),
+                          random_range(ARMOR_COUNT), 1);
+}
+
+static void reveal_corridor_to(x)
+int x;
+{
+  int start;
+
+  if (x >= bottom_door_x) x = bottom_door_x - 1;
+  if (x <= corridor_revealed_x) return;
+  start = corridor_revealed_x + 1;
+  corridor_revealed_x = (char) x;
+  while (start <= x) put_at(start++, corridor_y, glyph(GLYPH_HALLWAY));
+}
+
+static void draw_known_area()
+{
+  int x;
+
+  draw_room_at(dungeon_x, 0, 1);
+  for (x = top_door_x + 1; x <= corridor_revealed_x; x++)
+    put_at(x, corridor_y, glyph(GLYPH_HALLWAY));
+  if (right_room_visible) {
+    draw_room_at(right_room_x, 1, 0);
+    put_at(stair_x, stair_y, glyph(GLYPH_STAIRS));
+    draw_monster();
+  }
+  draw_floor_objects();
+}
+
+static void reveal_after_move()
+{
+  if (hero_x >= top_door_x) reveal_corridor_to(hero_x);
+  if (!right_room_visible && hero_x >= bottom_door_x) {
+    right_room_visible = 1;
+    draw_room_at(right_room_x, 1, 0);
+    put_at(stair_x, stair_y, glyph(GLYPH_STAIRS));
+    draw_floor_objects();
+    draw_monster();
+  }
 }
 
 static void erase_hero()
@@ -614,25 +838,9 @@ static void erase_monster()
   put_at(monster.x, monster.y, floor_glyph_at(monster.x, monster.y));
 }
 
-static int monster_at(x, y)
-int x;
-int y;
-{
-  return monster.hp > 0 && monster.x == x && monster.y == y;
-}
-
 static void no_appropriate()
 {
   epyx_message(rogue_string_at(OFF_NO_APPROPRIATE_OBJECT));
-}
-
-static int adjacent_to_hero(x, y)
-int x;
-int y;
-{
-  return x >= hero_x - 1 && x <= hero_x + 1 &&
-         y >= hero_y - 1 && y <= hero_y + 1 &&
-         (x != hero_x || y != hero_y);
 }
 
 static void monster_hit_player()
@@ -650,18 +858,10 @@ static void monster_hit_player()
   if (player_hp <= 0) {
     epyx_message(rogue_string_at(OFF_DEATH_YOU_DIED));
   } else {
-    epyx_message("It hits.");
+    epyx_message(rogue_string_at(OFF_COMBAT_THE_MONSTER_VERB),
+                 kobold_name,
+                 rogue_string_at(OFF_COMBAT_HITS));
   }
-}
-
-static char object_glyph(kind)
-int kind;
-{
-  if (kind == OBJ_FOOD) return '%';
-  if (kind == OBJ_POTION) return '?';
-  if (kind == OBJ_SCROLL) return '~';
-  if (kind == OBJ_WEAPON) return '^';
-  return '*';
 }
 
 static const char *formatted_name(fmt, name)
@@ -669,15 +869,6 @@ const char *fmt;
 const char *name;
 {
   epyx_format(object_name_buf, sizeof(object_name_buf), fmt, name);
-  return object_name_buf;
-}
-
-static const char *formatted_name2(fmt, a, b)
-const char *fmt;
-const char *a;
-const char *b;
-{
-  epyx_format(object_name_buf, sizeof(object_name_buf), fmt, a, b);
   return object_name_buf;
 }
 
@@ -698,25 +889,38 @@ static const char *object_name(kind, subtype)
 int kind;
 int subtype;
 {
+  const char *color;
+
   if (kind == OBJ_FOOD) return rogue_string_at(OFF_SOME_FOOD);
   if (kind == OBJ_POTION) {
-    if (epyx_potion_known(subtype))
-      return formatted_name2("a potion of %s(%s)",
-                             epyx_potion_name(subtype),
-                             potion_color(subtype));
-    if (starts_with_vowel(potion_color(subtype)))
-      return formatted_name("an %s potion", potion_color(subtype));
-    return formatted_name("a %s potion", potion_color(subtype));
+    color = potion_color(subtype);
+    if (rogue_get8(OFF_POTION_KNOWN_FLAGS + subtype)) {
+      epyx_format(object_name_buf, sizeof(object_name_buf),
+                  "a potion of %s(%s)",
+                  arena_table_string(OFF_POTION_TABLE, subtype, 4),
+                  color);
+      return object_name_buf;
+    }
+    if (starts_with_vowel(color)) return formatted_name("an %s potion", color);
+    return formatted_name("a %s potion", color);
   }
   if (kind == OBJ_SCROLL) {
-    if (epyx_scroll_known(subtype))
-      return formatted_name("a scroll of %s", epyx_scroll_name(subtype));
+    if (rogue_get8(OFF_SCROLL_KNOWN_FLAGS + subtype))
+      return formatted_name("a scroll of %s",
+                            arena_table_string(OFF_SCROLL_TABLE, subtype, 4));
     return formatted_name("a scroll titled '%s'",
                           rogue_string_at(OFF_RANDOM_SCROLL_NAMES +
                                           subtype * SCROLL_TITLE_SIZE));
   }
-  if (kind == OBJ_WEAPON) return "a mace";
-  if (kind == OBJ_ARMOR) return "some armor";
+  if (kind == OBJ_WEAPON) {
+    if (subtype < 0 || subtype >= WEAPON_COUNT) subtype = 0;
+    color = arena_table_string(OFF_WEAPON_NAME_TABLE, subtype, 2);
+    return formatted_name(starts_with_vowel(color) ? "an %s" : "a %s", color);
+  }
+  if (kind == OBJ_ARMOR) {
+    if (subtype < 0 || subtype >= ARMOR_COUNT) subtype = 0;
+    return arena_table_string(OFF_ARMOR_NAME_TABLE, subtype, 2);
+  }
   return "something";
 }
 
@@ -814,20 +1018,22 @@ int dy;
 
   nx = hero_x + dx;
   ny = hero_y + dy;
-  if (monster_at(nx, ny)) {
+  if (monster.hp > 0 && monster.x == nx && monster.y == ny) {
     monster.hp -= wielded_weapon ? 2 : 1;
     turn_taken = 1;
     if (monster.hp <= 0) {
       erase_monster();
-      epyx_message("Defeated.");
+      epyx_message(rogue_string_at(OFF_COMBAT_JOIN_FORMAT),
+                   rogue_string_at(OFF_COMBAT_DEFEATED),
+                   kobold_name);
     } else {
-      epyx_message("You hit.");
+      epyx_message(rogue_string_at(OFF_COMBAT_YOU_VERB),
+                   rogue_string_at(OFF_COMBAT_HIT));
     }
     return;
   }
 
   if (!is_walkable(nx, ny)) {
-    epyx_message("You bump into a wall.");
     return;
   }
 
@@ -836,7 +1042,9 @@ int dy;
   hero_x = nx;
   hero_y = ny;
   turn_taken = 1;
+  reveal_after_move();
   draw_hero();
+  if (object_at(hero_x, hero_y)) pickup_here();
 }
 
 static void monster_turn()
@@ -847,7 +1055,10 @@ static void monster_turn()
   int ny;
 
   if (monster.hp <= 0) return;
-  if (adjacent_to_hero(monster.x, monster.y)) {
+  if (!right_room_visible) return;
+  if (monster.x >= hero_x - 1 && monster.x <= hero_x + 1 &&
+      monster.y >= hero_y - 1 && monster.y <= hero_y + 1 &&
+      (monster.x != hero_x || monster.y != hero_y)) {
     monster_hit_player();
     return;
   }
@@ -885,6 +1096,7 @@ static void pickup_here()
   }
 
   pickup_object(obj);
+  clear_message_next = 1;
   draw_status();
   draw_hero();
 }
@@ -897,16 +1109,10 @@ static int read_key()
   return ch;
 }
 
-static void copy_string(dest, src)
-char *dest;
-const char *src;
-{
-  while ((*dest++ = *src++) != 0) ;
-}
-
 static void ask_player_name()
 {
   char *name;
+  char *default_name;
   int ch;
   int len;
 
@@ -940,7 +1146,10 @@ static void ask_player_name()
   }
 
   epyx_cursor_off();
-  if (len > 0) copy_string(rogue_string_at(OFF_DEFAULT_PLAYER_NAME), name);
+  if (len > 0) {
+    default_name = rogue_string_at(OFF_DEFAULT_PLAYER_NAME);
+    while ((*default_name++ = *name++) != 0) ;
+  }
 }
 
 static void preload_text_file(path, buffer, max)
@@ -959,8 +1168,8 @@ int max;
   _os_close(fd);
 }
 
-static InventoryItem *choose_item(prompt, kind)
-const char *prompt;
+static InventoryItem *choose_item(action, kind)
+const char *action;
 int kind;
 {
   int ch;
@@ -972,7 +1181,7 @@ int kind;
   }
 
   while (1) {
-    epyx_message(prompt);
+    epyx_message(rogue_string_at(OFF_OBJECT_ACTION_PROMPT), action);
     ch = read_key();
     if (ch == KEY_ESCAPE || ch == KEY_CTRL_E) {
       epyx_message("Cancelled.");
@@ -987,7 +1196,8 @@ int kind;
     if (index >= 0 && index < inventory_count &&
         (kind == 0 || inventory[index].kind == kind))
       return &inventory[index];
-    no_appropriate();
+    epyx_message(rogue_string_at(OFF_BAD_PACK_LETTER),
+                 'a' + inventory_count - 1);
     return 0;
   }
 }
@@ -996,7 +1206,7 @@ static void eat_item()
 {
   InventoryItem *item;
 
-  item = choose_item("Eat what?", OBJ_FOOD);
+  item = choose_item(rogue_string_at(OFF_ACTION_EAT), OBJ_FOOD);
   if (!item) return;
 
   remove_item(item);
@@ -1008,11 +1218,11 @@ static void quaff_item()
   InventoryItem *item;
   int subtype;
 
-  item = choose_item("Quaff what?", OBJ_POTION);
+  item = choose_item(rogue_string_at(OFF_ACTION_QUAFF), OBJ_POTION);
   if (!item) return;
 
   subtype = item->subtype;
-  epyx_set_potion_known(subtype);
+  rogue_put8(OFF_POTION_KNOWN_FLAGS + subtype, 1);
   remove_item(item);
   if (subtype == POTION_HEALING) {
     player_hp += 4;
@@ -1029,11 +1239,11 @@ static void read_scroll()
   InventoryItem *item;
   int subtype;
 
-  item = choose_item("Read what?", OBJ_SCROLL);
+  item = choose_item(rogue_string_at(OFF_ACTION_READ), OBJ_SCROLL);
   if (!item) return;
 
   subtype = item->subtype;
-  epyx_set_scroll_known(subtype);
+  rogue_put8(OFF_SCROLL_KNOWN_FLAGS + subtype, 1);
   remove_item(item);
   if (subtype == SCROLL_MAGIC_MAPPING) {
     redraw_dungeon();
@@ -1045,35 +1255,55 @@ static void read_scroll()
 
 static void wield_item()
 {
-  if (!choose_item("Wield what?", OBJ_WEAPON)) return;
+  InventoryItem *item;
 
+  item = choose_item(rogue_string_at(OFF_ACTION_WIELD), OBJ_WEAPON);
+  if (!item) return;
   wielded_weapon = 1;
-  epyx_message("You are now wielding a mace.");
+  epyx_message(rogue_string_at(OFF_NOW_WIELDING_WEAPON),
+               object_name(item->kind, item->subtype),
+               'a' + (item - inventory));
 }
 
 static void wear_armor()
 {
+  InventoryItem *item;
+
   if (worn_armor) {
-    epyx_message("You are already wearing some.");
+    epyx_message(rogue_string_at(OFF_ALREADY_WEARING_ARMOR));
     return;
   }
-  if (!choose_item("Wear what?", OBJ_ARMOR)) return;
+  item = choose_item(rogue_string_at(OFF_ACTION_WEAR), OBJ_ARMOR);
+  if (!item) return;
 
   worn_armor = 1;
   armor_guard = 0;
-  epyx_message("You are now wearing armor.");
+  epyx_message(rogue_string_at(OFF_NOW_WEARING_ARMOR),
+               object_name(item->kind, item->subtype));
 }
 
 static void take_off_armor()
 {
+  InventoryItem *item;
+  const char *name;
+  int letter;
+
   if (!worn_armor) {
-    epyx_message("You aren't wearing any armor.");
+    epyx_message(rogue_string_at(OFF_NO_ARMOR_WORN));
     return;
   }
 
+  item = inventory_item(OBJ_ARMOR, 0);
+  letter = '?';
+  name = "armor";
+  if (item) {
+    letter = 'a' + (item - inventory);
+    name = object_name(item->kind, item->subtype);
+  }
   worn_armor = 0;
   armor_guard = 0;
-  epyx_message("You used to be wearing armor.");
+  epyx_message(rogue_string_at(OFF_TOOK_OFF_ARMOR),
+               letter, name);
 }
 
 static void drop_item()
@@ -1087,7 +1317,7 @@ static void drop_item()
     return;
   }
 
-  item = choose_item("Drop what?", 0);
+  item = choose_item(rogue_string_at(OFF_ACTION_DROP), 0);
   if (!item) return;
   kind = item->kind;
 
@@ -1111,7 +1341,8 @@ static void drop_item()
   }
   turn_taken = 1;
   draw_hero();
-  epyx_message("Dropped.");
+  epyx_message(rogue_string_at(OFF_DROPPED_OBJECT_MESSAGE),
+               object_name(kind, obj->subtype));
 }
 
 static int wait_for_space_or_escape_at(y)
@@ -1246,10 +1477,7 @@ static void show_inventory()
 static void redraw_dungeon()
 {
   epyx_clear_window();
-  draw_room();
-  put_at(stair_x, stair_y, '>');
-  draw_floor_objects();
-  draw_monster();
+  draw_known_area();
   status_invalid = 1;
   draw_status();
   draw_hero();
@@ -1270,6 +1498,7 @@ int delta;
 
   dungeon_level = (char) (dungeon_level + delta);
   rogue_put8(OFF_DUNGEON_LEVEL, dungeon_level);
+  show_corner_stars();
   populate_level();
   redraw_dungeon();
   epyx_message("You are now on level %d.", dungeon_level);
@@ -1342,6 +1571,7 @@ int ch;
 int rogue_game_run()
 {
   int ch;
+  char clear_greeting;
 
   dungeon_level = 1;
   player_gold = 0;
@@ -1352,6 +1582,7 @@ int rogue_game_run()
   turn_taken = 0;
   inventory_count = 0;
   status_invalid = 1;
+  clear_message_next = 0;
   rogue_ignore_signals();
   epyx_screen_init();
   init_layout();
@@ -1360,19 +1591,27 @@ int rogue_game_run()
   init_object_names();
   show_title_screen();
   ask_player_name();
+  show_corner_stars();
+  centered_text(rogue_get8(OFF_SCREEN_MAX_Y) / 2 + 1, "Loading...");
   rogue_put8(OFF_DUNGEON_LEVEL, dungeon_level);
   rogue_put16(OFF_PLAYER_GOLD, player_gold);
-  add_item(OBJ_FOOD, object_glyph(OBJ_FOOD), 0, 1);
+  add_item(OBJ_FOOD, glyph(GLYPH_FOOD), 0, 1);
   populate_level();
   preload_text_file("rogue.hlp", rogue_help_text, HELP_TEXT_MAX);
   preload_text_file("rogue.chr", rogue_chr_text, CHR_TEXT_MAX);
   redraw_dungeon();
   epyx_message(rogue_string_at(OFF_NEW_GAME_GREETING),
                rogue_string_at(OFF_DEFAULT_PLAYER_NAME));
+  clear_greeting = 1;
 
   while (1) {
     ch = read_key();
     if (ch < 0) break;
+    if (clear_greeting || clear_message_next) {
+      epyx_message(0);
+      clear_greeting = 0;
+      clear_message_next = 0;
+    }
     if (!command(ch)) break;
     if (turn_taken) {
       turn_taken = 0;

@@ -7,12 +7,13 @@ LDLIBS = -L../../lib -lc
 ROGUE_DAT_SRC ?= ../../../nitros9/3rdparty/packages/rogue/rogue.dat
 ROGUE_HLP_SRC ?= ../../../nitros9/3rdparty/packages/rogue/rogue.hlp
 ROGUE_CHR_SRC ?= ../../../nitros9/3rdparty/packages/rogue/rogue.chr
+ROGUE_SCR_SRC ?= ../../../nitros9/3rdparty/packages/rogue/rogue.scr
 
-SRCS = main.c epyx_arena.c epyx_format.c epyx_screen.c epyx_startup.c epyx_tables.c rogue_game.c
+SRCS = main.c epyx_arena.c epyx_format.c epyx_screen.c rogue_game.c
 ASRCS = rogue_signal.as
 OBJS = $(SRCS:.c=.o) $(ASRCS:.as=.o)
 
-all: $(PROGRAM) rogue.dat rogue.hlp rogue.chr
+all: $(PROGRAM) rogue.dat rogue.hlp rogue.chr rogue.scr
 
 $(PROGRAM): $(OBJS)
 	$(CMOC) $(CFLAGS) -o $@ $(OBJS) $(LDLIBS)
@@ -26,6 +27,9 @@ rogue.hlp: $(ROGUE_HLP_SRC)
 rogue.chr: $(ROGUE_CHR_SRC)
 	cp $< $@
 
+rogue.scr: $(ROGUE_SCR_SRC)
+	cp $< $@
+
 %.o: %.c
 	$(CMOC) $(CFLAGS) -c $<
 
@@ -33,4 +37,4 @@ rogue.chr: $(ROGUE_CHR_SRC)
 	$(LWASM) $(ASFLAGS) -o$@ $<
 
 clean:
-	rm -f $(PROGRAM) rogue.dat rogue.hlp rogue.chr *.o *.s *.list *.map
+	rm -f $(PROGRAM) rogue.dat rogue.hlp rogue.chr rogue.scr *.o *.s *.list *.map

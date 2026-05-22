@@ -1,3 +1,6 @@
+#ifndef _CGFX_WIND_H
+#define _CGFX_WIND_H
+
 /* Wind.h - defs for window data structure */
 
 /* window type defs */
@@ -50,3 +53,5 @@ typedef struct wnstr {  /* window descriptor */
  char _wnres[7];        /* reserved */
  struct mnstr* _wnmen;  /* pointer to menu descriptor's array */
  } WNDSCR;
+
+#endif

@@ -1,3 +1,6 @@
+#ifndef _CGFX_MOUSE_H
+#define _CGFX_MOUSE_H
+
 /* Mouse.h -Defs for mouse data structures */
 
 /* structure for reading mouse info packet */
@@ -31,4 +34,5 @@ typedef struct mousin {
 #define WR_CNTNT 0 /* content region */
 #define WR_CNTRL 1 /* control region */
 #define WR_OFWIN 2 /* off window */
-      
+
+#endif

@@ -1,0 +1,16 @@
+name: Continuous Integration
+
+on:
+  pull_request:
+
+jobs:
+  check-build:
+    runs-on: ubuntu-latest
+    container:
+      image: jamieleecho/coco-dev:0.81
+    steps:
+      - uses: actions/checkout@v6.0.2
+
+      - name: Check compile
+        run: |
+          make tests

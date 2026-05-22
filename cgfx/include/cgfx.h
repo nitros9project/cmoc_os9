@@ -1,3 +1,6 @@
+#ifndef _CGFX_CGFX_H
+#define _CGFX_CGFX_H
+
 #include <fcntl.h>
 
 /**
@@ -1287,3 +1290,5 @@ VERTEX *PolyRot(VERTEX *polygon, int cx, int cy, int angle);
 VERTEX *PolyScal(VERTEX *polygon, int cx, int cy, int xmult, int ymult, int div);
 VERTEX *PolyTran(VERTEX *polygon, int xoff, int yoff);
  
+
+#endif

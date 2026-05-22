@@ -1,3 +1,6 @@
+#ifndef _CGFX_KEYSENSE_H
+#define _CGFX_KEYSENSE_H
+
 /*
 "Keysense.h" - header file for key-sensing functions added to the CGFX
 library.
@@ -18,4 +21,4 @@ sensed.
 #define RIGHTBIT 64
 #define SPACEBIT 128
 
-
+#endif

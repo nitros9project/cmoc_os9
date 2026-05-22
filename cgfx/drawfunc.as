@@ -19,7 +19,7 @@ _draw_blank             rmb     1 * reserve 1 bytes
 
 _Draw                   EXPORT * export this symbol
 
-_write                  EXTERNAL * import external symbol
+_cgfx_write             EXTERNAL * import external symbol
 
 negd    macro
         nega * negate A
@@ -67,7 +67,7 @@ p20     cmpa    #$43 * compare A against immediate value $43
         leax    ,s * compute effective address into X from ,s
         ldu     #3 * load U from immediate value 3
         lda     _draw_path,y * load A from indexed value _draw_path,y
-        lbsr    _write * long branch to subroutine to _write
+        lbsr    _cgfx_write * long branch to subroutine to _cgfx_write
         leas    3,s * adjust S using 3,s
         puls    x
         bra     parse
@@ -364,7 +364,7 @@ moveto  tst     _draw_blank,y * test indexed value _draw_blank,y and update cond
         leax    2,s * compute effective address into X from 2,s
         ldu     #6 * load U from immediate value 6
         lda     _draw_path,y * load A from indexed value _draw_path,y
-        lbsr    _write * long branch to subroutine to _write
+        lbsr    _cgfx_write * long branch to subroutine to _cgfx_write
         ldd     #$1b44 * load D from immediate value $1b44
         std     2,s * store D to stack-relative value 2,s
         ldd     _draw_x2,y * load D from indexed value _draw_x2,y
@@ -382,7 +382,7 @@ moveto  tst     _draw_blank,y * test indexed value _draw_blank,y and update cond
         leax    2,s * compute effective address into X from 2,s
         ldu     #6 * load U from immediate value 6
         lda     _draw_path,y * load A from indexed value _draw_path,y
-        lbsr    _write * long branch to subroutine to _write
+        lbsr    _cgfx_write * long branch to subroutine to _cgfx_write
         puls    x
         leas    6,s * adjust S using 6,s
 

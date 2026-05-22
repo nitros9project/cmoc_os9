@@ -21,9 +21,9 @@ char *FName(path_id path, const char *title, int fg, int bg)
     _cgfx_shadow(path, 32, 14, fg, bg);
     _cgfx_curoff(path);
     _cgfx_curxy(path, (32 - strlen(title)) / 2, 1);
-    write(path, title, strlen(title));
+    cwrite(path, title, strlen(title));
     _cgfx_curxy(path, 4, 12);
-    write(path, "UP/DOWN/ENTER to select", 23);
+    cwrite(path, "UP/DOWN/ENTER to select", 23);
 
     _cgfx_cwarea(path, 1, 3, 30, 8);
 
@@ -67,7 +67,7 @@ char *FName(path_id path, const char *title, int fg, int bg)
                 read(dpath, dbuf, 32);
                 _cgfx_curxy(path, 0, line);
                 strhcpy(_FName, dbuf);
-                write(path, _FName, strlen(_FName));
+                cwrite(path, _FName, strlen(_FName));
             }
 
         line = 0;
@@ -86,11 +86,11 @@ char *FName(path_id path, const char *title, int fg, int bg)
                 strhcpy(_FName, dbuf);
                 s = _FName;
             }
-            write(path, s, strlen(s));
+            cwrite(path, s, strlen(s));
             read(path, &ch, 1);
             _cgfx_revoff(path);
             _cgfx_curxy(path, 0, line);
-            write(path, s, strlen(s));
+            cwrite(path, s, strlen(s));
             _Flush();
 
             if (ch == 0x0a && index < numfiles)
@@ -123,7 +123,7 @@ char *FName(path_id path, const char *title, int fg, int bg)
                 {
                     _cgfx_clear(path);
                     _cgfx_curxy(path, 1, 4);
-                    write(path, "Filename?", 9);
+                    cwrite(path, "Filename?", 9);
                     _cgfx_curxy(path, 1, 5);
                     _cgfx_curon(path);
                     line = readln(path, _FName, 30);

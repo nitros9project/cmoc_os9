@@ -87,8 +87,8 @@ _CGFXBuf:
 * U=byte count
 *
 
-_write EXPORT * export this symbol
-_write:
+_cgfx_write EXPORT * export this symbol
+_cgfx_write:
  cmpa _CPath,y * check whether the new write uses the current buffered path
  beq noflush1 * keep buffering when the path has not changed
 

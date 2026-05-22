@@ -1,3 +1,6 @@
+#ifndef _CGFX_STDMENU_H
+#define _CGFX_STDMENU_H
+
 /* StdMenu.h - standard menu definitions */
 
 
@@ -62,3 +65,5 @@ MIDSCR _edtitms[]
 #define EDIT_MN {'E','d','i','t'},MN_EDIT,6,sizeof(_edtitms)/sizeof(_edtitms[0]),0,0,0,_edtitms
 
 
+
+#endif

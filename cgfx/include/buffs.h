@@ -1,3 +1,6 @@
+#ifndef _CGFX_BUFFS_H
+#define _CGFX_BUFFS_H
+
 /* Buff.h - definitions for standard get/put buffer usage */
 
 /* buffer group numbers */
@@ -54,3 +57,4 @@
 #define CHR_TRR 0xcc /* triple bar with open right side */
 #define CHR_TRL 0xcd /* triple bar with open left side */
 
+#endif

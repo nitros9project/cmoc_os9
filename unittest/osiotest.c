@@ -8,7 +8,7 @@ static int failed;
 
 void test_os_create_and_delete_file()
 {
-	char *file = "existentfile";
+	const char *file = "existentfile";
 	char buf[256];
 
 	/* open file for reading and writing, with owner read/write permissions */
@@ -51,7 +51,7 @@ void test_os_create_and_delete_file()
 
 void test_os_open_nonexistent_file()
 {
-	char *file = "nonexistentfile";
+	const char *file = "nonexistentfile";
 
 	int mode = FAM_READ;
 	path_id path = -1;
@@ -69,7 +69,7 @@ void test_os_open_nonexistent_file()
 
 void test_os_delete_nonexistent_file()
 {
-	char *file = "deletenonexistentfile";
+	const char *file = "deletenonexistentfile";
 	int mode = FAM_READ;
 	
 	int result = _os_delete(file, mode);
@@ -90,7 +90,7 @@ void test_os_delete_nonexistent_file()
    */
 void test_os_create_and_seek()
 {
-	char *file = "text.txt";
+	const char *file = "text.txt";
 
 	// delete the file if it exists, we don't care if we error here
 	_os_delete(file, FAM_READ);
@@ -103,7 +103,7 @@ void test_os_create_and_seek()
 	if (result == 0)
 	{
 		printf("%s [PASS] _os_create(\"%s\", %x, [%d], %d) = %d\n", __func__, file, mode, path, perms, result);
-		char *message = "this is a line of text\n";
+			const char *message = "this is a line of text\n";
 		int length = strlen(message);
 		result = _os_writeln(path, message, &length);
 		if (result == 0 && length == strlen(message))
@@ -170,7 +170,7 @@ void test_os_create_and_seek()
 
 void test_os_make_directory()
 {
-	char *file = "newdirectory";
+	const char *file = "newdirectory";
 
 	/* Keep the test rerunnable under batch automation. */
 	_os_delete(file, S_DIR | FAM_READ);
@@ -214,7 +214,7 @@ void test_os_make_directory()
 
 void test_os_make_and_attr_file()
 {
-	char *file = "newfile";
+	const char *file = "newfile";
 
 	int mode = FAM_READ | FAM_WRITE;
 	int perm = FAP_READ | FAP_WRITE;

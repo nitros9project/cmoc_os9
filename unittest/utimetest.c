@@ -10,9 +10,9 @@
 
 struct _os_time p = {2014 - 1900, 3, 4, 11, 33, 22};
 #define P_SECS_EPOCH 1393932802L
-char *pStr = "Tue Mar  4 11:33:22 2014\n";
+const char *pStr = "Tue Mar  4 11:33:22 2014\n";
 struct _os_time epoch = {1970 - 1900, 1, 1, 0, 0, 0};
-char *epochStr = "Thu Jan  1 00:00:00 1970\n";
+const char *epochStr = "Thu Jan  1 00:00:00 1970\n";
 #define EPOCH_START 0L
 static int failed;
 

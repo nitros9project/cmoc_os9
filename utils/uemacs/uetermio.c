@@ -251,7 +251,7 @@ char c;
         bios(BCONOUT, c, 0);
 #endif
 
-#ifdef MSDOS & CWC86
+#if defined(MSDOS) && defined(CWC86)
         dosb(CONDIO, c, 0);
 #endif
 

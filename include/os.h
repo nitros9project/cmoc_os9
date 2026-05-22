@@ -127,7 +127,7 @@ error_code _os_readln(path_id path, void *data, int *count);
  * @param count On entry, requested byte count; on return, bytes actually written.
  * @return `0` on success, otherwise an OS-9 error code.
  */
-error_code _os_write(path_id path, void *data, int *count);
+error_code _os_write(path_id path, const void *data, int *count);
 
 /**
  * @brief Write a line-oriented record to a low-level path descriptor.
@@ -137,7 +137,7 @@ error_code _os_write(path_id path, void *data, int *count);
  * @param count On entry, requested byte count; on return, bytes actually written.
  * @return `0` on success, otherwise an OS-9 error code.
  */
-error_code _os_writeln(path_id path, void *data, int *count);
+error_code _os_writeln(path_id path, const void *data, int *count);
 
 /**
  * @brief Delete a file or entry using explicit mode bits.
@@ -432,7 +432,7 @@ error_code _os_fork(const char *modname, int paramsize, void *paramaddr, int lan
  * @param modaddr Receives the module header address.
  * @return `0` on success, otherwise an OS-9 error code.
  */
-error_code _os_modlink(char *modname, int lang, int type, void **modaddr);
+error_code _os_modlink(const char *modname, int lang, int type, void **modaddr);
 
 /**
  * @brief Load a module by name and return its header address.
@@ -443,7 +443,7 @@ error_code _os_modlink(char *modname, int lang, int type, void **modaddr);
  * @param modaddr Receives the module header address.
  * @return `0` on success, otherwise an OS-9 error code.
  */
-error_code _os_modload(char *modname, int lang, int type, void **modaddr);
+error_code _os_modload(const char *modname, int lang, int type, void **modaddr);
 
 /**
  * @brief Unlink a previously linked or loaded module.

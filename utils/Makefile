@@ -1,6 +1,7 @@
 CC = cmoc
+CMOC_CPP = --cpp="cpp -Wno-builtin-macro-redefined"
 OS9FLAGS = --os9 -nodefaultlibs
-LFLAGS = -I../include -I../cgfx/include $(OS9FLAGS)
+LFLAGS = $(CMOC_CPP) -I../include -I../cgfx/include $(OS9FLAGS)
 SUBDIRS = uemacs ed
 
 %: %.c

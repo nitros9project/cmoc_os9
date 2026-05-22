@@ -4,7 +4,8 @@ DCC     = cmoc
 CMOC_OS9_DIR ?= $(abspath ../..)
 RM      = rm -f
 
-DCCFLAGS = --os9 --add-os9-stack-space=2048 -I. -I$(CMOC_OS9_DIR)/include -DOS9 -DNULL=0
+CMOC_CPP = --cpp="cpp -Wno-builtin-macro-redefined"
+DCCFLAGS = $(CMOC_CPP) --os9 --add-os9-stack-space=2048 -w -I. -I$(CMOC_OS9_DIR)/include -DOS9 -DNULL=0
 LDFLAGS = -L$(CMOC_OS9_DIR)/lib -lc
 CMOC_INTDIR = .cmoc-int
 

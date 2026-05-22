@@ -7,7 +7,7 @@ utoa_core(unsigned long value, char *buffer)
 	int i = 0;
 
 	do {
-		tmp[i++] = (value % 10UL) + '0';
+		tmp[i++] = (char) ((value % 10UL) + '0');
 		value /= 10UL;
 	} while (value);
 

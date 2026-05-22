@@ -61,7 +61,7 @@ static void estr(char *s, int *pos, int ch)
     if (ch < 0x20 || ch > 0x7f)
         return;
 
-    s[*pos] = ch;
+    s[*pos] = (char) ch;
     if (*pos < len)
         (*pos)++;
 }
@@ -70,7 +70,7 @@ int Dialog(int path, DIALOG *dlgptr, int column, int row, int width, int length,
 {
     DIALOG *temp;
     DIALOG *temp2, *textptr;
-    char ch;
+    int ch;
     MSRET mp;
     int textpos, textnum, xcor, ycor, event;
     int n;

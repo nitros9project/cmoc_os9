@@ -27,7 +27,8 @@ CC = cmoc
 ASM = lwasm
 AR = lwar
 INCLUDE_DIR = $(abspath ../include)
-BASE_CFLAGS = --os9 -I$(INCLUDE_DIR)
+CMOC_CPP = --cpp="cpp -Wno-builtin-macro-redefined"
+BASE_CFLAGS = $(CMOC_CPP) --os9 -I$(INCLUDE_DIR)
 FLOAT_CFLAGS = $(BASE_CFLAGS) --mc6839
 ASOUT = --obj -o
 OBJDIR_BASE = obj_base

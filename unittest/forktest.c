@@ -8,7 +8,7 @@ static int failed;
 
 void test_modlink_modunlink()
 {
-    char *module = "mdir";
+    const char *module = "mdir";
     void *modaddr;
     int type = Prgrm;
     int lang = Objct;
@@ -46,7 +46,7 @@ void test_modlink_modunlink()
 
 void test_fork()
 {
-    char *module = "mdir";
+    const char *module = "mdir";
     void *modaddr, *paramaddr;
     int paramsize = 1;
     int type = Prgrm;

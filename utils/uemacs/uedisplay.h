@@ -1,4 +1,4 @@
-/* #define WFDEBUG 0                       /* Window flag debug. */
+/* #define WFDEBUG 0                          Window flag debug. */
 
 typedef struct  VIDEO {
         short   v_flag;                 /* Flags */

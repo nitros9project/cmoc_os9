@@ -10,7 +10,7 @@ static int failed;
 
 void test_create_and_delete_file()
 {
-	char *file = "existentfile";
+	const char *file = "existentfile";
 	char buf[256];
 
     unlink(file);
@@ -52,7 +52,7 @@ void test_create_and_delete_file()
 
 void test_open_nonexistent_file()
 {
-	char *file = "nonexistentfile";
+	const char *file = "nonexistentfile";
 
 	int mode = FAM_READ;
 	int path = open(file, mode);
@@ -69,8 +69,8 @@ void test_open_nonexistent_file()
 
 void test_open_read_close_existing_file()
 {
-	char *file = "openread.tmp";
-	char *message = "open wrapper\n";
+	const char *file = "openread.tmp";
+	const char *message = "open wrapper\n";
 	char buf[32];
 	int mode = FAM_READ | FAM_WRITE;
 	int perms = FAP_READ | FAP_WRITE;
@@ -232,8 +232,8 @@ void test_readln_existing_file()
 
 void test_write_zero_count(void)
 {
-	char *file = "writezero.tmp";
-	char *message = "ignored";
+	const char *file = "writezero.tmp";
+	const char *message = "ignored";
 	int mode = FAM_READ | FAM_WRITE;
 	int perms = FAP_READ | FAP_WRITE;
 	int path;
@@ -271,7 +271,7 @@ void test_write_zero_count(void)
 
 void test_delete_nonexistent_file()
 {
-	char *file = "deletenonexistentfile";
+	const char *file = "deletenonexistentfile";
 	
 	int result = unlink(file);
 	if (result == -1 && (errno == E$PNNF || errno == E$MNF))
@@ -291,7 +291,7 @@ void test_delete_nonexistent_file()
    */
 void test_create_and_seek()
 {
-	char *file = "text.txt";
+	const char *file = "text.txt";
 	char buf[32];
 
 	// delete the file if it exists, we don't care if we error here
@@ -304,7 +304,7 @@ void test_create_and_seek()
 	if (path != -1)
 	{
 		printf("%s [PASS] create(\"%s\", %x, %d) = %d\n", __func__, file, mode, perms, path);
-		char *message = "this is a line of text\n";
+			const char *message = "this is a line of text\n";
 		int length = strlen(message);
 		int result = writeln(path, message, length);
 		if (result == length)
@@ -405,7 +405,7 @@ void test_create_and_seek()
 
 void test_make_directory()
 {
-	char *file = "newdirectory";
+	const char *file = "newdirectory";
 
 	int perm = FAP_DIR | FAP_READ | FAP_WRITE | FAP_PREAD;
 	int result = mknod(file, perm);
@@ -422,7 +422,7 @@ void test_make_directory()
 
 void test_make_and_attr_file()
 {
-	char *file = "newfile";
+	const char *file = "newfile";
 
 	int mode = FAM_READ | FAM_WRITE;
 	int perm = FAP_READ | FAP_WRITE;
@@ -455,10 +455,10 @@ void test_make_and_attr_file()
 
 void test_access_dup_unlinkx()
 {
-	char *file = "access.tmp";
+	const char *file = "access.tmp";
 	int mode = FAM_READ | FAM_WRITE;
 	int perms = FAP_READ | FAP_WRITE;
-	char *payload = "dup-check";
+	const char *payload = "dup-check";
 	char buf[16];
 	int path;
 	int dup_path;

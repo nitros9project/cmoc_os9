@@ -15,15 +15,15 @@ gmtime(const time_t *tp)
 	int leap;
 	int i;
 
-	_tm.tm_sec = ticks % 60;
+	_tm.tm_sec = (int) (ticks % 60);
 	ticks /= 60;
 
-	_tm.tm_min = ticks % 60;
+	_tm.tm_min = (int) (ticks % 60);
 	ticks /= 60;
 
-	_tm.tm_hour = ticks % 24;
-	days = ticks / 24;
-	_tm.tm_wday = (days + EPOCH_DOW) % 7;
+	_tm.tm_hour = (int) (ticks % 24);
+	days = (int) (ticks / 24);
+	_tm.tm_wday = (int) ((days + EPOCH_DOW) % 7);
 
 	i = 0;
 	while (days >= _myears[leap = _isleap(i)]) {

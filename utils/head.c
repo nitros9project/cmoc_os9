@@ -99,10 +99,22 @@ main(int argc, char **argv)
             if (many) {
                 if (newline)
                     putchar('\n');
-                printf("==> %s <==\n", strcmp(*argv, "-") == 0 ? "<stdin>" : *argv);
+                const char *name;
+                if (strcmp(*argv, "-") == 0)
+                    name = "<stdin>";
+                else
+                    name = *argv;
+                printf("==> %s <==\n", name);
             }
             newline = 1;
-            status = head_file(fp, strcmp(*argv, "-") == 0 ? "<stdin>" : *argv, count);
+            {
+                const char *name;
+                if (strcmp(*argv, "-") == 0)
+                    name = "<stdin>";
+                else
+                    name = *argv;
+                status = head_file(fp, name, count);
+            }
             if (fp != stdin)
                 fclose(fp);
             if (status == 2)

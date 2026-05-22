@@ -59,6 +59,29 @@ void _exit(int status);
  */
 int getpid(void);
 
+/**
+ * @brief Return the current user identifier.
+ *
+ * @return Current user identifier, or `-1` on failure with `errno` set.
+ */
+int getuid(void);
+
+/**
+ * @brief Set the active user identifier using administrative semantics.
+ *
+ * @param uid New user identifier.
+ * @return `0` on success, or `-1` on failure with `errno` set.
+ */
+int asetuid(int uid);
+
+/**
+ * @brief Set the current user identifier.
+ *
+ * @param uid New user identifier.
+ * @return `0` on success, or `-1` on failure with `errno` set.
+ */
+int setuid(int uid);
+
 // file I/O
 /**
  * @brief Create a file using classic Unix-style arguments.
@@ -215,6 +238,45 @@ int prerr(int filenum, int errcode);
  * @return Remaining or completion tick count as defined by the implementation.
  */
 clock_t tsleep(clock_t ticks);
+
+/**
+ * @brief Sleep for a number of seconds.
+ *
+ * @param seconds Number of seconds to sleep.
+ * @return Remaining seconds, or `0` when the sleep completed.
+ */
+int sleep(int seconds);
+
+/**
+ * @brief Wait for a child process to exit.
+ *
+ * @param status Receives the child status when non-`NULL`.
+ * @return Child process id, or `-1` on failure with `errno` set.
+ */
+int wait(int *status);
+
+/**
+ * @brief Set a process priority.
+ *
+ * @param pid Target process id.
+ * @param priority New priority.
+ * @return `0` on success, or `-1` on failure with `errno` set.
+ */
+int setpr(int pid, int priority);
+
+/**
+ * @brief Fork an OS-9 program module.
+ *
+ * @return Child process id, or `-1` on failure with `errno` set.
+ */
+int os9fork(const char *modname, int paramsize, void *paramaddr, int lang, int type, int datasize);
+
+/**
+ * @brief Chain to an OS-9 program module.
+ *
+ * @return Does not return on success; returns `-1` on failure with `errno` set.
+ */
+int chain(const char *modname, int paramsize, void *paramaddr, int lang, int type, int datasize);
 
 /**
  * @brief Create a directory or special node.

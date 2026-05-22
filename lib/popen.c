@@ -9,24 +9,40 @@
 
 static int popen_pid[_NFILE];
 
+static char *build_module_name(const char *command)
+{
+	char *module;
+	const char *end;
+	int len;
+
+	end = command;
+	while (*end != ' ' && *end != '\0')
+		++end;
+
+	len = end - command;
+	if (len == 0)
+		return 0;
+
+	module = (char *) malloc(len + 1);
+	if (module == 0)
+		return 0;
+
+	memcpy(module, command, len);
+	module[len] = '\0';
+	return module;
+}
+
 static char *build_parameter_string(const char *command, int *param_size)
 {
 	char *params;
-	char *space;
 	int arg_len;
 
-	space = command;
-	while (*space != ' ' && *space != '\0')
-		++space;
-	if (*space == ' ')
-		++space;
-
-	arg_len = strlen(space);
+	arg_len = strlen(command);
 	params = (char *) malloc(arg_len + 2);
 	if (params == 0)
 		return 0;
 
-	strcpy(params, space);
+	strcpy(params, command);
 	strcat(params, "\n");
 	*param_size = arg_len + 1;
 	return params;
@@ -34,6 +50,7 @@ static char *build_parameter_string(const char *command, int *param_size)
 
 FILE *popen(const char *command, const char *type)
 {
+	char *module;
 	char *parameter;
 	FILE *stream;
 	int path;
@@ -50,9 +67,17 @@ FILE *popen(const char *command, const char *type)
 	if (pipefd == ERR)
 		return 0;
 
+	module = build_module_name(command);
+	if (module == 0)
+	{
+		close(pipefd);
+		return 0;
+	}
+
 	saved_fd = dup(path);
 	if (saved_fd == ERR)
 	{
+		free(module);
 		close(pipefd);
 		return 0;
 	}
@@ -60,6 +85,7 @@ FILE *popen(const char *command, const char *type)
 	close(path);
 	if (dup(pipefd) == ERR)
 	{
+		free(module);
 		dup(saved_fd);
 		close(saved_fd);
 		close(pipefd);
@@ -69,6 +95,7 @@ FILE *popen(const char *command, const char *type)
 	parameter = build_parameter_string(command, &param_size);
 	if (parameter == 0)
 	{
+		free(module);
 		close(path);
 		dup(saved_fd);
 		close(saved_fd);
@@ -76,8 +103,9 @@ FILE *popen(const char *command, const char *type)
 		return 0;
 	}
 
-	if (_os_fork(command, param_size, parameter, Objct, Prgrm, 0, &pid) != 0)
+	if (_os_fork(module, param_size, parameter, Objct, Prgrm, 0, &pid) != 0)
 	{
+		free(module);
 		free(parameter);
 		close(path);
 		dup(saved_fd);
@@ -86,6 +114,7 @@ FILE *popen(const char *command, const char *type)
 		return 0;
 	}
 
+	free(module);
 	free(parameter);
 	close(path);
 	dup(saved_fd);

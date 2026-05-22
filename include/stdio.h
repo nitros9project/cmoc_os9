@@ -3,6 +3,10 @@
 
 #include <sys/types.h>
 
+#ifndef NULL
+#define NULL 0
+#endif
+
 /**
  * @file stdio.h
  * @brief Buffered stream I/O for the CMOC OS-9 C Library.
@@ -122,6 +126,13 @@ int fputs(const char *s, FILE *stream);
 #define feof(p)    	((p)->_flag&_EOF)
 #define clearerr(p)	((p)->_flag&=~(_ERR|_EOF))
 #define fileno(p)   ((p)->_fd)
+
+#undef putchar
+#undef feof
+#undef fileno
+int putchar(int c);
+int feof(FILE *p);
+int fileno(FILE *p);
 
 /**
  * @brief Print formatted output to standard output.

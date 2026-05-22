@@ -4,7 +4,7 @@ _cgfx_shadow            EXPORT * export this symbol
 
 _errno                  EXTERNAL * import external symbol
 _Flush                  EXTERNAL * import external symbol
-_xwrite                 EXTERNAL * import external symbol
+_cgfx_write             EXTERNAL * import external symbol
 
 * Create a centered overlay shadow box: _cgfx_shadow(path,width,length,fg,bg)
 _cgfx_shadow
@@ -35,7 +35,7 @@ _cgfx_shadow
         leax    ,s * compute effective address into X from ,s
         ldu     #9 * load U from immediate value 9
         lda     14,s * load A from stack-relative value 14,s
-        lbsr    _xwrite * long branch to subroutine to _xwrite
+        lbsr    _cgfx_write * long branch to subroutine to _cgfx_write
         bcc     noerror
         clra * clear A
         std     _errno,y * store D to indexed value _errno,y

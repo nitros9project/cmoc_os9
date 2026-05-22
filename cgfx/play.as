@@ -18,7 +18,7 @@ _play_strings           rmb     2 * reserve 2 bytes
 _Play                   EXPORT * export this symbol
 
 _Flush                  EXTERNAL * import external symbol
-_xwrite                 EXTERNAL * import external symbol
+_cgfx_write             EXTERNAL * import external symbol
 
 _play_notes
         fdb     3038,2871,2707,2554,2411,2273,2150,2027,1914,1806,1704,1610 * define word data 3038,2871,2707,2554,2411,2273,2150,2027,1914,1806,1704,1610

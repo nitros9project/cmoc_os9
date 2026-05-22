@@ -54,4 +54,4 @@ typedef struct wnstr {  /* window descriptor */
  struct mnstr* _wnmen;  /* pointer to menu descriptor's array */
  } WNDSCR;
 
- #endif
+#endif

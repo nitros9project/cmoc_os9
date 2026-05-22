@@ -10,8 +10,8 @@
 
 _errno EXTERN * import external symbol
 
-_xwrite EXPORT * export this symbol
-_xwrite:
+_cgfx_write EXPORT * export this symbol
+_cgfx_write:
  pshs y * preserve Y across the direct OS-9 write
  tfr u,y * move the requested byte count into Y for OS-9
  os9 $8A I$WRITE * write the caller's buffer directly without any intermediate buffering

@@ -6,7 +6,7 @@ __cgfx_boldsw            EXPORT * export this symbol
 __cgfx_propsw            EXPORT * export this symbol
 
 _errno                   EXTERNAL * import external symbol
-_xwrite                  EXTERNAL * import external symbol
+_cgfx_write                  EXTERNAL * import external symbol
 
 * Set the active font: _cgfx_font(path, grp, buf)
 __cgfx_font
@@ -19,7 +19,7 @@ __cgfx_font
         ldu     #4 * load U from immediate value 4
         leax    ,s * compute effective address into X from ,s
         lda     9,s * load A from stack-relative value 9,s
-        lbsr    _xwrite * long branch to subroutine to _xwrite
+        lbsr    _cgfx_write * long branch to subroutine to _cgfx_write
         leas    4,s * adjust S using 4,s
         bra     os9err0
 
@@ -45,7 +45,7 @@ send3   pshs    u * save U on the hardware stack
         ldu     #3 * load U from immediate value 3
         leax    ,s * compute effective address into X from ,s
         lda     8,s * load A from stack-relative value 8,s
-        lbsr    _xwrite * long branch to subroutine to _xwrite
+        lbsr    _cgfx_write * long branch to subroutine to _cgfx_write
         leas    3,s * adjust S using 3,s
 
 os9err0 puls    u * restore U from the hardware stack

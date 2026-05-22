@@ -9,9 +9,9 @@ static struct sgbuf opts;
 
 error_code _Flush(void);
 
-int getstr(int path, char *title, char *s, int n, int column, int row, int fg, int bg)
+int getstr(int path, const char *title, char *s, int n, int column, int row, int fg, int bg)
 {
-    int oldecho;
+    unsigned char oldecho;
     int len;
 
     _gs_opt(path, &opts);

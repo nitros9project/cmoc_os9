@@ -37,7 +37,7 @@ static error_code call_suser(int uid)
 
 static void test_writeln_syscall(void)
 {
-	char *message = "print this!\n";
+	const char *message = "print this!\n";
 	registers_6809 regs;
 	error_code result;
 

@@ -4,7 +4,7 @@
 
 int main(void)
 {
-	char *drive;
+	const char *drive;
 
 	drive = getdrive();
 	if (drive != 0 && strcmp(drive, "/DD") == 0)

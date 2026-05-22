@@ -139,7 +139,7 @@ int readln(int filedes, char *data, int count);
  * @param count Number of bytes to write.
  * @return Number of bytes written, or `-1` on failure.
  */
-int write(int filedes, char *data, int count);
+int write(int filedes, const char *data, int count);
 
 /**
  * @brief Write a line-oriented record to a file descriptor.
@@ -149,7 +149,7 @@ int write(int filedes, char *data, int count);
  * @param count Number of bytes to write.
  * @return Number of bytes written, or `-1` on failure.
  */
-int writeln(int filedes, char *data, int count);
+int writeln(int filedes, const char *data, int count);
 
 /**
  * @brief Close an open file descriptor.

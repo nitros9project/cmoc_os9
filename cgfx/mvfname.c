@@ -18,8 +18,8 @@ char *MVFName(path_id path, const char *title, int column, int row, int fg, int 
     int line, startnum, refresh, index;
     int numfiles;
     char ch;
-    char scrlsize, ypos;
-    char bflag;
+    int scrlsize, ypos;
+    int bflag;
 
     _gs_opt(path, &oldopts);
     _gs_opt(path, &newopts);
@@ -29,9 +29,9 @@ char *MVFName(path_id path, const char *title, int column, int row, int fg, int 
     _ss_opt(path, &newopts);
 
     _cgfx_owset(path, 1, column, row, 22, 10, fg, bg);
-    cwrite(path, "\x1b\x3a\xc8\x01\x05 \x1b\x35\x00\x1bH\x00\xaf\x00\x4f\x1b@\x00\xa8\x00\x00\x1bD\x00\xa8\x00\x4f", 27);
+    cwrite(path, "\033:\310\001\005 \033" "5\000\033H\000\257\000O\033@\000\250\000\000\033D\000\250\000O", 27);
     _cgfx_owset(path, 0, column, row, 22, 11, bg, fg);
-    cwrite(path, "\x03\x1b\x3a\xc8\x03\x06\xc7\x02\x35!\xc4\x02\x35)\xc3\x02\# \x1b\x3a\xc8\x01", 22);
+    cwrite(path, "\003\033:\310\003\006\307\002" "5!\304\002" "5)\303\002# \033:\310\001", 22);
     cwrite(path, title, 19);
     _cgfx_owend(path);
     column++;

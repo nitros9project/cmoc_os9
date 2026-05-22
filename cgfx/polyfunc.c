@@ -42,7 +42,7 @@ VERTEX *PolyRot(VERTEX *polygon, int cx, int cy, int angle)
     register VERTEX *temp, *temp2;
     int n = polysize(polygon);
 
-    temp2 = malloc(sizeof(VERTEX) * n);
+    temp2 = (VERTEX *) malloc(sizeof(VERTEX) * n);
     if (temp2)
     {
         temp = temp2;
@@ -64,7 +64,7 @@ VERTEX *PolyScal(VERTEX *polygon, int cx, int cy, int xmult, int ymult, int div)
     int n = polysize(polygon);
     register VERTEX *temp, *temp2;
 
-    temp2 = malloc(sizeof(VERTEX) * n);
+    temp2 = (VERTEX *) malloc(sizeof(VERTEX) * n);
     if (temp2)
     {
         temp = temp2;
@@ -86,7 +86,7 @@ VERTEX *PolyTran(VERTEX *polygon, int xoff, int yoff)
     register VERTEX *temp, *temp2;
     int n = polysize(polygon);
 
-    temp2 = malloc(sizeof(VERTEX) * n);
+    temp2 = (VERTEX *) malloc(sizeof(VERTEX) * n);
     if (temp2)
     {
         temp = temp2;

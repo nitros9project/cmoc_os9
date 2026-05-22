@@ -7,7 +7,7 @@ static void say(const char *s)
     int n = 0;
     while (s[n] != '\0')
         ++n;
-    write(1, (void *) s, n);
+    write(1, s, n);
 }
 
 int main()

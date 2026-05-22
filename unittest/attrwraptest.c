@@ -5,7 +5,7 @@
 int
 main(void)
 {
-    char *file = "attrwrap.tmp";
+    const char *file = "attrwrap.tmp";
     int fd;
     int result;
     int failed = 0;

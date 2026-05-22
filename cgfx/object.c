@@ -10,12 +10,12 @@ OBJECT *AddObj(int path, int group, int buffer, int xcor, int ycor, int (*border
 {
     OBJECT *temp;
 
-    temp = malloc(sizeof(OBJECT));
+    temp = (OBJECT *) malloc(sizeof(OBJECT));
     if (temp == 0)
         return 0;
 
-    temp->group = group;
-    temp->buffer = buffer;
+    temp->group = (char) group;
+    temp->buffer = (char) buffer;
     temp->xcor = xcor;
     temp->ycor = ycor;
     temp->border = border;

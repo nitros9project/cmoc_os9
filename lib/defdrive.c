@@ -10,7 +10,7 @@ char *getdrive(void)
 	char c;
 	mod_config *config;
 
-	if (_os_modlink((char *) "init", 0x0c, 0, (void **) &config) != 0)
+	if (_os_modlink("init", 0x0c, 0, (void **) &config) != 0)
 		return 0;
 
 	src = ((char *) config) + config->m_sysdrive;

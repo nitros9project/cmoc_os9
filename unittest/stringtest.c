@@ -4,11 +4,11 @@
 
 #define PLEN 11
 #define BUFLEN 12
-char *p = "cat bat dog";
-char *p1 = "catbatdog";
-char *pu = "CAT BAT DOG";
-char *pr = "god tab tac";
-char *sep = " ";
+const char *p = "cat bat dog";
+const char *p1 = "catbatdog";
+const char *pu = "CAT BAT DOG";
+const char *pr = "god tab tac";
+const char *sep = " ";
 static int failed;
 
 #ifndef NULL
@@ -262,8 +262,8 @@ void test_reverse(void)
 #ifdef _CMOC_VERSION_
 void test_strend(void)
 {
-	char *myend = p + strlen(p);
-	char *end = strend(p);
+	const char *myend = p + strlen(p);
+	const char *end = strend(p);
 	if (end==myend)
 	{
 		printf("%s [PASS]\n",__func__);
@@ -368,7 +368,7 @@ void test_strnucmp(void)
 #ifdef _CMOC_VERSION_
 void test_patmatch_questionmark(void)
 {
-	char *tst = "cat ?at dog";
+	const char *tst = "cat ?at dog";
 	int r = patmatch(tst, p, 0);
 	if (r)
 	{
@@ -377,7 +377,7 @@ void test_patmatch_questionmark(void)
 		failed = 1;
 		printf("%s [FAIL], expected 1 got %d, %s, %s\n",__func__,r,tst,p);
 	}
-	char *tstu = "CAT BAT D?G";
+	const char *tstu = "CAT BAT D?G";
 	r = patmatch(tstu, pu, 1);
 	if (r)
 	{
@@ -714,7 +714,7 @@ void test_memcpy_memcmp(void)
 void test_memchr(void)
 {
 	char data[] = "abcde";
-	char *ptr = memchr(data, 'c', sizeof(data));
+	char *ptr = (char *) memchr(data, 'c', sizeof(data));
 	if (ptr == data + 2 && memchr(data, 'z', sizeof(data)) == NULL)
 		printf("%s [PASS]\n", __func__);
 	else {
@@ -731,7 +731,7 @@ void test_memccpy(void)
 	int cmp;
 
 	memset(dst, 0, sizeof(dst));
-	end = memccpy(dst, src, 'c', sizeof(src));
+	end = (char *) memccpy(dst, src, 'c', sizeof(src));
 	cmp = memcmp(dst, "abc", 3);
 	if (end == dst + 3
 	&& cmp == 0

@@ -1,7 +1,8 @@
 CC = cmoc
+CMOC_CPP = --cpp="cpp -Wno-builtin-macro-redefined"
 OS9FLAGS = --os9 -nodefaultlibs
 OPT = -O0
-LFLAGS = -I../include -I../cgfx/include $(OS9FLAGS)
+LFLAGS = $(CMOC_CPP) -I../include -I../cgfx/include $(OS9FLAGS)
 CMOC_BIN ?= $(shell command -v cmoc)
 CMOC_FLOAT_LIB_DIR ?= $(abspath $(dir $(CMOC_BIN))../share/cmoc/lib)
 GRAPHICS_TEST_DIR = ../graphictest
@@ -11,23 +12,23 @@ GRAPHICS_TEST_DIR = ../graphictest
 	$(CC) $(LFLAGS) $^ $(OBJS) -L../lib -lc -L../cgfx -lcgfx
 
 hello: hello.c
-	$(CC) -I../include -I../cgfx/include --os9 -nodefaultlibs --add-os9-stack-space=512 \
+	$(CC) $(CMOC_CPP) -I../include -I../cgfx/include --os9 -nodefaultlibs --add-os9-stack-space=512 \
 		$^ $(OBJS) -L../lib -lc -L../cgfx -lcgfx
 
 maze: $(GRAPHICS_TEST_DIR)/maze.c
-	$(CC) -I../include -I../cgfx/include --os9 -nodefaultlibs --add-os9-stack-space=5518 \
+	$(CC) $(CMOC_CPP) -I../include -I../cgfx/include --os9 -nodefaultlibs --add-os9-stack-space=5518 \
 		$^ $(OBJS) -L../lib -lc -L../cgfx -lcgfx
 
 wintest: $(GRAPHICS_TEST_DIR)/wintest.c
 	$(CC) $(LFLAGS) $^ $(OBJS) -L../lib -lc -L../cgfx -lcgfx
 
 floattest: floattest.c
-	$(CC) -I../include -I../cgfx/include --os9 --mc6839 -nodefaultlibs \
+	$(CC) $(CMOC_CPP) -I../include -I../cgfx/include --os9 --mc6839 -nodefaultlibs \
 		$^ $(OBJS) -L../lib -lcf -L../cgfx -lcgfx \
 		-L$(CMOC_FLOAT_LIB_DIR) -lcmoc-float-mc6839_os9 -L../lib -lcf
 
 floatfmttest: floatfmttest.c
-	$(CC) -I../include -I../cgfx/include --os9 --mc6839 -nodefaultlibs \
+	$(CC) $(CMOC_CPP) -I../include -I../cgfx/include --os9 --mc6839 -w -nodefaultlibs \
 		$^ $(OBJS) -L../lib -lcf -L../cgfx -lcgfx \
 		-L$(CMOC_FLOAT_LIB_DIR) -lcmoc-float-mc6839_os9 -L../lib -lcf
 

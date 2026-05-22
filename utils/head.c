@@ -84,6 +84,12 @@ main(int argc, char **argv)
         ret = head_file(stdin, "<stdin>", count);
     } else {
         while (*argv) {
+            const char *name;
+            if (strcmp(*argv, "-") == 0)
+                name = "<stdin>";
+            else
+                name = *argv;
+
             if (strcmp(*argv, "-") == 0) {
                 fp = stdin;
             } else {
@@ -99,10 +105,10 @@ main(int argc, char **argv)
             if (many) {
                 if (newline)
                     putchar('\n');
-                printf("==> %s <==\n", strcmp(*argv, "-") == 0 ? "<stdin>" : *argv);
+                printf("==> %s <==\n", name);
             }
             newline = 1;
-            status = head_file(fp, strcmp(*argv, "-") == 0 ? "<stdin>" : *argv, count);
+            status = head_file(fp, name, count);
             if (fp != stdin)
                 fclose(fp);
             if (status == 2)

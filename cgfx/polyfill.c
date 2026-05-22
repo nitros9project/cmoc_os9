@@ -20,7 +20,7 @@ static int addpt(int x, int y)
 
     if (edges[y].p_numedges == 0)
     {
-        edges[y].p_edges = malloc(sizeof(short));
+        edges[y].p_edges = (short *) malloc(sizeof(short));
         if (edges[y].p_edges)
         {
             *(edges[y].p_edges) = x;
@@ -30,7 +30,7 @@ static int addpt(int x, int y)
         return -1;
     }
 
-    temp = realloc(edges[y].p_edges, sizeof(short) * (edges[y].p_numedges + 1));
+    temp = (short *) realloc(edges[y].p_edges, sizeof(short) * (edges[y].p_numedges + 1));
     if (temp)
     {
         edges[y].p_edges = temp;

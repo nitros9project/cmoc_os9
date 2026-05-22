@@ -24,6 +24,6 @@ typedef struct { /* dialog structure */
 #define D_END -1   /* End marker of array */
 
 int Dialog(int path, DIALOG *dlgptr, int column, int row, int width, int length, int fg, int bg);
-int getstr(int path, char *title, char *s, int n, int column, int row, int fg, int bg);
+int getstr(int path, const char *title, char *s, int n, int column, int row, int fg, int bg);
 
 #endif

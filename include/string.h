@@ -89,7 +89,7 @@ char  *strucpy(char *dst, const char *src);
  * @param c Character value to find.
  * @return Pointer to the matching character, or `NULL`.
  */
-char  *index(char *str, int c);
+char  *index(const char *str, int c);
 
 /**
  * @brief Find the last occurrence of a character in a string.
@@ -98,7 +98,7 @@ char  *index(char *str, int c);
  * @param c Character value to find.
  * @return Pointer to the matching character, or `NULL`.
  */
-char  *rindex(char *str, int c);
+char  *rindex(const char *str, int c);
 
 /**
  * @brief Reverse a string in place.
@@ -187,7 +187,7 @@ int   patmatch(const char *pattern, const char *str, char forceCase);
  * @param c Character value to find.
  * @return Pointer to the matching character, or `NULL`.
  */
-char  *strchr(char *str, int c);
+char  *strchr(const char *str, int c);
 
 /**
  * @brief Standard alias for `rindex()`.
@@ -196,7 +196,7 @@ char  *strchr(char *str, int c);
  * @param c Character value to find.
  * @return Pointer to the matching character, or `NULL`.
  */
-char  *strrchr(char *str, int c);
+char  *strrchr(const char *str, int c);
 
 /**
  * @brief Return the length of the initial accepted-character span.
@@ -223,7 +223,7 @@ size_t strcspn(const char *s1, const char *s2);
  * @param step Separator-character string.
  * @return Pointer to the next token, or `NULL` when done.
  */
-char  *strtok(char *str, char *step);
+char  *strtok(char *str, const char *step);
 
 /**
  * @brief Find the first character in `s1` that belongs to `s2`.
@@ -270,7 +270,7 @@ void _strass(char *to, char *from, int count);
  * @param len Number of bytes to copy.
  * @return `dst`.
  */
-void *memcpy(void *dst, void *src, size_t len);
+void *memcpy(void *dst, const void *src, size_t len);
 
 /**
  * @brief Copy bytes until a terminator byte is seen or `n` bytes are copied.

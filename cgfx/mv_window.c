@@ -32,7 +32,7 @@ _cgfx_gs_mnsel(path_id path, int *itemno, int *menuid)
 		clra
 		std		[2+1+2,s]		save into item no pointer
 		puls	b
-		std		[2+1+4,s]		save into menu id pointer
+		std		[2+4,s]			save into menu id pointer
 		lbra	_sysret
 	}
 }

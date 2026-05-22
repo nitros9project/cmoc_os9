@@ -33,7 +33,7 @@ ASOUT = --obj -o
 OBJDIR_BASE = obj_base
 OBJDIR_FLOAT = obj_float
 
-BASE_MODS = $(COMMON_MODS) pflinit.o pffdummy.o
+BASE_MODS = $(COMMON_MODS) pflinit.o pffdummy.o fcommon.o
 FLOAT_MODS = $(COMMON_MODS) pflinit.o pffinit.o $(FLOAT_SUPPORT)
 BASE_OBJS = $(addprefix $(OBJDIR_BASE)/,$(BASE_MODS))
 FLOAT_OBJS = $(addprefix $(OBJDIR_FLOAT)/,$(FLOAT_MODS))

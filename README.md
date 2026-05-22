@@ -12,21 +12,42 @@ Likewise, the code for the CGFX library is based off of Mike Sweet's CGFX7 libra
 
 You will need LWTOOLS and ToolShed to build this library.
 
-To make the libc.a C library, type:
+To make both the default non-floating-point `libc.a` and the floating-point
+`libcf.a` C libraries, type:
 
 ```
 cd cmoc_os9
-cd lib; make
+cd lib; make clean all
 cd ../cgfx; make
 ```
 
-From there, you can build the unit tests:
+To make just the default non-floating-point `libc.a`, type:
+
+```
+cd cmoc_os9
+cd lib; make clean libc.a
+```
+
+To make just the floating-point `libcf.a`, type:
+
+```
+cd cmoc_os9
+cd lib; make clean libcf.a
+```
+
+The default `libc.a` build uses a small dummy `pffloat` implementation so the
+library can be built and linked for integer/string-only programs without
+pulling in the MC6839 floating-point path. The `libcf.a` build enables
+the MC6839 floating-point configuration and includes the real formatting and
+parsing support.
+
+From there, you can build the runtime tests and CoCo 3 graphics tests:
 ```
 cd ../unittest
 make clean dsk
 ```
 
-This will create a disk image called 'test.dsk' which you can mount in an emulator and run under NitrOS-9. A convenient script named 'go' is placed in the root folder of the disk. You can run this script to run all of the unit tests.
+This will create a disk image called 'test.dsk' which you can mount in an emulator and run under NitrOS-9. A convenient script named 'go' is placed in the root folder of the disk. You can run this script to execute the non-graphical runtime and regression tests. The CoCo 3-specific graphics programs such as `wintest` and `maze` are built onto the disk as separate manual tests; both now live under `graphictest/` instead of `unittest/`.
 
 ## Differences from the original Microware C Library
 
@@ -93,4 +114,13 @@ While passing parameters by reference may be a bit more typing, this is arguably
 
 ## Work to be done
 
-Under the lib/todo folder are .as files which need to be brought into the CMOC format. Also, additional unit tests need to be written.
+The project is still mid-port.
+
+- `lib/todo/` contains additional Kreider C library routines that have not yet
+  been brought into the current CMOC-oriented source layout.
+- `cgfx/todo/` likewise contains CGFX routines that still need to be ported.
+- More unit tests are needed, especially around the low-level OS-9 I/O layer,
+  stdio compatibility, and floating-point formatting/parsing behavior.
+
+In other words, the core library is already usable, but it is not yet a
+complete port of all historical Kreider and CGFX components.

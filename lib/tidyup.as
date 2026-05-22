@@ -1,8 +1,9 @@
- section code
+                    section   code      ; begin code section
 
-_tidyup EXPORT
+_tidyup             EXPORT    ;         export runtime cleanup hook
 
-_tidyup: rts    
+_tidyup:
+stk_tidyup_ret      equ       0         ; caller return address
+                    rts                 ; no cleanup hooks are registered here
 
- endsect  
-
+                    endsect   ;         end current section

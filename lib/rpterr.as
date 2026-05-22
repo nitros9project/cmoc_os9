@@ -1,19 +1,17 @@
- section code
+                    use       ../include/os9.d ; shared OS-9 service constants
 
-* OS-9 system function equates
+                    section   code      ; begin code section
 
-_errno EXTERNAL
+_errno              EXTERNAL  ;         import C errno storage
 
-F$Send equ $08 
-F$ID equ $0c 
+_rpterr             EXPORT    ;         export report-error-to-parent helper
+_rpterr:
+stk_rpterr_ret      equ       0         ; caller return address
+                    std       _errno,y  ; record the caller's error value in errno
+                    pshs      b,y       ; preserve signal/error byte and data pointer across F_ID
+                    os9       F_ID      ; fetch current process identity for F_Send setup
+                    puls      b,y       ; restore signal/error byte and data pointer
+                    os9       F_Send    ; send the error byte as a signal/status notification
+                    rts                 ; return to caller
 
-_rpterr EXPORT
-_rpterr: std   _errno,y 
- pshs  b,y 
- os9 $0C F$ID 
- puls  b,y 
- os9 $08 F$Send 
- rts    
-
- endsect  
-
+                    endsect   ;         end current section

@@ -16,9 +16,11 @@ RESTO  = uebasic.o uebuffer1.o uebuffer2.o uefile1.o uefile2.o uefileio.o \
   uetermio.o uecoco.o uewindow.o ueword.o
 OFILES = $(MAINO) $(DISPO) $(RESTO)
 
+.PHONY: all clean help
+
+# Build the umacs editor (default target)
 all: umacs
 
-# use cio libarary
 umacs: $(OFILES)
 	$(DCC) $(DCCFLAGS) -o $@ $^ $(LDFLAGS)
 
@@ -30,6 +32,12 @@ $(RESTO): ueed.h
 	@mkdir -p $(CMOC_INTDIR)/$*
 	$(DCC) $(DCCFLAGS) --intermediate --intdir=$(CMOC_INTDIR)/$* --compile -o $@ $<
 
+# Remove umacs binary, intermediates, and listings
 clean:
 	$(RM) -r $(CMOC_INTDIR)
 	$(RM) $(OFILES) umacs *.list *.map c.errors cstr.* ctmp.*
+
+# Display this help message listing available phony targets
+help:
+	@echo "Available targets:"
+	@awk 'BEGIN{c=""} /^# /{c=substr($$0,3); next} /^[a-zA-Z_][a-zA-Z0-9_.-]*:/{if(c!=""){t=$$1; sub(/:.*/,"",t); printf "  %-20s %s\n", t, c}; c=""; next} {c=""}' $(MAKEFILE_LIST)

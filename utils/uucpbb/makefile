@@ -85,11 +85,15 @@ login_OBJS = login.o parse.o fixperms.o pwent.o getenv.o strdup.o
 cnvrtmail_OBJS = cnvrtmail.o docmd.o fixperms.o gtime.o strupr.o getval.o \
 	mfgets.o filemove.o getenv.o parse.o pwent.o strdup.o
 
-# Make all components
+.PHONY: all cmoc-all sizes banner clean dsk dskcopy dskclean info help
+
+# Build all UUCPbb commands (default target)
 all: cmoc-all
 
+# Build the cmoc-compiled UUCPbb commands
 cmoc-all: $(CMOC_TARGETS)
 
+# Print the size in bytes of each built UUCPbb command
 sizes: cmoc-all
 	@printf "%-16s %10s\n" "command" "cmoc"
 	@for cmd in $(SRC_CMDS); do \
@@ -97,6 +101,7 @@ sizes: cmoc-all
 			"`wc -c < $(CMOC_OUTDIR)/$$cmd`"; \
 	done
 
+# Print the UUCPbb banner
 banner:
 	@$(ECHO) "**************************************************"
 	@$(ECHO) "*                                                *"
@@ -104,11 +109,12 @@ banner:
 	@$(ECHO) "*                                                *"
 	@$(ECHO) "**************************************************"
 
-# Clean all components
+# Remove the build directory, disk images, and intermediate artifacts
 clean:	dskclean
 	$(RM) -r $(BUILDDIR)
 	$(RM) c.errors *.list *.map cstr.* ctmp.*
 
+# Build the 6809 and 6309 UUCPbb disk images
 dsk: $(DSKS)
 
 $(DISK68): banner all
@@ -163,15 +169,23 @@ $(DISK63): banner all
 	$(CD) doc; $(CPL) $(DOCS) ../$@,UUCP/DOC
 	$(CPL) copying readme.first $@,UUCP
 
+# Copy built disk images to $(DSKDIR)
 dskcopy: dsk
 	$(CP) $(DSKS) $(DSKDIR)
 
+# Remove the built disk images
 dskclean:
 	$(RM) $(DSKS)
 
+# Display the UUCPbb version and the disk image names
 info:
 	@$(ECHO) "*** UUCPbb 2.1 ***"
 	@$(foreach dsk, $(DSKS), $(ECHO) $(dsk);)
+
+# Display this help message listing available phony targets
+help:
+	@echo "Available targets:"
+	@awk 'BEGIN{c=""} /^# /{c=substr($$0,3); next} /^[a-zA-Z_][a-zA-Z0-9_.-]*:/{if(c!=""){t=$$1; sub(/:.*/,"",t); printf "  %-20s %s\n", t, c}; c=""; next} {c=""}' $(MAKEFILE_LIST)
 
 .SECONDEXPANSION:
 $(CMOC_OUTDIR):

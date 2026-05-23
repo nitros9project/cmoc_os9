@@ -73,7 +73,7 @@ static void dialog_close(int path)
     _cgfx_mvowend(path);
 }
 
-int Dialog(int path, DIALOG *dlgptr, int column, int row, int width, int length, int fg, int bg)
+int Dialog(path_id path, DIALOG *dlgptr, int column, int row, int width, int length, int fg, int bg)
 {
     DIALOG *temp;
     DIALOG *temp2, *textptr;

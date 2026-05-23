@@ -1,0 +1,4 @@
+echo * CMOC OS-9 test disk *
+link shell
+load utilpak1
+display 1b 24 1b 20 1 0 0 28 18 0 1 2 1b 21

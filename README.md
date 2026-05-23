@@ -41,13 +41,27 @@ pulling in the MC6839 floating-point path. The `libcf.a` build enables
 the MC6839 floating-point configuration and includes the real formatting and
 parsing support.
 
-From there, you can build the runtime tests and CoCo 3 graphics tests:
+From there, you can build the CoCo 3 NitrOS-9 test disk:
 ```
-cd ../unittest
-make clean dsk
+make dsk
 ```
 
-This will create a disk image called 'test.dsk' which you can mount in an emulator and run under NitrOS-9. A convenient script named 'go' is placed in the root folder of the disk. You can run this script to execute the non-graphical runtime and regression tests. The CoCo 3-specific graphics programs such as `wintest` and `maze` are built onto the disk as separate manual tests; both now live under `graphictest/` instead of `unittest/`.
+This will create a disk image called `l2_coco3_cmoc_os9.dsk` under
+`recipes/coco3/`. The recipe uses the local `cmoc_os9` sources and a
+nearby NitrOS-9 checkout for OS modules, commands, libraries, and disk tools.
+Set `NITROS9DIR` if your NitrOS-9 checkout is not a sibling of this repository.
+
+You can also build the smaller standalone unit-test disk:
+```
+make unittest-dsk
+```
+
+This will create a disk image called `test.dsk` which you can mount in an
+emulator and run under NitrOS-9. A convenient script named `go` is placed in
+the root folder of the disk. You can run this script to execute the
+non-graphical runtime and regression tests. The CoCo 3-specific graphics
+programs such as `wintest` and `maze` are built onto the disk as separate
+manual tests; both now live under `graphictest/` instead of `unittest/`.
 
 ## Differences from the original Microware C Library
 

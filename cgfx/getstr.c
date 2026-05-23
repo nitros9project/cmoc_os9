@@ -7,7 +7,7 @@
 
 static struct sgbuf opts;
 
-error_code _Flush(void);
+error_code Flush(void);
 
 int getstr(int path, const char *title, char *s, int n, int column, int row, int fg, int bg)
 {
@@ -25,7 +25,7 @@ int getstr(int path, const char *title, char *s, int n, int column, int row, int
     _cgfx_curon(path);
     _cgfx_font(path, GRP_FONT, FNT_S8X8);
     cwrite(path, title, 80);
-    _Flush();
+    Flush();
     while (_gs_rdy(path) == -1)
         tsleep(6);
 

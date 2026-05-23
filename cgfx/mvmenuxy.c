@@ -9,7 +9,7 @@ static int levels = 0;
 static MSRET mp;
 static struct sgbuf oldopts, newopts;
 
-error_code _Flush(void);
+error_code Flush(void);
 
 static void mvmenu_remove(int path)
 {
@@ -79,7 +79,7 @@ int MVMenuXY(int path, char *title, ITEM itemptr[], int column, int row, int fg,
     _cgfx_curxy(path, 0, index + offset);
     _cgfx_revon(path);
     cwrite(path, itemptr[index].i_name, 80);
-    _Flush();
+    Flush();
 
     onwindow = 0;
     while (1)
@@ -141,7 +141,7 @@ int MVMenuXY(int path, char *title, ITEM itemptr[], int column, int row, int fg,
             _cgfx_curxy(path, 0, index + offset);
             _cgfx_revon(path);
             cwrite(path, itemptr[index].i_name, 80);
-            _Flush();
+            Flush();
         }
 
         if (mp.pt_cbsa || (ch == 13))

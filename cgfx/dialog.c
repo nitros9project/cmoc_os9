@@ -6,7 +6,7 @@
 #define WT_DBOX 4
 #define WR_CNTNT 0
 
-error_code _Flush(void);
+error_code Flush(void);
 
 static void estr(char *s, int *pos, int ch)
 {
@@ -63,6 +63,14 @@ static void estr(char *s, int *pos, int ch)
     s[*pos] = (char) ch;
     if (*pos < len)
         (*pos)++;
+}
+
+/* Tear down the dialog's overlay window. Called on every exit from Dialog()
+   so the overlay never leaks (a leaked overlay stays on screen and lets later
+   clicks fall through to the application canvas). */
+static void dialog_close(int path)
+{
+    _cgfx_mvowend(path);
 }
 
 int Dialog(int path, DIALOG *dlgptr, int column, int row, int width, int length, int fg, int bg)
@@ -122,7 +130,7 @@ int Dialog(int path, DIALOG *dlgptr, int column, int row, int width, int length,
 
     while (1)
     {
-        _Flush();
+        Flush();
         ch = MouseKey(path);
         event = -1;
 
@@ -133,7 +141,7 @@ int Dialog(int path, DIALOG *dlgptr, int column, int row, int width, int length,
                 _cgfx_curoff(path);
                 if (textptr->d_val)
                 {
-                    _cgfx_mvowend(path);
+                    dialog_close(path);
                     return textptr->d_val;
                 }
                 textptr = 0;
@@ -201,9 +209,9 @@ int Dialog(int path, DIALOG *dlgptr, int column, int row, int width, int length,
         if (temp->d_type == D_BUTTON)
         {
             BDown(path, temp->d_column, temp->d_row, temp->d_string);
-            _Flush();
+            Flush();
             tsleep(10);
-            _cgfx_mvowend(path);
+            dialog_close(path);
             return temp->d_val;
         }
         else if (temp->d_type == D_RADIO)
@@ -245,10 +253,12 @@ int Dialog(int path, DIALOG *dlgptr, int column, int row, int width, int length,
         }
         else if (temp->d_val)
         {
-            _cgfx_mvowend(path);
+            dialog_close(path);
             return temp->d_val;
         }
     }
 
+    /* Reached only when a click outside the content area breaks the loop. */
+    dialog_close(path);
     return 0;
 }

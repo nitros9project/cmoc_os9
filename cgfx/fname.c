@@ -7,7 +7,7 @@ static int files[256];
 static struct sgbuf oldopts, newopts;
 static char dbuf[32];
 
-error_code _Flush(void);
+error_code Flush(void);
 long _gs_pos(path_id path);
 
 char *FName(path_id path, const char *title, int fg, int bg)
@@ -91,7 +91,7 @@ char *FName(path_id path, const char *title, int fg, int bg)
             _cgfx_revoff(path);
             _cgfx_curxy(path, 0, line);
             cwrite(path, s, strlen(s));
-            _Flush();
+            Flush();
 
             if (ch == 0x0a && index < numfiles)
             {

@@ -8,7 +8,7 @@ static char dbuf[32];
 static MSRET mp;
 static struct sgbuf oldopts, newopts;
 
-error_code _Flush(void);
+error_code Flush(void);
 long _gs_pos(path_id path);
 
 char *MVFName(path_id path, const char *title, int column, int row, int fg, int bg)
@@ -38,7 +38,7 @@ char *MVFName(path_id path, const char *title, int column, int row, int fg, int 
     bflag = 0;
 
     _cgfx_setgc(path, GRP_PTR, PTR_ARR);
-    _Flush();
+    Flush();
 
     while (1)
     {
@@ -122,7 +122,7 @@ char *MVFName(path_id path, const char *title, int column, int row, int fg, int 
             _cgfx_revon(path);
             cwrite(path, _FName, 19);
             _cgfx_revoff(path);
-            _Flush();
+            Flush();
 
             do
             {
@@ -133,7 +133,7 @@ char *MVFName(path_id path, const char *title, int column, int row, int fg, int 
 
             _cgfx_curxy(path, 1, line + 1);
             cwrite(path, _FName, 19);
-            _Flush();
+            Flush();
 
             if (_gs_rdy(path) == -1)
                 ch = 0;

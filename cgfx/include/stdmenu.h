@@ -1,6 +1,8 @@
 #ifndef _CGFX_STDMENU_H
 #define _CGFX_STDMENU_H
 
+#include "cgfx.h"
+
 /* StdMenu.h - standard menu definitions */
 
 

@@ -1,5 +1,4 @@
 #include <cgfx.h>
-#include <object.h>
 #include <stdlib.h>
 
 OBJECT *Objects = 0;

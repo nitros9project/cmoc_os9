@@ -1,4 +1,3 @@
-#include <menu.h>
 #include <string.h>
 #include <cgfx.h>
 

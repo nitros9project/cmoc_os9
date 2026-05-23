@@ -1016,6 +1016,14 @@ error_code _cgfx_putblk(path_id path, int grp, int buf, int bx, int by);
 
 /**** MULTI-VUE FUNCTIONS ****/
 
+/* window type defs */
+#define WT_NBOX		0
+#define WT_FWIN		1
+#define WT_FSWIN 	2
+#define WT_SBOX 	3
+#define WT_DBOX 	4
+#define WT_PBOX 	5
+
 #define MNENBL 		1
 #define MNDSBL 		0
 #define WINSYNC 	0xC0C0
@@ -1234,8 +1242,6 @@ error_code _cgfx_ss_mtyp(path_id path, int montype);
 
 /**** ADDED EXTRAS FROM MIKE SWEET ****/
 
-#ifndef _CGFX_DIALOG_DEFINED
-#define _CGFX_DIALOG_DEFINED
 typedef struct { 	/* dialog structure */
 	char d_type;    /* type- 0=string, 1=button */
 	char d_column;  /* column position within the overlay */
@@ -1244,7 +1250,6 @@ typedef struct { 	/* dialog structure */
 	char d_val;     /* value to return to caller */
 	char *d_string; /* pointer to actual string to be placed in overlay */
 } DIALOG;        	/* call this type DIALOG */
-#endif
 
 
 /* now for some define constants for the 'd_type' field... */
@@ -1256,8 +1261,6 @@ typedef struct { 	/* dialog structure */
 #define D_END 		-1  /* End marker of array */
 
 
-#ifndef _CGFX_OBJECT_DEFINED
-#define _CGFX_OBJECT_DEFINED
 typedef struct OBJSTR {
 	char group;          /* G/P group for this object */
 	char buffer;         /* G/P buffer for this object */
@@ -1271,7 +1274,6 @@ typedef struct OBJSTR {
 	struct OBJSTR *next; /* pointer to next object */
 	struct OBJSTR *prev; /* pointer to previous object */
 } OBJECT;   	         /* call this type OBJECT */
-#endif
 
 extern OBJECT *Objects; /* pointer to OBJECT list */
 

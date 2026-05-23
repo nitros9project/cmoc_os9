@@ -6,7 +6,7 @@
 #define WT_DBOX 4
 #define WR_CNTNT 0
 
-error_code _Flush(void);
+error_code Flush(void);
 
 static void estr(char *s, int *pos, int ch)
 {
@@ -65,7 +65,15 @@ static void estr(char *s, int *pos, int ch)
         (*pos)++;
 }
 
-int Dialog(int path, DIALOG *dlgptr, int column, int row, int width, int length, int fg, int bg)
+/* Tear down the dialog's overlay window. Called on every exit from Dialog()
+   so the overlay never leaks (a leaked overlay stays on screen and lets later
+   clicks fall through to the application canvas). */
+static void dialog_close(int path)
+{
+    _cgfx_mvowend(path);
+}
+
+int Dialog(path_id path, DIALOG *dlgptr, int column, int row, int width, int length, int fg, int bg)
 {
     DIALOG *temp;
     DIALOG *temp2, *textptr;
@@ -73,6 +81,7 @@ int Dialog(int path, DIALOG *dlgptr, int column, int row, int width, int length,
     MSRET mp;
     int textpos, textnum, xcor, ycor, event;
     int n;
+    int numbuttons;
 
     _cgfx_owset(path, 1, column, row, width, length, fg, bg);
     _cgfx_curoff(path);
@@ -84,6 +93,7 @@ int Dialog(int path, DIALOG *dlgptr, int column, int row, int width, int length,
 
     textptr = 0;
     textpos = 0;
+    numbuttons = 0;
 
     for (n = 0, temp = dlgptr; temp->d_type != D_END; temp++, n++)
         switch (temp->d_type)
@@ -105,6 +115,7 @@ int Dialog(int path, DIALOG *dlgptr, int column, int row, int width, int length,
             break;
         case D_BUTTON:
             BUp(path, temp->d_column, temp->d_row, temp->d_string, fg, bg);
+            numbuttons++;
             break;
         case D_RADIO:
             if (temp->d_val)
@@ -122,7 +133,7 @@ int Dialog(int path, DIALOG *dlgptr, int column, int row, int width, int length,
 
     while (1)
     {
-        _Flush();
+        Flush();
         ch = MouseKey(path);
         event = -1;
 
@@ -133,7 +144,7 @@ int Dialog(int path, DIALOG *dlgptr, int column, int row, int width, int length,
                 _cgfx_curoff(path);
                 if (textptr->d_val)
                 {
-                    _cgfx_mvowend(path);
+                    dialog_close(path);
                     return textptr->d_val;
                 }
                 textptr = 0;
@@ -168,7 +179,15 @@ int Dialog(int path, DIALOG *dlgptr, int column, int row, int width, int length,
             {
                 _cgfx_gs_mouse(path, &mp);
                 if (mp.pt_stat != WR_CNTNT)
+                {
+                    /* A click outside the dialog dismisses it only when there
+                       is at most one button. With multiple buttons it would be
+                       ambiguous which one was chosen, so ignore the click and
+                       keep waiting for the user to pick a button. */
+                    if (numbuttons > 1)
+                        continue;
                     break;
+                }
                 xcor = mp.pt_wrx / 8;
                 ycor = mp.pt_wry / 8;
             }
@@ -201,9 +220,9 @@ int Dialog(int path, DIALOG *dlgptr, int column, int row, int width, int length,
         if (temp->d_type == D_BUTTON)
         {
             BDown(path, temp->d_column, temp->d_row, temp->d_string);
-            _Flush();
+            Flush();
             tsleep(10);
-            _cgfx_mvowend(path);
+            dialog_close(path);
             return temp->d_val;
         }
         else if (temp->d_type == D_RADIO)
@@ -245,10 +264,12 @@ int Dialog(int path, DIALOG *dlgptr, int column, int row, int width, int length,
         }
         else if (temp->d_val)
         {
-            _cgfx_mvowend(path);
+            dialog_close(path);
             return temp->d_val;
         }
     }
 
+    /* Reached only when a click outside the content area breaks the loop. */
+    dialog_close(path);
     return 0;
 }

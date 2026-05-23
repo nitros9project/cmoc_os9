@@ -1,6 +1,6 @@
 #include <cgfx.h>
 
-error_code _Flush(void);
+error_code Flush(void);
 
 void SetType(path_id path, int stype, int fg, int bg)
 {
@@ -21,5 +21,5 @@ void SetType(path_id path, int stype, int fg, int bg)
     _cgfx_bcolor(path, bg);
     _cgfx_border(path, bg);
     _cgfx_clear(path);
-    _Flush();
+    Flush();
 }

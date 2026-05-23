@@ -3,7 +3,7 @@
 
 OBJECT *Objects = 0;
 
-error_code _Flush(void);
+error_code Flush(void);
 
 OBJECT *AddObj(int path, int group, int buffer, int xcor, int ycor, int (*border)())
 {
@@ -35,7 +35,7 @@ OBJECT *AddObj(int path, int group, int buffer, int xcor, int ycor, int (*border
         _cgfx_fcolor(path, buffer);
         _cgfx_point(path, xcor >> 5, ycor >> 5);
     }
-    _Flush();
+    Flush();
     return temp;
 }
 
@@ -87,7 +87,7 @@ void MoveObj(int path)
 
         temp = temp->next;
     }
-    _Flush();
+    Flush();
 }
 
 void DelObj(int path, OBJECT *objptr)
@@ -108,7 +108,7 @@ void DelObj(int path, OBJECT *objptr)
             _cgfx_fcolor(path, objptr->buffer);
             _cgfx_point(path, objptr->xcor >> 5, objptr->ycor >> 5);
         }
-        _Flush();
+        Flush();
     }
 
     free(objptr);

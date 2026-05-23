@@ -2,7 +2,7 @@
 #include <string.h>
 #include <unistd.h>
 
-error_code _Flush(void);
+error_code Flush(void);
 
 void BUp(path_id path, int column, int row, const char *s, int fg, int bg)
 {
@@ -27,7 +27,7 @@ void BUp(path_id path, int column, int row, const char *s, int fg, int bg)
     _cgfx_rline(path, -2, -2);
     _cgfx_linem(path, x + 3, y + 12);
     _cgfx_rlinem(path, -2, -2);
-    _Flush();
+    Flush();
 }
 
 void BDown(path_id path, int column, int row, const char *s)
@@ -39,5 +39,5 @@ void BDown(path_id path, int column, int row, const char *s)
     _cgfx_getblk(path, pid, 255, x, y, strlen(s) * 8 + 3, 12);
     _cgfx_putblk(path, pid, 255, x + 1, y + 1);
     _cgfx_kilbuf(path, pid, 255);
-    _Flush();
+    Flush();
 }

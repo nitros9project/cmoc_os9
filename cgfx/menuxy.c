@@ -6,7 +6,7 @@
 static int levels = 0;
 static struct sgbuf oldopts, newopts;
 
-error_code _Flush(void);
+error_code Flush(void);
 
 static void menu_remove(int path)
 {
@@ -78,7 +78,7 @@ int MenuXY(int path, char *title, ITEM itemptr[], int column, int row, int fg, i
         _cgfx_curxy(path, 1, index + offset);
         _cgfx_revoff(path);
         cwrite(path, itemptr[index].i_name, 80);
-        _Flush();
+        Flush();
 
         if (ch == 0x0a)
         {

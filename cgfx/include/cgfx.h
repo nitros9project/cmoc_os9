@@ -1260,6 +1260,11 @@ typedef struct { 	/* dialog structure */
 #define D_RADIO 	4  	/* Radio button (where d_string should be NULL)*/
 #define D_END 		-1  /* End marker of array */
 
+/* Run a modal dialog described by a D_END-terminated array of DIALOG items.
+   Returns the selected button/item's d_val, or 0 if dismissed by a click
+   outside the content area. */
+int Dialog(path_id path, DIALOG *dlgptr, int column, int row, int width, int length, int fg, int bg);
+
 
 typedef struct OBJSTR {
 	char group;          /* G/P group for this object */

@@ -116,3 +116,14 @@ utils/yes
 
 # Built utils object files
 utils/*/*.o
+
+# CoCo 3 recipe build products
+recipes/coco3/.lib/
+recipes/coco3/.mods/
+recipes/coco3/.obj/
+recipes/coco3/*.dsk
+recipes/coco3/*.list
+recipes/coco3/*.map
+recipes/coco3/bootfile
+recipes/coco3/buildinfo
+recipes/coco3/kerneltrack

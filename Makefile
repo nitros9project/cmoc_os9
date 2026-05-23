@@ -1,7 +1,7 @@
 # Top-level build driver for the CMOC OS-9 library, tests, and utilities.
 
-.PHONY: all libs tests utils clean clean-libs clean-tests clean-utils dsk run \
-        lib cgfx unittest help
+.PHONY: all libs tests utils clean clean-libs clean-tests clean-utils \
+        clean-recipe dsk run unittest-dsk unittest-run lib cgfx unittest help
 
 # Build libs, tests, and utils (default target)
 all: libs tests utils
@@ -25,16 +25,24 @@ tests: libs
 utils: libs
 	$(MAKE) -C utils
 
-# Build the unit tests and pack them into a bootable test.dsk image
-dsk: libs
+# Build the CoCo 3 NitrOS-9 cmoc_os9 test disk
+dsk:
+	$(MAKE) -C recipes/coco3
+
+# Build the standalone unit-test disk image
+unittest-dsk: libs
 	$(MAKE) -C unittest dsk
 
-# Build test.dsk and launch MAME to run the unit tests
-run: libs
+# Build the CoCo 3 NitrOS-9 cmoc_os9 test disk and launch MAME
+run:
+	$(MAKE) -C recipes/coco3 run
+
+# Build the standalone unit-test disk and launch MAME
+unittest-run: libs
 	$(MAKE) -C unittest run
 
 # Remove build artifacts in libs, tests, and utils
-clean: clean-tests clean-utils clean-libs
+clean: clean-tests clean-utils clean-libs clean-recipe
 
 # Remove build artifacts in cgfx/ and lib/
 clean-libs:
@@ -48,6 +56,10 @@ clean-tests:
 # Remove build artifacts in utils/
 clean-utils:
 	$(MAKE) -C utils clean
+
+# Remove recipe disk-image build artifacts
+clean-recipe:
+	$(MAKE) -C recipes/coco3 clean
 
 # Display this help message listing available phony targets
 help:

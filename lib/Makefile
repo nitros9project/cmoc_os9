@@ -39,6 +39,9 @@ FLOAT_MODS = $(COMMON_MODS) pflinit.o pffinit.o $(FLOAT_SUPPORT)
 BASE_OBJS = $(addprefix $(OBJDIR_BASE)/,$(BASE_MODS))
 FLOAT_OBJS = $(addprefix $(OBJDIR_FLOAT)/,$(FLOAT_MODS))
 
+.PHONY: all dskclean clean help
+
+# Build libc.a and libcf.a (default target)
 all: libc.a libcf.a
 
 libc.a: $(BASE_OBJS)
@@ -71,8 +74,15 @@ $(OBJDIR_BASE)/%.o: %.asm | $(OBJDIR_BASE)
 $(OBJDIR_FLOAT)/%.o: %.asm | $(OBJDIR_FLOAT)
 	cd $(OBJDIR_FLOAT) && $(ASM) $(AFLAGS) ../$< $(ASOUT)$(@F)
 
+# Alias for clean (removes build artifacts including disk images)
 dskclean: clean
 
+# Remove build artifacts
 clean:
 	$(RM) -r $(OBJDIR_BASE) $(OBJDIR_FLOAT)
 	$(RM) *.o *.list *.map libc.a libcf.a
+
+# Display this help message listing available phony targets
+help:
+	@echo "Available targets:"
+	@awk 'BEGIN{c=""} /^# /{c=substr($$0,3); next} /^[a-zA-Z_][a-zA-Z0-9_.-]*:/{if(c!=""){t=$$1; sub(/:.*/,"",t); printf "  %-20s %s\n", t, c}; c=""; next} {c=""}' $(MAKEFILE_LIST)

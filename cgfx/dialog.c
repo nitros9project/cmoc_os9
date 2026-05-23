@@ -1,5 +1,4 @@
 #include <cgfx.h>
-#include <dialog.h>
 #include <os.h>
 #include <string.h>
 #include <unistd.h>

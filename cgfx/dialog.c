@@ -81,6 +81,7 @@ int Dialog(path_id path, DIALOG *dlgptr, int column, int row, int width, int len
     MSRET mp;
     int textpos, textnum, xcor, ycor, event;
     int n;
+    int numbuttons;
 
     _cgfx_owset(path, 1, column, row, width, length, fg, bg);
     _cgfx_curoff(path);
@@ -92,6 +93,7 @@ int Dialog(path_id path, DIALOG *dlgptr, int column, int row, int width, int len
 
     textptr = 0;
     textpos = 0;
+    numbuttons = 0;
 
     for (n = 0, temp = dlgptr; temp->d_type != D_END; temp++, n++)
         switch (temp->d_type)
@@ -113,6 +115,7 @@ int Dialog(path_id path, DIALOG *dlgptr, int column, int row, int width, int len
             break;
         case D_BUTTON:
             BUp(path, temp->d_column, temp->d_row, temp->d_string, fg, bg);
+            numbuttons++;
             break;
         case D_RADIO:
             if (temp->d_val)
@@ -176,7 +179,15 @@ int Dialog(path_id path, DIALOG *dlgptr, int column, int row, int width, int len
             {
                 _cgfx_gs_mouse(path, &mp);
                 if (mp.pt_stat != WR_CNTNT)
+                {
+                    /* A click outside the dialog dismisses it only when there
+                       is at most one button. With multiple buttons it would be
+                       ambiguous which one was chosen, so ignore the click and
+                       keep waiting for the user to pick a button. */
+                    if (numbuttons > 1)
+                        continue;
                     break;
+                }
                 xcor = mp.pt_wrx / 8;
                 ycor = mp.pt_wry / 8;
             }

@@ -279,6 +279,16 @@ error_code _os_gs_devnm(path_id path, char *name);
 error_code _os_gs_fd(path_id path, void *buffer, int *count);
 
 /**
+ * @brief Read the screen size reported by `SS_ScSiz`.
+ *
+ * @param path Open path descriptor, usually standard output.
+ * @param width Receives the screen width in character columns.
+ * @param height Receives the screen height in character rows.
+ * @return `0` on success, otherwise an OS-9 error code.
+ */
+error_code _os_gs_scsiz(path_id path, int *width, int *height);
+
+/**
  * @brief Write a path options packet using `SS_Opt`.
  *
  * @param path Open path descriptor.

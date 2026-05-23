@@ -69,3 +69,4 @@ SS_ELog             equ       $19       ; error log command
 SS_SSig             equ       $1A       ; send signal command
 SS_Relea            equ       $1B       ; release command
 SS_Attr             equ       $1C       ; path attribute command
+SS_ScSiz            equ       $26       ; screen size query

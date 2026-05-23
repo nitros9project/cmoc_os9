@@ -11,6 +11,7 @@ __os_gs_eof         EXPORT    ;         export modern eof wrapper
 __os_gs_popt        EXPORT    ;         export modern path-options getter
 __os_gs_devnm       EXPORT    ;         export modern device-name getter
 __os_gs_fd          EXPORT    ;         export modern file-descriptor getter
+__os_gs_scsiz       EXPORT    ;         export modern screen-size getter
 __os_ss_popt        EXPORT    ;         export modern path-options setter
 __os_ss_pfd         EXPORT    ;         export modern file-descriptor setter
 __os_ss_sendsig     EXPORT    ;         export modern send-signal setter
@@ -124,6 +125,22 @@ stk_os_gs_fd_count  equ       6         ; count pointer for descriptor bytes
                     ldy       stk_os_gs_fd_count+2,s ; load byte-count pointer
                     os9       I_GetStt  ; read descriptor bytes into caller buffer
                     puls      y         ; restore preserved register
+                    lbra      _osret    ; return error_code status
+
+__os_gs_scsiz:
+stk_os_gs_scsiz_ret equ       0         ; caller return address
+stk_os_gs_scsiz_path equ       2         ; path descriptor argument
+stk_os_gs_scsiz_path_byte equ       3         ; low byte passed to OS-9 in A
+stk_os_gs_scsiz_width equ       4         ; destination width pointer
+stk_os_gs_scsiz_height equ       6         ; destination height pointer
+                    pshs      y         ; preserve Y across the system call
+                    ldb       #SS_ScSiz ; request screen dimensions
+                    lda       stk_os_gs_scsiz_path_byte+2,s ; pass path descriptor in A
+                    os9       I_GetStt  ; returns width in X and height in Y
+                    bcs       GSScSiz_01 ; skip stores when OS-9 reports an error
+                    stx       [stk_os_gs_scsiz_width+2,s] ; store returned screen width
+                    sty       [stk_os_gs_scsiz_height+2,s] ; store returned screen height
+GSScSiz_01          puls      y         ; restore preserved register
                     lbra      _osret    ; return error_code status
 
 GSBuf_01

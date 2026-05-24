@@ -1,12 +1,12 @@
 # CMOC C Library support for OS-9/NitrOS-9
 
-CMOC is an excellent ANSI C cross-compiler by Pierre Sarrazin. It supports the creation of OS-9 exectuables, which needs a complete C library. [Download CMOC here](https://perso.b2b2c.ca/~sarrazip/dev/cmoc.html).
+CMOC is an excellent ANSI C cross-compiler by Pierre Sarrazin. It supports the creation of OS-9 executables, which needs a complete C library. [Download CMOC here](https://perso.b2b2c.ca/~sarrazip/dev/cmoc.html).
 
 This project aims to deliver two libraries: the standard C library (libc.a) and the CGFX library (libcgfx.a).
 
-The code for the standard C library is based off of the Kreider C library, with yet-to-be ported files under the lib/todo folder.
+The code for the standard C library is based off of the Kreider C library.
 
-Likewise, the code for the CGFX library is based off of Mike Sweet's CGFX7 library, with yet-to-be ported files under the cgfx/todo folder.
+Likewise, the code for the CGFX library is based off of Mike Sweet's CGFX7 library.
 
 ## Building
 
@@ -128,13 +128,8 @@ While passing parameters by reference may be a bit more typing, this is arguably
 
 ## Work to be done
 
-The project is still mid-port.
-
-- `lib/todo/` contains additional Kreider C library routines that have not yet
-  been brought into the current CMOC-oriented source layout.
-- `cgfx/todo/` likewise contains CGFX routines that still need to be ported.
 - More unit tests are needed, especially around the low-level OS-9 I/O layer,
   stdio compatibility, and floating-point formatting/parsing behavior.
 
-In other words, the core library is already usable, but it is not yet a
-complete port of all historical Kreider and CGFX components.
+The core library is already usable, but it is not yet a complete port of all
+historical Kreider and CGFX components.

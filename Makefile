@@ -1,7 +1,8 @@
 # Top-level build driver for the CMOC OS-9 library, tests, and utilities.
 
 .PHONY: all libs tests utils clean clean-libs clean-tests clean-utils \
-        clean-recipe dsk run unittest-dsk unittest-run lib cgfx unittest help
+        clean-recipe dsk run unittest-dsk unittest-run lib cgfx unittest \
+        test-ci help
 
 # Build libs, tests, and utils (default target)
 all: libs tests utils
@@ -40,6 +41,22 @@ run:
 # Build the standalone unit-test disk and launch MAME
 unittest-run: libs
 	$(MAKE) -C unittest run
+
+# Headless MAME settings for test-ci. Requires `mame` (coco3 build) and `os9` on
+# PATH -- i.e. run inside the jamieleecho/coco-dev image -- and MAME_ROMPATH set
+# to a directory with a coco3 romset (coco3.rom plus a disk controller rom).
+CI_DISK        := recipes/coco3/l2_coco3_cmoc_os9.dsk
+CI_BUDGET      ?= 120
+CI_BUDGET_SLOW ?= 600
+CI_JOBS        ?= 4
+
+# Run the unit tests headlessly (one MAME boot per test), gating pass/fail
+test-ci:
+	@test -n "$(MAME_ROMPATH)" || { echo "ERROR: set MAME_ROMPATH to a dir with a coco3 romset"; exit 2; }
+	$(MAKE) dsk
+	DISK_SRC=$(CI_DISK) ROMPATH=$(MAME_ROMPATH) \
+	  BUDGET=$(CI_BUDGET) BUDGET_SLOW=$(CI_BUDGET_SLOW) JOBS=$(CI_JOBS) \
+	  bash recipes/coco3/citest.sh
 
 # Remove build artifacts in libs, tests, and utils
 clean: clean-tests clean-utils clean-libs clean-recipe

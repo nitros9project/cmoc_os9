@@ -119,6 +119,16 @@ setiob6
                     bra       setiob8   ; merge computed mode into FILE flags
 
 setiob7
+                    cmpb      #'w       ; writable modes start with 'w'
+                    beq       setiob7a
+                    cmpb      #'a       ; ... or 'a' (append)
+                    beq       setiob7a
+                    ldd       #E_BMode  ; unsupported mode string
+                    std       _errno,y  ; report EINVAL for an unsupported mode string
+                    clra                ; return NULL high byte
+                    clrb                ; return NULL low byte
+                    rts                 ; reject the bad mode so fdopen() yields NULL
+setiob7a
                     ldb       #_WRITE   ; mark stream writable
 setiob8
                     orb       FILE_FLAG+1,u ; preserve existing low-byte FILE flags

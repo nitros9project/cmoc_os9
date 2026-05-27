@@ -10,6 +10,7 @@
 #include <os.h>
 
 FILE *fpmp;
+int pfcount;
 char buf1[10];
 int dectbl[4]= {10000,1000,100,10};
 
@@ -97,6 +98,7 @@ prtvar  set         14          ; 2
 
 printf_common_exit
      	leas    vlen,s 
+		ldd     _pfcount,y          return count of characters written
  		rts    
 
 *    entry:  variables  fpmp  destination - string address or FILE pointer
@@ -115,6 +117,8 @@ printf_common_exit
 printf_common
  	    ldu     4,s             get format string
  		leas    -vlen,s         make room on stack
+		ldd     #0                  reset output character counter
+		std     _pfcount,y 
  		bra     L004a 
 case_c 	ldx     prtvar,s 
  		ldd     ,x++ 
@@ -426,6 +430,9 @@ put_to_file
 		pshs    d,x 
 		lbsr    putc 
 		leas    4,s 
+		ldd     _pfcount,y
+		addd    #1                  count one character written
+		std     _pfcount,y
 		rts    
 
 * B = character to put
@@ -434,6 +441,9 @@ put_to_mem
 		stb     ,x+ 
 		stx     _fpmp,y 
 		clr     ,x
+		ldd     _pfcount,y
+		addd    #1                  count one character written
+		std     _pfcount,y
 		rts
 	}
 }

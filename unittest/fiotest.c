@@ -20,7 +20,7 @@ static void check_true(const char *name, int condition)
 static void test_text_output(void)
 {
     FILE *fp;
-    char buf[128];
+    char buf[256];
     size_t n;
     const char expected[] =
         "123\n"

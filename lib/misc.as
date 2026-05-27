@@ -49,6 +49,8 @@ stk_prerr_error_byte equ       5         ; low byte of error code argument
                     ldb       stk_prerr_error_byte,s ; pass error code to print
                     os9       F_PErr    ; ask OS-9 to print the error text
                     lblo      _os9err   ; return OS-9 failure through error helper
+                    clra                ; return 0 on success (D held path:errcode)
+                    clrb
                     rts                 ; return to caller
 
 _tsleep:

@@ -101,8 +101,8 @@ static void test_fdopen_badmode(void)
     FILE *fp;
 
     unlink(fdopen_read_tmp);
-    fd = open(".", FAM_READ);
-    check_true("test_fdopen_badmode open(dir)", fd >= 0);
+    fd = open(".", FAM_DIR);
+    check_true("test_fdopen_badmode open(dir)", fd > 0);
     if (fd < 0)
         return;
 

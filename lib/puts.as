@@ -16,8 +16,10 @@ stk_puts_string     equ       2         ; string pointer argument
                     ldd       stk_puts_string+2,s ; load string pointer after saved U
                     pshs      d,x       ; stage string and stdout for fputs/putc calls
                     lbsr      _fputs    ; emit the string body through stdio
-                    ldb       #$0D      ; append OS-9 carriage return for puts()
-                    stb       1,s       ; replace staged low byte with newline character
+                    ldd       #$000D    ; append OS-9 carriage return as a full int
+                    std       ,s        ; replace staged char (zero high byte so putc
+*                                       ; returns the non-negative character, not the
+*                                       ; sign-extended high byte of the string pointer)
                     lbsr      _putc     ; emit trailing carriage return to stdout
                     leas      4,s       ; discard staged string/stdout arguments
                     puls      u,pc      ; restore registers and return

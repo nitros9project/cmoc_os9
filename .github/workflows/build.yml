@@ -50,7 +50,7 @@ jobs:
         env:
           NITROS9DIR: ${{ github.workspace }}/nitros9
           MAME_ROMPATH: ${{ github.workspace }}/roms
-          CI_JOBS: "2"
+          CI_JOBS: "16"
         run: make test-ci
 
   graphics-tests:
@@ -82,7 +82,7 @@ jobs:
         env:
           NITROS9DIR: ${{ github.workspace }}/nitros9
           MAME_ROMPATH: ${{ github.workspace }}/roms
-          GFX_JOBS: "2"
+          GFX_JOBS: "16"
           GFX_RESULTS_DIR: ${{ runner.temp }}/gxtest
         run: make graphics-test
 

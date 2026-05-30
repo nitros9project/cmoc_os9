@@ -171,6 +171,20 @@ filtered through composite mode.
   zero-area and the arc silently doesn't render. For a 90° top-right
   quadrant use `(xrad, 0)` → `(0, -yrad)`.
 
+- **Overlay teardown updates bookkeeping, not the framebuffer.** On
+  type-8 (and likely other graphics screens), `_cgfx_owend` and
+  `_cgfx_mvowend` remove an overlay from cowin's window list cleanly,
+  but the overlay's *rendered pixels* stay in the framebuffer until
+  something else paints over them. Observed empirically with
+  `_cgfx_shadow` — the magenta popup sticks around through both
+  `owend` and `mvowend`, and even a follow-up `_cgfx_clear` on the
+  parent window doesn't wipe the shadow's region. Same applies to
+  `_cgfx_dwend`: closing a window removes it from the list but
+  doesn't repaint where it used to be (in gfx40win the closed W2
+  happens to land at the screen's border color, so it *looks* erased,
+  but that's the border, not active cleanup). If a test needs the
+  pixels gone, redraw the area explicitly after teardown.
+
 ## See also
 
 - `cgfx/include/cgfx.h` — full API surface, with per-function notes.

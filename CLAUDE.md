@@ -90,10 +90,10 @@ If a test is known-broken and you want CI green, add its name to
 
 ## Adding a graphics test
 
-Graphics tests are C programs that open `/w` (a NitrOS-9 cowin graphics
-window) and draw with `cgfx`. They typically loop until SPACE is pressed --
-the harness snapshots the running program at chosen moments and compares
-each capture against a checked-in golden PNG.
+Graphics tests are C programs that exercise the behavior of full
+applications, including keyboard and mouse (joystick) input and video
+output. The harness snapshots the running program at chosen moments and
+compares each capture against a checked-in golden PNG.
 
 See `graphictest/README.md` for the long-form docs. The short version:
 

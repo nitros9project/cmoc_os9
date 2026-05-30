@@ -237,12 +237,13 @@ refactor.
   snapshot looks "stuck", the GIME *is* stuck; don't chase it as a
   rendering problem.
 
-- **`WALL_TIMEOUT` requires GNU `timeout`** (Linux / coco-dev) or
-  `gtimeout` (macOS with Homebrew coreutils). On stock macOS neither is
-  installed; the runner detects this and skips the wrapper, relying on
-  MAME's `-seconds_to_run` to bound normal completion. A true hang
-  there has to be ^C'd. `brew install coreutils` gives macOS users the
-  same hang protection Linux gets.
+- **`WALL_TIMEOUT` enforcement falls back along three paths**: GNU
+  `timeout` (Linux / coco-dev), `gtimeout` (macOS with Homebrew
+  coreutils), or a `perl -e 'alarm shift; exec @ARGV'` one-liner
+  (always available on macOS). The perl path can't do SIGTERM-then-
+  SIGKILL escalation, but for MAME (which doesn't trap SIGALRM) the
+  single signal is enough. MAME exit codes 124 / 137 / 142 all map to
+  "killed by WALL_TIMEOUT".
 
 ### Diagnosing a failing scenario
 

@@ -97,19 +97,23 @@ EOF
 # WALL_TIMEOUT (default 2x BUDGET seconds, real-time) is generous; it exists
 # to kill a hung emulator rather than to bound normal completion time.
 #
-# Use GNU `timeout` (Linux / coco-dev) or `gtimeout` (macOS with
-# coreutils via Homebrew) if available. Stock macOS ships neither, in
-# which case we run MAME unwrapped and rely on its own -seconds_to_run
-# to bound normal completion; a true hang there will require ^C.
+# Prefer GNU `timeout` (Linux / coco-dev) or `gtimeout` (macOS with
+# Homebrew coreutils); fall back to a perl SIGALRM one-liner so bare
+# macOS still gets hang protection. perl is preinstalled on every
+# macOS. The perl path can't do the SIGTERM-then-SIGKILL escalation
+# that --kill-after gives, but for MAME (which doesn't trap SIGALRM)
+# the single signal is enough.
 : "${WALL_TIMEOUT:=$((BUDGET * 2))}"
-TIMEOUT_PREFIX=
+TIMEOUT_ARGS=()
 if command -v timeout >/dev/null 2>&1; then
-	TIMEOUT_PREFIX="timeout --kill-after=5 $WALL_TIMEOUT"
+	TIMEOUT_ARGS=(timeout --kill-after=5 "$WALL_TIMEOUT")
 elif command -v gtimeout >/dev/null 2>&1; then
-	TIMEOUT_PREFIX="gtimeout --kill-after=5 $WALL_TIMEOUT"
+	TIMEOUT_ARGS=(gtimeout --kill-after=5 "$WALL_TIMEOUT")
+elif command -v perl >/dev/null 2>&1; then
+	TIMEOUT_ARGS=(perl -e 'alarm shift; exec @ARGV' "$WALL_TIMEOUT")
 fi
 SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy \
-	$TIMEOUT_PREFIX \
+	"${TIMEOUT_ARGS[@]+${TIMEOUT_ARGS[@]}}" \
 	mame coco3 -rompath "$ROMPATH" -skip_gameinfo \
 		-ext fdc -ext:fdc:wd17xx:0 525qd -flop1 "$disk" \
 		-video none -sound none -nothrottle \
@@ -118,10 +122,11 @@ SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy \
 		-autoboot_delay "$DELAY" -autoboot_script "$shim" \
 		-seconds_to_run "$BUDGET" >"$RESULTS_DIR/mame.log" 2>&1
 mame_rc=$?
-# 124 = timeout exit; 137 = SIGKILL after --kill-after. Everything else is
-# MAME's own exit (often non-zero even on a clean -seconds_to_run, so we
-# tolerate it -- the snapshot manifest check below is the real success gate).
-if [ "$mame_rc" = 124 ] || [ "$mame_rc" = 137 ]; then
+# 124 = GNU timeout exit; 137 = SIGKILL after --kill-after; 142 = SIGALRM
+# from the perl fallback (128+14). Everything else is MAME's own exit
+# (often non-zero even on a clean -seconds_to_run, so we tolerate it --
+# the snapshot manifest check below is the real success gate).
+if [ "$mame_rc" = 124 ] || [ "$mame_rc" = 137 ] || [ "$mame_rc" = 142 ]; then
 	echo "[$SCENARIO_NAME] MAME killed by WALL_TIMEOUT=${WALL_TIMEOUT}s" >&2
 fi
 

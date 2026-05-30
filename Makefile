@@ -91,17 +91,15 @@ graphics-test: gfx-have-disk
 	@test -n "$(MAME_ROMPATH)" || { echo "ERROR: set MAME_ROMPATH to a dir with a coco3 romset"; exit 2; }
 	@base="$${GFX_RESULTS_DIR:-$$(mktemp -d "$${TMPDIR:-/tmp}/gxtest.XXXXXX")}"; \
 	mkdir -p "$$base"; \
-	export GFX_BASE="$$base" \
-	       GFX_DISK_SRC="$(CI_DISK)" \
-	       GFX_ROMPATH="$(MAME_ROMPATH)" \
-	       GFX_BUDGET="$(GFX_BUDGET)" \
+	export DISK_SRC="$(CI_DISK)" \
+	       ROMPATH="$(MAME_ROMPATH)" \
+	       BUDGET="$(GFX_BUDGET)" \
+	       GFX_BASE="$$base" \
 	       GFX_SCENARIOS_DIR="$(GFX_SCENARIOS_DIR)" \
 	       GFX_RUNNER="$(GFX_RUNNER)"; \
 	printf '%s\n' $(GFX_SCENARIOS) | \
 	  xargs -P$(GFX_JOBS) -I{} sh -c ' \
-	    DISK_SRC="$$GFX_DISK_SRC" ROMPATH="$$GFX_ROMPATH" BUDGET="$$GFX_BUDGET" \
-	      SCENARIO_DIR="$$GFX_SCENARIOS_DIR/{}" \
-	      RESULTS_DIR="$$GFX_BASE/{}" \
+	    SCENARIO_DIR="$$GFX_SCENARIOS_DIR/{}" RESULTS_DIR="$$GFX_BASE/{}" \
 	      bash "$$GFX_RUNNER" >"$$GFX_BASE/{}.log" 2>&1; \
 	    echo $$? >"$$GFX_BASE/{}.rc"'; \
 	fail=0; \

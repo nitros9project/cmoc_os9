@@ -48,7 +48,7 @@ run_once() {
 	cp "$DISK_SRC" "$disk"
 	{
 		printf 'echo * %s *\nlink shell\nload utilpak1\n' "$test"
-		printf '%s >>>-%s.out\n' "$test" "$test"
+		printf 'shell %s >>>-%s.out\n' "$test" "$test"
 		printf 'echo CIDONE >>>-zzdone.out\n'
 	} >"$disk.startup"
 	os9 copy -l -r "$disk.startup" "$disk,startup" >/dev/null 2>&1

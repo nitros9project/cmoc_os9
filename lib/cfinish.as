@@ -3,13 +3,11 @@
 __exit              EXPORT    ;         export exit wrapper with cleanup
 _exit               EXPORT    ;         export raw process-exit entry point
 
-__dumprof           EXTERNAL  ;         profile dump hook
 __tidyup            EXTERNAL  ;         stdio/runtime cleanup hook
 
                     section   code      ; begin code section
 
 __exit:
-                    lbsr      __dumprof ; flush profiling data before exit
                     lbsr      __tidyup  ; flush and close runtime-managed resources
                     bra       _exit     ; tail into the raw exit path
 

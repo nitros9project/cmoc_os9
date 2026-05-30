@@ -2,7 +2,7 @@
 
 .PHONY: all libs tests utils clean clean-libs clean-tests clean-utils \
         clean-recipe dsk run unittest-dsk unittest-run lib cgfx unittest \
-        test-ci graphics-test graphics-update help
+        test-ci graphics-test graphics-update gfx-have-disk help
 
 # Build libs, tests, and utils (default target)
 all: libs tests utils
@@ -63,35 +63,40 @@ test-ci:
 # with Pillow and NumPy (already in coco-dev). See graphictest/README.md.
 GFX_SCENARIOS_DIR := graphictest/scenarios
 GFX_RUNNER       := graphictest/shared/runner.sh
-GFX_BUDGET       ?= 60
+# Boot to BASIC, type DOS, wait for NitrOS-9 boot + recipe startup, type the
+# program name, let it draw, then the scenario's snapshot waits on top. 100s
+# emulated leaves headroom on top of that.
+GFX_BUDGET       ?= 100
 # Discover scenarios as the subdirectories of graphictest/scenarios/ that have
 # a scenario.lua. Enables `make graphics-test-<name>` for each.
 GFX_SCENARIOS    := $(notdir $(patsubst %/,%,$(dir $(wildcard $(GFX_SCENARIOS_DIR)/*/scenario.lua))))
 
+# Build the recipe disk only if missing (skips when running in a container
+# that doesn't have the nitros9 sources alongside cmoc_os9).
+gfx-have-disk:
+	@test -f $(CI_DISK) || $(MAKE) dsk
+
 # Run all graphics-test scenarios and gate on mismatch
-graphics-test:
+graphics-test: gfx-have-disk
 	@test -n "$(MAME_ROMPATH)" || { echo "ERROR: set MAME_ROMPATH to a dir with a coco3 romset"; exit 2; }
-	$(MAKE) dsk
 	@fail=0; for s in $(GFX_SCENARIOS); do \
 	  DISK_SRC=$(CI_DISK) ROMPATH=$(MAME_ROMPATH) BUDGET=$(GFX_BUDGET) \
 	    SCENARIO_DIR=$(GFX_SCENARIOS_DIR)/$$s bash $(GFX_RUNNER) || fail=1; \
 	done; exit $$fail
 
-# Run a single graphics-test scenario by name (e.g. `make graphics-test-wintest`)
-graphics-test-%:
+# Run a single graphics-test scenario by name (e.g. `make graphics-test-maze`)
+graphics-test-%: gfx-have-disk
 	@test -n "$(MAME_ROMPATH)" || { echo "ERROR: set MAME_ROMPATH to a dir with a coco3 romset"; exit 2; }
-	$(MAKE) dsk
 	DISK_SRC=$(CI_DISK) ROMPATH=$(MAME_ROMPATH) BUDGET=$(GFX_BUDGET) \
 	  SCENARIO_DIR=$(GFX_SCENARIOS_DIR)/$* bash $(GFX_RUNNER)
 
 # Bless captured actuals as goldens (use CONFIRM=1 to avoid accidental updates)
-graphics-update:
+graphics-update: gfx-have-disk
 	@test "$(CONFIRM)" = "1" || { echo "Refusing to overwrite goldens without CONFIRM=1"; exit 2; }
 	@test -n "$(MAME_ROMPATH)" || { echo "ERROR: set MAME_ROMPATH to a dir with a coco3 romset"; exit 2; }
-	$(MAKE) dsk
 	@for s in $(GFX_SCENARIOS); do $(MAKE) graphics-update-$$s CONFIRM=1; done
 
-graphics-update-%:
+graphics-update-%: gfx-have-disk
 	@test "$(CONFIRM)" = "1" || { echo "Refusing to overwrite goldens without CONFIRM=1"; exit 2; }
 	@test -n "$(MAME_ROMPATH)" || { echo "ERROR: set MAME_ROMPATH to a dir with a coco3 romset"; exit 2; }
 	@d=$$(mktemp -d); \

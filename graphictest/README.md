@@ -1,26 +1,44 @@
 # Graphics tests
 
 Screenshot-based regression tests for the CoCo 3 graphics programs in this
-repo (`wintest`, `maze`, ...). Each test is a small **scenario** -- a Lua
-script that drives emulated time and asks the harness to capture the screen
-at chosen moments -- paired with reference PNGs (*goldens*) checked into the
-repo. A run boots the test in headless MAME (the existing `coco-dev` image),
-captures the snapshots, and compares each one against its golden with a
-configurable tolerance. Mismatches drop `actual.png`, `golden.png`, and a
-`diff.png` into the run's results dir so the failure is easy to eyeball.
+repo (`maze`, ...). Each test is a small **scenario** -- a Lua script that
+drives emulated time and asks the harness to capture the screen at chosen
+moments -- paired with reference PNGs (*goldens*) checked into the repo. A
+run boots the test in headless MAME (the existing `coco-dev` image), captures
+the snapshots, and compares each one against its golden with a configurable
+tolerance. Mismatches drop `actual.png`, `golden.png`, and a `diff.png` into
+the run's results dir so the failure is easy to eyeball.
+
+## How the boot is driven
+
+The runner uses `-autoboot_script` (not `-autoboot_command`, which it
+suppresses) and the natural keyboard to mimic an interactive session:
+
+1. Force the GIME's `Monitor Type` config to RGB so colors are reproducible.
+2. Wait, then `nk:post("DOS\r")` -- BASIC boots NitrOS-9 from disk.
+3. Wait for the recipe's `startup` to finish (`display 1b 24 ...` sets up
+   the cowin /term, then we land at an interactive shell prompt).
+4. `nk:post("<program>\r")` to launch the test. **It must be typed
+   interactively** -- launching the same program from a startup procedure
+   file silently fails to switch the GIME from /term to the program's /w
+   graphics window. (Posting longer strings drops chars to keyboard-scan
+   timing; keep posted strings short.)
+5. The scenario.lua then drives `g.wait()` / `g.snapshot()` from there.
 
 ## Layout
 
 ```
 graphictest/
   README.md                  -- this file
-  wintest.c / maze.c         -- the programs under test (built onto the recipe disk)
+  maze.c / wintest.c         -- the programs under test (built onto the recipe disk)
   shared/
     gxtest.lua               -- the scenario API loaded by MAME via -autoboot_script
     compare.py               -- pixel-diff / SSIM comparator with optional masks
-    runner.sh                -- one scenario per MAME boot
+    runner.sh                -- one scenario per MAME boot (handles RGB mode, DOS
+                              -- boot, interactive shell launch, etc.)
   scenarios/
-    <name>/
+    <name>/                  -- the runner types "<name>\r" at the OS-9 shell;
+                              -- pass PROGRAM=... to override
       scenario.lua           -- the scenario
       goldens/<snap>.png     -- reference images, one per g.snapshot() call
       masks/<mask>.png       -- optional, regions to ignore
@@ -59,11 +77,11 @@ test disk (`make dsk`).
 make graphics-test MAME_ROMPATH=/path/to/roms
 
 # one scenario, fast iteration
-make graphics-test-wintest MAME_ROMPATH=/path/to/roms
+make graphics-test-maze MAME_ROMPATH=/path/to/roms
 
 # regenerate goldens (requires explicit confirmation)
 make graphics-update CONFIRM=1 MAME_ROMPATH=/path/to/roms
-make graphics-update-wintest CONFIRM=1 MAME_ROMPATH=/path/to/roms
+make graphics-update-maze CONFIRM=1 MAME_ROMPATH=/path/to/roms
 ```
 
 Each scenario boots in its own MAME instance, so they're independent and

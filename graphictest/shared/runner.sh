@@ -34,11 +34,17 @@ mkdir -p "$RESULTS_DIR/actual" "$RESULTS_DIR/diff" "$RESULTS_DIR/mame-snap"
 # completion sentinel. wintest/maze loop until SPACE; -seconds_to_run ends MAME.
 disk="$RESULTS_DIR/disk.dsk"
 cp "$DISK_SRC" "$disk"
-{
-	printf 'echo * %s *\nlink shell\nload utilpak1\n' "$SCENARIO_NAME"
-	printf 'shell %s\n' "$PROGRAM"
-	printf 'echo CIDONE >>>-zzdone.out\n'
-} >"$RESULTS_DIR/startup"
+# Use the recipe's own startup verbatim, which leaves us at the OS-9 shell
+# prompt after configuring cowin. We then drive the test invocation from
+# Lua via the natural keyboard, mimicking what a human does interactively.
+# A startup-driven `shell wintest` runs but its _cgfx_select() display
+# switch doesn't take effect; an interactive shell does the right thing.
+ORIG_STARTUP="$HERE/../../recipes/coco3/startup"
+if [ -f "$ORIG_STARTUP" ]; then
+	cat "$ORIG_STARTUP" >"$RESULTS_DIR/startup"
+else
+	printf 'link shell\nload utilpak1\n' >"$RESULTS_DIR/startup"
+fi
 os9 copy -l -r "$RESULTS_DIR/startup" "$disk,startup" >/dev/null 2>&1
 os9 attr -q -ne -npe "$disk,startup" >/dev/null 2>&1
 
@@ -47,12 +53,44 @@ os9 attr -q -ne -npe "$disk,startup" >/dev/null 2>&1
 # writes a manifest of (index, name, opts) into RESULTS_DIR/manifest.tsv that
 # pairs MAME's auto-numbered PNGs with the scenario's logical names.
 export GXTEST_RESULTS="$RESULTS_DIR" GXTEST_SCENARIO="$SCENARIO_NAME"
-# Write a small shim that puts gxtest on the Lua path, then runs the scenario.
+# Write a small shim that boots NitrOS-9 from BASIC (since -autoboot_script
+# precludes -autoboot_command), then sets up the Lua path and runs the scenario.
 shim="$RESULTS_DIR/_shim.lua"
 abs_scenario=$(cd "$SCENARIO_DIR" && pwd)/scenario.lua
 abs_shared=$(cd "$HERE" && pwd)
 cat >"$shim" <<EOF
 package.path = "$abs_shared/?.lua;" .. package.path
+-- -autoboot_script suppresses -autoboot_command, so we drive everything
+-- from Lua. Boot sequence:
+--   1. Enable natural keyboard (coco3 ships with it disabled).
+--   2. Type DOS<CR> at the BASIC OK prompt -> boots NitrOS-9 from disk.
+--   3. Wait for the recipe's startup to finish (display init etc.) and
+--      drop us at the OS-9: shell prompt.
+--   4. Type "shell <PROGRAM><CR>" interactively. Running it from a
+--      startup procedure file does NOT switch the GIME from /term to /w
+--      when the program calls _cgfx_select(); typing it at the interactive
+--      shell does.
+-- Force the coco3 monitor type to RGB so colors are consistent across
+-- hosts (composite mode has phasing artifacts that make goldens flaky).
+manager.machine.ioport.ports[":screen_config"].fields["Monitor Type"]:set_value(1)
+
+-- Single :post() with the whole short string works (the natkeyboard
+-- handles inter-char timing internally); chunked per-char posting drops
+-- chars because nk.empty goes true before the keypress is actually
+-- delivered. Keep posted strings short (<=8 chars including the CR).
+--
+-- The waits between commands are generous: NitrOS-9 boot is disk-bound
+-- and so is forking the test program. Typing while the disk drive is
+-- working causes the keyboard scan to miss characters.
+local nk = manager.machine.natkeyboard
+nk.in_use = true
+emu.wait(2)
+nk:post("DOS\r")
+emu.wait(35)
+-- After the recipe startup runs, we are at the interactive OS-9 shell
+-- prompt -- type the program name directly (no "shell" prefix needed).
+nk:post("$PROGRAM\r")
+emu.wait(5)
 dofile("$abs_scenario")
 EOF
 SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy \
@@ -61,8 +99,7 @@ SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy \
 		-video none -sound none -nothrottle \
 		-snapshot_directory "$RESULTS_DIR/mame-snap" \
 		-cfg_directory "$RESULTS_DIR/cfg" -nvram_directory "$RESULTS_DIR/nvram" \
-		-autoboot_delay "$DELAY" -autoboot_command "DOS\n" \
-		-autoboot_script "$shim" \
+		-autoboot_delay "$DELAY" -autoboot_script "$shim" \
 		-seconds_to_run "$BUDGET" >"$RESULTS_DIR/mame.log" 2>&1 || true
 
 # MAME emits snapshots as <snapshot_directory>/<system>/<NNNN>.png. Flatten and

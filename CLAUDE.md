@@ -95,6 +95,23 @@ applications, including keyboard and mouse (joystick) input and video
 output. The harness snapshots the running program at chosen moments and
 compares each capture against a checked-in golden PNG.
 
+Two facts about how the harness drives the test that shape how you author
+one (the rest are in the gotchas section below):
+
+- **Tests are launched by typing the program name at the NitrOS-9 shell
+  prompt**, not from a startup procedure file. Startup-driven launches
+  appear to run but the GIME never switches from `/term` to the program's
+  `/w` graphics window when `_cgfx_select()` fires, so snapshots come back
+  as the cowin text terminal instead of your graphics. The shim handles
+  the typing -- you just write the scenario.
+
+- **Disk activity has to settle before we can type reliably.** The CoCo
+  keyboard scan drops characters that arrive while the FDC is busy, so
+  the shim waits ~35 s after `DOS\r` for NitrOS-9 boot + recipe startup
+  to finish before typing the program name. If you write scenarios that
+  type additional commands later, leave similarly generous gaps after any
+  disk-touching action (loading a module, opening a file).
+
 See `graphictest/README.md` for the long-form docs. The short version:
 
 1. **Write the program** at `graphictest/<name>.c` -- opens `/w`, calls

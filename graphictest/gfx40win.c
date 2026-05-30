@@ -17,15 +17,29 @@
  *    +--------------------------+----+
  *
  *  Snapshots:
- *    01-three-windows: all three created (after dwprotsw=0 on W1 so the
- *                      screen accepts subsequent windows), each with
- *                      distinct fg/bg + content; graphic cursor placed
- *                      in W1 via setgc(PTR_ARR) + putgc.
- *    02-overlay:       _cgfx_owset on W1 covers part of it with a new
- *                      overlay; overlay content visible.
- *    03-restored:      _cgfx_owend removes the overlay; W1's original
- *                      content shows again (the owset save-mode bit
- *                      preserves what was underneath).
+ *    01-three-windows:    all three created (after dwprotsw=0 on W1 so
+ *                         the screen accepts subsequent windows), each
+ *                         with distinct fg/bg + content; graphic cursor
+ *                         placed in W1 via setgc(PTR_ARR) + putgc.
+ *    02-overlay:          _cgfx_owset on W1 covers part of it with a
+ *                         new overlay; overlay content visible.
+ *    03-restored:         _cgfx_owend removes the overlay; W1's
+ *                         original content shows again (the owset
+ *                         save-mode bit preserves what was underneath).
+ *    04-cwarea:           shrinks W1's working area, sets fcolor to
+ *                         cyan, draws a bar inside that area, then
+ *                         restores cwarea to W1's full size and draws
+ *                         another bar outside the previous area. Both
+ *                         bars should be cyan -- verifies the fcolor
+ *                         state survives cwarea changes.
+ *    05-dwend:            _cgfx_dwend(w2) removes W2 from the window
+ *                         list. Note: dwend doesn't itself repaint the
+ *                         framebuffer, so W2's pixels remain visible
+ *                         until something else writes over the area.
+ *                         _cgfx_shadow + _cgfx_owend are deferred to
+ *                         their own scenario -- shadow leaves
+ *                         framebuffer pixels that owend can't clear,
+ *                         which blocks subsequent visible operations.
  *
  *  Companion docs: docs/coco3-screens.md.
  */
@@ -129,7 +143,7 @@ int main(void) {
     _cgfx_putgc(w1, 150, 80);
     Flush();
 
-    sleep_ticks(420);  /* ~7s hold for snapshot 1 */
+    sleep_ticks(300);  /* ~5s hold for snapshot 1 */
 
     /* ===== Phase 2: overlay on W1 ===== */
     /* _cgfx_owset(path, svs, cpx, cpy, szx, szy, fprn, bprn).
@@ -140,13 +154,40 @@ int main(void) {
     at(w1, 0, 4);  writez(w1, "fg=15 bg=5");
     Flush();
 
-    sleep_ticks(420);  /* ~7s hold for snapshot 2 */
+    sleep_ticks(300);  /* ~5s hold for snapshot 2 */
 
     /* ===== Phase 3: remove overlay; W1's saved pixels restored. ===== */
     _cgfx_owend(w1);
     Flush();
 
-    sleep_ticks(420);  /* ~7s hold for snapshot 3 */
+    sleep_ticks(300);  /* ~5s hold for snapshot 3 */
+
+    /* ===== Phase 4: cwarea test ============================================
+     * Shrink W1's working area, set fcolor to cyan, draw a bar inside the
+     * shrunk area, restore the working area, draw another bar in a region
+     * that was OUTSIDE the previous cwarea. Both bars should be cyan --
+     * cwarea changes the clip/draw region but doesn't reset fcolor. */
+    _cgfx_cwarea(w1, 4, 12, 22, 6);  /* shrink to (4,12) 22x6 chars */
+    _cgfx_fcolor(w1, 3);             /* slot 3 (default palette = cyan) */
+    _cgfx_bcolor(w1, 3);
+    _cgfx_setdptr(w1, 60, 110);
+    _cgfx_bar(w1, 130, 140);         /* inside the shrunk area */
+    _cgfx_cwarea(w1, 0, 0, 30, 21);  /* restore to W1's full size */
+    _cgfx_setdptr(w1, 180, 30);
+    _cgfx_bar(w1, 230, 60);          /* outside the previous cwarea */
+    _cgfx_bcolor(w1, 0);             /* reset bg */
+    Flush();
+
+    sleep_ticks(300);  /* ~5s hold for snapshot 4 */
+
+    /* ===== Phase 5: dwend closes W2 ======================================
+     * dwend removes the window from cowin's window list but doesn't
+     * itself repaint the framebuffer; the previously-rendered W2
+     * pixels stay until something else writes them. */
+    _cgfx_dwend(w2);
+    Flush();
+
+    sleep_ticks(300);  /* ~5s hold for snapshot 5 */
 
     /* Hold for harness exit. */
     _os_ss_keysense(w1, 1);

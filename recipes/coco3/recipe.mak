@@ -10,7 +10,7 @@ SCF = scf.mn vtio.dr snddrv_cc3.sb joydrv_joy.sb $(TERM_IO) $(TERM_WIN_DT) \
 	w.dw w1.dw w2.dw w3.dw w4.dw w5.dw w6.dw w7.dw
 PIPE = pipeman.mn piper.dr pipe.dd
 BOOTMODS = krnp2 ioman init $(RBF) $(SCF) $(PIPE) $(CLOCK)
-CMDS_BASE = shell grfdrv utilpak1 dump free ident
+CMDS_BASE = shell grfdrv utilpak1 dump free ident montype
 CMOC_OS9_GRAPHICS_TESTS = wintest maze text40 text40edit gfx80 gfx80draw gfx40draw
 CMOC_OS9_UTILITIES = wc cat head cmp tr cut echo sleep tee rev strings cksum uniq comm split paste seq basename dirname true false yes tail sync tty mkdir rmdir
 CMOC_OS9_PACKAGES = umacs

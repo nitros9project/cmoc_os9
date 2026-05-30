@@ -35,10 +35,10 @@ locally:
 # Unit tests (text-mode, parallel, one MAME boot per test)
 make test-ci MAME_ROMPATH=/roms
 
-# Graphics tests (one MAME boot per scenario; GFX_JOBS=4 in parallel)
+# Graphics tests (one MAME boot per scenario; GFX_JOBS=8 in parallel)
 make graphics-test MAME_ROMPATH=/roms
 make graphics-test-maze MAME_ROMPATH=/roms             # single scenario
-make graphics-test MAME_ROMPATH=/roms GFX_JOBS=8       # bump concurrency
+make graphics-test MAME_ROMPATH=/roms GFX_JOBS=16      # bump concurrency
 
 # Re-bless graphics goldens after intentional output change
 make graphics-update-maze CONFIRM=1 MAME_ROMPATH=/roms

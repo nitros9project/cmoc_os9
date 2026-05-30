@@ -48,7 +48,7 @@ unittest-run: libs
 CI_DISK        := recipes/coco3/l2_coco3_cmoc_os9.dsk
 CI_BUDGET      ?= 120
 CI_BUDGET_SLOW ?= 600
-CI_JOBS        ?= 4
+CI_JOBS        ?= 8
 
 # Run the unit tests headlessly (one MAME boot per test), gating pass/fail
 test-ci:
@@ -69,7 +69,7 @@ GFX_RUNNER       := graphictest/shared/runner.sh
 GFX_BUDGET       ?= 100
 # Concurrency for `make graphics-test`. Each scenario boots its own MAME
 # against its own disk copy, so they're independent. Default matches CI_JOBS.
-GFX_JOBS         ?= 4
+GFX_JOBS         ?= 8
 # Discover scenarios as the subdirectories of graphictest/scenarios/ that have
 # a scenario.lua. Enables `make graphics-test-<name>` for each.
 GFX_SCENARIOS    := $(notdir $(patsubst %/,%,$(dir $(wildcard $(GFX_SCENARIOS_DIR)/*/scenario.lua))))

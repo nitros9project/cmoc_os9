@@ -86,6 +86,17 @@ file on disk, then `grep -c '[FAIL]'` decides pass/fail.
 If a test is known-broken and you want CI green, add its name to
 `recipes/coco3/known-failures` (it becomes `XFAIL` instead of `FAIL`).
 
+A test that times out at the fast `BUDGET` (default 120 s emulated) is
+**automatically retried once at `BUDGET_SLOW`** (default 600 s) before
+being reported as `TIMEOUT`. Don't pad the fast budget for legitimately
+slow tests -- the retry handles it and keeps the common-case latency low.
+
+The OS-9 shell's `>>>` operator is a **truncating redirect** (different
+from `>` which appends to an existing file). The `test` procedure file uses
+`>>>-<name>.out` to capture each test's output into a fresh file on the
+disk; citest then reads those files back. If you write a test that uses
+`>` accidentally, you'll see output from the previous run leak in.
+
 ---
 
 ## Adding a graphics test
@@ -209,6 +220,46 @@ refactor.
 
 - **GFX_BUDGET=100 (emulated seconds) is the floor.** Boot + display init +
   program launch + scenario waits add up.
+
+- **`emu.wait(secs)` is the pause primitive in an autoboot_script Lua
+  coroutine.** Don't try `coroutine.yield()` or
+  `add_machine_frame_notifier()` -- both look reasonable but neither
+  actually advances emulated time inside an autoboot_script context.
+
+- **MAME's `-video none` snapshots reflect the GIME's live state**, not a
+  cached framebuffer. `-video soft` produces byte-identical PNGs. So you
+  don't need Xvfb, an X display, or any host video pipeline -- the
+  snapshot is rendered straight from the emulated chip state. If a
+  snapshot looks "stuck", the GIME *is* stuck; don't chase it as a
+  rendering problem.
+
+### Diagnosing a failing scenario
+
+When a snapshot doesn't match its golden and the diff PNG isn't enough,
+**color-quantize the actual capture** -- it tells you immediately what
+NitrOS-9 state the screen is in:
+
+```python
+from PIL import Image; from collections import Counter
+img = Image.open("path/to/actual.png").convert("RGB")
+px = list(img.getdata())
+q = [(r>>5, g>>5, b>>5) for r,g,b in px]
+for (r,g,b), n in Counter(q).most_common(5):
+    print(f"({r*32},{g*32},{b*32}): {100*n/len(px):.0f}%")
+```
+
+Rough signatures observed in this project:
+
+| Top colors                                  | What it means                         |
+| ------------------------------------------- | ------------------------------------- |
+| ~62% green (32,128,0) / ~37% black          | Still at the Color BASIC `OK` prompt  |
+| ~99% green / ~1% black                      | Color BASIC `OK` with nothing typed   |
+| ~80% purple (64,0,128) / ~20% black + white | NitrOS-9 `/term` cowin window         |
+| ~80% black / white + dark grey              | A maze (RGB-mode palette 0/63/07)     |
+
+If the screen is purple instead of "mazey", the program was launched but
+its `_cgfx_select()` didn't switch the GIME -- check that you used
+interactive launch and the recipe startup ran.
 
 ---
 

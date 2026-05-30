@@ -139,7 +139,11 @@ if [ ! -s "$manifest" ]; then
 	exit 2
 fi
 
-mapfile -t mame_pngs < <(find "$RESULTS_DIR/mame-snap" -type f -name '*.png' | sort)
+# bash 3.2 (stock macOS) has no `mapfile` builtin, so read into the array
+# the long way. Paths in mame-snap never contain newlines.
+mame_pngs=()
+while IFS= read -r line; do mame_pngs+=("$line"); done \
+	< <(find "$RESULTS_DIR/mame-snap" -type f -name '*.png' | sort)
 fail=0
 while IFS=$'\t' read -r idx name compare max_delta max_pct min_ssim mask; do
 	mame_png=${mame_pngs[$((idx-1))]:-}

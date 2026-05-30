@@ -2,7 +2,7 @@
 
 .PHONY: all libs tests utils clean clean-libs clean-tests clean-utils \
         clean-recipe dsk run unittest-dsk unittest-run lib cgfx unittest \
-        test-ci help
+        test-ci graphics-test graphics-update help
 
 # Build libs, tests, and utils (default target)
 all: libs tests utils
@@ -57,6 +57,50 @@ test-ci:
 	DISK_SRC=$(CI_DISK) ROMPATH=$(MAME_ROMPATH) \
 	  BUDGET=$(CI_BUDGET) BUDGET_SLOW=$(CI_BUDGET_SLOW) JOBS=$(CI_JOBS) \
 	  bash recipes/coco3/citest.sh
+
+# Headless graphics tests: per-scenario MAME boot, snapshot, compare. Same
+# environment requirements as test-ci (mame + os9 in coco-dev), plus Python 3
+# with Pillow and NumPy (already in coco-dev). See graphictest/README.md.
+GFX_SCENARIOS_DIR := graphictest/scenarios
+GFX_RUNNER       := graphictest/shared/runner.sh
+GFX_BUDGET       ?= 60
+# Discover scenarios as the subdirectories of graphictest/scenarios/ that have
+# a scenario.lua. Enables `make graphics-test-<name>` for each.
+GFX_SCENARIOS    := $(notdir $(patsubst %/,%,$(dir $(wildcard $(GFX_SCENARIOS_DIR)/*/scenario.lua))))
+
+# Run all graphics-test scenarios and gate on mismatch
+graphics-test:
+	@test -n "$(MAME_ROMPATH)" || { echo "ERROR: set MAME_ROMPATH to a dir with a coco3 romset"; exit 2; }
+	$(MAKE) dsk
+	@fail=0; for s in $(GFX_SCENARIOS); do \
+	  DISK_SRC=$(CI_DISK) ROMPATH=$(MAME_ROMPATH) BUDGET=$(GFX_BUDGET) \
+	    SCENARIO_DIR=$(GFX_SCENARIOS_DIR)/$$s bash $(GFX_RUNNER) || fail=1; \
+	done; exit $$fail
+
+# Run a single graphics-test scenario by name (e.g. `make graphics-test-wintest`)
+graphics-test-%:
+	@test -n "$(MAME_ROMPATH)" || { echo "ERROR: set MAME_ROMPATH to a dir with a coco3 romset"; exit 2; }
+	$(MAKE) dsk
+	DISK_SRC=$(CI_DISK) ROMPATH=$(MAME_ROMPATH) BUDGET=$(GFX_BUDGET) \
+	  SCENARIO_DIR=$(GFX_SCENARIOS_DIR)/$* bash $(GFX_RUNNER)
+
+# Bless captured actuals as goldens (use CONFIRM=1 to avoid accidental updates)
+graphics-update:
+	@test "$(CONFIRM)" = "1" || { echo "Refusing to overwrite goldens without CONFIRM=1"; exit 2; }
+	@test -n "$(MAME_ROMPATH)" || { echo "ERROR: set MAME_ROMPATH to a dir with a coco3 romset"; exit 2; }
+	$(MAKE) dsk
+	@for s in $(GFX_SCENARIOS); do $(MAKE) graphics-update-$$s CONFIRM=1; done
+
+graphics-update-%:
+	@test "$(CONFIRM)" = "1" || { echo "Refusing to overwrite goldens without CONFIRM=1"; exit 2; }
+	@test -n "$(MAME_ROMPATH)" || { echo "ERROR: set MAME_ROMPATH to a dir with a coco3 romset"; exit 2; }
+	@d=$$(mktemp -d); \
+	DISK_SRC=$(CI_DISK) ROMPATH=$(MAME_ROMPATH) BUDGET=$(GFX_BUDGET) \
+	  SCENARIO_DIR=$(GFX_SCENARIOS_DIR)/$* RESULTS_DIR=$$d \
+	  bash $(GFX_RUNNER) || true; \
+	mkdir -p $(GFX_SCENARIOS_DIR)/$*/goldens; \
+	cp -f $$d/actual/*.png $(GFX_SCENARIOS_DIR)/$*/goldens/ 2>/dev/null || true; \
+	echo "Blessed: $(GFX_SCENARIOS_DIR)/$*/goldens/"
 
 # Remove build artifacts in libs, tests, and utils
 clean: clean-tests clean-utils clean-libs clean-recipe

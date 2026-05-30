@@ -263,6 +263,31 @@ interactive launch and the recipe startup ran.
 
 ---
 
+## Claude-only conventions
+
+(Applies to Claude Code. Codex reads the same file via the `AGENTS.md`
+symlink and can ignore the section or honor it.)
+
+**Target verbosity: ~30 % of default** for everything Claude writes in
+this repo -- comments, doc strings, README prose, scenario file headers,
+PR / commit bodies, chat responses.
+
+Trim:
+- Sentences that narrate what code already says.
+- "I've done X, now let me Y" connective tissue.
+- Marketing intros to docs.
+- A paragraph where a bullet would lose nothing.
+- Restating what the user just said.
+
+Keep:
+- The *why* when it's non-obvious.
+- Surprises the reader needs (gotchas, invariants).
+- Comments that flag things the code can't express.
+
+If a section feels under-explained, ask before re-padding.
+
+---
+
 ## Pull-request flow
 
 - Branch from `master`; we open PRs against `nitros9project/cmoc_os9`.

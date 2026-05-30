@@ -16,8 +16,10 @@ suppresses) and the natural keyboard to mimic an interactive session:
 
 1. Force the GIME's `Monitor Type` config to RGB so colors are reproducible.
 2. Wait, then `nk:post("DOS\r")` -- BASIC boots NitrOS-9 from disk.
-3. Wait for the recipe's `startup` to finish (`display 1b 24 ...` sets up
-   the cowin /term, then we land at an interactive shell prompt).
+3. Wait for the recipe's `startup` to finish (it merges
+   `SYS/std{fonts,ptrs,pats_2,pats_4,pats_16}` into grfdrv, then the
+   `display 1b 24 ...` line sets up the cowin /term, then we land at an
+   interactive shell prompt). Budget ~55 emulated seconds for this.
 4. `nk:post("<program>\r")` to launch the test. **It must be typed
    interactively** -- launching the same program from a startup procedure
    file silently fails to switch the GIME from /term to the program's /w

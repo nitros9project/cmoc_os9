@@ -97,7 +97,11 @@ local nk = manager.machine.natkeyboard
 nk.in_use = true
 emu.wait(2)
 nk:post("DOS\r")
-emu.wait(35)
+-- 55s covers: NitrOS-9 boot, recipe startup's link/load, the merge of
+-- SYS/std{fonts,ptrs,pats_*} into grfdrv (5 file opens + grfdrv processing
+-- of ~4.6KB), and the cowin display-config line. 35s sufficed before the
+-- merge was added; typing too early drops the first char of $PROGRAM.
+emu.wait(55)
 -- After the recipe startup runs, we are at the interactive OS-9 shell
 -- prompt -- type the program name directly (no "shell" prefix needed).
 nk:post("$PROGRAM\r")

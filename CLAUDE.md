@@ -127,10 +127,11 @@ one (the rest are in the gotchas section below):
 
 - **Disk activity has to settle before we can type reliably.** The CoCo
   keyboard scan drops characters that arrive while the FDC is busy, so
-  the shim waits ~35 s after `DOS\r` for NitrOS-9 boot + recipe startup
-  to finish before typing the program name. If you write scenarios that
-  type additional commands later, leave similarly generous gaps after any
-  disk-touching action (loading a module, opening a file).
+  the shim waits ~55 s after `DOS\r` for NitrOS-9 boot + recipe startup
+  (which now also merges `SYS/std{fonts,ptrs,pats_2,pats_4,pats_16}` into
+  grfdrv) to finish before typing the program name. If you write scenarios
+  that type additional commands later, leave similarly generous gaps after
+  any disk-touching action (loading a module, opening a file).
 
 See `graphictest/README.md` for the long-form docs. The short version:
 
@@ -200,12 +201,22 @@ refactor.
   the keypress is actually delivered.
 
 - **Typing while the disk drive is active drops characters.** Wait
-  generously (~35s) between booting NitrOS-9 and typing the program name.
+  generously (~55s) between booting NitrOS-9 and typing the program name.
+  The merge step (see next bullet) reads five SYS/ files and pushes the
+  boot well past the pre-merge 35s mark; typing too early loses the first
+  char of the program name and the shell reports `ERROR #216`.
 
-- **Use the recipe's own `startup` verbatim.** The
-  `display 1b 24 1b 20 1 0 0 28 18 0 1 2 1b 21` line configures cowin's
-  `/term` window -- without it the GIME stays in an unknown mode and
-  graphics programs appear to do nothing.
+- **Use the recipe's own `startup` verbatim.** Two lines matter:
+  - `merge SYS/stdfonts SYS/stdptrs SYS/stdpats_2 SYS/stdpats_4 SYS/stdpats_16`
+    loads NitrOS-9's standard fonts, mouse pointers, and 2/4/16-color
+    pattern tables into grfdrv state -- the same canonical preamble
+    upstream `startup.mv` runs. Without it `/w` graphics windows fall
+    back to a minimal built-in font and have no pattern fills available.
+    citest.sh writes its own startup for unit-test boots, so this cost is
+    only paid by the graphics-test harness.
+  - `display 1b 24 1b 20 1 0 0 28 18 0 1 2 1b 21` configures cowin's
+    `/term` window -- without it the GIME stays in an unknown mode and
+    graphics programs appear to do nothing.
 
 - **Launch the program interactively, not from a startup procedure.** A
   startup-driven `shell <program>` runs but `_cgfx_select()` does not

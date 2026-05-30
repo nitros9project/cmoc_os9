@@ -71,7 +71,7 @@ mid-cycle, etc.).
 The harness needs `mame`, ToolShed `os9`, Python 3 with Pillow + NumPy, plus a
 CoCo 3 ROM -- i.e. the `jamieleecho/coco-dev` image -- and the recipe-built
 test disk (`make dsk`). On bare macOS / Linux:
-`pip install --user Pillow numpy`.
+`python3 -m pip install --user Pillow numpy`.
 
 ```sh
 # all scenarios

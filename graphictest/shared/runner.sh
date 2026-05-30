@@ -33,7 +33,8 @@ COMPARE=${COMPARE:-$HERE/compare.py}
 # rather than letting the comparator throw a traceback per snapshot.
 if ! python3 -c 'import PIL, numpy' >/dev/null 2>&1; then
 	echo "ERROR: $0 needs python3 with Pillow + numpy." >&2
-	echo "       Install with: pip install --user Pillow numpy" >&2
+	echo "       Install with: python3 -m pip install --user Pillow numpy" >&2
+	echo "       (drop --user if pyenv complains)" >&2
 	exit 2
 fi
 

@@ -24,7 +24,10 @@ recipes/coco3/      Disk-image recipe; citest.sh; the test/ procedure file
 ## Running the test suites
 
 Both require `MAME_ROMPATH` to point at a directory with `coco3.rom` plus a
-disk-controller ROM (e.g. `disk11.rom`). Run inside `coco-dev`:
+disk-controller ROM (e.g. `disk11.rom`). Graphics tests additionally need
+`python3` with `Pillow` and `numpy` (pre-installed in coco-dev; on bare
+macOS / Linux: `pip install --user Pillow numpy`). Run inside `coco-dev`
+or with the deps installed locally:
 
 ```sh
 # Unit tests (text-mode, parallel, one MAME boot per test)

@@ -28,6 +28,15 @@ RESULTS_DIR=${RESULTS_DIR:-$(mktemp -d)}
 HERE=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 COMPARE=${COMPARE:-$HERE/compare.py}
 
+# Pre-flight: compare.py needs Pillow + numpy. coco-dev ships them; bare
+# macOS / Linux Pythons usually don't. Fail loudly with the install hint
+# rather than letting the comparator throw a traceback per snapshot.
+if ! python3 -c 'import PIL, numpy' >/dev/null 2>&1; then
+	echo "ERROR: $0 needs python3 with Pillow + numpy." >&2
+	echo "       Install with: pip install --user Pillow numpy" >&2
+	exit 2
+fi
+
 mkdir -p "$RESULTS_DIR/actual" "$RESULTS_DIR/diff" "$RESULTS_DIR/mame-snap"
 
 # Per-scenario disk: inject a startup that auto-runs PROGRAM and writes a

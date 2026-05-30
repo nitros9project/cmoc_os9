@@ -9,8 +9,11 @@
  *   Convention from cgfx/button.c: group = current process pid,
  *   buffer numbers run 1..255. Each group caps at <8K of memory.
  *
- *   _cgfx_gpload (upload raw bitmap data via I/O) is deferred -- its
- *   wire format needs more spelunking than this test deserves.
+ *   _cgfx_gpload also tested: hand-build a 16x8 four-stripe bitmap
+ *   (red/green/blue/white) and upload it via _os_write following the
+ *   gpload escape. Mode 8 packed format: 2 pixels per byte, MSN = left
+ *   pixel; row stride = (width + 1) / 2 bytes; on odd widths the low
+ *   nibble of the last byte is ignored.
  *
  *   Mode 8 (320x200, 16 colors) is the nicest fit: enough palette
  *   slots to make captured regions distinguishable and the resolution
@@ -54,7 +57,8 @@ int main(void) {
 
     at(0, 0); writez("cmoc_os9 gfx40buf: dfngpbuf/getblk/putblk/kilbuf");
     at(0, 2); writez("source  ->  getblk + putblk x4 across:");
-    at(0, 12); writez("dfngpbuf 32x16 -> putblk (undefined contents):");
+    at(0, 6); writez("gpload 16x8 R/G/B/W stripe -> putblk x4:");
+    at(0, 12); writez("dfngpbuf 32x16 -> putblk (undef contents):");
     at(0, 16); writez("putblk after kilbuf:");
     Flush();
 
@@ -89,6 +93,41 @@ int main(void) {
     Flush();
 
     /* ============================================================
+     * gpload: define+upload a 16x8 four-stripe bitmap.
+     *   row 0..1: red    (slot 4)  -> nibble pair $44 per byte
+     *   row 2..3: green  (slot 2)  -> $22
+     *   row 4..5: blue   (slot 1)  -> $11
+     *   row 6..7: white  (slot 15) -> $FF
+     * Row stride = (16 + 1) / 2 = 8 bytes. Total = 8 * 8 = 64 bytes.
+     *
+     * _cgfx_gpload(path, grp, buf, sty, sx, sy, bl) sends the 11-byte
+     * escape header through cgfx's buffered _cgfx_write. Cowin's
+     * GPLoad handler then reads `bl` more bytes from the same path as
+     * raw bitmap data, so we Flush the escape out first, then push
+     * the 64 data bytes via _os_write. */
+    {
+        static const unsigned char stripe[64] = {
+            0x44,0x44,0x44,0x44, 0x44,0x44,0x44,0x44,
+            0x44,0x44,0x44,0x44, 0x44,0x44,0x44,0x44,
+            0x22,0x22,0x22,0x22, 0x22,0x22,0x22,0x22,
+            0x22,0x22,0x22,0x22, 0x22,0x22,0x22,0x22,
+            0x11,0x11,0x11,0x11, 0x11,0x11,0x11,0x11,
+            0x11,0x11,0x11,0x11, 0x11,0x11,0x11,0x11,
+            0xFF,0xFF,0xFF,0xFF, 0xFF,0xFF,0xFF,0xFF,
+            0xFF,0xFF,0xFF,0xFF, 0xFF,0xFF,0xFF,0xFF,
+        };
+        int count = 64;
+        _cgfx_gpload(outpath, pid, 3, 8, 16, 8, 64);
+        Flush();
+        _os_write(outpath, (void *)stripe, &count);
+    }
+    _cgfx_putblk(outpath, pid, 3,  16, 56);
+    _cgfx_putblk(outpath, pid, 3,  48, 56);
+    _cgfx_putblk(outpath, pid, 3,  80, 56);
+    _cgfx_putblk(outpath, pid, 3, 112, 56);
+    Flush();
+
+    /* ============================================================
      * dfngpbuf reserves a buffer (no data uploaded). putblk of it
      * shows what undefined buffer contents render as in mode 8.
      * Buffer length: 32*16 bytes / 2 (4 bits per pixel) = 256 bytes. */
@@ -104,8 +143,9 @@ int main(void) {
     _cgfx_putblk(outpath, pid, 1, 16, 130);
     Flush();
 
-    /* Clean up buffer 2 too. */
+    /* Clean up buffers 2 and 3 too. */
     _cgfx_kilbuf(outpath, pid, 2);
+    _cgfx_kilbuf(outpath, pid, 3);
     Flush();
 
     /* Hold for harness exit. */

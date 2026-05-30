@@ -39,6 +39,7 @@ unittest/forknooptest
 unittest/forknowaittest
 unittest/forktest
 unittest/getopttest
+unittest/gfx40buf
 unittest/gfx40draw
 unittest/gfx40win
 unittest/gfx80

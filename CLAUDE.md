@@ -289,6 +289,24 @@ If a section feels under-explained, ask before re-padding.
 
 ---
 
+## Keeping docs in sync with the code
+
+When changing how anything in this repo is built, tested, configured, or
+laid out, **update the docs in the same change**:
+
+- **`CLAUDE.md` / `AGENTS.md`** (this file) -- the agent-facing guide.
+  Anything that contradicts what's here is a doc bug. Examples that
+  warrant an update: a new `make` target, a new env knob, a new
+  scenario / unit-test registration step, a new gotcha, a deprecated
+  flow, a relocated file.
+- **`README.md`** -- user-facing build & quickstart.
+- **`graphictest/README.md`** -- the graphics harness's own long-form
+  doc; mirror any runner.sh / scenario API change here.
+- **`recipes/coco3/README.md`** -- for recipe-disk or boot-disk changes.
+
+A code change that leaves a doc stale is not done. If the change is too
+small for a paragraph but worth a sentence, add the sentence.
+
 ## Pull-request flow
 
 - Branch from `master`; we open PRs against `nitros9project/cmoc_os9`.

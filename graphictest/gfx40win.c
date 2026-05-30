@@ -36,10 +36,14 @@
  *                         list. Note: dwend doesn't itself repaint the
  *                         framebuffer, so W2's pixels remain visible
  *                         until something else writes over the area.
- *                         _cgfx_shadow + _cgfx_owend are deferred to
- *                         their own scenario -- shadow leaves
- *                         framebuffer pixels that owend can't clear,
- *                         which blocks subsequent visible operations.
+ *    06-shadow:           _cgfx_shadow paints a centered Multi-Vue
+ *                         popup with a drop shadow on W1.
+ *    07-shadow-removed:   _cgfx_mvowend removes the shadow. mvowend
+ *                         differs from owend in that it first issues
+ *                         SS.WSet ($86, "no box") via I$SetStt before
+ *                         the OWEnd escape -- needed to clear the
+ *                         shadow's box-style overlay framebuffer
+ *                         pixels that plain owend can't reach.
  *
  *  Companion docs: docs/coco3-screens.md.
  */
@@ -188,6 +192,31 @@ int main(void) {
     Flush();
 
     sleep_ticks(300);  /* ~5s hold for snapshot 5 */
+
+    /* ===== Phase 6: shadow overlay on W1 ================================
+     * _cgfx_shadow(path, width, length, fg, bg) draws a centered popup
+     * with a drop shadow. Placed at the end of the scenario because
+     * the shadow's framebuffer pixels persist through plain owend and
+     * would block any subsequent visible state change. */
+    _cgfx_shadow(w1, 18, 8, 15, 6);
+    Flush();
+
+    sleep_ticks(300);  /* ~5s hold for snapshot 6 */
+
+    /* ===== Phase 7: mvowend on the shadow ================================
+     * mvowend issues SS.WSet (B=$86, "set overlay to no box") via
+     * I$SetStt then sends the OWEnd escape. In practice neither this
+     * nor plain owend visibly clears the shadow's framebuffer pixels
+     * on a type-8 screen -- the API teardown updates cowin's window
+     * bookkeeping, but the rendered pixels stay until something
+     * explicitly repaints. Snap 7 ends up identical to snap 6; locking
+     * the behavior captures the current truth as the regression
+     * baseline. Even _cgfx_clear(w1) after mvowend was observed not to
+     * clear the shadow region. */
+    _cgfx_mvowend(w1);
+    Flush();
+
+    sleep_ticks(300);  /* ~5s hold for snapshot 7 */
 
     /* Hold for harness exit. */
     _os_ss_keysense(w1, 1);

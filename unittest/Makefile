@@ -20,7 +20,8 @@ maze: $(GRAPHICS_TEST_DIR)/maze.c
 		$^ $(OBJS) -L../lib -lc -L../cgfx -lcgfx
 
 wintest: $(GRAPHICS_TEST_DIR)/wintest.c
-	$(CC) $(LFLAGS) $^ $(OBJS) -L../lib -lc -L../cgfx -lcgfx
+	$(CC) $(CMOC_CPP) -I../include -I../cgfx/include --os9 -nodefaultlibs --add-os9-stack-space=5518 \
+		$^ $(OBJS) -L../lib -lc -L../cgfx -lcgfx
 
 floattest: floattest.c
 	$(CC) $(CMOC_CPP) -I../include -I../cgfx/include --os9 --mc6839 -nodefaultlibs \

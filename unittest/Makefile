@@ -35,6 +35,14 @@ gfx80: $(GRAPHICS_TEST_DIR)/gfx80.c
 	$(CC) $(CMOC_CPP) -I../include -I../cgfx/include --os9 -nodefaultlibs --add-os9-stack-space=2048 \
 		$^ $(OBJS) -L../lib -lc -L../cgfx -lcgfx
 
+gfx80draw: $(GRAPHICS_TEST_DIR)/gfx80draw.c
+	$(CC) $(CMOC_CPP) -I../include -I../cgfx/include --os9 -nodefaultlibs --add-os9-stack-space=2048 \
+		$^ $(OBJS) -L../lib -lc -L../cgfx -lcgfx
+
+gfx40draw: $(GRAPHICS_TEST_DIR)/gfx40draw.c
+	$(CC) $(CMOC_CPP) -I../include -I../cgfx/include --os9 -nodefaultlibs --add-os9-stack-space=2048 \
+		$^ $(OBJS) -L../lib -lc -L../cgfx -lcgfx
+
 floattest: floattest.c
 	$(CC) $(CMOC_CPP) -I../include -I../cgfx/include --os9 --mc6839 -nodefaultlibs \
 		$^ $(OBJS) -L../lib -lcf -L../cgfx -lcgfx \
@@ -45,7 +53,7 @@ floatfmttest: floatfmttest.c
 		$^ $(OBJS) -L../lib -lcf -L../cgfx -lcgfx \
 		-L$(CMOC_FLOAT_LIB_DIR) -lcmoc-float-mc6839_os9 -L../lib -lcf
 
-GRAPHICS_TESTS = wintest maze text40 text40edit gfx80
+GRAPHICS_TESTS = wintest maze text40 text40edit gfx80 gfx80draw gfx40draw
 TESTS	= abortchild aborttest attrwraptest compat3test ctypetest datmodstest defdrivetest dirapitest dirtest errmsgtest fdstreamtest filelayout fiotest floatfmttest floattest forkhellotest forknooptest forknowaittest forktest getopttest gtest hello intercepttest intmathtest iotest lmultest longtest memtest misctest noop osgstattest osiotest osopenerrtest popentest printtest pwcryptest pwenttest randtest searchtest setbuftest setjmptest setstest signaltest skiptest sleeptest stdioedgetest stdlibtest streamiotest stringexttest stringtest structcopytest syscalltest systemtest timetest utimetest
 ALL_TESTS = $(TESTS) $(GRAPHICS_TESTS)
 

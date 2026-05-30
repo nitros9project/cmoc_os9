@@ -39,7 +39,9 @@ unittest/forknooptest
 unittest/forknowaittest
 unittest/forktest
 unittest/getopttest
+unittest/gfx40draw
 unittest/gfx80
+unittest/gfx80draw
 unittest/go_float
 unittest/gtest
 unittest/hello

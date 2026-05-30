@@ -123,6 +123,15 @@ Each `/wN` device is one window. The recipe ships `w` through `w15`
   post-switch write starts at col 0 and overwrites it. Switch the font
   *before* the row's first write, or accept the implicit CR.
 
+- **`_cgfx_arc` start/end offsets must span at least two axes**. The
+  call signature is `(path, xrad, yrad, xo1, yo1, xo2, yo2)`; the two
+  offset pairs are start/end clip lines from the center. grfdrv
+  (`level2/cmds/grfdrv.asm:L18A3+`) subtracts them to compute the clip
+  region width/height — pass both offsets on the same axis (e.g.
+  `(28,0)` → `(-28,0)`, both `y=0`) and that region collapses to
+  zero-area and the arc silently doesn't render. For a 90° top-right
+  quadrant use `(xrad, 0)` → `(0, -yrad)`.
+
 ## See also
 
 - `cgfx/include/cgfx.h` — full API surface, with per-function notes.

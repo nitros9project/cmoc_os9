@@ -1,13 +1,13 @@
         section code
 
-_cgfx_shadow            EXPORT * export this symbol
+__cgfx_shadow           EXPORT * export this symbol (cmoc mangles C `_cgfx_shadow` to asm `__cgfx_shadow`)
 
 _errno                  EXTERNAL * import external symbol
 _Flush                  EXTERNAL * import external symbol
 _cgfx_write             EXTERNAL * import external symbol
 
 * Create a centered overlay shadow box: _cgfx_shadow(path,width,length,fg,bg)
-_cgfx_shadow
+__cgfx_shadow
         pshs    y
         lbsr    _Flush * long branch to subroutine to _Flush
         leas    -9,s * adjust S using -9,s

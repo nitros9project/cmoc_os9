@@ -102,7 +102,13 @@ emu.wait(35)
 -- prompt -- type the program name directly (no "shell" prefix needed).
 nk:post("$PROGRAM\r")
 emu.wait(5)
-dofile("$abs_scenario")
+-- Wrap the scenario in pcall so an error there still exits MAME -- otherwise
+-- the emulator runs out the rest of -seconds_to_run for nothing.
+local ok, err = pcall(dofile, "$abs_scenario")
+if not ok then print("[shim] scenario error: " .. tostring(err)) end
+-- Exit MAME as soon as the scenario is done so we don't burn the rest of
+-- -seconds_to_run on idle emulation (gives ~30-40% wall-clock speedup).
+manager.machine:exit()
 EOF
 # MAME runs at ~thousands-of-percent emulated speed in -video none, so
 # WALL_TIMEOUT (default 2x BUDGET seconds, real-time) is generous; it exists

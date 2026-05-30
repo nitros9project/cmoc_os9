@@ -104,7 +104,6 @@ int main(void) {
     _cgfx_curoff(w1);
     _cgfx_select(w1);
     _cgfx_clear(w1);
-    Flush();
 
     /* ===== W2: 10x24 at (30,0), yellow on green. Pass screen type 0 so
      * cowin treats it as "use current screen" (L07F9 conversion table:
@@ -114,7 +113,6 @@ int main(void) {
     _cgfx_dwset(w2, 0, 30, 0, 10, 24, 15, 1, 1);
     _cgfx_curoff(w2);
     _cgfx_clear(w2);
-    Flush();
 
     /* ===== W3: fills the bottom strip cols 0..29 (30 wide, 4 tall) at
      * (0,20). bg = slot 4 (palette[4]=36 = red).  */
@@ -123,9 +121,10 @@ int main(void) {
     _cgfx_dwprotsw(w3, 0);
     _cgfx_curoff(w3);
     _cgfx_clear(w3);
-    Flush();
 
-    /* Fill each window's content. */
+    /* Fill each window's content. cgfx_write auto-flushes when the path
+     * changes, so writes to one window are drained before writes to the
+     * next start. We only need an explicit Flush() before a snapshot. */
     draw_w1_content();
 
     at(w2, 0, 0);  writez(w2, "W2");
@@ -134,19 +133,17 @@ int main(void) {
     at(w2, 0, 5);  writez(w2, "bg=1");
     at(w2, 0, 7);  writez(w2, "tall");
     at(w2, 0, 8);  writez(w2, "narrow");
-    Flush();
 
     at(w3, 0, 0);  writez(w3, "W3 (30x4) fills the gap below W1");
     at(w3, 0, 1);  writez(w3, "fg=15");
     at(w3, 0, 2);  writez(w3, "bg=4");
     at(w3, 0, 3);  writez(w3, "(red)");
-    Flush();
 
     /* Graphic cursor: load the arrow pointer from the merged SYS/stdptrs
      * buffer group, then place it inside W1. */
     _cgfx_setgc(w1, GRP_PTR, PTR_ARR);
     _cgfx_putgc(w1, 150, 80);
-    Flush();
+    Flush();  /* drain w1 buffered ops before the snapshot */
 
     sleep_ticks(300);  /* ~5s hold for snapshot 1 */
 
@@ -163,7 +160,6 @@ int main(void) {
 
     /* ===== Phase 3: remove overlay; W1's saved pixels restored. ===== */
     _cgfx_owend(w1);
-    Flush();
 
     sleep_ticks(300);  /* ~5s hold for snapshot 3 */
 
@@ -190,7 +186,6 @@ int main(void) {
      * itself repaint the framebuffer; the previously-rendered W2
      * pixels stay until something else writes them. */
     _cgfx_dwend(w2);
-    Flush();
 
     sleep_ticks(300);  /* ~5s hold for snapshot 5 */
 
@@ -200,6 +195,11 @@ int main(void) {
      * the shadow's framebuffer pixels persist through plain owend and
      * would block any subsequent visible state change. */
     _cgfx_shadow(w1, 18, 8, 15, 6);
+    /* shadow.as is the lone exception to the "window-API self-flushes"
+     * rule. It Flushes pending writes at entry, but emits its own OWSet
+     * via the *buffered* _cgfx_write rather than a direct I$Write
+     * (cgfx/shadow.as:38). The 9-byte OWSet sits in the buffer until
+     * something else flushes -- so we drain it here before the snapshot. */
     Flush();
 
     sleep_ticks(300);  /* ~5s hold for snapshot 6 */
@@ -207,11 +207,8 @@ int main(void) {
     /* ===== Phase 7: owend removes shadow =================================
      * _cgfx_shadow is effectively _cgfx_owset with auto-centering
      * (cgfx/shadow.as: ESC $22 + svs=1), so the matching teardown is
-     * _cgfx_owend. Bracket with explicit Flush() to make sure the
-     * cgfx buffer is fully drained on either side. */
-    Flush();
+     * _cgfx_owend. */
     _cgfx_owend(w1);
-    Flush();
 
     sleep_ticks(300);  /* ~5s hold for snapshot 7 */
 

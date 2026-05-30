@@ -145,6 +145,24 @@ filtered through composite mode.
   enough that a snapshot misses them or successive state changes collide.
   Call `Flush()` after each iteration (declared in `cgfx.h`).
 
+- **The window-API functions in `cgfx/window.c` self-flush.** Each one
+  starts with `lbsr _Flush` to drain pending buffered writes, then
+  emits its own command via a direct `os9 I$Write` (or `I$SetStt`) —
+  bypassing the 256-byte buffer entirely. After they return, the
+  buffer is empty *and* the operation is committed. So calling
+  `Flush()` immediately before or after any of them is redundant:
+
+  - `_cgfx_dwset`, `_cgfx_dwend`, `_cgfx_dwprotsw`
+  - `_cgfx_owset`, `_cgfx_owend`, `_cgfx_mvowend`
+  - `_cgfx_select`, `_cgfx_cwarea`
+
+  **Exception**: `_cgfx_shadow` (in `cgfx/shadow.as`) flushes pending
+  writes at entry like the others, but emits its OWSet via the
+  *buffered* `_cgfx_write` (`shadow.as:38`), not direct `I$Write`.
+  So the 9-byte OWSet sits in the buffer until something else
+  flushes — you *do* need an explicit `Flush()` after a `_cgfx_shadow`
+  call before a snapshot, or before any non-buffer-flushing op.
+
 - **`_cgfx_dwset(type=1, …, szy=24)` only renders rows 0..21** in
   practice, even though the docs would lead you to expect 24 rows. Pass
   `szy=25` to get the full 0..22 (23 usable rows). The matching `+1`

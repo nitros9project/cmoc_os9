@@ -19,7 +19,11 @@ graphictest/        Graphics tests: .c programs + scenario harness
   scenarios/<n>/    A graphics scenario
   shared/           gxtest.lua, compare.py, runner.sh
 recipes/coco3/      Disk-image recipe; citest.sh; the test/ procedure file
+docs/               Platform reference (CoCo 3 screen types, palette, etc.)
 ```
+
+For the screen-type / palette / window-constraint background that informs
+how a graphics test gets written, see [`docs/coco3-screens.md`](docs/coco3-screens.md).
 
 ## Running the test suites
 

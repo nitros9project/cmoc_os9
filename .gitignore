@@ -39,6 +39,7 @@ unittest/forknooptest
 unittest/forknowaittest
 unittest/forktest
 unittest/getopttest
+unittest/gfx80
 unittest/go_float
 unittest/gtest
 unittest/hello
@@ -78,6 +79,8 @@ unittest/stringtest
 unittest/structcopytest
 unittest/syscalltest
 unittest/systemtest
+unittest/text40
+unittest/text40edit
 unittest/timetest
 unittest/utimetest
 unittest/wintest

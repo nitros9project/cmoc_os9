@@ -23,6 +23,18 @@ wintest: $(GRAPHICS_TEST_DIR)/wintest.c
 	$(CC) $(CMOC_CPP) -I../include -I../cgfx/include --os9 -nodefaultlibs --add-os9-stack-space=5518 \
 		$^ $(OBJS) -L../lib -lc -L../cgfx -lcgfx
 
+text40: $(GRAPHICS_TEST_DIR)/text40.c
+	$(CC) $(CMOC_CPP) -I../include -I../cgfx/include --os9 -nodefaultlibs --add-os9-stack-space=2048 \
+		$^ $(OBJS) -L../lib -lc -L../cgfx -lcgfx
+
+text40edit: $(GRAPHICS_TEST_DIR)/text40edit.c
+	$(CC) $(CMOC_CPP) -I../include -I../cgfx/include --os9 -nodefaultlibs --add-os9-stack-space=2048 \
+		$^ $(OBJS) -L../lib -lc -L../cgfx -lcgfx
+
+gfx80: $(GRAPHICS_TEST_DIR)/gfx80.c
+	$(CC) $(CMOC_CPP) -I../include -I../cgfx/include --os9 -nodefaultlibs --add-os9-stack-space=2048 \
+		$^ $(OBJS) -L../lib -lc -L../cgfx -lcgfx
+
 floattest: floattest.c
 	$(CC) $(CMOC_CPP) -I../include -I../cgfx/include --os9 --mc6839 -nodefaultlibs \
 		$^ $(OBJS) -L../lib -lcf -L../cgfx -lcgfx \
@@ -33,7 +45,7 @@ floatfmttest: floatfmttest.c
 		$^ $(OBJS) -L../lib -lcf -L../cgfx -lcgfx \
 		-L$(CMOC_FLOAT_LIB_DIR) -lcmoc-float-mc6839_os9 -L../lib -lcf
 
-GRAPHICS_TESTS = wintest maze
+GRAPHICS_TESTS = wintest maze text40 text40edit gfx80
 TESTS	= abortchild aborttest attrwraptest compat3test ctypetest datmodstest defdrivetest dirapitest dirtest errmsgtest fdstreamtest filelayout fiotest floatfmttest floattest forkhellotest forknooptest forknowaittest forktest getopttest gtest hello intercepttest intmathtest iotest lmultest longtest memtest misctest noop osgstattest osiotest osopenerrtest popentest printtest pwcryptest pwenttest randtest searchtest setbuftest setjmptest setstest signaltest skiptest sleeptest stdioedgetest stdlibtest streamiotest stringexttest stringtest structcopytest syscalltest systemtest timetest utimetest
 ALL_TESTS = $(TESTS) $(GRAPHICS_TESTS)
 

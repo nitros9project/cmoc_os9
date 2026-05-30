@@ -93,14 +93,25 @@ nk:post("$PROGRAM\r")
 emu.wait(5)
 dofile("$abs_scenario")
 EOF
+# MAME runs at ~thousands-of-percent emulated speed in -video none, so
+# WALL_TIMEOUT (default 2x BUDGET seconds, real-time) is generous; it exists
+# to kill a hung emulator rather than to bound normal completion time.
+: "${WALL_TIMEOUT:=$((BUDGET * 2))}"
 SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy \
+	timeout --kill-after=5 "$WALL_TIMEOUT" \
 	mame coco3 -rompath "$ROMPATH" -skip_gameinfo \
 		-ext fdc -ext:fdc:wd17xx:0 525qd -flop1 "$disk" \
 		-video none -sound none -nothrottle \
 		-snapshot_directory "$RESULTS_DIR/mame-snap" \
 		-cfg_directory "$RESULTS_DIR/cfg" -nvram_directory "$RESULTS_DIR/nvram" \
 		-autoboot_delay "$DELAY" -autoboot_script "$shim" \
-		-seconds_to_run "$BUDGET" >"$RESULTS_DIR/mame.log" 2>&1 || true
+		-seconds_to_run "$BUDGET" >"$RESULTS_DIR/mame.log" 2>&1
+mame_rc=$?
+# 124 = timeout exit; everything else: MAME's own exit (we tolerate non-zero
+# because MAME often exits with funky codes even on a clean -seconds_to_run).
+if [ "$mame_rc" = 124 ] || [ "$mame_rc" = 137 ]; then
+	echo "[$SCENARIO_NAME] MAME killed by WALL_TIMEOUT=${WALL_TIMEOUT}s" >&2
+fi
 
 # MAME emits snapshots as <snapshot_directory>/<system>/<NNNN>.png. Flatten and
 # rename in manifest order so we have actual/<name>.png for compare.
@@ -134,10 +145,19 @@ while IFS=$'\t' read -r idx name compare max_delta max_pct min_ssim mask; do
 		--actual "$actual" --golden "$golden" --diff "$diff_png"; then
 		echo "  [$SCENARIO_NAME] $name: PASS ($compare)"
 	else
-		echo "  [$SCENARIO_NAME] $name: FAIL ($compare; see $diff_png)"
+		echo "  [$SCENARIO_NAME] $name: FAIL ($compare)"
+		echo "    actual: $actual"
+		echo "    golden: $golden"
+		echo "    diff:   $diff_png"
 		fail=1
 	fi
 done <"$manifest"
 
-[ "$fail" = 0 ] && echo "[$SCENARIO_NAME] OK ($RESULTS_DIR)" || echo "[$SCENARIO_NAME] FAILED ($RESULTS_DIR)"
+if [ "$fail" = 0 ]; then
+	echo "[$SCENARIO_NAME] OK ($RESULTS_DIR)"
+else
+	echo "[$SCENARIO_NAME] FAILED ($RESULTS_DIR)"
+	echo "  MAME log tail:"
+	tail -20 "$RESULTS_DIR/mame.log" | sed 's/^/    /'
+fi
 exit "$fail"

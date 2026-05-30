@@ -67,6 +67,9 @@ GFX_RUNNER       := graphictest/shared/runner.sh
 # program name, let it draw, then the scenario's snapshot waits on top. 100s
 # emulated leaves headroom on top of that.
 GFX_BUDGET       ?= 100
+# Concurrency for `make graphics-test`. Each scenario boots its own MAME
+# against its own disk copy, so they're independent. Default matches CI_JOBS.
+GFX_JOBS         ?= 4
 # Discover scenarios as the subdirectories of graphictest/scenarios/ that have
 # a scenario.lua. Enables `make graphics-test-<name>` for each.
 GFX_SCENARIOS    := $(notdir $(patsubst %/,%,$(dir $(wildcard $(GFX_SCENARIOS_DIR)/*/scenario.lua))))
@@ -76,13 +79,26 @@ GFX_SCENARIOS    := $(notdir $(patsubst %/,%,$(dir $(wildcard $(GFX_SCENARIOS_DI
 gfx-have-disk:
 	@test -f $(CI_DISK) || $(MAKE) dsk
 
-# Run all graphics-test scenarios and gate on mismatch
+# Run all graphics-test scenarios in parallel (GFX_JOBS at a time) and gate
+# on any mismatch. Each scenario's output is captured to a per-scenario log
+# and replayed in deterministic order after all scenarios finish, so the
+# top-level output stays readable even with parallelism.
 graphics-test: gfx-have-disk
 	@test -n "$(MAME_ROMPATH)" || { echo "ERROR: set MAME_ROMPATH to a dir with a coco3 romset"; exit 2; }
-	@fail=0; for s in $(GFX_SCENARIOS); do \
-	  DISK_SRC=$(CI_DISK) ROMPATH=$(MAME_ROMPATH) BUDGET=$(GFX_BUDGET) \
-	    SCENARIO_DIR=$(GFX_SCENARIOS_DIR)/$$s bash $(GFX_RUNNER) || fail=1; \
-	done; exit $$fail
+	@d=$$(mktemp -d); \
+	printf '%s\n' $(GFX_SCENARIOS) | \
+	  xargs -P$(GFX_JOBS) -I{} sh -c ' \
+	    DISK_SRC=$(CI_DISK) ROMPATH=$(MAME_ROMPATH) BUDGET=$(GFX_BUDGET) \
+	      SCENARIO_DIR=$(GFX_SCENARIOS_DIR)/{} bash $(GFX_RUNNER) \
+	      >'"$$d"'/{}.log 2>&1; \
+	    echo $$? >'"$$d"'/{}.rc'; \
+	fail=0; \
+	for s in $(GFX_SCENARIOS); do \
+	  cat $$d/$$s.log; \
+	  [ "$$(cat $$d/$$s.rc)" = 0 ] || fail=1; \
+	done; \
+	rm -rf $$d; \
+	exit $$fail
 
 # Run a single graphics-test scenario by name (e.g. `make graphics-test-maze`)
 graphics-test-%: gfx-have-disk

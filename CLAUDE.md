@@ -237,6 +237,13 @@ refactor.
   snapshot looks "stuck", the GIME *is* stuck; don't chase it as a
   rendering problem.
 
+- **`WALL_TIMEOUT` requires GNU `timeout`** (Linux / coco-dev) or
+  `gtimeout` (macOS with Homebrew coreutils). On stock macOS neither is
+  installed; the runner detects this and skips the wrapper, relying on
+  MAME's `-seconds_to_run` to bound normal completion. A true hang
+  there has to be ^C'd. `brew install coreutils` gives macOS users the
+  same hang protection Linux gets.
+
 ### Diagnosing a failing scenario
 
 When a snapshot doesn't match its golden and the diff PNG isn't enough,

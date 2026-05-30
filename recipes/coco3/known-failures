@@ -1,19 +1,12 @@
 # Tests that currently hang or fail under headless NitrOS-9 in MAME.
 #
-# Listed here so `make test-ci` gates on regressions (any OTHER test failing
-# fails the run) without being permanently red on these known issues. They are
-# reported as XFAIL. Remove an entry once its underlying bug is fixed -- if a
-# listed test starts passing, the runner flags it so you know to clean it up.
+# Listed names report as XFAIL so `make test-ci` gates on regressions without
+# being permanently red on known issues. Remove an entry once its underlying
+# bug is fixed; if a listed test starts passing, the runner flags it.
 #
 # One test name per line; '#' begins a comment.
-
-# Hangs at exit, after test_freopen_failure_keeps_stream_usable prints its last
-# assertion (fclose / unlink / C-runtime stdio cleanup). Also asserts that
-# open(".", FAM_READ) >= 0, which NitrOS-9 does not allow.
-fdstreamtest
-
-# Hangs around test_putw / getw().
-fiotest
-
-# Hangs after test_crc. Also fails test_prerr (prerr()).
-misctest
+#
+# Currently empty: with the per-test invocation in citest.sh forking each
+# test through a fresh sub-shell, and with __dumprof removed from the C
+# runtime's exit path, fdstreamtest / fiotest / misctest all pass on stock
+# MAME.

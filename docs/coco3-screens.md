@@ -98,6 +98,45 @@ Two hard constraints to remember when designing a test:
 Each `/wN` device is one window. The recipe ships `w` through `w15`
 (`recipes/coco3/recipe.mak`). Tests typically open `/w` (first available).
 
+### Putting multiple windows on one screen
+
+`_cgfx_dwset(sty=8, …)` always creates a new screen. To attach a second
+or third window to an *existing* screen, pass **screen type 0** (not the
+actual type) to dwset. cowin's screen-type conversion table
+(`level2/coco3/modules/cowin.asm:1619-1620`) maps user-sty `$00` to the
+internal "current screen" sentinel `$FF`, which sends the dwset down the
+`L076D` path. That handler reads the calling process's currently
+selected path (`P$SelP`) and inherits its screen.
+
+Two things have to be true before the second dwset:
+
+1. **Some path must be selected** (`_cgfx_select` on the first window).
+   `P$SelP` is what L076D uses to find the parent screen.
+2. **The Protect bit on existing windows must be off** if your new
+   window's coords could intersect any of them. grfdrv's `L0224`
+   overlap check (`level2/cmds/grfdrv.asm:752+`) iterates existing
+   windows and, for each one that's still protected, demands the new
+   window not overlap. Call `_cgfx_dwprotsw(w, 0)` on the existing
+   window to clear it. If the windows genuinely don't overlap, this is
+   redundant but harmless.
+
+See `graphictest/gfx40win.c` for a worked three-window example.
+
+### Default screen palette is the composite-monitor table
+
+NitrOS-9 boots assuming a composite monitor. grfdrv routes palette
+writes through a CMP→RGB translation table
+(`cowin.asm:1893+`), so on RGB hardware (which is what MAME emits and
+what the gfx-test harness configures), a palette write of `36` (R+r,
+intended bright red) renders as cyan. Add `montype -r` to the recipe
+`startup` to flip `G.MonTyp` to RGB mode — after that, palette values
+go to the GIME verbatim.
+
+The bundled recipe (`recipes/coco3/startup`) does this for the
+graphics-test disk; if you're running test code outside the harness,
+either call `montype -r` first or remember that your palette will be
+filtered through composite mode.
+
 ## Gotchas (cgfx-side)
 
 - **cgfx buffers output in a 256-byte per-path ring** (`cgfx/cbuffer.as`).

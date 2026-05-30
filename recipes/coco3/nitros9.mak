@@ -22,6 +22,11 @@ CMOC_OS9_SYS_DIR ?= $(NITROS9DIR)/level2/coco3/sys
 CMOC_OS9_SYS_BIN_FILES ?= $(addprefix $(CMOC_OS9_SYS_DIR)/,\
 	stdfonts stdpats_2 stdpats_4 stdpats_16 stdptrs)
 
+# A fresh nitros9 checkout (e.g. in CI) doesn't have these built yet. Run the
+# sys/ subdir's own makefile to produce them on demand.
+$(CMOC_OS9_SYS_BIN_FILES):
+	$(MAKE) -C $(CMOC_OS9_SYS_DIR) $(@F)
+
 $(MODDIR)/ddd0_80d.dd: rb1773desc.asm | $(MODDIR)
 	$(AS) $(AFLAGS) $< $(ASOUT)$@ $(DSDD80) -DDNum=0 -DDD=1
 

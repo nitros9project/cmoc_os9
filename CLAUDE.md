@@ -3,7 +3,10 @@
 Project-specific notes for AI assistants (Claude Code, Codex, etc.) working
 in this repo. The two big "how do I add a test?" workflows are unit tests
 and graphics tests -- both run headlessly in MAME via the
-`jamieleecho/coco-dev` container image, gated by CI.
+`jamieleecho/coco-dev` container image, in two separate parallel CI jobs
+(`unit-tests` and `graphics-tests` in `.github/workflows/build.yml`).
+Failing graphics tests upload an artifact named `graphics-test-results`
+with the per-scenario actual / golden / diff PNGs and MAME log.
 
 ## Layout cheat-sheet
 

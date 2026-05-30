@@ -83,21 +83,27 @@ gfx-have-disk:
 # on any mismatch. Each scenario's output is captured to a per-scenario log
 # and replayed in deterministic order after all scenarios finish, so the
 # top-level output stays readable even with parallelism.
+#
+# Results go under GFX_RESULTS_DIR (default: a fresh mktemp dir, printed at
+# the end). Set it explicitly in CI so failure artifacts land in a known
+# path for upload.
 graphics-test: gfx-have-disk
 	@test -n "$(MAME_ROMPATH)" || { echo "ERROR: set MAME_ROMPATH to a dir with a coco3 romset"; exit 2; }
-	@d=$$(mktemp -d); \
+	@base="$${GFX_RESULTS_DIR:-$$(mktemp -d -t gxtest.XXXXXX)}"; \
+	mkdir -p "$$base"; \
 	printf '%s\n' $(GFX_SCENARIOS) | \
 	  xargs -P$(GFX_JOBS) -I{} sh -c ' \
 	    DISK_SRC=$(CI_DISK) ROMPATH=$(MAME_ROMPATH) BUDGET=$(GFX_BUDGET) \
-	      SCENARIO_DIR=$(GFX_SCENARIOS_DIR)/{} bash $(GFX_RUNNER) \
-	      >'"$$d"'/{}.log 2>&1; \
-	    echo $$? >'"$$d"'/{}.rc'; \
+	      SCENARIO_DIR=$(GFX_SCENARIOS_DIR)/{} \
+	      RESULTS_DIR='"$$base"'/{} \
+	      bash $(GFX_RUNNER) >'"$$base"'/{}.log 2>&1; \
+	    echo $$? >'"$$base"'/{}.rc'; \
 	fail=0; \
 	for s in $(GFX_SCENARIOS); do \
-	  cat $$d/$$s.log; \
-	  [ "$$(cat $$d/$$s.rc)" = 0 ] || fail=1; \
+	  cat "$$base/$$s.log"; \
+	  [ "$$(cat $$base/$$s.rc)" = 0 ] || fail=1; \
 	done; \
-	rm -rf $$d; \
+	echo "Graphics-test results: $$base"; \
 	exit $$fail
 
 # Run a single graphics-test scenario by name (e.g. `make graphics-test-maze`)

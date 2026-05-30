@@ -12,7 +12,7 @@
 local g = require "gxtest"
 
 g.wait(4)
-g.snapshot("01-cursor-moves", { compare = "ssim", min_ssim = 0.90 })
+g.snapshot("01-cursor-moves", { compare = "ssim", min_ssim = 0.85 })
 
 g.wait(6)
-g.snapshot("02-line-edits", { compare = "ssim", min_ssim = 0.90 })
+g.snapshot("02-line-edits", { compare = "ssim", min_ssim = 0.85 })

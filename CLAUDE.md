@@ -46,8 +46,11 @@ make graphics-update-maze CONFIRM=1 MAME_ROMPATH=/roms
 
 `make dsk` rebuilds the recipe disk and needs the **NitrOS-9 source tree**
 mounted as a sibling at `/src/nitros9`. The recipe disk
-(`recipes/coco3/l2_coco3_cmoc_os9.dsk`) is committed, so the graphics tests
-will use the committed one if the build deps aren't available.
+(`recipes/coco3/l2_coco3_cmoc_os9.dsk`) is **git-ignored, not committed** --
+it's built on demand. `gfx-have-disk` runs `make dsk` only when the disk is
+missing, so the graphics-test targets build it once and reuse it. Running the
+graphics tests therefore needs the sibling NitrOS-9 tree at least once (to
+build the disk); `coco-dev` provides it. There is no committed fallback disk.
 
 ---
 
@@ -222,10 +225,20 @@ refactor.
   `time()` as `return 0;`. `srand(0)` produces the same maze every boot,
   so even `ssim` matches give 1.0 -- a fresh random maze would not.
 
+- **Goldens are pinned to the MAME version that blessed them.** Different MAME
+  releases render the CoCo3 screen at different geometry / palette values.
+  `compare.py` treats an actual-vs-golden size difference as a hard error
+  ("DIMENSION MISMATCH", exit 2) rather than silently resizing -- so version
+  drift surfaces clearly instead of as a mysterious SSIM/pixel failure. The
+  runner passes `-noreadconfig` so a contributor's local `mame.ini` can't
+  perturb the run, but that can't bridge a version gap: if a fresh checkout
+  fails on dimensions or colors, compare `mame -version` against CI's
+  `jamieleecho/coco-dev` before treating it as a harness bug.
+
 - **`make graphics-test-*` won't rebuild the disk** if
   `recipes/coco3/l2_coco3_cmoc_os9.dsk` already exists (`gfx-have-disk`
-  helper). Lets the harness run in `coco-dev` without needing the sibling
-  `nitros9` source tree.
+  helper). The disk is built once (needs the sibling `nitros9` tree) and
+  then reused across scenarios; it is not committed.
 
 - **GFX_BUDGET=100 (emulated seconds) is the floor.** Boot + display init +
   program launch + scenario waits add up.

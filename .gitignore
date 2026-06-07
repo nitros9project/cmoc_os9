@@ -127,3 +127,7 @@ recipes/coco3/*.map
 recipes/coco3/bootfile
 recipes/coco3/buildinfo
 recipes/coco3/kerneltrack
+
+# Python bytecode (compare.py / harness helpers)
+__pycache__/
+*.pyc

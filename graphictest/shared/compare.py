@@ -28,17 +28,6 @@ def load(path):
     return np.asarray(img, dtype=np.int16)  # int16 so subtraction can be signed
 
 
-def resize_like(a, b):
-    """If shapes differ, downscale the larger to the smaller for comparison."""
-    if a.shape == b.shape:
-        return a, b
-    ah, aw = a.shape[:2]; bh, bw = b.shape[:2]
-    th, tw = min(ah, bh), min(aw, bw)
-    def fit(x):
-        return np.asarray(Image.fromarray(x.astype("uint8")).resize((tw, th), Image.BICUBIC), dtype=np.int16)
-    return fit(a), fit(b)
-
-
 def apply_mask(actual, golden, mask_path):
     if not mask_path:
         return actual, golden, None
@@ -64,7 +53,6 @@ def make_diff_png(actual, golden, deltas, keep, out_path):
 
 
 def pixel_compare(actual, golden, max_delta, max_diff_pct, mask_path, diff_path):
-    actual, golden = resize_like(actual, golden)
     actual, golden, keep = apply_mask(actual, golden, mask_path)
     deltas = np.max(np.abs(actual - golden), axis=2).astype(np.int32)
     if keep is not None:
@@ -80,7 +68,6 @@ def pixel_compare(actual, golden, max_delta, max_diff_pct, mask_path, diff_path)
 
 
 def ssim(actual, golden, mask_path, diff_path, min_ssim):
-    actual, golden = resize_like(actual, golden)
     a = actual.astype(np.float64).mean(axis=2)
     g = golden.astype(np.float64).mean(axis=2)
     if mask_path:
@@ -120,6 +107,15 @@ def main():
         actual = load(args.actual); golden = load(args.golden)
     except Exception as e:
         print(f"compare: load failed: {e}", file=sys.stderr); return 2
+
+    if actual.shape != golden.shape:
+        ah, aw = actual.shape[:2]; gh, gw = golden.shape[:2]
+        print(f"compare: DIMENSION MISMATCH actual {aw}x{ah} != golden {gw}x{gh}.",
+              file=sys.stderr)
+        print("  Likely a different MAME version rendering the CoCo3 screen at "
+              "another geometry than the golden was blessed against. Re-bless "
+              "with the intended MAME, or pin the version.", file=sys.stderr)
+        return 2
 
     if args.mode == "pixel":
         ok, msg = pixel_compare(actual, golden, args.max_delta, args.max_diff_pct, args.mask, args.diff)

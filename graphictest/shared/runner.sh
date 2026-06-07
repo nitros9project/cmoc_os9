@@ -129,9 +129,12 @@ elif command -v gtimeout >/dev/null 2>&1; then
 elif command -v perl >/dev/null 2>&1; then
 	TIMEOUT_ARGS=(perl -e 'alarm shift; exec @ARGV' "$WALL_TIMEOUT")
 fi
+# -noreadconfig: ignore mame.ini (cwd and ~/.mame) entirely so a
+# contributor's local config can't perturb the run -- the snapshot must depend
+# only on the explicit flags below. (cfg/nvram dirs are already isolated.)
 SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy \
 	"${TIMEOUT_ARGS[@]+${TIMEOUT_ARGS[@]}}" \
-	mame coco3 -rompath "$ROMPATH" -skip_gameinfo \
+	mame coco3 -noreadconfig -rompath "$ROMPATH" -skip_gameinfo \
 		-ext fdc -ext:fdc:wd17xx:0 525qd -flop1 "$disk" \
 		-video none -sound none -nothrottle \
 		-snapshot_directory "$RESULTS_DIR/mame-snap" \

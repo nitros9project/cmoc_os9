@@ -66,6 +66,16 @@ A `pixel` comparison is the right default for static UI; switch to `ssim`
 when a frame is intentionally variable (a random maze, an animation in
 mid-cycle, etc.).
 
+**MAME version matters.** `compare.py` requires the actual capture and the
+golden to have identical dimensions -- a size mismatch is a hard error
+(exit 2, "DIMENSION MISMATCH"), not silently resized away. Different MAME
+versions can render the CoCo3 screen at a different geometry (or palette), so
+goldens are effectively pinned to the MAME that blessed them. If you hit a
+dimension mismatch or unexpected color failures, check `mame -version`
+against whatever produced the goldens (CI uses `jamieleecho/coco-dev`) before
+chasing it as a harness bug. The runner passes `-noreadconfig` so a local
+`mame.ini` can't perturb the run, but it can't paper over a version gap.
+
 ## Running
 
 The harness needs `mame`, ToolShed `os9`, Python 3 with Pillow + NumPy, plus a

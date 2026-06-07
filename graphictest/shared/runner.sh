@@ -15,7 +15,9 @@
 #
 # Exit: 0 if every snapshot matches its golden; non-zero on any mismatch or
 # missing golden. Writes actual/<name>.png, golden/<name>.png and diff/<name>.png
-# into RESULTS_DIR so failures are easy to eyeball.
+# into RESULTS_DIR so failures are easy to eyeball. On failure it also packs
+# those plus mame.log and a report.txt (with the user's MAME version) into
+# RESULTS_DIR/<scenario>-failure.tar.gz -- one file to send to a maintainer.
 set -u
 : "${DISK_SRC:?DISK_SRC required}"
 : "${ROMPATH:?ROMPATH required}"
@@ -39,7 +41,7 @@ if ! python3 -c 'import PIL, numpy' >/dev/null 2>&1; then
 	exit 2
 fi
 
-mkdir -p "$RESULTS_DIR/actual" "$RESULTS_DIR/diff" "$RESULTS_DIR/mame-snap"
+mkdir -p "$RESULTS_DIR/actual" "$RESULTS_DIR/diff" "$RESULTS_DIR/golden" "$RESULTS_DIR/mame-snap"
 
 # Per-scenario disk: inject a startup that auto-runs PROGRAM and writes a
 # completion sentinel. wintest/maze loop until SPACE; -seconds_to_run ends MAME.
@@ -165,17 +167,23 @@ mame_pngs=()
 while IFS= read -r line; do mame_pngs+=("$line"); done \
 	< <(find "$RESULTS_DIR/mame-snap" -type f -name '*.png' | sort)
 fail=0
+summary=""
 while IFS=$'\t' read -r idx name compare max_delta max_pct min_ssim mask; do
 	mame_png=${mame_pngs[$((idx-1))]:-}
 	if [ -z "$mame_png" ] || [ ! -f "$mame_png" ]; then
 		echo "  [$SCENARIO_NAME] $name: MISSING (MAME didn't emit a PNG for this snapshot)"
+		summary+="$name: MISSING (no PNG emitted)"$'\n'
 		fail=1; continue
 	fi
 	actual="$RESULTS_DIR/actual/$name.png"
 	cp "$mame_png" "$actual"
 	golden="$SCENARIO_DIR/goldens/$name.png"
+	# Copy the golden alongside the capture so the failure bundle is
+	# self-contained -- the maintainer gets actual + golden + diff together.
+	[ -f "$golden" ] && cp "$golden" "$RESULTS_DIR/golden/$name.png"
 	if [ ! -f "$golden" ]; then
 		echo "  [$SCENARIO_NAME] $name: NEW (no golden -- bless with 'make graphics-update')"
+		summary+="$name: NEW (no golden yet)"$'\n'
 		fail=1; continue
 	fi
 	diff_png="$RESULTS_DIR/diff/$name.png"
@@ -185,11 +193,13 @@ while IFS=$'\t' read -r idx name compare max_delta max_pct min_ssim mask; do
 		--max-diff-pct "$max_pct" --min-ssim "$min_ssim" $mask_arg \
 		--actual "$actual" --golden "$golden" --diff "$diff_png"; then
 		echo "  [$SCENARIO_NAME] $name: PASS ($compare)"
+		summary+="$name: PASS ($compare)"$'\n'
 	else
 		echo "  [$SCENARIO_NAME] $name: FAIL ($compare)"
 		echo "    actual: $actual"
 		echo "    golden: $golden"
 		echo "    diff:   $diff_png"
+		summary+="$name: FAIL ($compare)"$'\n'
 		fail=1
 	fi
 done <"$manifest"
@@ -200,5 +210,30 @@ else
 	echo "[$SCENARIO_NAME] FAILED ($RESULTS_DIR)"
 	echo "  MAME log tail:"
 	tail -20 "$RESULTS_DIR/mame.log" | sed 's/^/    /'
+
+	# Bundle everything a maintainer needs into ONE file the user can attach
+	# to an email / Slack / issue: actual + golden + diff PNGs, the MAME log,
+	# and a report.txt recording the user's MAME version (the usual culprit
+	# behind a mismatch). No hunting through a temp dir for the right PNG.
+	report="$RESULTS_DIR/report.txt"
+	{
+		echo "scenario: $SCENARIO_NAME"
+		echo "program:  $PROGRAM"
+		echo "host:     $(uname -srm 2>/dev/null)"
+		echo "mame:     $(mame -version 2>/dev/null | head -1)"
+		echo "date:     $(date 2>/dev/null)"
+		echo
+		echo "results:"
+		printf '%s' "$summary" | sed 's/^/  /'
+	} >"$report"
+	bundle="$RESULTS_DIR/${SCENARIO_NAME}-failure.tar.gz"
+	tar czf "$bundle" -C "$RESULTS_DIR" \
+		actual diff golden report.txt manifest.tsv mame.log 2>/dev/null
+
+	echo
+	echo "  >>> To report this, send this single file to the maintainer:"
+	echo "  >>>     $bundle"
+	echo "  >>> (actual/golden/diff PNGs + mame.log + report.txt with your MAME version)"
+	echo "  >>> Or eyeball the captures in: $RESULTS_DIR/actual"
 fi
 exit "$fail"

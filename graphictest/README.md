@@ -100,6 +100,16 @@ make graphics-update-maze CONFIRM=1 MAME_ROMPATH=/path/to/roms
 Each scenario boots in its own MAME instance, so they're independent and
 parallelizable.
 
+### When a scenario fails
+
+The runner prints the `actual` / `golden` / `diff` path for each failing
+snapshot, and packs all of them -- plus `mame.log` and a `report.txt`
+recording your MAME version and host -- into a single
+`<results-dir>/<scenario>-failure.tar.gz`. To get help, send that one file;
+it's everything a maintainer needs to tell config/version drift from a real
+regression. The path is printed at the end of the run (`>>> To report this`).
+In CI the same artifacts upload as `graphics-test-results`.
+
 ## Authoring a new scenario
 
 1. `mkdir graphictest/scenarios/<name> && cd $_`

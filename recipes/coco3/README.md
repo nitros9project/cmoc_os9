@@ -4,7 +4,11 @@ Files here:
 - `makefile`: local recipe driver that builds the disk image in this directory.
 - `recipe.mak`: recipe settings consumed by the local recipe build.
 - `nitros9.mak`: CMOC OS-9 build and disk population rules.
-- `startup`: minimal boot script copied onto the test disk as `startup`.
+- `startup`: minimal boot script copied onto the test disk as `startup`. Merges
+  the NitrOS-9 `SYS/` fonts, pointers, and pattern tables (`stdfonts`,
+  `stdptrs`, `stdpats_2/4/16`) into grfdrv so `/w` graphics windows have the
+  standard assets available. The files themselves are copied from the sibling
+  `nitros9` checkout (`level2/coco3/sys/`) into the disk's `SYS/` dir.
 - `test`: manual regression batch script copied onto the disk when needed.
 - `citest.sh`: headless CI runner used by `make test-ci` (see below).
 

@@ -50,5 +50,48 @@ jobs:
         env:
           NITROS9DIR: ${{ github.workspace }}/nitros9
           MAME_ROMPATH: ${{ github.workspace }}/roms
-          CI_JOBS: "2"
+          CI_JOBS: "16"
         run: make test-ci
+
+  graphics-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    container:
+      image: jamieleecho/coco-dev:0.82
+    steps:
+      - name: Checkout cmoc_os9
+        uses: actions/checkout@v6.0.2
+
+      - name: Checkout NitrOS-9
+        uses: actions/checkout@v6.0.2
+        with:
+          repository: nitros9project/nitros9
+          ref: cba089576bc761d8089755ecc23048fa5e67777b
+          path: nitros9
+
+      - name: Fetch CoCo 3 ROMs
+        run: |
+          mkdir -p roms
+          curl -fL --retry 3 -o roms/coco3.zip \
+            https://archive.org/download/batov39/coco3.zip
+
+      # Boot NitrOS-9 in headless MAME once per scenario, capture screen at
+      # scenario-defined moments, compare to golden PNGs in
+      # graphictest/scenarios/<name>/goldens/. See graphictest/README.md.
+      - name: Run graphics tests (headless MAME)
+        env:
+          NITROS9DIR: ${{ github.workspace }}/nitros9
+          MAME_ROMPATH: ${{ github.workspace }}/roms
+          GFX_JOBS: "16"
+          GFX_RESULTS_DIR: ${{ runner.temp }}/gxtest
+        run: make graphics-test
+
+      # On failure, upload the per-scenario actual/golden/diff PNGs and the
+      # MAME log so the visual regression is inspectable from the PR.
+      - name: Upload graphics-test artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: graphics-test-results
+          path: ${{ runner.temp }}/gxtest
+          if-no-files-found: ignore

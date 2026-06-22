@@ -828,6 +828,21 @@ int creadln(path_id path, char *s, int n);
 int cwrite(path_id path, const char *s, int n);
 
 /**
+ * @brief Flush the cgfx output buffer.
+ *
+ * cgfx buffers writes (up to 256 bytes per path) so that a sequence of
+ * small calls becomes a single I$Write. The buffer flushes automatically
+ * when the destination path changes or it would overflow, but state-change
+ * APIs (e.g. `_cgfx_bcolor`, `_cgfx_fcolor`, `_cgfx_curxy`) do not. In a
+ * tight loop pairing state-change with a write, call Flush() each iteration
+ * -- otherwise pending bytes can sit unsent and intermediate state collapses
+ * into the buffer's final value.
+ *
+ * @return 0 if successful, otherwise the error code.
+ */
+error_code Flush(void);
+
+/**
  * @brief Write a string and trailing carriage return to a window path.
  *
  * @param path The path to the window device.

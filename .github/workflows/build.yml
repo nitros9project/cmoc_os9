@@ -10,7 +10,7 @@ jobs:
   check-build:
     runs-on: ubuntu-latest
     container:
-      image: jamieleecho/coco-dev:0.82
+      image: jamieleecho/coco-dev:0.83
     steps:
       - uses: actions/checkout@v6.0.2
 
@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     container:
-      image: jamieleecho/coco-dev:0.82
+      image: jamieleecho/coco-dev:0.83
     steps:
       - name: Checkout cmoc_os9
         uses: actions/checkout@v6.0.2
@@ -57,7 +57,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     container:
-      image: jamieleecho/coco-dev:0.82
+      image: jamieleecho/coco-dev:0.83
     steps:
       - name: Checkout cmoc_os9
         uses: actions/checkout@v6.0.2

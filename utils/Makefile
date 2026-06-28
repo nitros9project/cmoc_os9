@@ -7,7 +7,7 @@ SUBDIRS = uemacs ed
 %: %.c
 	$(CC) $(LFLAGS) $^ -L../lib -lc -L../cgfx -lcgfx
 
-UTILS = wc cat head cmp tr cut echo sleep tee rev strings cksum uniq comm split paste seq basename dirname true false yes tail sync tty mkdir rmdir
+UTILS = wc cat head cmp tr cut echo sleep tee rev strings cksum uniq comm split paste seq basename dirname true false yes tail sync tty mkdir rmdir cal fold nl expand unexpand od sort touch uuencode uudecode
 
 .PHONY: all clean help $(SUBDIRS)
 

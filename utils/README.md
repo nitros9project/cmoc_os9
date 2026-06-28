@@ -15,9 +15,11 @@ and Unix APIs that are not available in this environment.
 
 The current sbase-derived utilities include:
 
-`basename`, `cat`, `cksum`, `cmp`, `comm`, `cut`, `dirname`, `echo`, `false`,
-`head`, `mkdir`, `paste`, `rev`, `rmdir`, `seq`, `sleep`, `split`, `strings`,
-`sync`, `tail`, `tee`, `tr`, `true`, `tty`, `uniq`, `wc`, and `yes`.
+`basename`, `cal`, `cat`, `cksum`, `cmp`, `comm`, `cut`, `dirname`, `echo`,
+`expand`, `false`, `fold`, `head`, `mkdir`, `nl`, `od`, `paste`, `rev`, `rmdir`,
+`seq`, `sleep`, `sort`, `split`, `strings`, `sync`, `tail`, `tee`, `touch`,
+`tr`, `true`, `tty`, `unexpand`, `uniq`, `uudecode`, `uuencode`, `wc`, and
+`yes`.
 
 These ports favor small fixed buffers and simple option handling suitable for
 the target OS-9 environment. Some commands therefore support a smaller option

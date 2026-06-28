@@ -91,6 +91,7 @@ unittest/wintest
 
 # Built utils binaries
 utils/basename
+utils/cal
 utils/cat
 utils/cksum
 utils/cmp
@@ -99,25 +100,34 @@ utils/cut
 utils/dirname
 utils/ed/ed
 utils/echo
+utils/expand
 utils/false
+utils/fold
 utils/head
 utils/mkdir
+utils/nl
+utils/od
 utils/paste
 utils/rev
 utils/rmdir
 utils/seq
 utils/sleep
+utils/sort
 utils/split
 utils/strings
 utils/sync
 utils/tail
 utils/tee
+utils/touch
 utils/tr
 utils/true
 utils/tty
+utils/unexpand
 utils/uemacs/.cmoc-int/
 utils/uemacs/umacs
 utils/uniq
+utils/uudecode
+utils/uuencode
 utils/wc
 utils/yes
 

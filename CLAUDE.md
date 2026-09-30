@@ -360,3 +360,24 @@ small for a paragraph but worth a sentence, add the sentence.
   explains the why, end with the standard `Co-Authored-By:` trailer.
 - Graphics goldens live in git (small PNGs, ~10 KB each). Re-bless in a
   separate commit so reviewers can see the visual change distinctly.
+
+## LLVM compatibility branch
+
+`llvm/` builds libcmoc_os9_compat.a for mc6809-unknown-os9 with LLVM and
+picolibc. It supplies getuid/asetuid/readln without using CMOC objects or
+CMOC standard headers. See llvm/README.md. Existing lib/ and cgfx/ targets
+remain CMOC-specific.
+
+- `make -C llvm`: target library; OPT=Os by default, isolated out/<OPT>.
+- `make -C llvm test`: host mock tests of the adapter semantics.
+- `make -C llvm smoke`: build the real OS-9 kernel smoke-test module.
+- `make -C llvm run-smoke`: use picolibc's OS-9 boot harness; requires emulator,
+  boot disk and firmware. Host tests do not establish kernel execution.
+- LLVM_BIN and OS9_SYSROOT override the sibling toolchain/picolibc defaults;
+  HOST_CC selects the native compiler. Rebuilds always recompile target objects.
+
+LLVM tests live in llvm/tests/ and use their own targets. They are not included
+in the CMOC unittest/ Makefile or recipe disks. Keep the LLVM README and root
+README in sync with changes here. LLVM code must use picolibc's uid_t and FILE
+layouts; do not reuse CMOC's assembly stack offsets. readln converts CR to LF
+and leaves NUL termination to its caller.

@@ -133,3 +133,13 @@ While passing parameters by reference may be a bit more typing, this is arguably
 
 The core library is already usable, but it is not yet a complete port of all
 historical Kreider and CGFX components.
+
+## LLVM with picolibc
+
+The `llvm-os9` branch also provides an LLVM-native Kreider compatibility
+library alongside picolibc, covering all 280 callable declarations in the active
+C library headers. It includes native OS-9 extensions, IEEE float/double math,
+and an optional floating stdio profile. Build with `make -C llvm`; run host tests
+with `make -C llvm test`. See [llvm/README.md](llvm/README.md) for toolchain and
+sysroot settings, API differences, OS-9 smoke tests and UUCPbb integration.
+The CMOC library and CGFX builds above are independent.

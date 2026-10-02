@@ -1,0 +1,1402 @@
+{
+  "DEBUG": {
+    "header": "include/debug.h",
+    "provider": "compat",
+    "symbol": "DEBUG"
+  },
+  "LPX": {
+    "header": "include/debug.h",
+    "provider": "compat",
+    "symbol": "LPX"
+  },
+  "PAUSE": {
+    "header": "include/debug.h",
+    "provider": "compat",
+    "symbol": "PAUSE"
+  },
+  "_dump": {
+    "header": "include/debug.h",
+    "provider": "compat",
+    "symbol": "_dump"
+  },
+  "_errmsg": {
+    "header": "include/stdio.h",
+    "provider": "compat",
+    "symbol": "_errmsg"
+  },
+  "_exit": {
+    "header": "include/unistd.h",
+    "provider": "picolibc",
+    "symbol": "_exit"
+  },
+  "_gs_devn": {
+    "header": "include/fcntl.h",
+    "provider": "compat",
+    "symbol": "_gs_devn"
+  },
+  "_gs_eof": {
+    "header": "include/fcntl.h",
+    "provider": "compat",
+    "symbol": "_gs_eof"
+  },
+  "_gs_gfd": {
+    "header": "include/fcntl.h",
+    "provider": "compat",
+    "symbol": "_gs_gfd"
+  },
+  "_gs_opt": {
+    "header": "include/fcntl.h",
+    "provider": "compat",
+    "symbol": "_gs_opt"
+  },
+  "_gs_pos": {
+    "header": "include/fcntl.h",
+    "provider": "compat",
+    "symbol": "_gs_pos"
+  },
+  "_gs_rdy": {
+    "header": "include/fcntl.h",
+    "provider": "compat",
+    "symbol": "_gs_rdy"
+  },
+  "_gs_size": {
+    "header": "include/fcntl.h",
+    "provider": "compat",
+    "symbol": "_gs_size"
+  },
+  "_os9_sleep": {
+    "header": "include/os.h",
+    "provider": "compat",
+    "symbol": "cmoc_os9_sleep"
+  },
+  "_os_asetuid": {
+    "header": "include/os.h",
+    "provider": "compat",
+    "symbol": "cmoc_os_asetuid"
+  },
+  "_os_chain": {
+    "header": "include/os.h",
+    "provider": "compat",
+    "symbol": "cmoc_os_chain"
+  },
+  "_os_close": {
+    "header": "include/os.h",
+    "provider": "compat",
+    "symbol": "cmoc_os_close"
+  },
+  "_os_create": {
+    "header": "include/os.h",
+    "provider": "compat",
+    "symbol": "cmoc_os_create"
+  },
+  "_os_delete": {
+    "header": "include/os.h",
+    "provider": "compat",
+    "symbol": "cmoc_os_delete"
+  },
+  "_os_fork": {
+    "header": "include/os.h",
+    "provider": "compat",
+    "symbol": "cmoc_os_fork"
+  },
+  "_os_getime": {
+    "header": "include/os.h",
+    "provider": "compat",
+    "symbol": "cmoc_os_getime"
+  },
+  "_os_getpid": {
+    "header": "include/os.h",
+    "provider": "compat",
+    "symbol": "cmoc_os_getpid"
+  },
+  "_os_getstat": {
+    "header": "include/os.h",
+    "provider": "compat",
+    "symbol": "cmoc_os_getstat"
+  },
+  "_os_getuid": {
+    "header": "include/os.h",
+    "provider": "compat",
+    "symbol": "cmoc_os_getuid"
+  },
+  "_os_gs_devnm": {
+    "header": "include/os.h",
+    "provider": "compat",
+    "symbol": "cmoc_os_gs_devnm"
+  },
+  "_os_gs_eof": {
+    "header": "include/os.h",
+    "provider": "compat",
+    "symbol": "cmoc_os_gs_eof"
+  },
+  "_os_gs_fd": {
+    "header": "include/os.h",
+    "provider": "compat",
+    "symbol": "cmoc_os_gs_fd"
+  },
+  "_os_gs_popt": {
+    "header": "include/os.h",
+    "provider": "compat",
+    "symbol": "cmoc_os_gs_popt"
+  },
+  "_os_gs_pos": {
+    "header": "include/os.h",
+    "provider": "compat",
+    "symbol": "cmoc_os_gs_pos"
+  },
+  "_os_gs_ready": {
+    "header": "include/os.h",
+    "provider": "compat",
+    "symbol": "cmoc_os_gs_ready"
+  },
+  "_os_gs_scsiz": {
+    "header": "include/os.h",
+    "provider": "compat",
+    "symbol": "cmoc_os_gs_scsiz"
+  },
+  "_os_gs_size": {
+    "header": "include/os.h",
+    "provider": "compat",
+    "symbol": "cmoc_os_gs_size"
+  },
+  "_os_makdir": {
+    "header": "include/os.h",
+    "provider": "compat",
+    "symbol": "cmoc_os_makdir"
+  },
+  "_os_modlink": {
+    "header": "include/os.h",
+    "provider": "compat",
+    "symbol": "cmoc_os_modlink"
+  },
+  "_os_modload": {
+    "header": "include/os.h",
+    "provider": "compat",
+    "symbol": "cmoc_os_modload"
+  },
+  "_os_modunlink": {
+    "header": "include/os.h",
+    "provider": "compat",
+    "symbol": "cmoc_os_modunlink"
+  },
+  "_os_open": {
+    "header": "include/os.h",
+    "provider": "compat",
+    "symbol": "cmoc_os_open"
+  },
+  "_os_read": {
+    "header": "include/os.h",
+    "provider": "compat",
+    "symbol": "cmoc_os_read"
+  },
+  "_os_readln": {
+    "header": "include/os.h",
+    "provider": "compat",
+    "symbol": "cmoc_os_readln"
+  },
+  "_os_seek": {
+    "header": "include/os.h",
+    "provider": "compat",
+    "symbol": "cmoc_os_seek"
+  },
+  "_os_send": {
+    "header": "include/os.h",
+    "provider": "compat",
+    "symbol": "cmoc_os_send"
+  },
+  "_os_setime": {
+    "header": "include/os.h",
+    "provider": "compat",
+    "symbol": "cmoc_os_setime"
+  },
+  "_os_setpr": {
+    "header": "include/os.h",
+    "provider": "compat",
+    "symbol": "cmoc_os_setpr"
+  },
+  "_os_setstat": {
+    "header": "include/os.h",
+    "provider": "compat",
+    "symbol": "cmoc_os_setstat"
+  },
+  "_os_setuid": {
+    "header": "include/os.h",
+    "provider": "compat",
+    "symbol": "cmoc_os_setuid"
+  },
+  "_os_ss_attr": {
+    "header": "include/os.h",
+    "provider": "compat",
+    "symbol": "cmoc_os_ss_attr"
+  },
+  "_os_ss_pfd": {
+    "header": "include/os.h",
+    "provider": "compat",
+    "symbol": "cmoc_os_ss_pfd"
+  },
+  "_os_ss_popt": {
+    "header": "include/os.h",
+    "provider": "compat",
+    "symbol": "cmoc_os_ss_popt"
+  },
+  "_os_ss_relea": {
+    "header": "include/os.h",
+    "provider": "compat",
+    "symbol": "cmoc_os_ss_relea"
+  },
+  "_os_ss_reset": {
+    "header": "include/os.h",
+    "provider": "compat",
+    "symbol": "cmoc_os_ss_reset"
+  },
+  "_os_ss_sendsig": {
+    "header": "include/os.h",
+    "provider": "compat",
+    "symbol": "cmoc_os_ss_sendsig"
+  },
+  "_os_ss_ticks": {
+    "header": "include/os.h",
+    "provider": "compat",
+    "symbol": "cmoc_os_ss_ticks"
+  },
+  "_os_syscall": {
+    "header": "include/os.h",
+    "provider": "compat",
+    "symbol": "cmoc_os_syscall"
+  },
+  "_os_wait": {
+    "header": "include/os.h",
+    "provider": "compat",
+    "symbol": "cmoc_os_wait"
+  },
+  "_os_write": {
+    "header": "include/os.h",
+    "provider": "compat",
+    "symbol": "cmoc_os_write"
+  },
+  "_os_writeln": {
+    "header": "include/os.h",
+    "provider": "compat",
+    "symbol": "cmoc_os_writeln"
+  },
+  "_prgname": {
+    "header": "include/stdio.h",
+    "provider": "compat",
+    "symbol": "_prgname"
+  },
+  "_ss_attr": {
+    "header": "include/fcntl.h",
+    "provider": "compat",
+    "symbol": "_ss_attr"
+  },
+  "_ss_lock": {
+    "header": "include/fcntl.h",
+    "provider": "compat",
+    "symbol": "_ss_lock"
+  },
+  "_ss_opt": {
+    "header": "include/fcntl.h",
+    "provider": "compat",
+    "symbol": "_ss_opt"
+  },
+  "_ss_pfd": {
+    "header": "include/fcntl.h",
+    "provider": "compat",
+    "symbol": "_ss_pfd"
+  },
+  "_ss_rel": {
+    "header": "include/fcntl.h",
+    "provider": "compat",
+    "symbol": "_ss_rel"
+  },
+  "_ss_rest": {
+    "header": "include/fcntl.h",
+    "provider": "compat",
+    "symbol": "_ss_rest"
+  },
+  "_ss_size": {
+    "header": "include/fcntl.h",
+    "provider": "compat",
+    "symbol": "_ss_size"
+  },
+  "_ss_ssig": {
+    "header": "include/fcntl.h",
+    "provider": "compat",
+    "symbol": "_ss_ssig"
+  },
+  "_ss_tiks": {
+    "header": "include/fcntl.h",
+    "provider": "compat",
+    "symbol": "_ss_tiks"
+  },
+  "_strass": {
+    "header": "include/string.h",
+    "provider": "compat",
+    "symbol": "_strass"
+  },
+  "abort": {
+    "header": "include/stdlib.h",
+    "provider": "picolibc",
+    "symbol": "abort"
+  },
+  "abs": {
+    "header": "include/stdlib.h",
+    "provider": "picolibc",
+    "symbol": "abs"
+  },
+  "access": {
+    "header": "include/unistd.h",
+    "provider": "compat",
+    "symbol": "cmoc_access"
+  },
+  "acos": {
+    "header": "include/math.h",
+    "provider": "compat",
+    "symbol": "cmoc_acos"
+  },
+  "acosh": {
+    "header": "include/math.h",
+    "provider": "compat",
+    "symbol": "acosh"
+  },
+  "addc2set": {
+    "header": "include/sets.h",
+    "provider": "compat",
+    "symbol": "addc2set"
+  },
+  "adds2set": {
+    "header": "include/sets.h",
+    "provider": "compat",
+    "symbol": "adds2set"
+  },
+  "allocset": {
+    "header": "include/sets.h",
+    "provider": "compat",
+    "symbol": "allocset"
+  },
+  "antilg": {
+    "header": "include/math.h",
+    "provider": "compat",
+    "symbol": "antilg"
+  },
+  "asctime": {
+    "header": "include/time.h",
+    "provider": "picolibc",
+    "symbol": "asctime"
+  },
+  "asetuid": {
+    "header": "include/unistd.h",
+    "provider": "compat",
+    "symbol": "asetuid"
+  },
+  "asin": {
+    "header": "include/math.h",
+    "provider": "compat",
+    "symbol": "cmoc_asin"
+  },
+  "asinh": {
+    "header": "include/math.h",
+    "provider": "compat",
+    "symbol": "asinh"
+  },
+  "atan": {
+    "header": "include/math.h",
+    "provider": "compat",
+    "symbol": "cmoc_atan"
+  },
+  "atanh": {
+    "header": "include/math.h",
+    "provider": "compat",
+    "symbol": "atanh"
+  },
+  "atof": {
+    "header": "include/stdlib.h",
+    "provider": "compat",
+    "symbol": "atof"
+  },
+  "atoi": {
+    "header": "include/stdlib.h",
+    "provider": "picolibc",
+    "symbol": "atoi"
+  },
+  "atol": {
+    "header": "include/stdlib.h",
+    "provider": "picolibc",
+    "symbol": "atol"
+  },
+  "brk": {
+    "header": "include/unistd.h",
+    "provider": "compat",
+    "symbol": "cmoc_brk"
+  },
+  "bsearch": {
+    "header": "include/stdlib.h",
+    "provider": "picolibc",
+    "symbol": "bsearch"
+  },
+  "c3tol": {
+    "header": "include/stdlib.h",
+    "provider": "compat",
+    "symbol": "c3tol"
+  },
+  "calloc": {
+    "header": "include/stdlib.h",
+    "provider": "picolibc",
+    "symbol": "calloc"
+  },
+  "chain": {
+    "header": "include/unistd.h",
+    "provider": "compat",
+    "symbol": "chain"
+  },
+  "chdir": {
+    "header": "include/unistd.h",
+    "provider": "picolibc",
+    "symbol": "chdir"
+  },
+  "chmod": {
+    "header": "include/unistd.h",
+    "provider": "compat",
+    "symbol": "cmoc_chmod"
+  },
+  "chown": {
+    "header": "include/unistd.h",
+    "provider": "compat",
+    "symbol": "cmoc_chown"
+  },
+  "chxdir": {
+    "header": "include/unistd.h",
+    "provider": "compat",
+    "symbol": "chxdir"
+  },
+  "close": {
+    "header": "include/unistd.h",
+    "provider": "picolibc",
+    "symbol": "close"
+  },
+  "closedir": {
+    "header": "include/dir.h",
+    "provider": "compat",
+    "symbol": "cmoc_closedir"
+  },
+  "copyset": {
+    "header": "include/sets.h",
+    "provider": "compat",
+    "symbol": "copyset"
+  },
+  "cos": {
+    "header": "include/math.h",
+    "provider": "compat",
+    "symbol": "cmoc_cos"
+  },
+  "cosh": {
+    "header": "include/math.h",
+    "provider": "compat",
+    "symbol": "cosh"
+  },
+  "crc": {
+    "header": "include/module.h",
+    "provider": "compat",
+    "symbol": "crc"
+  },
+  "creat": {
+    "header": "include/unistd.h",
+    "provider": "compat",
+    "symbol": "cmoc_creat"
+  },
+  "create": {
+    "header": "include/unistd.h",
+    "provider": "compat",
+    "symbol": "create"
+  },
+  "ctime": {
+    "header": "include/time.h",
+    "provider": "picolibc",
+    "symbol": "ctime"
+  },
+  "dabs": {
+    "header": "include/math.h",
+    "provider": "compat",
+    "symbol": "dabs"
+  },
+  "datlink": {
+    "header": "include/module.h",
+    "provider": "compat",
+    "symbol": "datlink"
+  },
+  "deg": {
+    "header": "include/math.h",
+    "provider": "compat",
+    "symbol": "deg"
+  },
+  "devtyp": {
+    "header": "include/unistd.h",
+    "provider": "compat",
+    "symbol": "devtyp"
+  },
+  "dexp": {
+    "header": "include/math.h",
+    "provider": "compat",
+    "symbol": "dexp"
+  },
+  "dunlink": {
+    "header": "include/module.h",
+    "provider": "compat",
+    "symbol": "dunlink"
+  },
+  "dup": {
+    "header": "include/unistd.h",
+    "provider": "compat",
+    "symbol": "dup"
+  },
+  "dupset": {
+    "header": "include/sets.h",
+    "provider": "compat",
+    "symbol": "dupset"
+  },
+  "endpwent": {
+    "header": "include/password.h",
+    "provider": "compat",
+    "symbol": "endpwent"
+  },
+  "exit": {
+    "header": "include/unistd.h",
+    "provider": "picolibc",
+    "symbol": "exit"
+  },
+  "exp": {
+    "header": "include/math.h",
+    "provider": "compat",
+    "symbol": "exp"
+  },
+  "fclose": {
+    "header": "include/stdio.h",
+    "provider": "picolibc",
+    "symbol": "fclose"
+  },
+  "fdopen": {
+    "header": "include/stdio.h",
+    "provider": "picolibc",
+    "symbol": "fdopen"
+  },
+  "feof": {
+    "header": "include/stdio.h",
+    "provider": "picolibc",
+    "symbol": "feof"
+  },
+  "fflush": {
+    "header": "include/stdio.h",
+    "provider": "picolibc",
+    "symbol": "fflush"
+  },
+  "fgets": {
+    "header": "include/stdio.h",
+    "provider": "picolibc",
+    "symbol": "fgets"
+  },
+  "fileno": {
+    "header": "include/stdio.h",
+    "provider": "picolibc",
+    "symbol": "fileno"
+  },
+  "findnstr": {
+    "header": "include/string.h",
+    "provider": "compat",
+    "symbol": "findnstr"
+  },
+  "findstr": {
+    "header": "include/string.h",
+    "provider": "compat",
+    "symbol": "findstr"
+  },
+  "fopen": {
+    "header": "include/stdio.h",
+    "provider": "picolibc",
+    "symbol": "fopen"
+  },
+  "fprintf": {
+    "header": "include/stdio.h",
+    "provider": "picolibc",
+    "symbol": "fprintf"
+  },
+  "fputs": {
+    "header": "include/stdio.h",
+    "provider": "picolibc",
+    "symbol": "fputs"
+  },
+  "fread": {
+    "header": "include/stdio.h",
+    "provider": "picolibc",
+    "symbol": "fread"
+  },
+  "free": {
+    "header": "include/stdlib.h",
+    "provider": "picolibc",
+    "symbol": "free"
+  },
+  "freopen": {
+    "header": "include/stdio.h",
+    "provider": "picolibc",
+    "symbol": "freopen"
+  },
+  "frexp": {
+    "header": "include/math.h",
+    "provider": "compat",
+    "symbol": "frexp"
+  },
+  "fseek": {
+    "header": "include/stdio.h",
+    "provider": "picolibc",
+    "symbol": "fseek"
+  },
+  "ftell": {
+    "header": "include/stdio.h",
+    "provider": "picolibc",
+    "symbol": "ftell"
+  },
+  "fwrite": {
+    "header": "include/stdio.h",
+    "provider": "picolibc",
+    "symbol": "fwrite"
+  },
+  "getc": {
+    "header": "include/stdio.h",
+    "provider": "picolibc",
+    "symbol": "getc"
+  },
+  "getdrive": {
+    "header": "include/module.h",
+    "provider": "compat",
+    "symbol": "getdrive"
+  },
+  "getopt": {
+    "header": "include/arg.h",
+    "provider": "picolibc",
+    "symbol": "getopt"
+  },
+  "getpid": {
+    "header": "include/unistd.h",
+    "provider": "compat",
+    "symbol": "cmoc_legacy_getpid"
+  },
+  "getpwdlm": {
+    "header": "include/password.h",
+    "provider": "compat",
+    "symbol": "getpwdlm"
+  },
+  "getpwent": {
+    "header": "include/password.h",
+    "provider": "compat",
+    "symbol": "getpwent"
+  },
+  "getpwnam": {
+    "header": "include/password.h",
+    "provider": "compat",
+    "symbol": "getpwnam"
+  },
+  "getpwuid": {
+    "header": "include/password.h",
+    "provider": "compat",
+    "symbol": "getpwuid"
+  },
+  "gets": {
+    "header": "include/stdio.h",
+    "provider": "picolibc",
+    "symbol": "gets"
+  },
+  "getstat": {
+    "header": "include/fcntl.h",
+    "provider": "compat",
+    "symbol": "getstat"
+  },
+  "getuid": {
+    "header": "include/unistd.h",
+    "provider": "compat",
+    "symbol": "cmoc_legacy_getuid"
+  },
+  "getw": {
+    "header": "include/stdio.h",
+    "provider": "compat",
+    "symbol": "getw"
+  },
+  "gmtime": {
+    "header": "include/time.h",
+    "provider": "picolibc",
+    "symbol": "gmtime"
+  },
+  "hputs": {
+    "header": "include/string.h",
+    "provider": "compat",
+    "symbol": "hputs"
+  },
+  "hstrtostr": {
+    "header": "include/string.h",
+    "provider": "compat",
+    "symbol": "hstrtostr"
+  },
+  "htoi": {
+    "header": "include/stdlib.h",
+    "provider": "compat",
+    "symbol": "htoi"
+  },
+  "htol": {
+    "header": "include/stdlib.h",
+    "provider": "compat",
+    "symbol": "htol"
+  },
+  "ibrk": {
+    "header": "include/unistd.h",
+    "provider": "compat",
+    "symbol": "ibrk"
+  },
+  "index": {
+    "header": "include/string.h",
+    "provider": "picolibc",
+    "symbol": "index"
+  },
+  "intercept": {
+    "header": "include/signal.h",
+    "provider": "compat",
+    "symbol": "intercept"
+  },
+  "inv": {
+    "header": "include/math.h",
+    "provider": "compat",
+    "symbol": "inv"
+  },
+  "isalpha": {
+    "header": "include/ctype.h",
+    "provider": "picolibc",
+    "symbol": "isalpha"
+  },
+  "isatty": {
+    "header": "include/unistd.h",
+    "provider": "picolibc",
+    "symbol": "isatty"
+  },
+  "isdigit": {
+    "header": "include/ctype.h",
+    "provider": "picolibc",
+    "symbol": "isdigit"
+  },
+  "isprint": {
+    "header": "include/ctype.h",
+    "provider": "picolibc",
+    "symbol": "isprint"
+  },
+  "isspace": {
+    "header": "include/ctype.h",
+    "provider": "picolibc",
+    "symbol": "isspace"
+  },
+  "itoa": {
+    "header": "include/stdlib.h",
+    "provider": "compat",
+    "symbol": "cmoc_itoa"
+  },
+  "itoa10": {
+    "header": "include/stdlib.h",
+    "provider": "compat",
+    "symbol": "itoa10"
+  },
+  "kill": {
+    "header": "include/signal.h",
+    "provider": "compat",
+    "symbol": "cmoc_kill"
+  },
+  "l3tol": {
+    "header": "include/stdlib.h",
+    "provider": "compat",
+    "symbol": "l3tol"
+  },
+  "ldexp": {
+    "header": "include/math.h",
+    "provider": "compat",
+    "symbol": "ldexp"
+  },
+  "localtime": {
+    "header": "include/time.h",
+    "provider": "picolibc",
+    "symbol": "localtime"
+  },
+  "lockdata": {
+    "header": "include/module.h",
+    "provider": "compat",
+    "symbol": "lockdata"
+  },
+  "log": {
+    "header": "include/math.h",
+    "provider": "compat",
+    "symbol": "log"
+  },
+  "log10": {
+    "header": "include/math.h",
+    "provider": "compat",
+    "symbol": "log10"
+  },
+  "longjmp": {
+    "header": "include/setjmp.h",
+    "provider": "picolibc",
+    "symbol": "longjmp"
+  },
+  "lseek": {
+    "header": "include/unistd.h",
+    "provider": "picolibc",
+    "symbol": "lseek"
+  },
+  "ltoa": {
+    "header": "include/stdlib.h",
+    "provider": "compat",
+    "symbol": "ltoa"
+  },
+  "ltoc3": {
+    "header": "include/stdlib.h",
+    "provider": "compat",
+    "symbol": "ltoc3"
+  },
+  "ltol3": {
+    "header": "include/stdlib.h",
+    "provider": "compat",
+    "symbol": "ltol3"
+  },
+  "malloc": {
+    "header": "include/stdlib.h",
+    "provider": "picolibc",
+    "symbol": "malloc"
+  },
+  "max": {
+    "header": "include/stdlib.h",
+    "provider": "compat",
+    "symbol": "max"
+  },
+  "memccpy": {
+    "header": "include/string.h",
+    "provider": "picolibc",
+    "symbol": "memccpy"
+  },
+  "memchr": {
+    "header": "include/string.h",
+    "provider": "picolibc",
+    "symbol": "memchr"
+  },
+  "memcmp": {
+    "header": "include/string.h",
+    "provider": "picolibc",
+    "symbol": "memcmp"
+  },
+  "memcpy": {
+    "header": "include/string.h",
+    "provider": "picolibc",
+    "symbol": "memcpy"
+  },
+  "memncmp": {
+    "header": "include/string.h",
+    "provider": "compat",
+    "symbol": "memncmp"
+  },
+  "memset": {
+    "header": "include/string.h",
+    "provider": "picolibc",
+    "symbol": "memset"
+  },
+  "min": {
+    "header": "include/stdlib.h",
+    "provider": "compat",
+    "symbol": "min"
+  },
+  "mknod": {
+    "header": "include/unistd.h",
+    "provider": "compat",
+    "symbol": "cmoc_mknod"
+  },
+  "mktemp": {
+    "header": "include/stdlib.h",
+    "provider": "picolibc",
+    "symbol": "mktemp"
+  },
+  "mktime": {
+    "header": "include/time.h",
+    "provider": "picolibc",
+    "symbol": "mktime"
+  },
+  "o2utime": {
+    "header": "include/time.h",
+    "provider": "compat",
+    "symbol": "o2utime"
+  },
+  "ocreat": {
+    "header": "include/fcntl.h",
+    "provider": "compat",
+    "symbol": "ocreat"
+  },
+  "open": {
+    "header": "include/unistd.h",
+    "provider": "compat",
+    "symbol": "cmoc_open"
+  },
+  "opendir": {
+    "header": "include/dir.h",
+    "provider": "compat",
+    "symbol": "cmoc_opendir"
+  },
+  "os9fork": {
+    "header": "include/unistd.h",
+    "provider": "compat",
+    "symbol": "os9fork"
+  },
+  "patmatch": {
+    "header": "include/string.h",
+    "provider": "compat",
+    "symbol": "patmatch"
+  },
+  "pause": {
+    "header": "include/unistd.h",
+    "provider": "compat",
+    "symbol": "cmoc_pause"
+  },
+  "pclose": {
+    "header": "include/stdio.h",
+    "provider": "compat",
+    "symbol": "cmoc_pclose"
+  },
+  "pflinit": {
+    "header": "include/fcntl.h",
+    "provider": "compat",
+    "symbol": "pflinit"
+  },
+  "popen": {
+    "header": "include/stdio.h",
+    "provider": "compat",
+    "symbol": "cmoc_popen"
+  },
+  "pow": {
+    "header": "include/math.h",
+    "provider": "compat",
+    "symbol": "pow"
+  },
+  "prerr": {
+    "header": "include/unistd.h",
+    "provider": "compat",
+    "symbol": "prerr"
+  },
+  "printf": {
+    "header": "include/stdio.h",
+    "provider": "picolibc",
+    "symbol": "printf"
+  },
+  "putc": {
+    "header": "include/stdio.h",
+    "provider": "picolibc",
+    "symbol": "putc"
+  },
+  "putchar": {
+    "header": "include/stdio.h",
+    "provider": "picolibc",
+    "symbol": "putchar"
+  },
+  "puts": {
+    "header": "include/stdio.h",
+    "provider": "picolibc",
+    "symbol": "puts"
+  },
+  "putw": {
+    "header": "include/stdio.h",
+    "provider": "compat",
+    "symbol": "putw"
+  },
+  "pwcryp": {
+    "header": "include/string.h",
+    "provider": "compat",
+    "symbol": "pwcryp"
+  },
+  "qsort": {
+    "header": "include/stdlib.h",
+    "provider": "picolibc",
+    "symbol": "qsort"
+  },
+  "rad": {
+    "header": "include/math.h",
+    "provider": "compat",
+    "symbol": "rad"
+  },
+  "rand": {
+    "header": "include/stdlib.h",
+    "provider": "picolibc",
+    "symbol": "rand"
+  },
+  "read": {
+    "header": "include/unistd.h",
+    "provider": "picolibc",
+    "symbol": "read"
+  },
+  "readdir": {
+    "header": "include/dir.h",
+    "provider": "compat",
+    "symbol": "cmoc_readdir"
+  },
+  "readln": {
+    "header": "include/unistd.h",
+    "provider": "compat",
+    "symbol": "readln"
+  },
+  "realloc": {
+    "header": "include/stdlib.h",
+    "provider": "picolibc",
+    "symbol": "realloc"
+  },
+  "reverse": {
+    "header": "include/string.h",
+    "provider": "compat",
+    "symbol": "reverse"
+  },
+  "rewind": {
+    "header": "include/stdio.h",
+    "provider": "picolibc",
+    "symbol": "rewind"
+  },
+  "rindex": {
+    "header": "include/string.h",
+    "provider": "picolibc",
+    "symbol": "rindex"
+  },
+  "rmfmset": {
+    "header": "include/sets.h",
+    "provider": "compat",
+    "symbol": "rmfmset"
+  },
+  "sbrk": {
+    "header": "include/unistd.h",
+    "provider": "compat",
+    "symbol": "cmoc_sbrk"
+  },
+  "sdifference": {
+    "header": "include/sets.h",
+    "provider": "compat",
+    "symbol": "sdifference"
+  },
+  "seekdir": {
+    "header": "include/dir.h",
+    "provider": "compat",
+    "symbol": "cmoc_seekdir"
+  },
+  "setbuf": {
+    "header": "include/stdio.h",
+    "provider": "picolibc",
+    "symbol": "setbuf"
+  },
+  "setjmp": {
+    "header": "include/setjmp.h",
+    "provider": "picolibc",
+    "symbol": "setjmp"
+  },
+  "setpr": {
+    "header": "include/unistd.h",
+    "provider": "compat",
+    "symbol": "setpr"
+  },
+  "setpwent": {
+    "header": "include/password.h",
+    "provider": "compat",
+    "symbol": "setpwent"
+  },
+  "setstat": {
+    "header": "include/fcntl.h",
+    "provider": "compat",
+    "symbol": "setstat"
+  },
+  "setuid": {
+    "header": "include/unistd.h",
+    "provider": "compat",
+    "symbol": "cmoc_setuid"
+  },
+  "signal": {
+    "header": "include/signal.h",
+    "provider": "compat",
+    "symbol": "cmoc_signal"
+  },
+  "sin": {
+    "header": "include/math.h",
+    "provider": "compat",
+    "symbol": "cmoc_sin"
+  },
+  "sinh": {
+    "header": "include/math.h",
+    "provider": "compat",
+    "symbol": "sinh"
+  },
+  "sintersect": {
+    "header": "include/sets.h",
+    "provider": "compat",
+    "symbol": "sintersect"
+  },
+  "sleep": {
+    "header": "include/unistd.h",
+    "provider": "compat",
+    "symbol": "cmoc_sleep"
+  },
+  "smember": {
+    "header": "include/sets.h",
+    "provider": "compat",
+    "symbol": "smember"
+  },
+  "sprintf": {
+    "header": "include/stdio.h",
+    "provider": "picolibc",
+    "symbol": "sprintf"
+  },
+  "sqr": {
+    "header": "include/math.h",
+    "provider": "compat",
+    "symbol": "sqr"
+  },
+  "sqrt": {
+    "header": "include/math.h",
+    "provider": "compat",
+    "symbol": "sqrt"
+  },
+  "srand": {
+    "header": "include/stdlib.h",
+    "provider": "picolibc",
+    "symbol": "srand"
+  },
+  "strcat": {
+    "header": "include/string.h",
+    "provider": "picolibc",
+    "symbol": "strcat"
+  },
+  "strchr": {
+    "header": "include/string.h",
+    "provider": "picolibc",
+    "symbol": "strchr"
+  },
+  "strclr": {
+    "header": "include/string.h",
+    "provider": "compat",
+    "symbol": "strclr"
+  },
+  "strcmp": {
+    "header": "include/string.h",
+    "provider": "picolibc",
+    "symbol": "strcmp"
+  },
+  "strcpy": {
+    "header": "include/string.h",
+    "provider": "picolibc",
+    "symbol": "strcpy"
+  },
+  "strcspn": {
+    "header": "include/string.h",
+    "provider": "picolibc",
+    "symbol": "strcspn"
+  },
+  "strend": {
+    "header": "include/string.h",
+    "provider": "compat",
+    "symbol": "strend"
+  },
+  "strhcpy": {
+    "header": "include/string.h",
+    "provider": "compat",
+    "symbol": "strhcpy"
+  },
+  "strlen": {
+    "header": "include/string.h",
+    "provider": "picolibc",
+    "symbol": "strlen"
+  },
+  "strncat": {
+    "header": "include/string.h",
+    "provider": "picolibc",
+    "symbol": "strncat"
+  },
+  "strncmp": {
+    "header": "include/string.h",
+    "provider": "picolibc",
+    "symbol": "strncmp"
+  },
+  "strncpy": {
+    "header": "include/string.h",
+    "provider": "picolibc",
+    "symbol": "strncpy"
+  },
+  "strnucmp": {
+    "header": "include/string.h",
+    "provider": "compat",
+    "symbol": "strnucmp"
+  },
+  "strpbrk": {
+    "header": "include/string.h",
+    "provider": "picolibc",
+    "symbol": "strpbrk"
+  },
+  "strrchr": {
+    "header": "include/string.h",
+    "provider": "picolibc",
+    "symbol": "strrchr"
+  },
+  "strspn": {
+    "header": "include/string.h",
+    "provider": "picolibc",
+    "symbol": "strspn"
+  },
+  "strtohstr": {
+    "header": "include/string.h",
+    "provider": "compat",
+    "symbol": "strtohstr"
+  },
+  "strtok": {
+    "header": "include/string.h",
+    "provider": "picolibc",
+    "symbol": "strtok"
+  },
+  "strtol": {
+    "header": "include/stdlib.h",
+    "provider": "picolibc",
+    "symbol": "strtol"
+  },
+  "strtoul": {
+    "header": "include/stdlib.h",
+    "provider": "picolibc",
+    "symbol": "strtoul"
+  },
+  "strucat": {
+    "header": "include/string.h",
+    "provider": "compat",
+    "symbol": "strucat"
+  },
+  "strucmp": {
+    "header": "include/string.h",
+    "provider": "compat",
+    "symbol": "strucmp"
+  },
+  "strucpy": {
+    "header": "include/string.h",
+    "provider": "compat",
+    "symbol": "strucpy"
+  },
+  "sunion": {
+    "header": "include/sets.h",
+    "provider": "compat",
+    "symbol": "sunion"
+  },
+  "swab": {
+    "header": "include/string.h",
+    "provider": "compat",
+    "symbol": "cmoc_swab"
+  },
+  "sync": {
+    "header": "include/unistd.h",
+    "provider": "compat",
+    "symbol": "sync"
+  },
+  "system": {
+    "header": "include/stdlib.h",
+    "provider": "compat",
+    "symbol": "cmoc_system"
+  },
+  "tan": {
+    "header": "include/math.h",
+    "provider": "compat",
+    "symbol": "cmoc_tan"
+  },
+  "tanh": {
+    "header": "include/math.h",
+    "provider": "compat",
+    "symbol": "tanh"
+  },
+  "telldir": {
+    "header": "include/dir.h",
+    "provider": "compat",
+    "symbol": "cmoc_telldir"
+  },
+  "time": {
+    "header": "include/time.h",
+    "provider": "picolibc",
+    "symbol": "time"
+  },
+  "tolower": {
+    "header": "include/ctype.h",
+    "provider": "picolibc",
+    "symbol": "tolower"
+  },
+  "toupper": {
+    "header": "include/ctype.h",
+    "provider": "picolibc",
+    "symbol": "toupper"
+  },
+  "trunc": {
+    "header": "include/math.h",
+    "provider": "compat",
+    "symbol": "trunc"
+  },
+  "tsleep": {
+    "header": "include/unistd.h",
+    "provider": "compat",
+    "symbol": "tsleep"
+  },
+  "u2otime": {
+    "header": "include/time.h",
+    "provider": "compat",
+    "symbol": "u2otime"
+  },
+  "umax": {
+    "header": "include/stdlib.h",
+    "provider": "compat",
+    "symbol": "umax"
+  },
+  "umin": {
+    "header": "include/stdlib.h",
+    "provider": "compat",
+    "symbol": "umin"
+  },
+  "unbrk": {
+    "header": "include/unistd.h",
+    "provider": "compat",
+    "symbol": "unbrk"
+  },
+  "ungetc": {
+    "header": "include/stdio.h",
+    "provider": "picolibc",
+    "symbol": "ungetc"
+  },
+  "unlink": {
+    "header": "include/unistd.h",
+    "provider": "picolibc",
+    "symbol": "unlink"
+  },
+  "unlinkx": {
+    "header": "include/unistd.h",
+    "provider": "compat",
+    "symbol": "cmoc_unlinkx"
+  },
+  "unlkdata": {
+    "header": "include/module.h",
+    "provider": "compat",
+    "symbol": "unlkdata"
+  },
+  "utoa": {
+    "header": "include/stdlib.h",
+    "provider": "compat",
+    "symbol": "cmoc_utoa"
+  },
+  "utoa10": {
+    "header": "include/stdlib.h",
+    "provider": "compat",
+    "symbol": "utoa10"
+  },
+  "wait": {
+    "header": "include/unistd.h",
+    "provider": "compat",
+    "symbol": "cmoc_wait"
+  },
+  "write": {
+    "header": "include/unistd.h",
+    "provider": "picolibc",
+    "symbol": "write"
+  },
+  "writeln": {
+    "header": "include/unistd.h",
+    "provider": "compat",
+    "symbol": "writeln"
+  }
+}
